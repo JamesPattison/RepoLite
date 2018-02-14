@@ -1,0 +1,62 @@
+﻿<UserControl x:Class="RepoLite.Views.Main.CreateRepositoriesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             DataContext="{Binding CreateRepositoriesViewModel, Source={StaticResource Locator}}"
+             xmlns:main1="clr-namespace:RepoLite.ViewModel.Main"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             d:DataContext="{d:DesignInstance main1:CreateRepositoriesViewModel}" >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="6"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.ColumnSpan="3" HorizontalAlignment="Left" FontSize="24px" Foreground="Black">Create Repositories</Label>
+
+        <ScrollViewer Grid.Row="1" Grid.Column="0">
+            <DockPanel LastChildFill="True">
+                <Button DockPanel.Dock="Top" Content="Load Tables" Margin="3" Command="{Binding Path=LoadTables}" />
+                <ListView DockPanel.Dock="Bottom" Margin="3 0 3 3" ItemsSource="{Binding Path=Tables}">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Focusable" Value="false"/>
+                            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="EventSetter_OnHandler" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <WrapPanel>
+                                <CheckBox IsChecked="{Binding Selected}" />
+                                <TextBlock Cursor="Hand" >
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}[{0}].[{1}]">
+                                            <Binding Path="Schema"></Binding>
+                                            <Binding Path="Table"></Binding>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </WrapPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+
+                </ListView>
+            </DockPanel>
+        </ScrollViewer>
+        <GridSplitter Grid.Row="1" Grid.Column="1" />
+        <ScrollViewer Grid.Row="1" Grid.Column="2">
+            <DockPanel LastChildFill="True">
+                <Button DockPanel.Dock="Top" Margin="3" Command="{Binding Path=Generate}">Generate</Button>
+                <ListBox DockPanel.Dock="Bottom" Margin="3 0 3 3"
+                     ItemsSource="{Binding Path=Messages}"></ListBox>
+            </DockPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

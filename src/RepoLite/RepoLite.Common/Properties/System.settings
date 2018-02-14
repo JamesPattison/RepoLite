@@ -1,0 +1,18 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="RepoLite.Common.Properties" GeneratedClassName="System">
+  <Profiles />
+  <Settings>
+    <Setting Name="ConnectionString" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Data Source=.;Initial Catalog=RepoDev;Integrated Security=true;</Value>
+    </Setting>
+    <Setting Name="SessionDuration" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="DataSource" Type="RepoLite.Common.Enums.DataSourceEnum" Scope="User">
+      <Value Profile="(Default)">SQLServer</Value>
+    </Setting>
+    <Setting Name="GenerationLanguage" Type="RepoLite.Common.Enums.GenerationLanguage" Scope="User">
+      <Value Profile="(Default)">CSharp</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

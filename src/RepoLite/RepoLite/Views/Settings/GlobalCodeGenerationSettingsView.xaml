@@ -1,0 +1,190 @@
+﻿<UserControl x:Class="RepoLite.Views.Settings.GlobalCodeGenerationSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             DataContext="{Binding AllSettingsViewModel, Source={StaticResource Locator}}"
+             xmlns:settings="clr-namespace:RepoLite.ViewModel.Settings"
+             xmlns:mui="http://firstfloorsoftware.com/ModernUI"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
+             xmlns:StyleAlias="clr-namespace:RepoLite.Common.Enums;assembly=RepoLite.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="360"
+             d:DataContext="{d:DesignInstance settings:AllSettingsViewModel}">
+    <UserControl.Resources>
+        <ObjectDataProvider x:Key="targetFramework" MethodName="GetValues" ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="StyleAlias:TargetFramework"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="cSharpVersion" MethodName="GetValues" ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="StyleAlias:CSharpVersion"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </UserControl.Resources>
+    <Grid>
+        <ScrollViewer>
+            <StackPanel MinWidth="200">
+
+
+                <TextBlock Text="Code Generation Settings" Style="{StaticResource Heading2}" Margin="0,0,0,8" />
+                <mui:BBCodeBlock BBCode="These settings are used in the code generation process" Margin="0,0,0,16"/>
+
+                <!-- actual form starts here -->
+                <StackPanel x:Name="Form" Orientation="Vertical">
+                    <StackPanel.Resources>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Orientation" Value="Horizontal" />
+                            <Setter Property="Margin" Value="0,0,0,4" />
+                        </Style>
+                        <Style x:Key="LeftLabel" TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+                            <Setter Property="Width" Value="160" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                            <Setter Property="MinWidth" Value="200" />
+                            <Setter Property="MaxWidth" Value="350" />
+                            <Setter Property="HorizontalAlignment" Value="Stretch"></Setter>
+                            <Setter Property="Height" Value="Auto"></Setter>
+                            <Setter Property="TextWrapping" Value="Wrap"></Setter>
+                        </Style>
+                        <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+                            <Setter Property="MinWidth" Value="200" />
+                            <Setter Property="MaxWidth" Value="350" />
+                            <Setter Property="HorizontalAlignment" Value="Stretch"></Setter>
+                            <Setter Property="Height" Value="Auto"></Setter>
+                        </Style>
+                    </StackPanel.Resources>
+
+                    <StackPanel>
+                        <Label Style="{StaticResource LeftLabel}" Content="Model Namespace" Target="{Binding ElementName=ModelNamespace}"
+                               ToolTip="The namespace used in the model classes"/>
+                        <TextBox x:Name="ModelNamespace" Text="{Binding Path=GenerationSettings.ModelGenerationNamespace}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Style="{StaticResource LeftLabel}" Content="Repository Namespace" Target="{Binding ElementName=RepositoryNamespace}"
+                               ToolTip="The namespace used in the repository classes"/>
+                        <TextBox x:Name="RepositoryNamespace" Text="{Binding Path=GenerationSettings.RepositoryGenerationNamespace}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Style="{StaticResource LeftLabel}" Content="Output Directory" Target="{Binding ElementName=OutputDirectory}"
+                               ToolTip="The directory where files will be generated in"/>
+                        <TextBox x:Name="OutputDirectory" Text="{Binding Path=GenerationSettings.OutputDirectory}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Style="{StaticResource LeftLabel}" Content="Model FileName Format" Target="{Binding ElementName=ModelFileNameFormat}"
+                               ToolTip="The format for Model filenames. Available variables: {Schema}, {Name}"/>
+                        <TextBox x:Name="ModelFileNameFormat" Text="{Binding Path=GenerationSettings.ModelFileNameFormat}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Style="{StaticResource LeftLabel}" Content="Repository FileName Format" Target="{Binding ElementName=RepositoryFileNameFormat}"
+                               ToolTip="The format for Repository filenames. Available variables: {Schema}, {Name}"/>
+                        <TextBox x:Name="RepositoryFileNameFormat" Text="{Binding Path=GenerationSettings.RepositoryFileNameFormat}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Style="{StaticResource LeftLabel}" Content="Target Framework" Target="{Binding ElementName=TargetFramework}"
+                               ToolTip="The target framework to support in the generated code"/>
+                        <ComboBox x:Name="TargetFramework" ItemsSource="{Binding Source={StaticResource targetFramework}}"
+                                  SelectedItem="{Binding Path=GenerationSettings.TargetFramework}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Style="{StaticResource LeftLabel}" Content="C# Version" Target="{Binding ElementName=CSharpVersion}"
+                               ToolTip="The language version to use (not framework, the language version)"/>
+                        <ComboBox x:Name="CSharpVersion" ItemsSource="{Binding Source={StaticResource cSharpVersion}}"
+                                  SelectedItem="{Binding Path=GenerationSettings.CSharpVersion}"/>
+                    </StackPanel>
+                    <!--<StackPanel>
+                        <Label Content="Last name" Target="{Binding ElementName=TextLastName}"/>
+                        <TextBox x:Name="TextLastName" Width="150" Text="{Binding LastName, Mode=TwoWay, ValidatesOnDataErrors=True}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Content="Gender" Target="{Binding ElementName=RadioGendeMale}"/>
+                        <RadioButton x:Name="RadioGendeMale">
+                            <TextBlock>Male</TextBlock>
+                        </RadioButton>
+                        <RadioButton Content="Female" Margin="8,0,0,0" />
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Content="Birth date" Target="{Binding ElementName=DateBirth}" />
+                        <DatePicker x:Name="DateBirth" />
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Content="Address" Target="{Binding ElementName=TextAddress}"/>
+                        <TextBox x:Name="TextAddress" Width="150" />
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Content="City" Target="{Binding ElementName=TextCity}"/>
+                        <TextBox x:Name="TextCity" Width="150" />
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Content="State" Target="{Binding ElementName=ComboState}"/>
+                        <ComboBox x:Name="ComboState" Width="150">
+                            <ComboBoxItem>Alabama</ComboBoxItem>
+                            <ComboBoxItem>Alaska</ComboBoxItem>
+                            <ComboBoxItem>Arizona</ComboBoxItem>
+                            <ComboBoxItem>Arkansas</ComboBoxItem>
+                            <ComboBoxItem>California</ComboBoxItem>
+                            <ComboBoxItem>Colorado</ComboBoxItem>
+                            <ComboBoxItem>Connecticut</ComboBoxItem>
+                            <ComboBoxItem>Delaware</ComboBoxItem>
+                            <ComboBoxItem>Florida</ComboBoxItem>
+                            <ComboBoxItem>Georgia</ComboBoxItem>
+                            <ComboBoxItem>Hawaii</ComboBoxItem>
+                            <ComboBoxItem>Idaho</ComboBoxItem>
+                            <ComboBoxItem>Illinois</ComboBoxItem>
+                            <ComboBoxItem>Indiana</ComboBoxItem>
+                            <ComboBoxItem>Iowa</ComboBoxItem>
+                            <ComboBoxItem>Kansas</ComboBoxItem>
+                            <ComboBoxItem>Kentucky</ComboBoxItem>
+                            <ComboBoxItem>Louisiana</ComboBoxItem>
+                            <ComboBoxItem>Maine</ComboBoxItem>
+                            <ComboBoxItem>Maryland</ComboBoxItem>
+                            <ComboBoxItem>Massachusetts</ComboBoxItem>
+                            <ComboBoxItem>Michigan</ComboBoxItem>
+                            <ComboBoxItem>Minnesota</ComboBoxItem>
+                            <ComboBoxItem>Mississippi</ComboBoxItem>
+                            <ComboBoxItem>Missouri</ComboBoxItem>
+                            <ComboBoxItem>Montana</ComboBoxItem>
+                            <ComboBoxItem>Nebraska</ComboBoxItem>
+                            <ComboBoxItem>Nevada</ComboBoxItem>
+                            <ComboBoxItem>New Hampshire</ComboBoxItem>
+                            <ComboBoxItem>New Jersey</ComboBoxItem>
+                            <ComboBoxItem>New Mexico</ComboBoxItem>
+                            <ComboBoxItem>New York</ComboBoxItem>
+                            <ComboBoxItem>North Carolina</ComboBoxItem>
+                            <ComboBoxItem>North Dakota</ComboBoxItem>
+                            <ComboBoxItem>Ohio</ComboBoxItem>
+                            <ComboBoxItem>Oklahoma</ComboBoxItem>
+                            <ComboBoxItem>Oregon</ComboBoxItem>
+                            <ComboBoxItem>Pennsylvania</ComboBoxItem>
+                            <ComboBoxItem>Rhode Island</ComboBoxItem>
+                            <ComboBoxItem>South Carolina</ComboBoxItem>
+                            <ComboBoxItem>South Dakota</ComboBoxItem>
+                            <ComboBoxItem>Tennessee</ComboBoxItem>
+                            <ComboBoxItem>Texas</ComboBoxItem>
+                            <ComboBoxItem>Utah</ComboBoxItem>
+                            <ComboBoxItem>Vermont</ComboBoxItem>
+                            <ComboBoxItem>Virginia</ComboBoxItem>
+                            <ComboBoxItem>Washington</ComboBoxItem>
+                            <ComboBoxItem>West Virginia</ComboBoxItem>
+                            <ComboBoxItem>Wisconsin</ComboBoxItem>
+                            <ComboBoxItem>Wyoming</ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Content="Zip code" Target="{Binding ElementName=TextZipCode}"/>
+                        <TextBox x:Name="TextZipCode" Width="150" />
+                    </StackPanel>
+                    <StackPanel >
+                        <Label />
+                        <CheckBox>
+                            <TextBlock FontWeight="Bold">I agree to the terms of use</TextBlock>
+                        </CheckBox>
+                    </StackPanel>-->
+
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

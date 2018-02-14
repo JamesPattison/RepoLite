@@ -1,0 +1,808 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1C5542D9-BF11-49C0-AC18-308D24114593}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>RepoLite</RootNamespace>
+    <AssemblyName>RepoLite</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FirstFloor.ModernUI, Version=1.0.9.0, Culture=neutral, PublicKeyToken=bc9b0c37bf06c6a9, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\ModernUI.WPF.1.0.9\lib\net45\FirstFloor.ModernUI.dll</HintPath>
+    </Reference>
+    <Reference Include="GalaSoft.MvvmLight, Version=5.3.0.19026, Culture=neutral, PublicKeyToken=e7570ab207bcb616, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\MvvmLightLibs.5.3.0.0\lib\net45\GalaSoft.MvvmLight.dll</HintPath>
+    </Reference>
+    <Reference Include="GalaSoft.MvvmLight.Extras, Version=5.3.0.19032, Culture=neutral, PublicKeyToken=669f0b5e8f868abf, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\MvvmLightLibs.5.3.0.0\lib\net45\GalaSoft.MvvmLight.Extras.dll</HintPath>
+    </Reference>
+    <Reference Include="GalaSoft.MvvmLight.Platform, Version=5.3.0.19032, Culture=neutral, PublicKeyToken=5f873c45e98af8a1, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\MvvmLightLibs.5.3.0.0\lib\net45\GalaSoft.MvvmLight.Platform.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="RestSharp, Version=106.2.1.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\RestSharp.106.2.1\lib\net452\RestSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="Commands\CommandManager.cs" />
+    <Compile Include="Commands\RelayCommand.cs" />
+    <Compile Include="Converters\InverseBoolToVisibilityConverter.cs" />
+    <Compile Include="Models\CodePreview.cs" />
+    <Compile Include="Models\ListBoxItem.cs" />
+    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ViewModel\Base\ViewModelBase.cs" />
+    <Compile Include="ViewModel\Main\CreateModelsViewModel.cs" />
+    <Compile Include="ViewModel\Main\CreateRepositoriesViewModel.cs" />
+    <Compile Include="ViewModel\LandingViewModel.cs" />
+    <Compile Include="ViewModel\Settings\AllSettingsViewModel.cs" />
+    <Compile Include="ViewModel\ViewModelLocator.cs" />
+    <Compile Include="Views\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Generation\CreateModelsView.xaml.cs">
+      <DependentUpon>CreateModelsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Generation\CreateRepositoriesView.xaml.cs">
+      <DependentUpon>CreateRepositoriesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LandingView.xaml.cs">
+      <DependentUpon>LandingView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Settings\GlobalCodeGenerationSettingsView.xaml.cs">
+      <DependentUpon>GlobalCodeGenerationSettingsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Settings\Global.xaml.cs">
+      <DependentUpon>Global.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Settings\GlobalConnectionSettingsView.xaml.cs">
+      <DependentUpon>GlobalConnectionSettingsView.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RepoLite.Common\RepoLite.Common.csproj">
+      <Project>{4e4b8334-a677-4686-858f-782642c051f2}</Project>
+      <Name>RepoLite.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RepoLite.DataAccess\RepoLite.DataAccess.csproj">
+      <Project>{dea75419-f6a0-4ff0-9925-40cfa3b49e0c}</Project>
+      <Name>RepoLite.DataAccess</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RepoLite.GeneratorEngine\RepoLite.GeneratorEngine.csproj">
+      <Project>{9cf0994e-5d80-4a33-be5a-3e3601450f1e}</Project>
+      <Name>RepoLite.GeneratorEngine</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\FontAwesome\address-book.png" />
+    <Resource Include="Images\FontAwesome\address-card.png" />
+    <Resource Include="Images\FontAwesome\adjust.png" />
+    <Resource Include="Images\FontAwesome\alarm-clock.png" />
+    <Resource Include="Images\FontAwesome\align-center.png" />
+    <Resource Include="Images\FontAwesome\align-justify.png" />
+    <Resource Include="Images\FontAwesome\align-left.png" />
+    <Resource Include="Images\FontAwesome\align-right.png" />
+    <Resource Include="Images\FontAwesome\ambulance.png" />
+    <Resource Include="Images\FontAwesome\american-sign-language-interpreting.png" />
+    <Resource Include="Images\FontAwesome\anchor.png" />
+    <Resource Include="Images\FontAwesome\angle-double-down.png" />
+    <Resource Include="Images\FontAwesome\angle-double-left.png" />
+    <Resource Include="Images\FontAwesome\angle-double-right.png" />
+    <Resource Include="Images\FontAwesome\angle-double-up.png" />
+    <Resource Include="Images\FontAwesome\angle-down.png" />
+    <Resource Include="Images\FontAwesome\angle-left.png" />
+    <Resource Include="Images\FontAwesome\angle-right.png" />
+    <Resource Include="Images\FontAwesome\angle-up.png" />
+    <Resource Include="Images\FontAwesome\archive.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-circle-down.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-circle-left.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-circle-right.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-circle-up.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-down.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-from-bottom.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-from-left.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-from-right.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-from-top.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-left.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-right.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-square-down.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-square-left.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-square-right.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-square-up.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-to-bottom.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-to-left.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-to-right.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-to-top.png" />
+    <Resource Include="Images\FontAwesome\arrow-alt-up.png" />
+    <Resource Include="Images\FontAwesome\arrow-circle-down.png" />
+    <Resource Include="Images\FontAwesome\arrow-circle-left.png" />
+    <Resource Include="Images\FontAwesome\arrow-circle-right.png" />
+    <Resource Include="Images\FontAwesome\arrow-circle-up.png" />
+    <Resource Include="Images\FontAwesome\arrow-down.png" />
+    <Resource Include="Images\FontAwesome\arrow-from-bottom.png" />
+    <Resource Include="Images\FontAwesome\arrow-from-left.png" />
+    <Resource Include="Images\FontAwesome\arrow-from-right.png" />
+    <Resource Include="Images\FontAwesome\arrow-from-top.png" />
+    <Resource Include="Images\FontAwesome\arrow-left.png" />
+    <Resource Include="Images\FontAwesome\arrow-right.png" />
+    <Resource Include="Images\FontAwesome\arrow-square-down.png" />
+    <Resource Include="Images\FontAwesome\arrow-square-left.png" />
+    <Resource Include="Images\FontAwesome\arrow-square-right.png" />
+    <Resource Include="Images\FontAwesome\arrow-square-up.png" />
+    <Resource Include="Images\FontAwesome\arrow-to-bottom.png" />
+    <Resource Include="Images\FontAwesome\arrow-to-left.png" />
+    <Resource Include="Images\FontAwesome\arrow-to-right.png" />
+    <Resource Include="Images\FontAwesome\arrow-to-top.png" />
+    <Resource Include="Images\FontAwesome\arrow-up.png" />
+    <Resource Include="Images\FontAwesome\arrows-alt-h.png" />
+    <Resource Include="Images\FontAwesome\arrows-alt-v.png" />
+    <Resource Include="Images\FontAwesome\arrows-alt.png" />
+    <Resource Include="Images\FontAwesome\arrows-h.png" />
+    <Resource Include="Images\FontAwesome\arrows-v.png" />
+    <Resource Include="Images\FontAwesome\arrows.png" />
+    <Resource Include="Images\FontAwesome\assistive-listening-systems.png" />
+    <Resource Include="Images\FontAwesome\asterisk.png" />
+    <Resource Include="Images\FontAwesome\at.png" />
+    <Resource Include="Images\FontAwesome\audio-description.png" />
+    <Resource Include="Images\FontAwesome\backward.png" />
+    <Resource Include="Images\FontAwesome\badge-check.png" />
+    <Resource Include="Images\FontAwesome\badge.png" />
+    <Resource Include="Images\FontAwesome\balance-scale.png" />
+    <Resource Include="Images\FontAwesome\ban.png" />
+    <Resource Include="Images\FontAwesome\barcode.png" />
+    <Resource Include="Images\FontAwesome\bars.png" />
+    <Resource Include="Images\FontAwesome\bath.png" />
+    <Resource Include="Images\FontAwesome\battery-bolt.png" />
+    <Resource Include="Images\FontAwesome\battery-empty.png" />
+    <Resource Include="Images\FontAwesome\battery-full.png" />
+    <Resource Include="Images\FontAwesome\battery-half.png" />
+    <Resource Include="Images\FontAwesome\battery-quarter.png" />
+    <Resource Include="Images\FontAwesome\battery-slash.png" />
+    <Resource Include="Images\FontAwesome\battery-three-quarters.png" />
+    <Resource Include="Images\FontAwesome\bed.png" />
+    <Resource Include="Images\FontAwesome\beer.png" />
+    <Resource Include="Images\FontAwesome\bell-slash.png" />
+    <Resource Include="Images\FontAwesome\bell.png" />
+    <Resource Include="Images\FontAwesome\bicycle.png" />
+    <Resource Include="Images\FontAwesome\binoculars.png" />
+    <Resource Include="Images\FontAwesome\birthday-cake.png" />
+    <Resource Include="Images\FontAwesome\blind.png" />
+    <Resource Include="Images\FontAwesome\bold.png" />
+    <Resource Include="Images\FontAwesome\bolt.png" />
+    <Resource Include="Images\FontAwesome\bomb.png" />
+    <Resource Include="Images\FontAwesome\book.png" />
+    <Resource Include="Images\FontAwesome\bookmark.png" />
+    <Resource Include="Images\FontAwesome\braille.png" />
+    <Resource Include="Images\FontAwesome\briefcase.png" />
+    <Resource Include="Images\FontAwesome\browser.png" />
+    <Resource Include="Images\FontAwesome\bug.png" />
+    <Resource Include="Images\FontAwesome\building.png" />
+    <Resource Include="Images\FontAwesome\bullhorn.png" />
+    <Resource Include="Images\FontAwesome\bullseye.png" />
+    <Resource Include="Images\FontAwesome\bus.png" />
+    <Resource Include="Images\FontAwesome\calculator.png" />
+    <Resource Include="Images\FontAwesome\calendar-alt.png" />
+    <Resource Include="Images\FontAwesome\calendar-check.png" />
+    <Resource Include="Images\FontAwesome\calendar-edit.png" />
+    <Resource Include="Images\FontAwesome\calendar-exclamation.png" />
+    <Resource Include="Images\FontAwesome\calendar-minus.png" />
+    <Resource Include="Images\FontAwesome\calendar-plus.png" />
+    <Resource Include="Images\FontAwesome\calendar-times.png" />
+    <Resource Include="Images\FontAwesome\calendar.png" />
+    <Resource Include="Images\FontAwesome\camera-alt.png" />
+    <Resource Include="Images\FontAwesome\camera-retro.png" />
+    <Resource Include="Images\FontAwesome\camera.png" />
+    <Resource Include="Images\FontAwesome\car.png" />
+    <Resource Include="Images\FontAwesome\caret-circle-down.png" />
+    <Resource Include="Images\FontAwesome\caret-circle-left.png" />
+    <Resource Include="Images\FontAwesome\caret-circle-right.png" />
+    <Resource Include="Images\FontAwesome\caret-circle-up.png" />
+    <Resource Include="Images\FontAwesome\caret-down.png" />
+    <Resource Include="Images\FontAwesome\caret-left.png" />
+    <Resource Include="Images\FontAwesome\caret-right.png" />
+    <Resource Include="Images\FontAwesome\caret-square-down.png" />
+    <Resource Include="Images\FontAwesome\caret-square-left.png" />
+    <Resource Include="Images\FontAwesome\caret-square-right.png" />
+    <Resource Include="Images\FontAwesome\caret-square-up.png" />
+    <Resource Include="Images\FontAwesome\caret-up.png" />
+    <Resource Include="Images\FontAwesome\cart-arrow-down.png" />
+    <Resource Include="Images\FontAwesome\cart-plus.png" />
+    <Resource Include="Images\FontAwesome\certificate.png" />
+    <Resource Include="Images\FontAwesome\chart-area.png" />
+    <Resource Include="Images\FontAwesome\chart-bar.png" />
+    <Resource Include="Images\FontAwesome\chart-line.png" />
+    <Resource Include="Images\FontAwesome\chart-pie.png" />
+    <Resource Include="Images\FontAwesome\check-circle.png" />
+    <Resource Include="Images\FontAwesome\check-square.png" />
+    <Resource Include="Images\FontAwesome\check.png" />
+    <Resource Include="Images\FontAwesome\chevron-circle-down.png" />
+    <Resource Include="Images\FontAwesome\chevron-circle-left.png" />
+    <Resource Include="Images\FontAwesome\chevron-circle-right.png" />
+    <Resource Include="Images\FontAwesome\chevron-circle-up.png" />
+    <Resource Include="Images\FontAwesome\chevron-double-down.png" />
+    <Resource Include="Images\FontAwesome\chevron-double-left.png" />
+    <Resource Include="Images\FontAwesome\chevron-double-right.png" />
+    <Resource Include="Images\FontAwesome\chevron-double-up.png" />
+    <Resource Include="Images\FontAwesome\chevron-down.png" />
+    <Resource Include="Images\FontAwesome\chevron-left.png" />
+    <Resource Include="Images\FontAwesome\chevron-right.png" />
+    <Resource Include="Images\FontAwesome\chevron-square-down.png" />
+    <Resource Include="Images\FontAwesome\chevron-square-left.png" />
+    <Resource Include="Images\FontAwesome\chevron-square-right.png" />
+    <Resource Include="Images\FontAwesome\chevron-square-up.png" />
+    <Resource Include="Images\FontAwesome\chevron-up.png" />
+    <Resource Include="Images\FontAwesome\child.png" />
+    <Resource Include="Images\FontAwesome\circle-notch.png" />
+    <Resource Include="Images\FontAwesome\circle.png" />
+    <Resource Include="Images\FontAwesome\clipboard.png" />
+    <Resource Include="Images\FontAwesome\clock.png" />
+    <Resource Include="Images\FontAwesome\clone.png" />
+    <Resource Include="Images\FontAwesome\closed-captioning.png" />
+    <Resource Include="Images\FontAwesome\cloud-download-alt.png" />
+    <Resource Include="Images\FontAwesome\cloud-download.png" />
+    <Resource Include="Images\FontAwesome\cloud-upload-alt.png" />
+    <Resource Include="Images\FontAwesome\cloud-upload.png" />
+    <Resource Include="Images\FontAwesome\cloud.png" />
+    <Resource Include="Images\FontAwesome\club.png" />
+    <Resource Include="Images\FontAwesome\code-branch.png" />
+    <Resource Include="Images\FontAwesome\code-commit.png" />
+    <Resource Include="Images\FontAwesome\code-merge.png" />
+    <Resource Include="Images\FontAwesome\code.png" />
+    <Resource Include="Images\FontAwesome\coffee.png" />
+    <Resource Include="Images\FontAwesome\cog.png" />
+    <Resource Include="Images\FontAwesome\cogs.png" />
+    <Resource Include="Images\FontAwesome\columns.png" />
+    <Resource Include="Images\FontAwesome\comment-alt.png" />
+    <Resource Include="Images\FontAwesome\comment.png" />
+    <Resource Include="Images\FontAwesome\comments.png" />
+    <Resource Include="Images\FontAwesome\compass.png" />
+    <Resource Include="Images\FontAwesome\compress-wide.png" />
+    <Resource Include="Images\FontAwesome\compress.png" />
+    <Resource Include="Images\FontAwesome\copy.png" />
+    <Resource Include="Images\FontAwesome\copyright.png" />
+    <Resource Include="Images\FontAwesome\credit-card-blank.png" />
+    <Resource Include="Images\FontAwesome\credit-card-front.png" />
+    <Resource Include="Images\FontAwesome\credit-card.png" />
+    <Resource Include="Images\FontAwesome\crop.png" />
+    <Resource Include="Images\FontAwesome\crosshairs.png" />
+    <Resource Include="Images\FontAwesome\cube.png" />
+    <Resource Include="Images\FontAwesome\cubes.png" />
+    <Resource Include="Images\FontAwesome\cut.png" />
+    <Resource Include="Images\FontAwesome\database.png" />
+    <Resource Include="Images\FontAwesome\deaf.png" />
+    <Resource Include="Images\FontAwesome\desktop-alt.png" />
+    <Resource Include="Images\FontAwesome\desktop.png" />
+    <Resource Include="Images\FontAwesome\diamond.png" />
+    <Resource Include="Images\FontAwesome\dollar-sign.png" />
+    <Resource Include="Images\FontAwesome\dot-circle.png" />
+    <Resource Include="Images\FontAwesome\download.png" />
+    <Resource Include="Images\FontAwesome\edit.png" />
+    <Resource Include="Images\FontAwesome\eject.png" />
+    <Resource Include="Images\FontAwesome\ellipsis-h-alt.png" />
+    <Resource Include="Images\FontAwesome\ellipsis-h.png" />
+    <Resource Include="Images\FontAwesome\ellipsis-v-alt.png" />
+    <Resource Include="Images\FontAwesome\ellipsis-v.png" />
+    <Resource Include="Images\FontAwesome\envelope-open.png" />
+    <Resource Include="Images\FontAwesome\envelope-square.png" />
+    <Resource Include="Images\FontAwesome\envelope.png" />
+    <Resource Include="Images\FontAwesome\eraser.png" />
+    <Resource Include="Images\FontAwesome\euro-sign.png" />
+    <Resource Include="Images\FontAwesome\exchange-alt.png" />
+    <Resource Include="Images\FontAwesome\exchange.png" />
+    <Resource Include="Images\FontAwesome\exclamation-circle.png" />
+    <Resource Include="Images\FontAwesome\exclamation-square.png" />
+    <Resource Include="Images\FontAwesome\exclamation-triangle.png" />
+    <Resource Include="Images\FontAwesome\exclamation.png" />
+    <Resource Include="Images\FontAwesome\expand-arrows-alt.png" />
+    <Resource Include="Images\FontAwesome\expand-arrows.png" />
+    <Resource Include="Images\FontAwesome\expand-wide.png" />
+    <Resource Include="Images\FontAwesome\expand.png" />
+    <Resource Include="Images\FontAwesome\external-link-alt.png" />
+    <Resource Include="Images\FontAwesome\external-link-square-alt.png" />
+    <Resource Include="Images\FontAwesome\external-link-square.png" />
+    <Resource Include="Images\FontAwesome\external-link.png" />
+    <Resource Include="Images\FontAwesome\eye-dropper.png" />
+    <Resource Include="Images\FontAwesome\eye-slash.png" />
+    <Resource Include="Images\FontAwesome\eye.png" />
+    <Resource Include="Images\FontAwesome\fast-backward.png" />
+    <Resource Include="Images\FontAwesome\fast-forward.png" />
+    <Resource Include="Images\FontAwesome\fax.png" />
+    <Resource Include="Images\FontAwesome\female.png" />
+    <Resource Include="Images\FontAwesome\fighter-jet.png" />
+    <Resource Include="Images\FontAwesome\file-alt.png" />
+    <Resource Include="Images\FontAwesome\file-archive.png" />
+    <Resource Include="Images\FontAwesome\file-audio.png" />
+    <Resource Include="Images\FontAwesome\file-check.png" />
+    <Resource Include="Images\FontAwesome\file-code.png" />
+    <Resource Include="Images\FontAwesome\file-edit.png" />
+    <Resource Include="Images\FontAwesome\file-excel.png" />
+    <Resource Include="Images\FontAwesome\file-exclamation.png" />
+    <Resource Include="Images\FontAwesome\file-image.png" />
+    <Resource Include="Images\FontAwesome\file-minus.png" />
+    <Resource Include="Images\FontAwesome\file-pdf.png" />
+    <Resource Include="Images\FontAwesome\file-plus.png" />
+    <Resource Include="Images\FontAwesome\file-powerpoint.png" />
+    <Resource Include="Images\FontAwesome\file-times.png" />
+    <Resource Include="Images\FontAwesome\file-video.png" />
+    <Resource Include="Images\FontAwesome\file-word.png" />
+    <Resource Include="Images\FontAwesome\file.png" />
+    <Resource Include="Images\FontAwesome\film.png" />
+    <Resource Include="Images\FontAwesome\filter.png" />
+    <Resource Include="Images\FontAwesome\fire-extinguisher.png" />
+    <Resource Include="Images\FontAwesome\fire.png" />
+    <Resource Include="Images\FontAwesome\flag-checkered.png" />
+    <Resource Include="Images\FontAwesome\flag.png" />
+    <Resource Include="Images\FontAwesome\flask.png" />
+    <Resource Include="Images\FontAwesome\folder-open.png" />
+    <Resource Include="Images\FontAwesome\folder.png" />
+    <Resource Include="Images\FontAwesome\font.png" />
+    <Resource Include="Images\FontAwesome\forward.png" />
+    <Resource Include="Images\FontAwesome\frown.png" />
+    <Resource Include="Images\FontAwesome\futbol.png" />
+    <Resource Include="Images\FontAwesome\gamepad.png" />
+    <Resource Include="Images\FontAwesome\gavel.png" />
+    <Resource Include="Images\FontAwesome\gem.png" />
+    <Resource Include="Images\FontAwesome\genderless.png" />
+    <Resource Include="Images\FontAwesome\gift.png" />
+    <Resource Include="Images\FontAwesome\glass-martini.png" />
+    <Resource Include="Images\FontAwesome\globe.png" />
+    <Resource Include="Images\FontAwesome\graduation-cap.png" />
+    <Resource Include="Images\FontAwesome\h-square.png" />
+    <Resource Include="Images\FontAwesome\h1.png" />
+    <Resource Include="Images\FontAwesome\h2.png" />
+    <Resource Include="Images\FontAwesome\h3.png" />
+    <Resource Include="Images\FontAwesome\hand-lizard.png" />
+    <Resource Include="Images\FontAwesome\hand-paper.png" />
+    <Resource Include="Images\FontAwesome\hand-peace.png" />
+    <Resource Include="Images\FontAwesome\hand-point-down.png" />
+    <Resource Include="Images\FontAwesome\hand-point-left.png" />
+    <Resource Include="Images\FontAwesome\hand-point-right.png" />
+    <Resource Include="Images\FontAwesome\hand-point-up.png" />
+    <Resource Include="Images\FontAwesome\hand-pointer.png" />
+    <Resource Include="Images\FontAwesome\hand-rock.png" />
+    <Resource Include="Images\FontAwesome\hand-scissors.png" />
+    <Resource Include="Images\FontAwesome\hand-spock.png" />
+    <Resource Include="Images\FontAwesome\handshake.png" />
+    <Resource Include="Images\FontAwesome\hashtag.png" />
+    <Resource Include="Images\FontAwesome\hdd.png" />
+    <Resource Include="Images\FontAwesome\heading.png" />
+    <Resource Include="Images\FontAwesome\headphones.png" />
+    <Resource Include="Images\FontAwesome\heart.png" />
+    <Resource Include="Images\FontAwesome\heartbeat.png" />
+    <Resource Include="Images\FontAwesome\hexagon.png" />
+    <Resource Include="Images\FontAwesome\history.png" />
+    <Resource Include="Images\FontAwesome\home.png" />
+    <Resource Include="Images\FontAwesome\hospital.png" />
+    <Resource Include="Images\FontAwesome\hourglass-end.png" />
+    <Resource Include="Images\FontAwesome\hourglass-half.png" />
+    <Resource Include="Images\FontAwesome\hourglass-start.png" />
+    <Resource Include="Images\FontAwesome\hourglass.png" />
+    <Resource Include="Images\FontAwesome\i-cursor.png" />
+    <Resource Include="Images\FontAwesome\id-badge.png" />
+    <Resource Include="Images\FontAwesome\id-card.png" />
+    <Resource Include="Images\FontAwesome\image.png" />
+    <Resource Include="Images\FontAwesome\images.png" />
+    <Resource Include="Images\FontAwesome\inbox-in.png" />
+    <Resource Include="Images\FontAwesome\inbox-out.png" />
+    <Resource Include="Images\FontAwesome\inbox.png" />
+    <Resource Include="Images\FontAwesome\indent.png" />
+    <Resource Include="Images\FontAwesome\industry-alt.png" />
+    <Resource Include="Images\FontAwesome\industry.png" />
+    <Resource Include="Images\FontAwesome\info-circle.png" />
+    <Resource Include="Images\FontAwesome\info-square.png" />
+    <Resource Include="Images\FontAwesome\info.png" />
+    <Resource Include="Images\FontAwesome\italic.png" />
+    <Resource Include="Images\FontAwesome\jack-o-lantern.png" />
+    <Resource Include="Images\FontAwesome\key.png" />
+    <Resource Include="Images\FontAwesome\keyboard.png" />
+    <Resource Include="Images\FontAwesome\language.png" />
+    <Resource Include="Images\FontAwesome\laptop.png" />
+    <Resource Include="Images\FontAwesome\leaf.png" />
+    <Resource Include="Images\FontAwesome\lemon.png" />
+    <Resource Include="Images\FontAwesome\level-down-alt.png" />
+    <Resource Include="Images\FontAwesome\level-down.png" />
+    <Resource Include="Images\FontAwesome\level-up-alt.png" />
+    <Resource Include="Images\FontAwesome\level-up.png" />
+    <Resource Include="Images\FontAwesome\life-ring.png" />
+    <Resource Include="Images\FontAwesome\lightbulb.png" />
+    <Resource Include="Images\FontAwesome\link.png" />
+    <Resource Include="Images\FontAwesome\lira-sign.png" />
+    <Resource Include="Images\FontAwesome\list-alt.png" />
+    <Resource Include="Images\FontAwesome\list-ol.png" />
+    <Resource Include="Images\FontAwesome\list-ul.png" />
+    <Resource Include="Images\FontAwesome\list.png" />
+    <Resource Include="Images\FontAwesome\location-arrow.png" />
+    <Resource Include="Images\FontAwesome\lock-alt.png" />
+    <Resource Include="Images\FontAwesome\lock-open-alt.png" />
+    <Resource Include="Images\FontAwesome\lock-open.png" />
+    <Resource Include="Images\FontAwesome\lock.png" />
+    <Resource Include="Images\FontAwesome\long-arrow-alt-down.png" />
+    <Resource Include="Images\FontAwesome\long-arrow-alt-left.png" />
+    <Resource Include="Images\FontAwesome\long-arrow-alt-right.png" />
+    <Resource Include="Images\FontAwesome\long-arrow-alt-up.png" />
+    <Resource Include="Images\FontAwesome\long-arrow-down.png" />
+    <Resource Include="Images\FontAwesome\long-arrow-left.png" />
+    <Resource Include="Images\FontAwesome\long-arrow-right.png" />
+    <Resource Include="Images\FontAwesome\long-arrow-up.png" />
+    <Resource Include="Images\FontAwesome\low-vision.png" />
+    <Resource Include="Images\FontAwesome\magic.png" />
+    <Resource Include="Images\FontAwesome\magnet.png" />
+    <Resource Include="Images\FontAwesome\male.png" />
+    <Resource Include="Images\FontAwesome\map-marker-alt.png" />
+    <Resource Include="Images\FontAwesome\map-marker.png" />
+    <Resource Include="Images\FontAwesome\map-pin.png" />
+    <Resource Include="Images\FontAwesome\map-signs.png" />
+    <Resource Include="Images\FontAwesome\map.png" />
+    <Resource Include="Images\FontAwesome\mars-double.png" />
+    <Resource Include="Images\FontAwesome\mars-stroke-h.png" />
+    <Resource Include="Images\FontAwesome\mars-stroke-v.png" />
+    <Resource Include="Images\FontAwesome\mars-stroke.png" />
+    <Resource Include="Images\FontAwesome\mars.png" />
+    <Resource Include="Images\FontAwesome\medkit.png" />
+    <Resource Include="Images\FontAwesome\meh.png" />
+    <Resource Include="Images\FontAwesome\mercury.png" />
+    <Resource Include="Images\FontAwesome\microchip.png" />
+    <Resource Include="Images\FontAwesome\microphone-alt.png" />
+    <Resource Include="Images\FontAwesome\microphone-slash.png" />
+    <Resource Include="Images\FontAwesome\microphone.png" />
+    <Resource Include="Images\FontAwesome\minus-circle.png" />
+    <Resource Include="Images\FontAwesome\minus-hexagon.png" />
+    <Resource Include="Images\FontAwesome\minus-octagon.png" />
+    <Resource Include="Images\FontAwesome\minus-square.png" />
+    <Resource Include="Images\FontAwesome\minus.png" />
+    <Resource Include="Images\FontAwesome\mobile-alt.png" />
+    <Resource Include="Images\FontAwesome\mobile-android-alt.png" />
+    <Resource Include="Images\FontAwesome\mobile-android.png" />
+    <Resource Include="Images\FontAwesome\mobile.png" />
+    <Resource Include="Images\FontAwesome\money-bill-alt.png" />
+    <Resource Include="Images\FontAwesome\money-bill.png" />
+    <Resource Include="Images\FontAwesome\moon.png" />
+    <Resource Include="Images\FontAwesome\motorcycle.png" />
+    <Resource Include="Images\FontAwesome\mouse-pointer.png" />
+    <Resource Include="Images\FontAwesome\music.png" />
+    <Resource Include="Images\FontAwesome\neuter.png" />
+    <Resource Include="Images\FontAwesome\newspaper.png" />
+    <Resource Include="Images\FontAwesome\object-group.png" />
+    <Resource Include="Images\FontAwesome\object-ungroup.png" />
+    <Resource Include="Images\FontAwesome\octagon.png" />
+    <Resource Include="Images\FontAwesome\outdent.png" />
+    <Resource Include="Images\FontAwesome\paint-brush.png" />
+    <Resource Include="Images\FontAwesome\paper-plane.png" />
+    <Resource Include="Images\FontAwesome\paperclip.png" />
+    <Resource Include="Images\FontAwesome\paragraph.png" />
+    <Resource Include="Images\FontAwesome\paste.png" />
+    <Resource Include="Images\FontAwesome\pause-circle.png" />
+    <Resource Include="Images\FontAwesome\pause.png" />
+    <Resource Include="Images\FontAwesome\paw.png" />
+    <Resource Include="Images\FontAwesome\pen-alt.png" />
+    <Resource Include="Images\FontAwesome\pen-square.png" />
+    <Resource Include="Images\FontAwesome\pen.png" />
+    <Resource Include="Images\FontAwesome\pencil-alt.png" />
+    <Resource Include="Images\FontAwesome\pencil.png" />
+    <Resource Include="Images\FontAwesome\percent.png" />
+    <Resource Include="Images\FontAwesome\phone-slash.png" />
+    <Resource Include="Images\FontAwesome\phone-square.png" />
+    <Resource Include="Images\FontAwesome\phone-volume.png" />
+    <Resource Include="Images\FontAwesome\phone.png" />
+    <Resource Include="Images\FontAwesome\plane-alt.png" />
+    <Resource Include="Images\FontAwesome\plane.png" />
+    <Resource Include="Images\FontAwesome\play-circle.png" />
+    <Resource Include="Images\FontAwesome\play.png" />
+    <Resource Include="Images\FontAwesome\plug.png" />
+    <Resource Include="Images\FontAwesome\plus-circle.png" />
+    <Resource Include="Images\FontAwesome\plus-hexagon.png" />
+    <Resource Include="Images\FontAwesome\plus-octagon.png" />
+    <Resource Include="Images\FontAwesome\plus-square.png" />
+    <Resource Include="Images\FontAwesome\plus.png" />
+    <Resource Include="Images\FontAwesome\podcast.png" />
+    <Resource Include="Images\FontAwesome\poo.png" />
+    <Resource Include="Images\FontAwesome\portrait.png" />
+    <Resource Include="Images\FontAwesome\pound-sign.png" />
+    <Resource Include="Images\FontAwesome\power-off.png" />
+    <Resource Include="Images\FontAwesome\print.png" />
+    <Resource Include="Images\FontAwesome\puzzle-piece.png" />
+    <Resource Include="Images\FontAwesome\qrcode.png" />
+    <Resource Include="Images\FontAwesome\question-circle.png" />
+    <Resource Include="Images\FontAwesome\question-square.png" />
+    <Resource Include="Images\FontAwesome\question.png" />
+    <Resource Include="Images\FontAwesome\quote-left.png" />
+    <Resource Include="Images\FontAwesome\quote-right.png" />
+    <Resource Include="Images\FontAwesome\random.png" />
+    <Resource Include="Images\FontAwesome\rectangle-landscape.png" />
+    <Resource Include="Images\FontAwesome\rectangle-portrait.png" />
+    <Resource Include="Images\FontAwesome\rectangle-wide.png" />
+    <Resource Include="Images\FontAwesome\recycle.png" />
+    <Resource Include="Images\FontAwesome\redo-alt.png" />
+    <Resource Include="Images\FontAwesome\redo.png" />
+    <Resource Include="Images\FontAwesome\registered.png" />
+    <Resource Include="Images\FontAwesome\repeat-1-alt.png" />
+    <Resource Include="Images\FontAwesome\repeat-1.png" />
+    <Resource Include="Images\FontAwesome\repeat-alt.png" />
+    <Resource Include="Images\FontAwesome\repeat.png" />
+    <Resource Include="Images\FontAwesome\reply-all.png" />
+    <Resource Include="Images\FontAwesome\reply.png" />
+    <Resource Include="Images\FontAwesome\retweet-alt.png" />
+    <Resource Include="Images\FontAwesome\retweet.png" />
+    <Resource Include="Images\FontAwesome\road.png" />
+    <Resource Include="Images\FontAwesome\rocket.png" />
+    <Resource Include="Images\FontAwesome\rss-square.png" />
+    <Resource Include="Images\FontAwesome\rss.png" />
+    <Resource Include="Images\FontAwesome\ruble-sign.png" />
+    <Resource Include="Images\FontAwesome\rupee-sign.png" />
+    <Resource Include="Images\FontAwesome\save.png" />
+    <Resource Include="Images\FontAwesome\scrubber.png" />
+    <Resource Include="Images\FontAwesome\search-minus.png" />
+    <Resource Include="Images\FontAwesome\search-plus.png" />
+    <Resource Include="Images\FontAwesome\search.png" />
+    <Resource Include="Images\FontAwesome\server.png" />
+    <Resource Include="Images\FontAwesome\share-all.png" />
+    <Resource Include="Images\FontAwesome\share-alt-square.png" />
+    <Resource Include="Images\FontAwesome\share-alt.png" />
+    <Resource Include="Images\FontAwesome\share-square.png" />
+    <Resource Include="Images\FontAwesome\share.png" />
+    <Resource Include="Images\FontAwesome\shekel-sign.png" />
+    <Resource Include="Images\FontAwesome\shield-alt.png" />
+    <Resource Include="Images\FontAwesome\shield-check.png" />
+    <Resource Include="Images\FontAwesome\shield.png" />
+    <Resource Include="Images\FontAwesome\ship.png" />
+    <Resource Include="Images\FontAwesome\shopping-bag.png" />
+    <Resource Include="Images\FontAwesome\shopping-basket.png" />
+    <Resource Include="Images\FontAwesome\shopping-cart.png" />
+    <Resource Include="Images\FontAwesome\shower.png" />
+    <Resource Include="Images\FontAwesome\sign-in-alt.png" />
+    <Resource Include="Images\FontAwesome\sign-in.png" />
+    <Resource Include="Images\FontAwesome\sign-language.png" />
+    <Resource Include="Images\FontAwesome\sign-out-alt.png" />
+    <Resource Include="Images\FontAwesome\sign-out.png" />
+    <Resource Include="Images\FontAwesome\signal.png" />
+    <Resource Include="Images\FontAwesome\sitemap.png" />
+    <Resource Include="Images\FontAwesome\sliders-h-square.png" />
+    <Resource Include="Images\FontAwesome\sliders-h.png" />
+    <Resource Include="Images\FontAwesome\sliders-v-square.png" />
+    <Resource Include="Images\FontAwesome\sliders-v.png" />
+    <Resource Include="Images\FontAwesome\smile.png" />
+    <Resource Include="Images\FontAwesome\snowflake.png" />
+    <Resource Include="Images\FontAwesome\sort-alpha-down.png" />
+    <Resource Include="Images\FontAwesome\sort-alpha-up.png" />
+    <Resource Include="Images\FontAwesome\sort-amount-down.png" />
+    <Resource Include="Images\FontAwesome\sort-amount-up.png" />
+    <Resource Include="Images\FontAwesome\sort-down.png" />
+    <Resource Include="Images\FontAwesome\sort-numeric-down.png" />
+    <Resource Include="Images\FontAwesome\sort-numeric-up.png" />
+    <Resource Include="Images\FontAwesome\sort-up.png" />
+    <Resource Include="Images\FontAwesome\sort.png" />
+    <Resource Include="Images\FontAwesome\space-shuttle.png" />
+    <Resource Include="Images\FontAwesome\spade.png" />
+    <Resource Include="Images\FontAwesome\spinner-third.png" />
+    <Resource Include="Images\FontAwesome\spinner.png" />
+    <Resource Include="Images\FontAwesome\square.png" />
+    <Resource Include="Images\FontAwesome\star-exclamation.png" />
+    <Resource Include="Images\FontAwesome\star-half.png" />
+    <Resource Include="Images\FontAwesome\star.png" />
+    <Resource Include="Images\FontAwesome\step-backward.png" />
+    <Resource Include="Images\FontAwesome\step-forward.png" />
+    <Resource Include="Images\FontAwesome\stethoscope.png" />
+    <Resource Include="Images\FontAwesome\sticky-note.png" />
+    <Resource Include="Images\FontAwesome\stop-circle.png" />
+    <Resource Include="Images\FontAwesome\stop.png" />
+    <Resource Include="Images\FontAwesome\stopwatch.png" />
+    <Resource Include="Images\FontAwesome\street-view.png" />
+    <Resource Include="Images\FontAwesome\strikethrough.png" />
+    <Resource Include="Images\FontAwesome\subscript.png" />
+    <Resource Include="Images\FontAwesome\subway.png" />
+    <Resource Include="Images\FontAwesome\suitcase.png" />
+    <Resource Include="Images\FontAwesome\sun.png" />
+    <Resource Include="Images\FontAwesome\superscript.png" />
+    <Resource Include="Images\FontAwesome\sync-alt.png" />
+    <Resource Include="Images\FontAwesome\sync.png" />
+    <Resource Include="Images\FontAwesome\table.png" />
+    <Resource Include="Images\FontAwesome\tablet-alt.png" />
+    <Resource Include="Images\FontAwesome\tablet-android-alt.png" />
+    <Resource Include="Images\FontAwesome\tablet-android.png" />
+    <Resource Include="Images\FontAwesome\tablet.png" />
+    <Resource Include="Images\FontAwesome\tachometer-alt.png" />
+    <Resource Include="Images\FontAwesome\tachometer.png" />
+    <Resource Include="Images\FontAwesome\tag.png" />
+    <Resource Include="Images\FontAwesome\tags.png" />
+    <Resource Include="Images\FontAwesome\tasks.png" />
+    <Resource Include="Images\FontAwesome\taxi.png" />
+    <Resource Include="Images\FontAwesome\terminal.png" />
+    <Resource Include="Images\FontAwesome\text-height.png" />
+    <Resource Include="Images\FontAwesome\text-width.png" />
+    <Resource Include="Images\FontAwesome\th-large.png" />
+    <Resource Include="Images\FontAwesome\th-list.png" />
+    <Resource Include="Images\FontAwesome\th.png" />
+    <Resource Include="Images\FontAwesome\thermometer-empty.png" />
+    <Resource Include="Images\FontAwesome\thermometer-full.png" />
+    <Resource Include="Images\FontAwesome\thermometer-half.png" />
+    <Resource Include="Images\FontAwesome\thermometer-quarter.png" />
+    <Resource Include="Images\FontAwesome\thermometer-three-quarters.png" />
+    <Resource Include="Images\FontAwesome\thumbs-down.png" />
+    <Resource Include="Images\FontAwesome\thumbs-up.png" />
+    <Resource Include="Images\FontAwesome\thumbtack.png" />
+    <Resource Include="Images\FontAwesome\ticket-alt.png" />
+    <Resource Include="Images\FontAwesome\ticket.png" />
+    <Resource Include="Images\FontAwesome\times-circle.png" />
+    <Resource Include="Images\FontAwesome\times-hexagon.png" />
+    <Resource Include="Images\FontAwesome\times-octagon.png" />
+    <Resource Include="Images\FontAwesome\times-square.png" />
+    <Resource Include="Images\FontAwesome\times.png" />
+    <Resource Include="Images\FontAwesome\tint.png" />
+    <Resource Include="Images\FontAwesome\toggle-off.png" />
+    <Resource Include="Images\FontAwesome\toggle-on.png" />
+    <Resource Include="Images\FontAwesome\trademark.png" />
+    <Resource Include="Images\FontAwesome\train.png" />
+    <Resource Include="Images\FontAwesome\transgender-alt.png" />
+    <Resource Include="Images\FontAwesome\transgender.png" />
+    <Resource Include="Images\FontAwesome\trash-alt.png" />
+    <Resource Include="Images\FontAwesome\trash.png" />
+    <Resource Include="Images\FontAwesome\tree-alt.png" />
+    <Resource Include="Images\FontAwesome\tree.png" />
+    <Resource Include="Images\FontAwesome\triangle.png" />
+    <Resource Include="Images\FontAwesome\trophy-alt.png" />
+    <Resource Include="Images\FontAwesome\trophy.png" />
+    <Resource Include="Images\FontAwesome\truck.png" />
+    <Resource Include="Images\FontAwesome\tty.png" />
+    <Resource Include="Images\FontAwesome\tv-retro.png" />
+    <Resource Include="Images\FontAwesome\tv.png" />
+    <Resource Include="Images\FontAwesome\umbrella.png" />
+    <Resource Include="Images\FontAwesome\underline.png" />
+    <Resource Include="Images\FontAwesome\undo-alt.png" />
+    <Resource Include="Images\FontAwesome\undo.png" />
+    <Resource Include="Images\FontAwesome\universal-access.png" />
+    <Resource Include="Images\FontAwesome\university.png" />
+    <Resource Include="Images\FontAwesome\unlink.png" />
+    <Resource Include="Images\FontAwesome\unlock-alt.png" />
+    <Resource Include="Images\FontAwesome\unlock.png" />
+    <Resource Include="Images\FontAwesome\upload.png" />
+    <Resource Include="Images\FontAwesome\usd-circle.png" />
+    <Resource Include="Images\FontAwesome\usd-square.png" />
+    <Resource Include="Images\FontAwesome\user-alt.png" />
+    <Resource Include="Images\FontAwesome\user-circle.png" />
+    <Resource Include="Images\FontAwesome\user-md.png" />
+    <Resource Include="Images\FontAwesome\user-plus.png" />
+    <Resource Include="Images\FontAwesome\user-secret.png" />
+    <Resource Include="Images\FontAwesome\user-times.png" />
+    <Resource Include="Images\FontAwesome\user.png" />
+    <Resource Include="Images\FontAwesome\users.png" />
+    <Resource Include="Images\FontAwesome\utensil-fork.png" />
+    <Resource Include="Images\FontAwesome\utensil-knife.png" />
+    <Resource Include="Images\FontAwesome\utensil-spoon.png" />
+    <Resource Include="Images\FontAwesome\utensils-alt.png" />
+    <Resource Include="Images\FontAwesome\utensils.png" />
+    <Resource Include="Images\FontAwesome\venus-double.png" />
+    <Resource Include="Images\FontAwesome\venus-mars.png" />
+    <Resource Include="Images\FontAwesome\venus.png" />
+    <Resource Include="Images\FontAwesome\video.png" />
+    <Resource Include="Images\FontAwesome\volume-down.png" />
+    <Resource Include="Images\FontAwesome\volume-mute.png" />
+    <Resource Include="Images\FontAwesome\volume-off.png" />
+    <Resource Include="Images\FontAwesome\volume-up.png" />
+    <Resource Include="Images\FontAwesome\watch.png" />
+    <Resource Include="Images\FontAwesome\wheelchair.png" />
+    <Resource Include="Images\FontAwesome\wifi.png" />
+    <Resource Include="Images\FontAwesome\window-alt.png" />
+    <Resource Include="Images\FontAwesome\window-close.png" />
+    <Resource Include="Images\FontAwesome\window-maximize.png" />
+    <Resource Include="Images\FontAwesome\window-minimize.png" />
+    <Resource Include="Images\FontAwesome\window-restore.png" />
+    <Resource Include="Images\FontAwesome\window.png" />
+    <Resource Include="Images\FontAwesome\won-sign.png" />
+    <Resource Include="Images\FontAwesome\wrench.png" />
+    <Resource Include="Images\FontAwesome\yen-sign.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Theme\Theme.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Generation\CreateModelsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Generation\CreateRepositoriesView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LandingView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Settings\GlobalCodeGenerationSettingsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Settings\Global.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Settings\GlobalConnectionSettingsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

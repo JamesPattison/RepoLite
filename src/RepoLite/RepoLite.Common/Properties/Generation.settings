@@ -1,0 +1,30 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="RepoLite.Common.Properties" GeneratedClassName="Generation">
+  <Profiles />
+  <Settings>
+    <Setting Name="ModelGenerationNamespace" Type="System.String" Scope="User">
+      <Value Profile="(Default)">NS.Models</Value>
+    </Setting>
+    <Setting Name="RepositoryGenerationNamespace" Type="System.String" Scope="User">
+      <Value Profile="(Default)">NS</Value>
+    </Setting>
+    <Setting Name="OutputDirectory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Temp</Value>
+    </Setting>
+    <Setting Name="ModelFileNameFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">m.{Name}</Value>
+    </Setting>
+    <Setting Name="RepositoryFileNameFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">{Name}</Value>
+    </Setting>
+    <Setting Name="TargetFramework" Type="RepoLite.Common.Enums.TargetFramework" Scope="User">
+      <Value Profile="(Default)">Framework35</Value>
+    </Setting>
+    <Setting Name="CSharpVersion" Type="RepoLite.Common.Enums.CSharpVersion" Scope="User">
+      <Value Profile="(Default)">CSharp4</Value>
+    </Setting>
+    <Setting Name="PluginDirectory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Plugins</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
