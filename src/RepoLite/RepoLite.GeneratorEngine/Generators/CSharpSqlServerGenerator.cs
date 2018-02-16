@@ -530,8 +530,15 @@ namespace RepoLite.GeneratorEngine.Generators
 
                 sb.AppendLine(Tab3, "foreach (var compositeKey in compositeIds)");
                 sb.AppendLine(Tab3, "{");
-                sb.AppendLine(Tab4,
-                    "filteredResults.AddRange(result.Where(x => x.Id == compositeKey.Id && x.AnotherId == compositeKey.AnotherId));");
+                sb.Append(Tab4,
+                    "filteredResults.AddRange(result.Where(x => ");
+                foreach (var pk in table.PrimaryKeys)
+                {
+                    sb.Append($"x.{pk.DbColName} == compositeKey.{pk.DbColName}");
+                    if (pk != table.PrimaryKeys.Last())
+                        sb.Append(" && ");
+                }
+                sb.AppendLine("));");
                 sb.AppendLine(Tab3, "}");
                 sb.AppendLine(Tab3, "return filteredResults;");
 
