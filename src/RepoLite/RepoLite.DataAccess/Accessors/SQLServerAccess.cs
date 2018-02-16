@@ -13,7 +13,7 @@ namespace RepoLite.DataAccess.Accessors
     {
         public override List<TableAndSchema> GetTables()
         {
-            return GetTables("dbo");
+            return GetTables(null);
         }
 
         public override List<TableAndSchema> GetTables(string schema)
@@ -28,7 +28,7 @@ namespace RepoLite.DataAccess.Accessors
                     WHERE
                             TABLE_TYPE = 'BASE TABLE'
                         AND
-                            TABLE_SCHEMA = @schema",
+                            (@schema IS NULL OR TABLE_SCHEMA = @schema)",
                     new { schema });
 
                 var toReturn = tables.Select(table => table.GetTableAndSchema()).ToList();
