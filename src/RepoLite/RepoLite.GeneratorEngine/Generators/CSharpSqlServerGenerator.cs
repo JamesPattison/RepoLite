@@ -141,8 +141,8 @@ namespace RepoLite.GeneratorEngine.Generators
                 var colLengthVal = sqlPrecisionColumns.Contains(column.SqlDataTypeCode) ? $"({Math.Max(column.MaxLength, column.MaxIntLength)})" : string.Empty;
                 sb.AppendLine(Tab3,
                     _cSharpVersion >= CSharpVersion.CSharp6
-                        ? $"Columns.Add(new ColumnDefinition({(column.DbColName == nameof(column.DbColName) ? $"nameof({table.ClassName}.{column.DbColName})" : $"\"{column.DbColName}\"")}, \"[{column.SqlDataType}]{colLengthVal}\", {column.IsNullable.ToString().ToLower()}, {column.PrimaryKey.ToString().ToLower()}, {column.IsIdentity.ToString().ToLower()}));"
-                        : $"Columns.Add(new ColumnDefinition(\"{column.DbColName}\", \"[{column.SqlDataType}]{colLengthVal}\", {column.IsNullable.ToString().ToLower()}, {column.PrimaryKey.ToString().ToLower()}, {column.IsIdentity.ToString().ToLower()}));");
+                        ? $"Columns.Add(new ColumnDefinition({(column.DbColName == nameof(column.DbColName) ? $"nameof({table.ClassName}.{column.DbColName})" : $"\"{column.DbColName}\"")}, typeof({column.DataType}), \"[{column.SqlDataType}]{colLengthVal}\", {column.IsNullable.ToString().ToLower()}, {column.PrimaryKey.ToString().ToLower()}, {column.IsIdentity.ToString().ToLower()}));"
+                        : $"Columns.Add(new ColumnDefinition(\"{column.DbColName}\", typeof({column.DataType}), \"[{column.SqlDataType}]{colLengthVal}\", {column.IsNullable.ToString().ToLower()}, {column.PrimaryKey.ToString().ToLower()}, {column.IsIdentity.ToString().ToLower()}));");
             }
             sb.AppendLine(Tab2, "}");
 
@@ -639,7 +639,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("");
             sb.AppendLine(Tab3, "var dt = new DataTable();");
             sb.AppendLine(Tab3, "foreach (var mergeColumn in Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))");
-            sb.AppendLine(Tab4, "dt.Columns.Add(mergeColumn.ColumnName);");
+            sb.AppendLine(Tab4, "dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);");
             sb.AppendLine("");
             sb.AppendLine(Tab3, "foreach (var item in items)");
             sb.AppendLine(Tab3, "{");

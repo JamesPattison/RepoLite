@@ -133,23 +133,25 @@ namespace {{NAMESPACE}}.Base
     public class ColumnDefinition
     {
         public string ColumnName { get; set; }
+        public Type ValueType { get; set; }
         public string SqlDataType { get; set; }
         public bool Identity { get; set; }
         public bool PrimaryKey { get; set; }
         public bool Nullable { get; set; }
 
-        public ColumnDefinition(string columnName, string sqlDataType) : this(columnName, sqlDataType, false, false, false) { }
-        public ColumnDefinition(string columnName, string sqlDataType, bool nullable) : this(columnName, sqlDataType, nullable, false, false) { }
-        public ColumnDefinition(string columnName, string sqlDataType, bool nullable, bool primaryKey) : this(columnName, sqlDataType, nullable, primaryKey, false) { }
-        public ColumnDefinition(string columnName, string sqlDataType, bool nullable, bool primaryKey, bool identity)
+        public ColumnDefinition(string columnName, Type valueType, string sqlDataType) : this(columnName, valueType, sqlDataType, false, false, false) { }
+        public ColumnDefinition(string columnName, Type valueType, string sqlDataType, bool nullable) : this(columnName, valueType, sqlDataType, nullable, false, false) { }
+        public ColumnDefinition(string columnName, Type valueType, string sqlDataType, bool nullable, bool primaryKey) : this(columnName, valueType, sqlDataType, nullable, primaryKey, false) { }
+        public ColumnDefinition(string columnName, Type valueType, string sqlDataType, bool nullable, bool primaryKey, bool identity)
         {
             ColumnName = columnName;
+            ValueType = valueType;
             SqlDataType = sqlDataType;
             Nullable = nullable;
             PrimaryKey = primaryKey;
             Identity = identity;
         }
-    }	
+    }
 
     public class QueryItem
     {
@@ -985,12 +987,12 @@ namespace {{NAMESPACE}}.Base
                 var dt = new DataTable();
                 foreach (var mergeColumn in Columns)
                 {
-                    dt.Columns.Add(mergeColumn.ColumnName);
+                    dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
                     if (!mergeColumn.PrimaryKey)
 @@@CSharp4 || CSharp5@@@
-                        dt.Columns.Add(mergeColumn.ColumnName + "Changed");
+                        dt.Columns.Add(mergeColumn.ColumnName + "Changed", typeof(bool));
 @@@ELSE [CSharp4 || CSharp5]
-                        dt.Columns.Add($"{mergeColumn.ColumnName}Changed");
+                        dt.Columns.Add($"{mergeColumn.ColumnName}Changed", typeof(bool));
 @@@//CSharp4 || CSharp5@@@
                 }
 
