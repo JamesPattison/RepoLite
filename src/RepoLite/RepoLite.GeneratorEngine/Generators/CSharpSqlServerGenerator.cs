@@ -819,8 +819,8 @@ namespace RepoLite.GeneratorEngine.Generators
             {
                 sb.AppendLine(Tab4,
                     _cSharpVersion >= CSharpVersion.CSharp6
-                        ? $"{column.PropertyName} = Get{(column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, {(column.DbColName == nameof(column.DbColName) ? $"nameof({table.ClassName}.{column.DbColName})" : $"\"{column.DbColName}\"")}),"
-                        : $"{column.PropertyName} = Get{(column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, \"{column.DbColName}\"),");
+                        ? $"{column.PropertyName} = Get{(IsNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, {(column.DbColName == nameof(column.DbColName) ? $"nameof({table.ClassName}.{column.DbColName})" : $"\"{column.DbColName}\"")}),"
+                        : $"{column.PropertyName} = Get{(IsNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, \"{column.DbColName}\"),");
             }
             sb.AppendLine(Tab3, "};");
             sb.AppendLine("");
