@@ -194,7 +194,7 @@ namespace RepoLite.GeneratorEngine.Generators
             foreach (var column in table.Columns)
             {
                 //Field
-                sb.AppendLine(Tab2, $"private {column.DataType.Name} _{column.FieldName};");
+                sb.AppendLine(Tab2, $"private {column.DataType.Name}{(IsNullable(column.DataType.Name) && column.IsNullable ? "?" : "")} _{column.FieldName};");
             }
 
             sb.Append(Environment.NewLine);
@@ -204,7 +204,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 if (column.PrimaryKey && _targetFramework >= TargetFramework.Framework4)
                     sb.AppendLine(Tab2, "[Key]");
                 var fieldName = $"_{column.FieldName}";
-                sb.AppendLine(Tab2, $"public virtual {column.DataType.Name} {column.PropertyName}");
+                sb.AppendLine(Tab2, $"public virtual {column.DataType.Name}{(IsNullable(column.DataType.Name) && column.IsNullable ? "?" : "")} {column.PropertyName}");
                 sb.AppendLine(Tab2, "{");
                 if (_cSharpVersion >= CSharpVersion.CSharp7)
                 {
@@ -808,8 +808,8 @@ namespace RepoLite.GeneratorEngine.Generators
             {
                 sb.AppendLine(Tab4,
                     _cSharpVersion >= CSharpVersion.CSharp6
-                        ? $"{column.PropertyName} = Get{column.DataType.Name}(row, {(column.DbColName == nameof(column.DbColName) ? $"nameof({table.ClassName}.{column.DbColName})" : $"\"{column.DbColName}\"")}),"
-                        : $"{column.PropertyName} = Get{column.DataType.Name}(row, \"{column.DbColName}\"),");
+                        ? $"{column.PropertyName} = Get{(column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, {(column.DbColName == nameof(column.DbColName) ? $"nameof({table.ClassName}.{column.DbColName})" : $"\"{column.DbColName}\"")}),"
+                        : $"{column.PropertyName} = Get{(column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, \"{column.DbColName}\"),");
             }
             sb.AppendLine(Tab3, "};");
             sb.AppendLine("");

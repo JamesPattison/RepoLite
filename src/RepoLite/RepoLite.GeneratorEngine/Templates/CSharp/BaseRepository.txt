@@ -1165,9 +1165,24 @@ namespace {{NAMESPACE}}.Base
             return isSuccess;
         }
 
+        protected Boolean GetBoolean(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) && row.Field<bool>(fieldName);
+        }
+
+        protected Boolean? GetNullableBoolean(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) ? row.Field<Boolean?>(fieldName) : default(Boolean?);
+        }
+
         protected Int16 GetInt16(DataRow row, string fieldName)
         {
             return row.Table.Columns.Contains(fieldName) ? row.Field<Int16>(fieldName) : default(Int16);
+        }
+
+        protected Int16? GetNullableInt16(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) ? row.Field<Int16?>(fieldName) : default(Int16?);
         }
 
         protected Int32 GetInt32(DataRow row, string fieldName)
@@ -1175,32 +1190,107 @@ namespace {{NAMESPACE}}.Base
             return row.Table.Columns.Contains(fieldName) ? row.Field<Int32>(fieldName) : default(Int32);
         }
 
+        protected Int32? GetNullableInt32(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) ? row.Field<Int32?>(fieldName) : default(Int32?);
+        }
+
         protected Int64 GetInt64(DataRow row, string fieldName)
         {
             return row.Table.Columns.Contains(fieldName) ? row.Field<Int64>(fieldName) : default(Int64);
         }
-        
-        protected string GetString(DataRow row, string fieldName)
+
+        protected Int64? GetNullableInt64(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<string>(fieldName) : default(string);
+            return row.Table.Columns.Contains(fieldName) ? row.Field<Int64?>(fieldName) : default(Int64?);
         }
 
-        protected bool GetBoolean(DataRow row, string fieldName)
+        protected Decimal GetDecimal(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) && row.Field<bool>(fieldName);
+            return row.Table.Columns.Contains(fieldName) ? row.Field<Decimal>(fieldName) : default(Decimal);
+        }
+
+        protected Decimal? GetNullableDecimal(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) ? row.Field<Decimal?>(fieldName) : default(Decimal?);
+        }
+
+        protected Double GetDouble(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) ? row.Field<Double>(fieldName) : default(Double);
+        }
+
+        protected Double? GetNullableDouble(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) ? row.Field<Double?>(fieldName) : default(Double?);
+        }
+
+        protected DateTime GetDateTime(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) ? row.Field<DateTime>(fieldName) : default(DateTime);
+        }
+
+        protected DateTime? GetNullableDateTime(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) ? row.Field<DateTime?>(fieldName) : default(DateTime?);
+        }
+
+        protected byte GetByte(DataRow row, string fieldName)
+        {
+            return (byte)row[fieldName];
+        }
+
+        protected byte? GetNullableByte(DataRow row, string fieldName)
+        {
+            return (byte?)row[fieldName];
+        }
+
+        protected byte[] GetByteArray(DataRow row, string fieldName)
+        {
+            return (byte[])row[fieldName];
+        }
+
+        protected DateTimeOffset GetDateTimeOffset(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) ? row.Field<DateTimeOffset>(fieldName) : default(DateTimeOffset);
+        }
+
+        protected DateTimeOffset? GetNullableDateTimeOffset(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) ? row.Field<DateTimeOffset?>(fieldName) : default(DateTimeOffset?);
         }
 
         protected Guid GetGuid(DataRow row, string fieldName)
         {
             return row.Table.Columns.Contains(fieldName) ? row.Field<Guid>(fieldName) : Guid.Empty;
         }
-        
+
+        protected Guid? GetNullableGuid(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) ? row.Field<Guid?>(fieldName) : default(Guid?);
+        }
+
+        protected TimeSpan GetTimeSpan(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) ? row.Field<TimeSpan>(fieldName) : default(TimeSpan);
+        }
+
+        protected TimeSpan? GetNullableTimeSpan(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) ? row.Field<TimeSpan?>(fieldName) : default(TimeSpan?);
+        }
+
         protected XmlDocument GetXmlDocument(DataRow row, string fieldName)
         {
             return new XmlDocument
             {
                 InnerXml = row.Table.Columns.Contains(fieldName) ? row.Field<string>(fieldName) : ""
             };
+        }
+
+        protected string GetString(DataRow row, string fieldName)
+        {
+            return row.Table.Columns.Contains(fieldName) ? row.Field<string>(fieldName) : default(string);
         }
 
         #region [Private]
