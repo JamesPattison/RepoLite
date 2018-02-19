@@ -269,6 +269,17 @@ namespace RepoLite.GeneratorEngine.Generators
                             ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Max length is {column.MaxLength}\"));"
                             : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Max length is {column.MaxLength}\"));");
                 }
+                else if (column.DataType == typeof(Byte[]))
+                {
+                    if (!column.IsNullable)
+                    {
+                        sb.AppendLine(Tab3, $"if ({column.PropertyName} == null)");
+                        sb.AppendLine(Tab3,
+                            _cSharpVersion >= CSharpVersion.CSharp6
+                                ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot be null\"));"
+                                : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Value cannot be null\"));");
+                    }
+                }
                 else
                     switch (Activator.CreateInstance(column.DataType))
                     {
