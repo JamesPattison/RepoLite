@@ -49,8 +49,6 @@ namespace RepoLite.DataAccess
         public abstract List<Procedure> LoadProcedures(List<string> procedures);
         //protected abstract List<TableDefault> GetTableDefaults(List<TableAndSchema> tables);
         public abstract List<Column> LoadTableColumns(Table table);
-
-        public abstract List<string> GetTableColumns(Table table);
     }
 
     public abstract class DataSource<T> : DataSource where T : DbConnection, new() //dbconnection may not be appropriate going forward, but will do for now

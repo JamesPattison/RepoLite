@@ -11,8 +11,7 @@ namespace RepoLite.DataAccess
 
         List<string> GetProcedures();
         List<Procedure> LoadProcedures(List<string> procedures);
-
-        List<string> GetTableColumns(Table table);
+        
         List<Column> LoadTableColumns(Table table);
     }
 }

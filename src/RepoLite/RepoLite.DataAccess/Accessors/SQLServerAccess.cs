@@ -45,12 +45,7 @@ namespace RepoLite.DataAccess.Accessors
         {
             throw new NotImplementedException();
         }
-
-        public override List<string> GetTableColumns(Table table)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public override List<Column> LoadTableColumns(Table table)
         {
             using (var cn = Connection)
@@ -101,6 +96,7 @@ namespace RepoLite.DataAccess.Accessors
 											AND x.COLUMN_NAME = c.COLUMN_NAME
                             WHERE 
 	                            LOWER(c.TABLE_SCHEMA + '.' + c.TABLE_NAME) = @table
+								AND t.system_type_id <> 189 -- TIMESTAMP columns
                             ORDER BY 
 	                            c.ORDINAL_POSITION ASC",
                     new
