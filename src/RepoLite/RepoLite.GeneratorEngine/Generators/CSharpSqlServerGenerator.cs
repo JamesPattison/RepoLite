@@ -188,7 +188,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             if (_targetFramework >= TargetFramework.Framework45)
                 sb.AppendLine(Tab1, $"[Table(\"{tableNameAndSchema.Table}\", Schema=\"{tableNameAndSchema.Schema}\")]");
-            sb.AppendLine(Tab1, $"public class {table.ClassName} : BaseModel");
+            sb.AppendLine(Tab1, $"public partial class {table.ClassName} : BaseModel");
             sb.AppendLine(Tab1, "{");
 
             foreach (var column in table.Columns)

@@ -68,40 +68,46 @@ namespace RepoLite.ViewModel.Main
                             LogMessage($"Processing Table {x.Schema}.{x.ClassName}");
                             var model = generator.ModelForTable(x).ToString();
 
-                            var result = Regex.Replace(
-                                AppSettings.Generation.ModelFileNameFormat,
-                                Regex.Escape("{Name}"),
-                                x.ClassName.Replace("$", "$$"),
-                                RegexOptions.IgnoreCase
-                            );
-
-                            result = Regex.Replace(
-                                result,
-                                Regex.Escape("{Schema}"),
-                                x.Schema.Replace("$", "$$"),
-                                RegexOptions.IgnoreCase
-                            );
-
-                            string fileName;
-
-                            switch (AppSettings.System.GenerationLanguage)
-                            {
-                                case GenerationLanguage.CSharp:
-                                    fileName = $"{outputDirectory}/{result}.{generator.FileExtension()}";
-                                    break;
-                                default:
-                                    //"If you've added a new language to the enum, the generator needs creating and hooking up here"
-                                    throw new ArgumentOutOfRangeException();
-                            }
-
-                            if (!Directory.Exists(AppSettings.Generation.OutputDirectory)) Directory.CreateDirectory(AppSettings.Generation.OutputDirectory);
-                            LogMessage($"Creating Model File for {x.Schema}.{x.ClassName} in {outputDirectory}/");
-                            File.WriteAllText(fileName, model);
-                            LogMessage($"Done {x.Schema}.{x.ClassName}!");
+                            CreateModel(x, outputDirectory, generator, model);
                         });
                     }, () => Process.Start(outputDirectory));
                 });
             }
+        }
+
+        internal void CreateModel(Table table, string outputDirectory, IGenerator generator, string modelName)
+        {
+            var result = Regex.Replace(
+                AppSettings.Generation.ModelFileNameFormat,
+                Regex.Escape("{Name}"),
+                table.ClassName.Replace("$", "$$"),
+                RegexOptions.IgnoreCase
+            );
+
+            result = Regex.Replace(
+                result,
+                Regex.Escape("{Schema}"),
+                table.Schema.Replace("$", "$$"),
+                RegexOptions.IgnoreCase
+            );
+
+            string fileName;
+
+            switch (AppSettings.System.GenerationLanguage)
+            {
+                case GenerationLanguage.CSharp:
+                    fileName = $"{outputDirectory}/{result}.{generator.FileExtension()}";
+                    break;
+                default:
+                    //"If you've added a new language to the enum, the generator needs creating and hooking up here"
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            if (!Directory.Exists(AppSettings.Generation.OutputDirectory))
+                Directory.CreateDirectory(AppSettings.Generation.OutputDirectory);
+            LogMessage($"Creating Model File for {table.Schema}.{table.ClassName} in {outputDirectory}/");
+            File.WriteAllText(fileName, modelName);
+            LogMessage($"Done {table.Schema}.{table.ClassName}!");
         }
 
         private void CreateBaseModel(string outputDirectory, IGenerator generator)
