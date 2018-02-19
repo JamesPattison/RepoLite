@@ -67,10 +67,13 @@
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\Event.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\m.Address.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\m.Event.cs" />
+    <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\m.NullableTable.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\m.Person.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\m.xmltable.cs" />
+    <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\NullableTable.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\Person.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\xmltable.cs" />
+    <Compile Include="ActualGeneratedFIlesTests\NullableTableTests.cs" />
     <Compile Include="ActualGeneratedFIlesTests\PersonTableTests.cs" />
     <Compile Include="ActualGeneratedFIlesTests\XmlTableTests.cs" />
     <Compile Include="BaseClassParser\BaseClassParserTests.cs" />

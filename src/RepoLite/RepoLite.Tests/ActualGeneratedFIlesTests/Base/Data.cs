@@ -13,7 +13,8 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests.Base
             RunSql(@"DROP TABLE IF EXISTS [dbo].[Address]");
             RunSql(@"DROP TABLE IF EXISTS [dbo].[Person]");
             RunSql(@"DROP TABLE IF EXISTS [dbo].[Event]");
-            RunSql(@"DROP TABLE IF EXISTS xmltable");
+            RunSql(@"DROP TABLE IF EXISTS [dbo].[xmltable]");
+            RunSql(@"DROP TABLE IF EXISTS [dbo].[NullableTable]");
 
             RunSql(@"CREATE TABLE [dbo].[Person](
 	                    [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
@@ -48,7 +49,14 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests.Base
 	                    [EventName] [nvarchar](100) NOT NULL
                     )");
 
-            RunSql(@"CREATE TABLE xmltable([name] VARCHAR(12) not null, [data] XML not null)");
+            RunSql(@"CREATE TABLE [dbo].[xmltable] ([name] VARCHAR(12) not null, [data] XML not null)");
+
+            RunSql(@"CREATE TABLE [dbo].[NullableTable](
+            	        [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+            	        [Age] INT NULL,
+            	        [DoB] DATETIME NULL,
+            	        [lolVal] UNIQUEIDENTIFIER NULL
+                    )");
 
             RunSql("INSERT [dbo].[Person] ([Name],[Age],[Nationality],[Registered]) VALUES ('Jim Pattison', 31, 'British', 1)");
             RunSql("INSERT [dbo].[Person] ([Name],[Age],[Nationality],[Registered]) VALUES ('Rebecca Pattison', 30, 'British', 0)");
@@ -89,6 +97,10 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests.Base
             RunSql("INSERT [dbo].[xmltable] VALUES ('XML3', '<xml>Yet Another Value</xml>')");
             RunSql("INSERT [dbo].[xmltable] VALUES ('XML4', '<xml><nest>Nested!</nest></xml>')");
             RunSql("INSERT [dbo].[xmltable] VALUES ('XML5', '<xml><nest><nest>Nested Further!</nest></nest></xml>')");
+
+            RunSql("INSERT [dbo].[NullableTable] (Age, DoB, lolVal) VALUES(31, '2018-02-19 09:55:16.057', '84F00717-BFDB-49ED-A116-02578C4D2513')");
+            RunSql("INSERT [dbo].[NullableTable] (Age, DoB, lolVal) VALUES(27, '2016-11-12', '847ED511-C462-4478-BD98-02625D5F6BCF')");
+            RunSql("INSERT [dbo].[NullableTable] (Age, DoB, lolVal) VALUES(2, '2017-05-01 21:21:21', '63C5DD71-060F-4DEE-81A4-5203277EEED8')");
         }
 
         private static void RunSql(string sql)
