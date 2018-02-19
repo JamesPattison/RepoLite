@@ -19,7 +19,7 @@ namespace {{NAMESPACE}}.Base
     public abstract class BaseModel
     {
         public abstract List<ValidationError> Validate();
-        protected internal readonly List<string> DirtyColumns = new List<string>();
+        public readonly List<string> DirtyColumns = new List<string>();
 
         public void ResetDirty()
         {
