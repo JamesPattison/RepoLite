@@ -61,7 +61,12 @@ namespace RepoLite.ViewModel.Main
 
                     DoWork(() =>
                     {
+                        var createModelViewModel = new CreateModelsViewModel();
                         CreateBaseRepository(outputDirectory, generator);
+                        if (true)
+                        {
+                            createModelViewModel.CreateBaseModel(outputDirectory, generator);
+                        }
 
                         tableDefinitions.ForEach(x =>
                         {
@@ -69,7 +74,6 @@ namespace RepoLite.ViewModel.Main
                             {
                                 var model = generator.ModelForTable(x).ToString();
 
-                                var createModelViewModel = new CreateModelsViewModel();
                                 createModelViewModel.CreateModel(x, outputDirectory, generator, model);
                             }
 
@@ -118,7 +122,7 @@ namespace RepoLite.ViewModel.Main
             LogMessage($"Done {table.Schema}.{table.ClassName}!");
         }
 
-        private void CreateBaseRepository(string outputDirectory, IGenerator generator)
+        internal void CreateBaseRepository(string outputDirectory, IGenerator generator)
         {
             if (!Directory.Exists($"{outputDirectory}/Base"))
                 Directory.CreateDirectory($"{outputDirectory}/Base");

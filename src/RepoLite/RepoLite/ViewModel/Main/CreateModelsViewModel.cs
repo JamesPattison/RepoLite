@@ -110,7 +110,7 @@ namespace RepoLite.ViewModel.Main
             LogMessage($"Done {table.Schema}.{table.ClassName}!");
         }
 
-        private void CreateBaseModel(string outputDirectory, IGenerator generator)
+        internal void CreateBaseModel(string outputDirectory, IGenerator generator)
         {
             if (!Directory.Exists($"{outputDirectory}/Base"))
                 Directory.CreateDirectory($"{outputDirectory}/Base");
