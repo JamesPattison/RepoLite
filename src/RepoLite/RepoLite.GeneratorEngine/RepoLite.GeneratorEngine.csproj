@@ -55,9 +55,14 @@
     <Compile Include="Generators\CSharpSqlServerGenerator.cs" />
     <Compile Include="IGenerator.cs" />
     <Compile Include="Models\TableToGenerate.cs" />
+    <Compile Include="PluginHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Plugins\RepoLite.Plugins.K3\RepoLite.Plugins.K3.csproj">
+      <Project>{23303b8f-4b89-472d-856b-6b0f864f80b6}</Project>
+      <Name>RepoLite.Plugins.K3</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RepoLite.Common\RepoLite.Common.csproj">
       <Project>{4e4b8334-a677-4686-858f-782642c051f2}</Project>
       <Name>RepoLite.Common</Name>

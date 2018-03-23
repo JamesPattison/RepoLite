@@ -22,6 +22,11 @@
                 <x:Type TypeName="StyleAlias:CSharpVersion"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <ObjectDataProvider x:Key="pluginEnum" MethodName="GetValues" ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="StyleAlias:PluginEnum"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
     </UserControl.Resources>
     <Grid>
         <ScrollViewer>
@@ -94,95 +99,12 @@
                         <ComboBox x:Name="CSharpVersion" ItemsSource="{Binding Source={StaticResource cSharpVersion}}"
                                   SelectedItem="{Binding Path=GenerationSettings.CSharpVersion}"/>
                     </StackPanel>
-                    <!--<StackPanel>
-                        <Label Content="Last name" Target="{Binding ElementName=TextLastName}"/>
-                        <TextBox x:Name="TextLastName" Width="150" Text="{Binding LastName, Mode=TwoWay, ValidatesOnDataErrors=True}"/>
-                    </StackPanel>
                     <StackPanel>
-                        <Label Content="Gender" Target="{Binding ElementName=RadioGendeMale}"/>
-                        <RadioButton x:Name="RadioGendeMale">
-                            <TextBlock>Male</TextBlock>
-                        </RadioButton>
-                        <RadioButton Content="Female" Margin="8,0,0,0" />
+                        <Label Style="{StaticResource LeftLabel}" Content="Plugin" Target="{Binding ElementName=Plugin}"
+                               ToolTip="The plugin to use during generation"/>
+                        <ComboBox x:Name="Plugin" ItemsSource="{Binding Source={StaticResource pluginEnum}}"
+                                  SelectedItem="{Binding Path=GenerationSettings.Plugin}"/>
                     </StackPanel>
-                    <StackPanel>
-                        <Label Content="Birth date" Target="{Binding ElementName=DateBirth}" />
-                        <DatePicker x:Name="DateBirth" />
-                    </StackPanel>
-                    <StackPanel>
-                        <Label Content="Address" Target="{Binding ElementName=TextAddress}"/>
-                        <TextBox x:Name="TextAddress" Width="150" />
-                    </StackPanel>
-                    <StackPanel>
-                        <Label Content="City" Target="{Binding ElementName=TextCity}"/>
-                        <TextBox x:Name="TextCity" Width="150" />
-                    </StackPanel>
-                    <StackPanel>
-                        <Label Content="State" Target="{Binding ElementName=ComboState}"/>
-                        <ComboBox x:Name="ComboState" Width="150">
-                            <ComboBoxItem>Alabama</ComboBoxItem>
-                            <ComboBoxItem>Alaska</ComboBoxItem>
-                            <ComboBoxItem>Arizona</ComboBoxItem>
-                            <ComboBoxItem>Arkansas</ComboBoxItem>
-                            <ComboBoxItem>California</ComboBoxItem>
-                            <ComboBoxItem>Colorado</ComboBoxItem>
-                            <ComboBoxItem>Connecticut</ComboBoxItem>
-                            <ComboBoxItem>Delaware</ComboBoxItem>
-                            <ComboBoxItem>Florida</ComboBoxItem>
-                            <ComboBoxItem>Georgia</ComboBoxItem>
-                            <ComboBoxItem>Hawaii</ComboBoxItem>
-                            <ComboBoxItem>Idaho</ComboBoxItem>
-                            <ComboBoxItem>Illinois</ComboBoxItem>
-                            <ComboBoxItem>Indiana</ComboBoxItem>
-                            <ComboBoxItem>Iowa</ComboBoxItem>
-                            <ComboBoxItem>Kansas</ComboBoxItem>
-                            <ComboBoxItem>Kentucky</ComboBoxItem>
-                            <ComboBoxItem>Louisiana</ComboBoxItem>
-                            <ComboBoxItem>Maine</ComboBoxItem>
-                            <ComboBoxItem>Maryland</ComboBoxItem>
-                            <ComboBoxItem>Massachusetts</ComboBoxItem>
-                            <ComboBoxItem>Michigan</ComboBoxItem>
-                            <ComboBoxItem>Minnesota</ComboBoxItem>
-                            <ComboBoxItem>Mississippi</ComboBoxItem>
-                            <ComboBoxItem>Missouri</ComboBoxItem>
-                            <ComboBoxItem>Montana</ComboBoxItem>
-                            <ComboBoxItem>Nebraska</ComboBoxItem>
-                            <ComboBoxItem>Nevada</ComboBoxItem>
-                            <ComboBoxItem>New Hampshire</ComboBoxItem>
-                            <ComboBoxItem>New Jersey</ComboBoxItem>
-                            <ComboBoxItem>New Mexico</ComboBoxItem>
-                            <ComboBoxItem>New York</ComboBoxItem>
-                            <ComboBoxItem>North Carolina</ComboBoxItem>
-                            <ComboBoxItem>North Dakota</ComboBoxItem>
-                            <ComboBoxItem>Ohio</ComboBoxItem>
-                            <ComboBoxItem>Oklahoma</ComboBoxItem>
-                            <ComboBoxItem>Oregon</ComboBoxItem>
-                            <ComboBoxItem>Pennsylvania</ComboBoxItem>
-                            <ComboBoxItem>Rhode Island</ComboBoxItem>
-                            <ComboBoxItem>South Carolina</ComboBoxItem>
-                            <ComboBoxItem>South Dakota</ComboBoxItem>
-                            <ComboBoxItem>Tennessee</ComboBoxItem>
-                            <ComboBoxItem>Texas</ComboBoxItem>
-                            <ComboBoxItem>Utah</ComboBoxItem>
-                            <ComboBoxItem>Vermont</ComboBoxItem>
-                            <ComboBoxItem>Virginia</ComboBoxItem>
-                            <ComboBoxItem>Washington</ComboBoxItem>
-                            <ComboBoxItem>West Virginia</ComboBoxItem>
-                            <ComboBoxItem>Wisconsin</ComboBoxItem>
-                            <ComboBoxItem>Wyoming</ComboBoxItem>
-                        </ComboBox>
-                    </StackPanel>
-                    <StackPanel>
-                        <Label Content="Zip code" Target="{Binding ElementName=TextZipCode}"/>
-                        <TextBox x:Name="TextZipCode" Width="150" />
-                    </StackPanel>
-                    <StackPanel >
-                        <Label />
-                        <CheckBox>
-                            <TextBlock FontWeight="Bold">I agree to the terms of use</TextBlock>
-                        </CheckBox>
-                    </StackPanel>-->
-
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

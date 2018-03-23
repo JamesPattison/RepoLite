@@ -1,14 +1,12 @@
 ﻿using RepoLite.Common.Extensions;
 using RepoLite.Common.Interfaces;
 using RepoLite.Common.Models;
-using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using static RepoLite.Common.Helpers;
 
 namespace RepoLite.Plugins.K3
 {
-    [Export("CSharpSqlServerGeneratorImports", typeof(ICSharpSqlServerGeneratorImports))]
     public class CSharpSqlServerGeneratorImports : ICSharpSqlServerGeneratorImports
     {
         public StringBuilder GenerateRepoWrapper(Table table)

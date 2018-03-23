@@ -23,8 +23,8 @@
     <Setting Name="CSharpVersion" Type="RepoLite.Common.Enums.CSharpVersion" Scope="User">
       <Value Profile="(Default)">CSharp4</Value>
     </Setting>
-    <Setting Name="PluginDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Plugins</Value>
+    <Setting Name="Plugin" Type="RepoLite.Common.Enums.PluginEnum" Scope="User">
+      <Value Profile="(Default)">None</Value>
     </Setting>
   </Settings>
 </SettingsFile>

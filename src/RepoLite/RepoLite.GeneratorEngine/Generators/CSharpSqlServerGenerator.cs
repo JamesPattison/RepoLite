@@ -5,11 +5,7 @@ using RepoLite.Common.Interfaces;
 using RepoLite.Common.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Xml;
 using static RepoLite.Common.Helpers;
@@ -24,33 +20,14 @@ namespace RepoLite.GeneratorEngine.Generators
 
         //private Func<string, string, string, string> GetColName = (s, table, name) => $"{(s == name ? $"nameof({table}.{name})" : $"\"{name}\"")}";
 
-        [Import("CSharpSqlServerGeneratorImports", typeof(ICSharpSqlServerGeneratorImports))]
-        private ICSharpSqlServerGeneratorImports _import;
+        private readonly ICSharpSqlServerGeneratorImports _plugin;
 
         public CSharpSqlServerGenerator()
         {
             _targetFramework = AppSettings.Generation.TargetFramework;
             _cSharpVersion = AppSettings.Generation.CSharpVersion;
+            _plugin = PluginHelper.GetPlugin();
 
-            //load mef imports
-            var fullPluginDirectory = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\{AppSettings.Generation.PluginDirectory}";
-            if (!Directory.Exists(fullPluginDirectory))
-                return;
-
-            try
-            {
-                using (var catalog = new AggregateCatalog(new DirectoryCatalog(fullPluginDirectory)))
-                {
-                    using (var container = new CompositionContainer(catalog))
-                    {
-                        if (container.Catalog.Parts.Any())
-                        {
-                            container.ComposeParts(this);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex) { }
         }
 
         public override StringBuilder ModelForTable(Table table)
@@ -86,8 +63,8 @@ namespace RepoLite.GeneratorEngine.Generators
 
             sb.AppendLine($"namespace {AppSettings.Generation.RepositoryGenerationNamespace}");
             sb.AppendLine("{");
-            if (_import != null)
-                sb.Append(_import.GenerateRepoWrapper(table));
+            if (_plugin != null)
+                sb.Append(_plugin.GenerateRepoWrapper(table));
 
             if (table.HasCompositeKey)
             {

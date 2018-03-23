@@ -53,10 +53,6 @@
       <Project>{4E4B8334-A677-4686-858F-782642C051F2}</Project>
       <Name>RepoLite.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\RepoLite.GeneratorEngine\RepoLite.GeneratorEngine.csproj">
-      <Project>{9cf0994e-5d80-4a33-be5a-3e3601450f1e}</Project>
-      <Name>RepoLite.GeneratorEngine</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
