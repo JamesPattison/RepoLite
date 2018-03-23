@@ -27,7 +27,6 @@ namespace RepoLite.GeneratorEngine.Generators
             _targetFramework = AppSettings.Generation.TargetFramework;
             _cSharpVersion = AppSettings.Generation.CSharpVersion;
             _plugin = PluginHelper.GetPlugin();
-
         }
 
         public override StringBuilder ModelForTable(Table table)

@@ -66,6 +66,7 @@
     <Compile Include="Models\Procedure.cs" />
     <Compile Include="Models\Table.cs" />
     <Compile Include="Models\TableAndSchema.cs" />
+    <Compile Include="Models\TableSelection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\System.Designer.cs">
       <DependentUpon>System.settings</DependentUpon>
