@@ -1,3 +1,4 @@
+using NS.Models.Base;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,8 +7,6 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using NS.Models;
-using NS.Models.Base;
 
 namespace NS.Base
 {
@@ -145,7 +144,7 @@ namespace NS.Base
             PrimaryKey = primaryKey;
             Identity = identity;
         }
-    }	
+    }
 
     public class QueryItem
     {
@@ -213,7 +212,7 @@ namespace NS.Base
 
             switch (clauseType)
             {
-                case ClauseType.Initial:        
+                case ClauseType.Initial:
                     query.Append(valueType == typeof(XmlDocument)
                         ? "CONVERT(NVARCHAR(MAX), [" + col + "])"
                         : "[" + col + "]");
@@ -458,7 +457,7 @@ namespace NS.Base
             _tableName = table;
             ConnectionString = connectionString;
             Logger = logMethod ?? (exception => { });
-            
+
             var sql = @"SELECT COUNT(*)
                             FROM INFORMATION_SCHEMA.COLUMNS
                             WHERE TABLE_NAME = '" + table + "' AND TABLE_SCHEMA = '" + schema + "'";
@@ -486,7 +485,7 @@ namespace NS.Base
         }
 
         public abstract bool Create(T item);
-        public abstract bool BulkCreate(List<T> items);		
+        public abstract bool BulkCreate(List<T> items);
         public abstract bool BulkCreate(params T[] items);
         protected abstract T ToItem(DataRow row);
 
@@ -580,7 +579,7 @@ namespace NS.Base
         {
             if (!queries.Any())
                 return new List<T>();
-                
+
             var first = queries.First();
             var whereQuery = Where(first.DbColumnName, Comparison.Equals, first.Value, first.DataType);
 
@@ -601,7 +600,7 @@ namespace NS.Base
             using (var cn = new SqlConnection(ConnectionString))
             {
                 var sb = new StringBuilder();
-                
+
                 sb.AppendLine("INSERT [" + _schema + "].[" + _tableName + "] (");
 
                 var toCreate = Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity).ToList();
@@ -611,18 +610,18 @@ namespace NS.Base
 
                     sb.AppendLine(createColumn != Columns.Last() ? "," : ")");
                 }
-				
-				if (Columns.Any(x => x.PrimaryKey))
+
+                if (Columns.Any(x => x.PrimaryKey))
                 {
-					sb.Append("OUTPUT ");
-                
-					var pkCols = Columns.Where(x => x.PrimaryKey).ToList();
-					foreach (var pk in pkCols)
-					{
-					    sb.Append("[Inserted].[" + pk.ColumnName + "] ");
-						sb.AppendLine(pk != pkCols[pkCols.Count - 1] ? "," : string.Empty);
-					}
-				}
+                    sb.Append("OUTPUT ");
+
+                    var pkCols = Columns.Where(x => x.PrimaryKey).ToList();
+                    foreach (var pk in pkCols)
+                    {
+                        sb.Append("[Inserted].[" + pk.ColumnName + "] ");
+                        sb.AppendLine(pk != pkCols[pkCols.Count - 1] ? "," : string.Empty);
+                    }
+                }
 
                 sb.AppendLine("VALUES (");
 
@@ -654,21 +653,21 @@ namespace NS.Base
                                     : values[i])
                                 : DBNull.Value);
                     }
-                    
+
                     DataTable dt;
                     var isSuccess = ToDataTable(cmd, cn, out dt);
                     //Extract the primary keys
 
                     if (!isSuccess) return returnIds;
-					
-					if (dt.Rows.Count > 0)
+
+                    if (dt.Rows.Count > 0)
                     {
-						for (var i = 0; i < dt.Columns.Count; i++)
-						{
-							var dataColumn = dt.Columns[i];
-							returnIds.Add(dataColumn.ColumnName, dt.Rows[0][i]);
-						}
-					}
+                        for (var i = 0; i < dt.Columns.Count; i++)
+                        {
+                            var dataColumn = dt.Columns[i];
+                            returnIds.Add(dataColumn.ColumnName, dt.Rows[0][i]);
+                        }
+                    }
                 }
             }
 
@@ -725,7 +724,7 @@ namespace NS.Base
 
             var nonpkCols = Columns.Where(x => !x.PrimaryKey).ToArray();
             foreach (var col in nonpkCols.Where(x => dirtyColumns.Contains(x.ColumnName)))
-            {            
+            {
                 sb.Append("[" + col.ColumnName + "] = @" + col.ColumnName);
                 sb.AppendLine(col != nonpkCols.Last(x => dirtyColumns.Contains(x.ColumnName)) ? "," : "");
             }
@@ -857,7 +856,8 @@ namespace NS.Base
                     mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => "[" + x.ColumnName + "]").ToArray()) + ")");
                     mergeSql.AppendLine("VALUES (");
                     mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => "[Source].[" + x.ColumnName + "]").ToArray()) + ");");
-                    mergeSql.AppendLine("DROP TABLE " + tempTableName);
+                    //mergeSql.AppendLine("DROP TABLE " + tempTableName);
+                    mergeSql.AppendLine("IF OBJECT_ID('dbo.DropTmpTable') IS NULL EXEC ('CREATE PROCEDURE dbo.DropTmpTable @table NVARCHAR(250) AS DECLARE @sql NVARCHAR(300) = N''DROP TABLE '' + @table; EXECUTE sp_executesql @sql')");
 
                     var sql = mergeSql.ToString();
                     if (HasInjection(sql))
@@ -873,7 +873,21 @@ namespace NS.Base
 
                     cn.Open();
                     cmd.ExecuteNonQuery();
+                    cmd.Dispose();
                     cn.Close();
+
+                    var dropCmd = new SqlCommand
+                    {
+                        Connection = cn,
+                        CommandType = CommandType.StoredProcedure,
+                        CommandText = "dbo.DropTmpTable"
+                    };
+                    dropCmd.Parameters.AddWithValue("table", tempTableName);
+                    cn.Open();
+                    dropCmd.ExecuteNonQuery();
+                    dropCmd.Dispose();
+                    cn.Close();
+
                     return true;
                 }
             }

@@ -31,8 +31,6 @@
                     <Button Grid.Column="0" Content="Save Selection" Margin="3" Command="{Binding Path=SaveSelection}" IsEnabled="{Binding Path=Loaded}"></Button>
                     <Button Grid.Column="1" Content="Load Selection" Margin="3" Command="{Binding Path=LoadSelection}" IsEnabled="{Binding Path=Loaded}"></Button>
                 </Grid>
-                <DockPanel>
-                </DockPanel>
                 <Button DockPanel.Dock="Top" Content="Load Tables" Margin="3" Command="{Binding Path=LoadTables}" />
                 <ListView DockPanel.Dock="Bottom" Margin="3 0 3 3" ItemsSource="{Binding Path=Tables}">
                     <ListView.ItemContainerStyle>

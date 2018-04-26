@@ -1067,7 +1067,7 @@ namespace {{NAMESPACE}}.Base
 @@@ELSE [Framework35]@@@
                     mergeSql.AppendLine($"{string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[Source].[{x.ColumnName}]"))});");
 @@@//Framework35@@@
-                    mergeSql.AppendLine($"DROP TABLE {tempTableName}");
+                    mergeSql.AppendLine("IF OBJECT_ID('dbo.DropTmpTable') IS NULL EXEC ('CREATE PROCEDURE dbo.DropTmpTable @table NVARCHAR(250) AS DECLARE @sql NVARCHAR(300) = N''DROP TABLE '' + @table; EXECUTE sp_executesql @sql')");
 @@@//CSharp4 || CSharp5@@@
 
                     var sql = mergeSql.ToString();
@@ -1084,7 +1084,19 @@ namespace {{NAMESPACE}}.Base
 
                     cn.Open();
                     cmd.ExecuteNonQuery();
+					cmd.Dispose();
+
+					var dropCmd = new SqlCommand
+                    {
+                        Connection = cn,
+                        CommandType = CommandType.StoredProcedure,
+                        CommandText = "dbo.DropTmpTable"
+                    };
+                    dropCmd.Parameters.AddWithValue("table", tempTableName);
+                    dropCmd.ExecuteNonQuery();
+                    dropCmd.Dispose();
                     cn.Close();
+
                     return true;
                 }
             }

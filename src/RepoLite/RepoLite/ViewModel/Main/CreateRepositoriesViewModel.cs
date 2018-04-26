@@ -1,4 +1,5 @@
-﻿using RepoLite.Commands;
+﻿using Newtonsoft.Json;
+using RepoLite.Commands;
 using RepoLite.Common;
 using RepoLite.Common.Enums;
 using RepoLite.Common.Models;
@@ -8,6 +9,8 @@ using RepoLite.GeneratorEngine.Generators.BaseParsers;
 using RepoLite.GeneratorEngine.Generators.BaseParsers.Base;
 using RepoLite.GeneratorEngine.Models;
 using RepoLite.ViewModel.Base;
+using RepoLite.Views;
+using RepoLite.Views.Generation;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -20,9 +23,16 @@ namespace RepoLite.ViewModel.Main
 {
     public class CreateRepositoriesViewModel : ViewModelBase
     {
+        private bool _loaded;
         public ObservableCollection<string> Messages { get; set; } = new ObservableCollection<string>();
 
         public ObservableCollection<TableToGenerate> Tables { get; set; } = new ObservableCollection<TableToGenerate>();
+
+        public bool Loaded
+        {
+            get => _loaded;
+            set => SetProperty(ref _loaded, value);
+        }
 
         public ICommand LoadTables
         {
@@ -38,6 +48,7 @@ namespace RepoLite.ViewModel.Main
                         Tables.Add(new TableToGenerate { Schema = table.Schema, Table = table.Table });
                     }
                     OnPropertyChanged(nameof(Tables));
+                    Loaded = true;
                 });
             }
         }
@@ -83,6 +94,71 @@ namespace RepoLite.ViewModel.Main
                             CreateRepo(x, outputDirectory, generator, repository);
                         });
                     }, () => Process.Start(outputDirectory));
+                });
+            }
+        }
+
+        public ICommand SaveSelection
+        {
+            get
+            {
+                return new RelayCommand(o =>
+                {
+                    var dlg = new InputDialog();
+                    dlg.ShowDialog();
+                    var f = dlg.Value;
+
+                    if (!Directory.Exists($"{App.ClientDataPath}TableSelections"))
+                        Directory.CreateDirectory($"{App.ClientDataPath}TableSelections");
+
+                    var presets = new DirectoryInfo($"{App.ClientDataPath}TableSelections").GetFiles();
+
+                    if (presets.All(x => x.Name.Split('.')[0] != f))
+                    {
+                        var tableSelection = new TableSelection
+                        {
+                            Name = f,
+                            SelectedTables = Tables.Where(x => x.Selected).Select(x => $"{x.Schema}.{x.Table}").ToList()
+                        };
+
+                        var json = JsonConvert.SerializeObject(tableSelection);
+
+                        File.WriteAllText($@"{App.ClientDataPath}TableSelections\{f}.json", json);
+                    }
+                    else
+                    {
+                        LogMessage("Template already exists");
+                    }
+                });
+            }
+        }
+
+        public ICommand LoadSelection
+        {
+            get
+            {
+                return new RelayCommand(o =>
+                {
+                    var dlg = new LoadTemplates();
+                    dlg.ShowDialog();
+                    var f = dlg.SelectedItem;
+
+                    if (!Directory.Exists($"{App.ClientDataPath}TableSelections"))
+                        Directory.CreateDirectory($"{App.ClientDataPath}TableSelections");
+
+                    var presets = new DirectoryInfo($"{App.ClientDataPath}TableSelections").GetFiles();
+
+                    var template = presets.FirstOrDefault(x => x.Name.Split('.')[0] == f);
+                    if (template == null) return;
+
+                    var obj = JsonConvert.DeserializeObject<TableSelection>(File.ReadAllText(template.FullName));
+
+                    foreach (var objSelectedTable in obj.SelectedTables)
+                    {
+                        var table = Tables.FirstOrDefault(x => $"{x.Schema}.{x.Table}" == objSelectedTable);
+                        if (table != null)
+                            table.Selected = true;
+                    }
                 });
             }
         }
