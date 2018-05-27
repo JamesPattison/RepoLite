@@ -45,7 +45,7 @@ namespace RepoLite.DataAccess.Accessors
         {
             throw new NotImplementedException();
         }
-        
+
         public override List<Column> LoadTableColumns(Table table)
         {
             using (var cn = Connection)

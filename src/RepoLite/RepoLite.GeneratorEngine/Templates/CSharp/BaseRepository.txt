@@ -208,6 +208,25 @@ namespace {{NAMESPACE}}.Base
         private string MakeClause(string col, Comparison comparison, object val, ClauseType clauseType, Type valueType)
         {
             var query = new StringBuilder();
+						
+            switch (comparison)
+            {
+                case Comparison.In:
+                case Comparison.NotIn:
+@@@CSharp7 || CSharp71 || CSharp72@@@
+                    if (val is IEnumerable list && !(list as object[] ?? list.Cast<object>().ToArray()).Any())
+@@@ELSE [CSharp7 || CSharp71 || CSharp72]@@@
+					if (val is IEnumerable list && !(val as object[] ?? (val as IEnumerable).Cast<object>().ToArray()).Any())
+@@@//CSharp7 || CSharp71 || CSharp72@@@
+                    {
+                        //No elements in list, append a clause which will return no values
+                        query.Append("1=0");
+                        return query.ToString();
+                    }
+
+                    break;
+            }
+
 @@@CSharp7 || CSharp71 || CSharp72@@@
 @@@ELSE [CSharp7 || CSharp71 || CSharp72]@@@
             float floatVal;
@@ -688,7 +707,7 @@ namespace {{NAMESPACE}}.Base
 
             string[] sqlCheckList =
             {
-                "--", ";--", "/*", "*/", "exec", "execute","kill","begin"
+                "--", ";--", "/*", "*/"
             };
 
             var checkString = query.Replace("'", "''");
