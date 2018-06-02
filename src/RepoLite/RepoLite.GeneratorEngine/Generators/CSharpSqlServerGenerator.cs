@@ -84,7 +84,7 @@ namespace RepoLite.GeneratorEngine.Generators
             {
                 //build up object to use for composite searching
 
-                sb.AppendLine(Tab1, $"public class {table.ClassName}Keys");
+                sb.AppendLine(Tab1, $"public class {GetClassName(table.ClassName)}Keys");
                 sb.AppendLine(Tab1, "{");
 
 
@@ -94,9 +94,9 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab2, $"public {column.DataType.Name} {column.PropertyName} {{ get; set; }}");
                 }
 
-                sb.AppendLine(Tab2, $"public {table.ClassName}Keys() {{}}");
+                sb.AppendLine(Tab2, $"public {GetClassName(table.ClassName)}Keys() {{}}");
 
-                sb.AppendLine(Tab2, $"public {table.ClassName}Keys(");
+                sb.AppendLine(Tab2, $"public {GetClassName(table.ClassName)}Keys(");
                 foreach (var column in table.PrimaryKeys)
                 {
                     sb.Append(Tab3, $"{column.DataType.Name} {column.FieldName}");
@@ -373,9 +373,9 @@ namespace RepoLite.GeneratorEngine.Generators
                     .TrimEnd(' ', ',');
 
                 sb.AppendLine(Tab2, $"{GetClassName(table.ClassName)} Get({pkParamList});");
-                sb.AppendLine(Tab2, $"{GetClassName(table.ClassName)} Get({table.ClassName}Keys compositeId);");
-                sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Get(List<{table.ClassName}Keys> compositeIds);");
-                sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Get(params {table.ClassName}Keys[] compositeIds);");
+                sb.AppendLine(Tab2, $"{GetClassName(table.ClassName)} Get({GetClassName(table.ClassName)}Keys compositeId);");
+                sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Get(List<{GetClassName(table.ClassName)}Keys> compositeIds);");
+                sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Get(params {GetClassName(table.ClassName)}Keys[] compositeIds);");
                 sb.AppendLine("");
                 sb.AppendLine(Tab2, $"bool Update({GetClassName(table.ClassName)} item);");
                 sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)} item);");
@@ -490,7 +490,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, "}");
 
                 sb.AppendLine("");
-                sb.AppendLine(Tab2, $"public {GetClassName(table.ClassName)} Get({table.ClassName}Keys compositeId)");
+                sb.AppendLine(Tab2, $"public {GetClassName(table.ClassName)} Get({GetClassName(table.ClassName)}Keys compositeId)");
                 sb.AppendLine(Tab2, "{");
                 sb.Append(Tab3, "return Where(");
                 foreach (var pk in table.PrimaryKeys)
@@ -508,13 +508,13 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, "}");
 
                 sb.AppendLine("");
-                sb.AppendLine(Tab2, $"public IEnumerable<{GetClassName(table.ClassName)}> Get(List<{table.ClassName}Keys> compositeIds)");
+                sb.AppendLine(Tab2, $"public IEnumerable<{GetClassName(table.ClassName)}> Get(List<{GetClassName(table.ClassName)}Keys> compositeIds)");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3, "return Get(compositeIds.ToArray());");
                 sb.AppendLine(Tab2, "}");
 
                 sb.AppendLine("");
-                sb.AppendLine(Tab2, $"public IEnumerable<{GetClassName(table.ClassName)}> Get(params {table.ClassName}Keys[] compositeIds)");
+                sb.AppendLine(Tab2, $"public IEnumerable<{GetClassName(table.ClassName)}> Get(params {GetClassName(table.ClassName)}Keys[] compositeIds)");
                 sb.AppendLine(Tab2, "{");
 
                 sb.Append(Tab3, "var result = Where(");
@@ -732,7 +732,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
 
-                sb.AppendLine(Tab2, $"public bool Delete({table.ClassName}Keys compositeId)");
+                sb.AppendLine(Tab2, $"public bool Delete({GetClassName(table.ClassName)}Keys compositeId)");
                 sb.AppendLine(Tab2, "{");
                 sb.Append(Tab3, $"return Delete(new {GetClassName(table.ClassName)} {{ ");
                 foreach (var pk in table.PrimaryKeys)

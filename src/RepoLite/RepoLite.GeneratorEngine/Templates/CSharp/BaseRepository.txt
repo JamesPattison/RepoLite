@@ -1042,9 +1042,9 @@ namespace {{NAMESPACE}}.Base
                         if (pk != pks.First())
                             mergeSql.Append("AND ");
 @@@CSharp4 || CSharp5@@@
-                        mergeSql.AppendLine("[Target].[" + pks[0].ColumnName + "] = [Source].[" + pks[0].ColumnName + "]");
+                        mergeSql.AppendLine("[Target].[" + pk.ColumnName + "] = [Source].[" + pk.ColumnName + "]");
 @@@ELSE [CSharp4 || CSharp5]
-                        mergeSql.AppendLine($"[Target].[{pks[0].ColumnName}] = [Source].[{pks[0].ColumnName}]");
+                        mergeSql.AppendLine($"[Target].[{pk.ColumnName}] = [Source].[{pk.ColumnName}]");
 @@@//CSharp4 || CSharp5@@@
                     }
 
