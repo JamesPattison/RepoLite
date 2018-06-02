@@ -94,26 +94,17 @@ namespace {{NAMESPACE}}.Base
         public bool PrimaryKey { get; set; }
         public object Data { get; set; }
     }
-
-    public class DeleteTable
-    {
-        internal List<DeleteColumn> Columns = new List<DeleteColumn>();
-
-        public void AddColumn(DeleteColumn column)
-        {
-            Columns.Add(column);
-        }
-
-        public void AddColumn(string columnName, object data)
-        {
-            AddColumn(new DeleteColumn { ColumnName = columnName, Data = data });
-        }
-    }
-
+	
     public class DeleteColumn
     {
         public string ColumnName { get; set; }
         public object Data { get; set; }
+
+        public DeleteColumn(string columnName, object data)
+        {
+            ColumnName = columnName;
+            Data = data;
+        }
     }
 
     public class MergeTable
@@ -407,10 +398,10 @@ namespace {{NAMESPACE}}.Base
 @@@CSharp4 || CSharp5@@@
                             .Aggregate(result, (current, o) => current + GetTypeVal(col, o) + ", ")
 @@@ELSE [CSharp4 || CSharp5]
-                .Aggregate(result, (current, o) => current + $"{GetTypeVal(col, o)}, ")
+							.Aggregate(result, (current, o) => current + $"{GetTypeVal(col, o)}, ")
 @@@//CSharp4 || CSharp5@@@
-                .TrimEnd(' ')
-                .TrimEnd(',');
+							.TrimEnd(' ')
+							.TrimEnd(',');
 
                         if (batches > i + 1)
 @@@CSharp4 || CSharp5@@@
@@ -419,6 +410,7 @@ namespace {{NAMESPACE}}.Base
                             result += $") OR [{col}] IN (";
 @@@//CSharp4 || CSharp5@@@
                     }
+
                     return result;
                 default:
                     throw new NotSupportedException("Not supported yet");
@@ -950,7 +942,7 @@ namespace {{NAMESPACE}}.Base
             return isSuccess;
         }
 
-        protected bool BaseDelete(DeleteTable deleteTable)
+        protected bool BaseDelete(DeleteColumn deleteColumn)
         {
             bool isSuccess;
 
@@ -960,19 +952,11 @@ namespace {{NAMESPACE}}.Base
                 var sb = new StringBuilder();
 @@@CSharp4 || CSharp5@@@
                 sb.Append(@"DELETE [" + _schema + "].[" + _tableName + "] WHERE ");
+				sb.Append("[" + deleteColumn.ColumnName + "] = @" + deleteColumn.ColumnName + "");
 @@@ELSE [CSharp4 || CSharp5]
                 sb.Append($@"DELETE [{Schema}].[{TableName}] WHERE ");
+				sb.Append($"[{deleteColumn.ColumnName}] = @{deleteColumn.ColumnName}");
 @@@//CSharp4 || CSharp5@@@
-                foreach (var deleteColumn in deleteTable.Columns)
-                {
-@@@CSharp4 || CSharp5@@@
-                    sb.Append("[" + deleteColumn.ColumnName + "] = @" + deleteColumn.ColumnName);
-@@@ELSE [CSharp4 || CSharp5]
-                    sb.Append($"[{deleteColumn.ColumnName}] = @{deleteColumn.ColumnName}");
-@@@//CSharp4 || CSharp5@@@
-                    if (deleteColumn != deleteTable.Columns.Last())
-                        sb.AppendLine(" AND ");
-                }
 
                 var sql = sb.ToString();
                 if (HasInjection(sql))
@@ -980,10 +964,7 @@ namespace {{NAMESPACE}}.Base
 
                 using (var cmd = CreateCommand(cn, sql))
                 {
-                    foreach (var deleteColumn in deleteTable.Columns)
-                    {
-                        cmd.Parameters.AddWithValue(deleteColumn.ColumnName, deleteColumn.Data);
-                    }
+                    cmd.Parameters.AddWithValue(deleteColumn.ColumnName, deleteColumn.Data);
 
                     //Execute
                     isSuccess = NoneQuery(cn, cmd);
@@ -992,6 +973,44 @@ namespace {{NAMESPACE}}.Base
 
             return isSuccess;
         }
+
+		protected bool BaseDelete(string columnName, List<object> dataValues)
+		{
+			bool isSuccess;
+
+			
+            //Creation
+            using (var cn = new SqlConnection(ConnectionString))
+            {
+                var sb = new StringBuilder();
+
+@@@CSharp4 || CSharp5@@@
+                sb.Append(@"DELETE [" + Schema + "].[" + TableName + "] WHERE [ " + columnName + "] IN (");
+@@@ELSE [CSharp4 || CSharp5]
+                sb.Append($@"DELETE [{Schema}].[{TableName}] WHERE [{columnName}] IN (");
+@@@//CSharp4 || CSharp5@@@
+
+                foreach (var dataValue in dataValues)
+                {
+                    sb.Append(dataValue);
+                    if (dataValue != dataValues.Last())
+                        sb.Append(", ");
+                }
+
+                sb.Append(")");
+
+                var sql = sb.ToString();
+                if (HasInjection(sql))
+                    throw new Exception("Sql Injection attempted. Aborted");
+                
+                using (var cmd = CreateCommand(cn, sql))
+                {
+                    isSuccess = NoneQuery(cn, cmd);
+                }
+            }
+
+            return isSuccess;
+		}
 
         protected bool BaseMerge(List<object[]> mergeData)
         {

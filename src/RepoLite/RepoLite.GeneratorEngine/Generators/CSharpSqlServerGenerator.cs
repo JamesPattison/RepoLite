@@ -702,18 +702,22 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab3, $"if ({table.LowerClassName} == null)");
             sb.AppendLine(Tab4, "return false;");
             sb.AppendLine("");
-
-            sb.AppendLine(Tab3, "var deleteTable = new DeleteTable();");
-            foreach (var pk in table.PrimaryKeys)
-            {
-                sb.AppendLine(Tab3,
-                    _cSharpVersion >= CSharpVersion.CSharp6
-                        ? $"deleteTable.AddColumn({(pk.DbColName == nameof(pk.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{pk.DbColName})" : $"\"{pk.DbColName}\"")}, {table.LowerClassName}.{pk.PropertyName});"
-                        : $"deleteTable.AddColumn(\"{pk.PropertyName}\", {table.LowerClassName}.{pk.PropertyName});");
-            }
-
+            sb.AppendLine(Tab3, $"var deleteColumn = new DeleteColumn(\"{table.PrimaryKeys[0].DbColName}\", {table.LowerClassName}.{table.PrimaryKeys[0].DbColName});");
             sb.AppendLine("");
-            sb.AppendLine(Tab3, "return BaseDelete(deleteTable);");
+            sb.AppendLine(Tab3, "return BaseDelete(deleteColumn);");
+            sb.AppendLine(Tab2, "}");
+
+
+            sb.AppendLine(Tab2, $"public bool Delete(IEnumerable<{GetClassName(table.ClassName)}> items)");
+            sb.AppendLine(Tab2, "{");
+            sb.AppendLine(Tab3, "if (!items.Any()) return true;");
+            sb.AppendLine(Tab3, "var deleteValues = new List<object>();");
+            sb.AppendLine(Tab3, "foreach (var item in items)");
+            sb.AppendLine(Tab3, "{");
+            sb.AppendLine(Tab4, "deleteValues.Add(item);");
+            sb.AppendLine(Tab3, "}");
+            sb.AppendLine("");
+            sb.AppendLine(Tab3, $"return BaseDelete(\"{table.PrimaryKeys[0].DbColName}\", deleteValues);");
             sb.AppendLine(Tab2, "}");
 
             if (table.HasCompositeKey)
@@ -802,6 +806,15 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3,
                     $"return Delete(new {GetClassName(table.ClassName)} {{ {pk.PropertyName} = {pk.FieldName} }});");
+                sb.AppendLine(Tab2, "}");
+                sb.AppendLine("");
+
+
+                sb.AppendLine("");
+                sb.AppendLine(Tab2, $"public bool Delete(IEnumerable<{pk.DataType.Name}> {pk.FieldName}s)");
+                sb.AppendLine(Tab2, "{");
+                sb.AppendLine(Tab3,
+                    $"return Delete({pk.FieldName}s.Select(x => new {GetClassName(table.ClassName)} {{ {pk.PropertyName} = x }}));");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
             }
