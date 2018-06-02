@@ -71,8 +71,10 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine("using System.Data;");
+            sb.AppendLine("using System.Data.SqlClient;");
             sb.AppendLine("using System.Linq;");
             sb.AppendLine("using System.Xml;");
+            sb.AppendLine("using Dapper;");
             sb.Append(Environment.NewLine);
 
             sb.AppendLine($"namespace {AppSettings.Generation.RepositoryGenerationNamespace}");
@@ -381,6 +383,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)} item);");
                 sb.AppendLine(Tab2, $"bool Delete({pkParamList});");
                 sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)}Keys compositeId);");
+                sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{GetClassName(table.ClassName)}Keys> compositeIds);");
                 sb.AppendLine("");
             }
             else if (table.PrimaryKeys.Any())
@@ -394,7 +397,9 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine("");
                 sb.AppendLine(Tab2, $"bool Update({GetClassName(table.ClassName)} item);");
                 sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)} item);");
+                sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{GetClassName(table.ClassName)}> items);");
                 sb.AppendLine(Tab2, $"bool Delete({pk.DataType.Name} {pk.FieldName});");
+                sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{pk.DataType.Name}> {pk.FieldName}s);");
                 sb.AppendLine("");
             }
 
@@ -727,7 +732,6 @@ namespace RepoLite.GeneratorEngine.Generators
                     if (pk != table.PrimaryKeys.Last())
                         sb.Append(",");
                 }
-
                 sb.AppendLine("});");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
@@ -741,8 +745,51 @@ namespace RepoLite.GeneratorEngine.Generators
                     if (pk != table.PrimaryKeys.Last())
                         sb.Append(",");
                 }
-
                 sb.AppendLine("});");
+                sb.AppendLine(Tab2, "}");
+                sb.AppendLine("");
+
+                sb.AppendLine(Tab2, $"public bool Delete(IEnumerable<{GetClassName(table.ClassName)}Keys> compositeIds)");
+                sb.AppendLine(Tab2, "{");
+
+                sb.AppendLine(Tab3, "var tempTableName = $\"staging{DateTime.Now.Ticks}\";");
+                sb.AppendLine(Tab3, "var dt = new DataTable();");
+                sb.AppendLine(Tab3, "foreach (var mergeColumn in Columns.Where(x => x.PrimaryKey))");
+                sb.AppendLine(Tab3, "{");
+                sb.AppendLine(Tab4, "dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);");
+                sb.AppendLine(Tab3, "}");
+
+                sb.AppendLine(Tab3, "foreach (var compositeId in compositeIds)");
+                sb.AppendLine(Tab3, "{");
+                sb.Append(Tab4, "dt.Rows.Add(");
+                foreach (var pk in table.PrimaryKeys)
+                {
+                    sb.Append($"compositeId.{pk.PropertyName}");
+                    if (pk != table.PrimaryKeys.Last())
+                        sb.Append(",");
+                }
+
+                sb.AppendLine(Tab4, ");");
+                sb.AppendLine(Tab3, "}");
+
+                sb.AppendLine(Tab3, "CreateStagingTable(tempTableName, true);");
+                sb.AppendLine(Tab3, "BulkInsert(dt, tempTableName);");
+                sb.AppendLine(Tab3, "using (var cn = new SqlConnection(ConnectionString))");
+                sb.AppendLine(Tab3, "{");
+                sb.AppendLine(Tab4, "return cn.Execute($@\";WITH cte AS (");
+                sb.AppendLine(Tab6, $"SELECT * FROM {table.Schema}.{table.DbTableName} o");
+                sb.Append(Tab6, "WHERE EXISTS (SELECT 'x' FROM {tempTableName} i WHERE ");
+                foreach (var pk in table.PrimaryKeys)
+                {
+                    sb.Append($"i.[{pk.PropertyName}] = o.[{pk.PropertyName}]");
+                    if (pk != table.PrimaryKeys.Last())
+                        sb.Append(" AND ");
+                }
+                sb.Append(Tab6, "))");
+
+                sb.AppendLine(Tab6, "DELETE FROM cte\") > 0; ");
+                sb.AppendLine(Tab3, "}");
+
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
             }

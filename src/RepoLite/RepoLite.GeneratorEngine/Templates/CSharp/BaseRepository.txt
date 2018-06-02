@@ -1344,7 +1344,7 @@ namespace {{NAMESPACE}}.Base
             }
         }
 
-        private void CreateStagingTable(string tempTableName)
+        protected void CreateStagingTable(string tempTableName, bool onlyPrimaryKeys = false)
         {
             var stagingSqlBuilder = new StringBuilder();
 @@@CSharp4 || CSharp5@@@
@@ -1352,7 +1352,7 @@ namespace {{NAMESPACE}}.Base
 @@@ELSE [CSharp4 || CSharp5]
             stagingSqlBuilder.AppendLine($@"CREATE TABLE {tempTableName} (");
 @@@//CSharp4 || CSharp5@@@
-            foreach (var mergeColumn in Columns)
+            foreach (var mergeColumn in Columns.Where(x => onlyPrimaryKeys && x.PrimaryKey || !onlyPrimaryKeys))
             {
                 stagingSqlBuilder.Append(
 @@@CSharp4 || CSharp5@@@
