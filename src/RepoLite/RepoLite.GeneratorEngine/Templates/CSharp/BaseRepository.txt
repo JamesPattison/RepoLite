@@ -23,6 +23,14 @@ namespace {{NAMESPACE}}.Base
         IEnumerable<T> Where(string query);
     }
 
+	public interface IPkRepository<T> : IBaseRepository<T>
+    {
+        bool Update(T item);
+        bool Delete(T item);
+        bool Delete(IEnumerable<T> items);
+        bool Merge(List<T> items);
+    }
+
     #region Enums
 
     internal enum ClauseType

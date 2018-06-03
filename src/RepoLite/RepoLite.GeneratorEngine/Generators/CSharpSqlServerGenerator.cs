@@ -366,7 +366,11 @@ namespace RepoLite.GeneratorEngine.Generators
         private StringBuilder Interface(Table table)
         {
             var sb = new StringBuilder();
-            sb.AppendLine(Tab1, $"public partial interface I{table.ClassName}Repository : IBaseRepository<{GetClassName(table.ClassName)}>");
+            sb.AppendLine(Tab1,
+                table.Columns.Count(x => x.PrimaryKey) == 1
+                    ? $"public partial interface I{table.ClassName}Repository : IPkRepository<{GetClassName(table.ClassName)}>"
+                    : $"public partial interface I{table.ClassName}Repository : IBaseRepository<{GetClassName(table.ClassName)}>");
+
             sb.AppendLine(Tab1, "{");
             if (table.HasCompositeKey)
             {
@@ -379,8 +383,11 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Get(List<{GetClassName(table.ClassName)}Keys> compositeIds);");
                 sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Get(params {GetClassName(table.ClassName)}Keys[] compositeIds);");
                 sb.AppendLine("");
-                sb.AppendLine(Tab2, $"bool Update({GetClassName(table.ClassName)} item);");
-                sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)} item);");
+                if (table.Columns.All(x => !x.PrimaryKey))
+                {
+                    sb.AppendLine(Tab2, $"bool Update({GetClassName(table.ClassName)} item);");
+                    sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)} item);");
+                }
                 sb.AppendLine(Tab2, $"bool Delete({pkParamList});");
                 sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)}Keys compositeId);");
                 sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{GetClassName(table.ClassName)}Keys> compositeIds);");
@@ -395,9 +402,14 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2,
                     $"IEnumerable<{GetClassName(table.ClassName)}> Get(params {pk.DataType.Name}[] {pk.FieldName}s);");
                 sb.AppendLine("");
-                sb.AppendLine(Tab2, $"bool Update({GetClassName(table.ClassName)} item);");
-                sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)} item);");
-                sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{GetClassName(table.ClassName)}> items);");
+
+                if (table.Columns.All(x => !x.PrimaryKey))
+                {
+                    sb.AppendLine(Tab2, $"bool Update({GetClassName(table.ClassName)} item);");
+                    sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)} item);");
+                    sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{GetClassName(table.ClassName)}> items);");
+                }
+
                 sb.AppendLine(Tab2, $"bool Delete({pk.DataType.Name} {pk.FieldName});");
                 sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{pk.DataType.Name}> {pk.FieldName}s);");
                 sb.AppendLine("");
@@ -456,11 +468,6 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab2,
                         $"IEnumerable<{GetClassName(table.ClassName)}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, String {nonPrimaryKey.FieldName});");
                 }
-            }
-
-            if (table.PrimaryKeys.Any())
-            {
-                sb.AppendLine(Tab2, $"bool Merge(List<{GetClassName(table.ClassName)}> items);");
             }
 
             sb.AppendLine(Tab1, "}");
@@ -707,18 +714,20 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab3, "return BaseDelete(deleteColumn);");
             sb.AppendLine(Tab2, "}");
 
-
-            sb.AppendLine(Tab2, $"public bool Delete(IEnumerable<{GetClassName(table.ClassName)}> items)");
-            sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, "if (!items.Any()) return true;");
-            sb.AppendLine(Tab3, "var deleteValues = new List<object>();");
-            sb.AppendLine(Tab3, "foreach (var item in items)");
-            sb.AppendLine(Tab3, "{");
-            sb.AppendLine(Tab4, "deleteValues.Add(item);");
-            sb.AppendLine(Tab3, "}");
-            sb.AppendLine("");
-            sb.AppendLine(Tab3, $"return BaseDelete(\"{table.PrimaryKeys[0].DbColName}\", deleteValues);");
-            sb.AppendLine(Tab2, "}");
+            if (!table.HasCompositeKey)
+            {
+                sb.AppendLine(Tab2, $"public bool Delete(IEnumerable<{GetClassName(table.ClassName)}> items)");
+                sb.AppendLine(Tab2, "{");
+                sb.AppendLine(Tab3, "if (!items.Any()) return true;");
+                sb.AppendLine(Tab3, "var deleteValues = new List<object>();");
+                sb.AppendLine(Tab3, "foreach (var item in items)");
+                sb.AppendLine(Tab3, "{");
+                sb.AppendLine(Tab4, $"deleteValues.Add(item.{table.PrimaryKeys[0].DbColName});");
+                sb.AppendLine(Tab3, "}");
+                sb.AppendLine("");
+                sb.AppendLine(Tab3, $"return BaseDelete(\"{table.PrimaryKeys[0].DbColName}\", deleteValues);");
+                sb.AppendLine(Tab2, "}");
+            }
 
             if (table.HasCompositeKey)
             {
