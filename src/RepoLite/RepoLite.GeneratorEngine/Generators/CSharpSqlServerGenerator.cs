@@ -144,11 +144,14 @@ namespace RepoLite.GeneratorEngine.Generators
             //create
             sb.Append(Repo_Create(table));
             //update
+
             if (table.PrimaryKeys.Any())
+            {
                 sb.Append(Repo_Update(table));
-            //delete
-            if (table.PrimaryKeys.Any())
                 sb.Append(Repo_Delete(table));
+            }
+            else
+                sb.Append(Repo_NonPkDelete(table));
             //merge
             sb.Append(Repo_Merge(table));
             //toItem
@@ -383,11 +386,6 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Get(List<{GetClassName(table.ClassName)}Keys> compositeIds);");
                 sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Get(params {GetClassName(table.ClassName)}Keys[] compositeIds);");
                 sb.AppendLine("");
-                if (table.Columns.All(x => !x.PrimaryKey))
-                {
-                    sb.AppendLine(Tab2, $"bool Update({GetClassName(table.ClassName)} item);");
-                    sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)} item);");
-                }
                 sb.AppendLine(Tab2, $"bool Delete({pkParamList});");
                 sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)}Keys compositeId);");
                 sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{GetClassName(table.ClassName)}Keys> compositeIds);");
@@ -403,16 +401,16 @@ namespace RepoLite.GeneratorEngine.Generators
                     $"IEnumerable<{GetClassName(table.ClassName)}> Get(params {pk.DataType.Name}[] {pk.FieldName}s);");
                 sb.AppendLine("");
 
-                if (table.Columns.All(x => !x.PrimaryKey))
-                {
-                    sb.AppendLine(Tab2, $"bool Update({GetClassName(table.ClassName)} item);");
-                    sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)} item);");
-                    sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{GetClassName(table.ClassName)}> items);");
-                }
-
                 sb.AppendLine(Tab2, $"bool Delete({pk.DataType.Name} {pk.FieldName});");
                 sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{pk.DataType.Name}> {pk.FieldName}s);");
                 sb.AppendLine("");
+            }
+            else
+            {
+                foreach (var column in table.Columns)
+                {
+                    sb.AppendLine(Tab2, $"bool DeleteBy{column.DbColName}({column.DataType.Name} {column.FieldName});");
+                }
             }
 
             sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Search(");
@@ -829,6 +827,21 @@ namespace RepoLite.GeneratorEngine.Generators
             }
 
             return sb;
+        }
+
+        private string Repo_NonPkDelete(Table table)
+        {
+            var sb = new StringBuilder();
+
+            foreach (var column in table.Columns)
+            {
+                sb.AppendLine(Tab2, $"public bool DeleteBy{column.DbColName}({column.DataType.Name} {column.FieldName})");
+                sb.AppendLine(Tab2, "{");
+                sb.AppendLine(Tab3, $"return BaseDelete(new DeleteColumn(\"{column.DbColName}\", {column.FieldName}));");
+                sb.AppendLine(Tab2, "}");
+            }
+
+            return sb.ToString();
         }
 
         private StringBuilder Repo_Merge(Table table)
