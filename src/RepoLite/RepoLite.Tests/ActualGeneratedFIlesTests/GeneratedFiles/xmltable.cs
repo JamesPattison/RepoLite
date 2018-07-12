@@ -8,128 +8,138 @@ using System.Xml;
 
 namespace NS
 {
-	public partial interface IXmltableRepository : IBaseRepository<Xmltable>
-	{
-		IEnumerable<Xmltable> Search(
-			String name = null,
-			String data = null);
+    public partial interface IXmltableRepository : IBaseRepository<Xmltable>
+    {
+        bool DeleteByname(String name);
+        bool DeleteBydata(XmlDocument data);
+        IEnumerable<Xmltable> Search(
+            String name = null,
+            String data = null);
 
-		IEnumerable<Xmltable> FindByName(String name);
-		IEnumerable<Xmltable> FindByName(FindComparison comparison, String name);
-		IEnumerable<Xmltable> FindByData(String data);
-		IEnumerable<Xmltable> FindByData(FindComparison comparison, String data);
-	}
-	public sealed partial class XmltableRepository : BaseRepository<Xmltable>, IXmltableRepository
-	{
-		public XmltableRepository(string connectionString) : this(connectionString, exception => { }) { }
-		public XmltableRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
-			"dbo", "xmltable", 2)
-		{
-			Columns.Add(new ColumnDefinition("name", "[VARCHAR](12)", false, false, false));
-			Columns.Add(new ColumnDefinition("data", "[XML]", false, false, false));
-		}
-		public override bool Create(Xmltable item)
-		{
-			//Validation
-			if (item == null)
-				return false;
+        IEnumerable<Xmltable> FindByName(String name);
+        IEnumerable<Xmltable> FindByName(FindComparison comparison, String name);
+        IEnumerable<Xmltable> FindByData(String data);
+        IEnumerable<Xmltable> FindByData(FindComparison comparison, String data);
+    }
+    public sealed partial class XmltableRepository : BaseRepository<Xmltable>, IXmltableRepository
+    {
+        public XmltableRepository(string connectionString) : this(connectionString, exception => { }) { }
+        public XmltableRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
+            "dbo", "xmltable", 2)
+        {
+            Columns.Add(new ColumnDefinition("name", typeof(System.String), "[VARCHAR](12)", false, false, false));
+            Columns.Add(new ColumnDefinition("data", typeof(System.Xml.XmlDocument), "[XML]", false, false, false));
+        }
+        public override bool Create(Xmltable item)
+        {
+            //Validation
+            if (item == null)
+                return false;
 
-			var validationErrors = item.Validate();
-			if (validationErrors.Any())
-				throw new ValidationException(validationErrors);
+            var validationErrors = item.Validate();
+            if (validationErrors.Any())
+                throw new ValidationException(validationErrors);
 
-			var createdKeys = BaseCreate(item.Name, item.Data);
-			if (createdKeys.Count != Columns.Count(x => x.PrimaryKey))
-				return false;
-			
-			item.ResetDirty();
-			
-			return true;
-		}
-			
-		public override bool BulkCreate(params Xmltable[] items)
-		{
-			if (!items.Any())
-				return false;
-			
-			var validationErrors = items.SelectMany(x => x.Validate()).ToList();
-			if (validationErrors.Any())
-				throw new ValidationException(validationErrors);
-			
-			var dt = new DataTable();
-			foreach (var mergeColumn in Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
-				dt.Columns.Add(mergeColumn.ColumnName);
-			
-			foreach (var item in items)
-			{
-				dt.Rows.Add(item.Name, item.Data); 
-			}
-			
-			return BulkInsert(dt);
-		}
-		public override bool BulkCreate(List<Xmltable> items)
-		{
-			return BulkCreate(items.ToArray());
-		}
+            var createdKeys = BaseCreate(item.Name, item.Data);
+            if (createdKeys.Count != Columns.Count(x => x.PrimaryKey))
+                return false;
 
-		public bool Merge(List<Xmltable> items)
-		{
-			var mergeTable = new List<object[]>();
-			foreach (var item in items)
-			{
-				mergeTable.Add(new object[]
-				{
-					item.Name, item.DirtyColumns.Contains("name"),
-					item.Data, item.DirtyColumns.Contains("data")
-				});
-			}
-			return BaseMerge(mergeTable);
-		}
+            item.ResetDirty();
 
-		protected override Xmltable ToItem(DataRow row)
-		{
-			 var item = new Xmltable
-			{
-				Name = GetString(row, "name"),
-				Data = GetXmlDocument(row, "data"),
-			};
+            return true;
+        }
 
-			item.ResetDirty();
-			return item;
-		}
+        public override bool BulkCreate(params Xmltable[] items)
+        {
+            if (!items.Any())
+                return false;
 
-		public IEnumerable<Xmltable> Search(
-			String name = null,
-			String data = null)
-		{
-			var queries = new List<QueryItem>(); 
+            var validationErrors = items.SelectMany(x => x.Validate()).ToList();
+            if (validationErrors.Any())
+                throw new ValidationException(validationErrors);
 
-			if (!string.IsNullOrEmpty(name))
-				queries.Add(new QueryItem("name", name));
-			if (data != null)
-				queries.Add(new QueryItem("data", data, typeof(XmlDocument)));
+            var dt = new DataTable();
+            foreach (var mergeColumn in Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
+                dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
 
-			return BaseSearch(queries);
-		}
+            foreach (var item in items)
+            {
+                dt.Rows.Add(item.Name, item.Data.ToString());
+            }
 
-		public IEnumerable<Xmltable> FindByName(String name)
-		{
-			return FindByName(FindComparison.Equals, name);
-		}
+            return BulkInsert(dt);
+        }
+        public override bool BulkCreate(List<Xmltable> items)
+        {
+            return BulkCreate(items.ToArray());
+        }
+        public bool DeleteByname(String name)
+        {
+            return BaseDelete(new DeleteColumn("name", name));
+        }
+        public bool DeleteBydata(XmlDocument data)
+        {
+            return BaseDelete(new DeleteColumn("data", data));
+        }
 
-		public IEnumerable<Xmltable> FindByName(FindComparison comparison, String name)
-		{
-			return Where("name", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), name).Results();
-		}
+        public bool Merge(List<Xmltable> items)
+        {
+            var mergeTable = new List<object[]>();
+            foreach (var item in items)
+            {
+                mergeTable.Add(new object[]
+                {
+                    item.Name, item.DirtyColumns.Contains("name"),
+                    item.Data, item.DirtyColumns.Contains("data")
+                });
+            }
+            return BaseMerge(mergeTable);
+        }
 
-		public IEnumerable<Xmltable> FindByData(String data)
-		{
-			return FindByData(FindComparison.Equals, data);
-		}
+        protected override Xmltable ToItem(DataRow row)
+        {
+            var item = new Xmltable
+            {
+                Name = GetString(row, "name"),
+                Data = GetXmlDocument(row, "data"),
+            };
 
-		public IEnumerable<Xmltable> FindByData(FindComparison comparison, String data)
-		{
-			return Where("data", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), data, typeof(XmlDocument)).Results();
-		}
-	}
+            item.ResetDirty();
+            return item;
+        }
+
+        public IEnumerable<Xmltable> Search(
+            String name = null,
+            String data = null)
+        {
+            var queries = new List<QueryItem>();
+
+            if (!string.IsNullOrEmpty(name))
+                queries.Add(new QueryItem("name", name));
+            if (data != null)
+                queries.Add(new QueryItem("data", data, typeof(XmlDocument)));
+
+            return BaseSearch(queries);
+        }
+
+        public IEnumerable<Xmltable> FindByName(String name)
+        {
+            return FindByName(FindComparison.Equals, name);
+        }
+
+        public IEnumerable<Xmltable> FindByName(FindComparison comparison, String name)
+        {
+            return Where("name", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), name).Results();
+        }
+
+        public IEnumerable<Xmltable> FindByData(String data)
+        {
+            return FindByData(FindComparison.Equals, data);
+        }
+
+        public IEnumerable<Xmltable> FindByData(FindComparison comparison, String data)
+        {
+            return Where("data", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), data, typeof(XmlDocument)).Results();
+        }
+    }
 }

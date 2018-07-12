@@ -3,7 +3,6 @@ using NS;
 using NS.Base;
 using NS.Models;
 using RepoLite.Tests.ActualGeneratedFIlesTests.Base;
-using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 
@@ -274,27 +273,6 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
 
             Assert.IsTrue(_repository.GetAll().Count() == 6);
-        }
-
-        [TestMethod]
-        public void TestBulkCreate()
-        {
-            var tables = new List<Xmltable>();
-            for (var i = 0; i < 10; i++)
-            {
-                tables.Add(new Xmltable
-                {
-                    Name = $"Inserted_{i + 1}",
-                    Data = new XmlDocument { InnerXml = $"<xml>{ i + 1 }</xml>" }
-                });
-            }
-
-            var expected = true;
-            var actual = _repository.BulkCreate(tables);
-
-            Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
-
-            Assert.IsTrue(_repository.GetAll().Count() == 15);
         }
 
         [TestMethod]

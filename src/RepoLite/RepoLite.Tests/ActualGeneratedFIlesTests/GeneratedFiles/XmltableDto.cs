@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace NS.Models
 {
 	[Table("xmltable", Schema="dbo")]
-	public class Xmltable : BaseModel
+	public partial class Xmltable : BaseModel
 	{
 		private String _name;
 		private XmlDocument _data;
@@ -26,12 +26,12 @@ namespace NS.Models
 		public override List<ValidationError> Validate()
 		{
 			var validationErrors = new List<ValidationError>();
-			
+
 			if (string.IsNullOrEmpty(Name))
-			validationErrors.Add(new ValidationError(nameof(Name), "Value cannot be null"));
+				validationErrors.Add(new ValidationError(nameof(Name), "Value cannot be null"));
 			if (!string.IsNullOrEmpty(Name) && Name.Length > 12)
-			validationErrors.Add(new ValidationError(nameof(Name), "Max length is 12"));
-			
+				validationErrors.Add(new ValidationError(nameof(Name), "Max length is 12"));
+
 			return validationErrors;
 		}
 	}

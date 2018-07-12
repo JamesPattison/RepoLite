@@ -3,8 +3,10 @@ using NS.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Xml;
+using Dapper;
 
 namespace NS
 {
@@ -29,9 +31,10 @@ namespace NS
 		IEnumerable<Address> Get(params AddressKeys[] compositeIds);
 
 		bool Update(Address item);
-		bool Delete(Address item);
 		bool Delete(Int32 id, String anotherId);
 		bool Delete(AddressKeys compositeId);
+		bool Delete(IEnumerable<AddressKeys> compositeIds);
+	    bool Merge(List<Address> items);
 
 		IEnumerable<Address> Search(
 			Int32? id = null,
@@ -66,7 +69,6 @@ namespace NS
 		IEnumerable<Address> FindByPhoneNumber(FindComparison comparison, String phoneNumber);
 		IEnumerable<Address> FindByCOUNTRY_CODE(String cOUNTRY_CODE);
 		IEnumerable<Address> FindByCOUNTRY_CODE(FindComparison comparison, String cOUNTRY_CODE);
-		bool Merge(List<Address> items);
 	}
 	public sealed partial class AddressRepository : BaseRepository<Address>, IAddressRepository
 	{
@@ -74,16 +76,16 @@ namespace NS
 		public AddressRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
 			"dbo", "Address", 10)
 		{
-			Columns.Add(new ColumnDefinition("Id", "[INT]", false, true, true));
-			Columns.Add(new ColumnDefinition("AnotherId", "[NVARCHAR](10)", false, true, false));
-			Columns.Add(new ColumnDefinition("PersonId", "[INT]", false, false, false));
-			Columns.Add(new ColumnDefinition("Line1", "[NVARCHAR](100)", false, false, false));
-			Columns.Add(new ColumnDefinition("Line2", "[NVARCHAR](100)", true, false, false));
-			Columns.Add(new ColumnDefinition("Line3", "[NVARCHAR](100)", true, false, false));
-			Columns.Add(new ColumnDefinition("Line4", "[NVARCHAR](100)", true, false, false));
-			Columns.Add(new ColumnDefinition("PostCode", "[NVARCHAR](15)", false, false, false));
-			Columns.Add(new ColumnDefinition("PhoneNumber", "[NVARCHAR](20)", true, false, false));
-			Columns.Add(new ColumnDefinition("COUNTRY_CODE", "[NVARCHAR](2)", true, false, false));
+			Columns.Add(new ColumnDefinition("Id", typeof(System.Int32), "[INT]", false, true, true));
+			Columns.Add(new ColumnDefinition("AnotherId", typeof(System.String), "[NVARCHAR](10)", false, true, false));
+			Columns.Add(new ColumnDefinition("PersonId", typeof(System.Int32), "[INT]", false, false, false));
+			Columns.Add(new ColumnDefinition("Line1", typeof(System.String), "[NVARCHAR](100)", false, false, false));
+			Columns.Add(new ColumnDefinition("Line2", typeof(System.String), "[NVARCHAR](100)", true, false, false));
+			Columns.Add(new ColumnDefinition("Line3", typeof(System.String), "[NVARCHAR](100)", true, false, false));
+			Columns.Add(new ColumnDefinition("Line4", typeof(System.String), "[NVARCHAR](100)", true, false, false));
+			Columns.Add(new ColumnDefinition("PostCode", typeof(System.String), "[NVARCHAR](15)", false, false, false));
+			Columns.Add(new ColumnDefinition("PhoneNumber", typeof(System.String), "[NVARCHAR](20)", true, false, false));
+			Columns.Add(new ColumnDefinition("COUNTRY_CODE", typeof(System.String), "[NVARCHAR](2)", true, false, false));
 		}
 
 		public Address Get(Int32 id, String anotherId)
@@ -127,33 +129,33 @@ namespace NS
 				item.Line3, item.Line4, item.PostCode, item.PhoneNumber, item.COUNTRY_CODE);
 			if (createdKeys.Count != Columns.Count(x => x.PrimaryKey))
 				return false;
-			
+
 			item.Id = (Int32)createdKeys[nameof(Address.Id)];
 			item.AnotherId = (String)createdKeys[nameof(Address.AnotherId)];
 			item.ResetDirty();
-			
+
 			return true;
 		}
-			
+
 		public override bool BulkCreate(params Address[] items)
 		{
 			if (!items.Any())
 				return false;
-			
+
 			var validationErrors = items.SelectMany(x => x.Validate()).ToList();
 			if (validationErrors.Any())
 				throw new ValidationException(validationErrors);
-			
+
 			var dt = new DataTable();
 			foreach (var mergeColumn in Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
-				dt.Columns.Add(mergeColumn.ColumnName);
-			
+				dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
+
 			foreach (var item in items)
 			{
 				dt.Rows.Add(item.AnotherId, item.PersonId, item.Line1, item.Line2, item.Line3, 
 				item.Line4, item.PostCode, item.PhoneNumber, item.COUNTRY_CODE); 
 			}
-			
+
 			return BulkInsert(dt);
 		}
 		public override bool BulkCreate(List<Address> items)
@@ -184,21 +186,41 @@ namespace NS
 			if (address == null)
 				return false;
 
-			var deleteTable = new DeleteTable();
-			deleteTable.AddColumn("Id", address.Id);
-			deleteTable.AddColumn("AnotherId", address.AnotherId);
+			var deleteColumn = new DeleteColumn("Id", address.Id);
 
-			return BaseDelete(deleteTable);
+			return BaseDelete(deleteColumn);
 		}
-			
+
 		public bool Delete(Int32 id, String anotherId)
 		{
 			return Delete(new Address { Id = id,AnotherId = anotherId});
 		}
-		
+
 		public bool Delete(AddressKeys compositeId)
 		{
 			return Delete(new Address { Id = compositeId.Id,AnotherId = compositeId.AnotherId});
+		}
+
+		public bool Delete(IEnumerable<AddressKeys> compositeIds)
+		{
+			var tempTableName = $"staging{DateTime.Now.Ticks}";
+			var dt = new DataTable();
+			foreach (var mergeColumn in Columns.Where(x => x.PrimaryKey))
+			{
+				dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
+			}
+			foreach (var compositeId in compositeIds)
+			{
+				dt.Rows.Add(compositeId.Id,compositeId.AnotherId				);
+			}
+			CreateStagingTable(tempTableName, true);
+			BulkInsert(dt, tempTableName);
+			using (var cn = new SqlConnection(ConnectionString))
+			{
+				return cn.Execute($@";WITH cte AS (
+						SELECT * FROM dbo.Address o
+						WHERE EXISTS (SELECT 'x' FROM {tempTableName} i WHERE i.[Id] = o.[Id] AND i.[AnotherId] = o.[AnotherId]						))						DELETE FROM cte") > 0; 
+			}
 		}
 
 

@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace NS.Models
 {
 	[Table("Person", Schema="dbo")]
-	public class Person : BaseModel
+	public partial class Person : BaseModel
 	{
 		private Int32 _id;
 		private String _name;
@@ -45,16 +45,16 @@ namespace NS.Models
 		public override List<ValidationError> Validate()
 		{
 			var validationErrors = new List<ValidationError>();
-			
+
 			if (string.IsNullOrEmpty(Name))
-			validationErrors.Add(new ValidationError(nameof(Name), "Value cannot be null"));
+				validationErrors.Add(new ValidationError(nameof(Name), "Value cannot be null"));
 			if (!string.IsNullOrEmpty(Name) && Name.Length > 50)
-			validationErrors.Add(new ValidationError(nameof(Name), "Max length is 50"));
+				validationErrors.Add(new ValidationError(nameof(Name), "Max length is 50"));
 			if (string.IsNullOrEmpty(Nationality))
-			validationErrors.Add(new ValidationError(nameof(Nationality), "Value cannot be null"));
+				validationErrors.Add(new ValidationError(nameof(Nationality), "Value cannot be null"));
 			if (!string.IsNullOrEmpty(Nationality) && Nationality.Length > 50)
-			validationErrors.Add(new ValidationError(nameof(Nationality), "Max length is 50"));
-			
+				validationErrors.Add(new ValidationError(nameof(Nationality), "Max length is 50"));
+
 			return validationErrors;
 		}
 	}

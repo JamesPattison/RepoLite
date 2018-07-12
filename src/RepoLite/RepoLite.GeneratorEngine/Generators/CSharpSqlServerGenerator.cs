@@ -291,13 +291,13 @@ namespace RepoLite.GeneratorEngine.Generators
                                 maxValueForNum += 9;
                             }
 
-                            sb.AppendLine(Tab3, $"if (Math.Floor({column.PropertyName}) > {maxValueForNum})");
+                            sb.AppendLine(Tab3, $"if ({(column.IsNullable ? $"{column.PropertyName}.HasValue && " : "")}Math.Floor({column.PropertyName}{(column.IsNullable ? ".Value" : "")}) > {maxValueForNum})");
 
                             sb.AppendLine(Tab4,
                                 _cSharpVersion >= CSharpVersion.CSharp6
                                     ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot exceed {maxValueForNum}\"));"
                                     : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Value cannot exceed {maxValueForNum}\"));");
-                            sb.AppendLine(Tab3, $"if (GetDecimalPlaces({column.PropertyName}) > {column.MaxDecimalLength})");
+                            sb.AppendLine(Tab3, $"if ({(column.IsNullable ? $"{column.PropertyName}.HasValue && " : "")}GetDecimalPlaces({column.PropertyName}{(column.IsNullable ? ".Value" : "")}) > {column.MaxDecimalLength})");
 
                             sb.AppendLine(Tab4,
                                 _cSharpVersion >= CSharpVersion.CSharp6
@@ -386,9 +386,11 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Get(List<{GetClassName(table.ClassName)}Keys> compositeIds);");
                 sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Get(params {GetClassName(table.ClassName)}Keys[] compositeIds);");
                 sb.AppendLine("");
+                sb.AppendLine(Tab2, $"bool Update({GetClassName(table.ClassName)} item);");
                 sb.AppendLine(Tab2, $"bool Delete({pkParamList});");
                 sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)}Keys compositeId);");
                 sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{GetClassName(table.ClassName)}Keys> compositeIds);");
+                sb.AppendLine(Tab2, $"bool Merge(List<{GetClassName(table.ClassName)}> items);");
                 sb.AppendLine("");
             }
             else if (table.PrimaryKeys.Any())
@@ -401,8 +403,10 @@ namespace RepoLite.GeneratorEngine.Generators
                     $"IEnumerable<{GetClassName(table.ClassName)}> Get(params {pk.DataType.Name}[] {pk.FieldName}s);");
                 sb.AppendLine("");
 
+                sb.AppendLine(Tab2, $"bool Update({GetClassName(table.ClassName)} item);");
                 sb.AppendLine(Tab2, $"bool Delete({pk.DataType.Name} {pk.FieldName});");
                 sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{pk.DataType.Name}> {pk.FieldName}s);");
+                sb.AppendLine(Tab2, $"bool Merge(List<{GetClassName(table.ClassName)}> items);");
                 sb.AppendLine("");
             }
             else

@@ -548,7 +548,7 @@ namespace {{NAMESPACE}}.Base
 
         public Where<T> EndGroup()
         {
-            _activeGroups++;
+            _activeGroups--;
             _query.Append(")");
             return this;
         }

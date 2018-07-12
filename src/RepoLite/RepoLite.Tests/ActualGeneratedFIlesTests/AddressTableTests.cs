@@ -476,7 +476,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
             var address = GetFromDb(1);
 
             var expected = true;
-            var actual = _repository.Delete(address);
+            var actual = _repository.Delete(new AddressKeys(address.Id, address.AnotherId));
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
 
@@ -490,7 +490,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
             var address = GetFromDb(1);
 
             var expected = true;
-            var actual = _repository.Delete(address);
+            var actual = _repository.Delete(new AddressKeys(address.Id, address.AnotherId));
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
 

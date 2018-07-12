@@ -3,20 +3,23 @@ using NS.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Xml;
+using Dapper;
 
 namespace NS
 {
-	public partial interface IPersonRepository : IBaseRepository<Person>
+	public partial interface IPersonRepository : IPkRepository<Person>
 	{
 		Person Get(Int32 id);
 		IEnumerable<Person> Get(List<Int32> ids);
 		IEnumerable<Person> Get(params Int32[] ids);
 
 		bool Update(Person item);
-		bool Delete(Person item);
 		bool Delete(Int32 id);
+		bool Delete(IEnumerable<Int32> ids);
+	    bool Merge(List<Person> items);
 
 		IEnumerable<Person> Search(
 			Int32? id = null,
@@ -33,7 +36,6 @@ namespace NS
 		IEnumerable<Person> FindByNationality(FindComparison comparison, String nationality);
 		IEnumerable<Person> FindByRegistered(Boolean registered);
 		IEnumerable<Person> FindByRegistered(FindComparison comparison, Boolean registered);
-		bool Merge(List<Person> items);
 	}
 	public sealed partial class PersonRepository : BaseRepository<Person>, IPersonRepository
 	{
@@ -41,11 +43,11 @@ namespace NS
 		public PersonRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
 			"dbo", "Person", 5)
 		{
-			Columns.Add(new ColumnDefinition("Id", "[INT]", false, true, true));
-			Columns.Add(new ColumnDefinition("Name", "[NVARCHAR](50)", false, false, false));
-			Columns.Add(new ColumnDefinition("Age", "[INT]", false, false, false));
-			Columns.Add(new ColumnDefinition("Nationality", "[NVARCHAR](50)", false, false, false));
-			Columns.Add(new ColumnDefinition("Registered", "[BIT]", false, false, false));
+			Columns.Add(new ColumnDefinition("Id", typeof(System.Int32), "[INT]", false, true, true));
+			Columns.Add(new ColumnDefinition("Name", typeof(System.String), "[NVARCHAR](50)", false, false, false));
+			Columns.Add(new ColumnDefinition("Age", typeof(System.Int32), "[INT]", false, false, false));
+			Columns.Add(new ColumnDefinition("Nationality", typeof(System.String), "[NVARCHAR](50)", false, false, false));
+			Columns.Add(new ColumnDefinition("Registered", typeof(System.Boolean), "[BIT]", false, false, false));
 		}
 
 		public Person Get(Int32 id)
@@ -76,31 +78,31 @@ namespace NS
 			var createdKeys = BaseCreate(item.Id, item.Name, item.Age, item.Nationality, item.Registered);
 			if (createdKeys.Count != Columns.Count(x => x.PrimaryKey))
 				return false;
-			
+
 			item.Id = (Int32)createdKeys[nameof(Person.Id)];
 			item.ResetDirty();
-			
+
 			return true;
 		}
-			
+
 		public override bool BulkCreate(params Person[] items)
 		{
 			if (!items.Any())
 				return false;
-			
+
 			var validationErrors = items.SelectMany(x => x.Validate()).ToList();
 			if (validationErrors.Any())
 				throw new ValidationException(validationErrors);
-			
+
 			var dt = new DataTable();
 			foreach (var mergeColumn in Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
-				dt.Columns.Add(mergeColumn.ColumnName);
-			
+				dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
+
 			foreach (var item in items)
 			{
 				dt.Rows.Add(item.Name, item.Age, item.Nationality, item.Registered); 
 			}
-			
+
 			return BulkInsert(dt);
 		}
 		public override bool BulkCreate(List<Person> items)
@@ -130,15 +132,31 @@ namespace NS
 			if (person == null)
 				return false;
 
-			var deleteTable = new DeleteTable();
-			deleteTable.AddColumn("Id", person.Id);
+			var deleteColumn = new DeleteColumn("Id", person.Id);
 
-			return BaseDelete(deleteTable);
+			return BaseDelete(deleteColumn);
+		}
+		public bool Delete(IEnumerable<Person> items)
+		{
+			if (!items.Any()) return true;
+			var deleteValues = new List<object>();
+			foreach (var item in items)
+			{
+				deleteValues.Add(item.Id);
+			}
+
+			return BaseDelete("Id", deleteValues);
 		}
 
 		public bool Delete(Int32 id)
 		{
 			return Delete(new Person { Id = id });
+		}
+
+
+		public bool Delete(IEnumerable<Int32> ids)
+		{
+			return Delete(ids.Select(x => new Person { Id = x }));
 		}
 
 

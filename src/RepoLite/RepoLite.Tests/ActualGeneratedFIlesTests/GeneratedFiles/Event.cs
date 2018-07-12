@@ -3,20 +3,23 @@ using NS.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Xml;
+using Dapper;
 
 namespace NS
 {
-	public partial interface IEventRepository : IBaseRepository<Event>
+	public partial interface IEventRepository : IPkRepository<Event>
 	{
 		Event Get(String eventId);
 		IEnumerable<Event> Get(List<String> eventIds);
 		IEnumerable<Event> Get(params String[] eventIds);
 
 		bool Update(Event item);
-		bool Delete(Event item);
 		bool Delete(String eventId);
+		bool Delete(IEnumerable<String> eventIds);
+	    bool Merge(List<Event> items);
 
 		IEnumerable<Event> Search(
 			String eventId = null,
@@ -24,7 +27,6 @@ namespace NS
 
 		IEnumerable<Event> FindByEventName(String eventName);
 		IEnumerable<Event> FindByEventName(FindComparison comparison, String eventName);
-		bool Merge(List<Event> items);
 	}
 	public sealed partial class EventRepository : BaseRepository<Event>, IEventRepository
 	{
@@ -32,8 +34,8 @@ namespace NS
 		public EventRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
 			"dbo", "Event", 2)
 		{
-			Columns.Add(new ColumnDefinition("EventId", "[NVARCHAR](20)", false, true, false));
-			Columns.Add(new ColumnDefinition("EventName", "[NVARCHAR](100)", false, false, false));
+			Columns.Add(new ColumnDefinition("EventId", typeof(System.String), "[NVARCHAR](20)", false, true, false));
+			Columns.Add(new ColumnDefinition("EventName", typeof(System.String), "[NVARCHAR](100)", false, false, false));
 		}
 
 		public Event Get(String eventId)
@@ -64,31 +66,31 @@ namespace NS
 			var createdKeys = BaseCreate(item.EventId, item.EventName);
 			if (createdKeys.Count != Columns.Count(x => x.PrimaryKey))
 				return false;
-			
+
 			item.EventId = (String)createdKeys[nameof(Event.EventId)];
 			item.ResetDirty();
-			
+
 			return true;
 		}
-			
+
 		public override bool BulkCreate(params Event[] items)
 		{
 			if (!items.Any())
 				return false;
-			
+
 			var validationErrors = items.SelectMany(x => x.Validate()).ToList();
 			if (validationErrors.Any())
 				throw new ValidationException(validationErrors);
-			
+
 			var dt = new DataTable();
 			foreach (var mergeColumn in Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
-				dt.Columns.Add(mergeColumn.ColumnName);
-			
+				dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
+
 			foreach (var item in items)
 			{
 				dt.Rows.Add(item.EventId, item.EventName); 
 			}
-			
+
 			return BulkInsert(dt);
 		}
 		public override bool BulkCreate(List<Event> items)
@@ -118,15 +120,31 @@ namespace NS
 			if (@event == null)
 				return false;
 
-			var deleteTable = new DeleteTable();
-			deleteTable.AddColumn("EventId", @event.EventId);
+			var deleteColumn = new DeleteColumn("EventId", @event.EventId);
 
-			return BaseDelete(deleteTable);
+			return BaseDelete(deleteColumn);
+		}
+		public bool Delete(IEnumerable<Event> items)
+		{
+			if (!items.Any()) return true;
+			var deleteValues = new List<object>();
+			foreach (var item in items)
+			{
+				deleteValues.Add(item.EventId);
+			}
+
+			return BaseDelete("EventId", deleteValues);
 		}
 
 		public bool Delete(String eventId)
 		{
 			return Delete(new Event { EventId = eventId });
+		}
+
+
+		public bool Delete(IEnumerable<String> eventIds)
+		{
+			return Delete(eventIds.Select(x => new Event { EventId = x }));
 		}
 
 

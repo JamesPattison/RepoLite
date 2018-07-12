@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace NS.Models
 {
 	[Table("Event", Schema="dbo")]
-	public class Event : BaseModel
+	public partial class Event : BaseModel
 	{
 		private String _eventId;
 		private String _eventName;
@@ -27,16 +27,16 @@ namespace NS.Models
 		public override List<ValidationError> Validate()
 		{
 			var validationErrors = new List<ValidationError>();
-			
+
 			if (string.IsNullOrEmpty(EventId))
-			validationErrors.Add(new ValidationError(nameof(EventId), "Value cannot be null"));
+				validationErrors.Add(new ValidationError(nameof(EventId), "Value cannot be null"));
 			if (!string.IsNullOrEmpty(EventId) && EventId.Length > 20)
-			validationErrors.Add(new ValidationError(nameof(EventId), "Max length is 20"));
+				validationErrors.Add(new ValidationError(nameof(EventId), "Max length is 20"));
 			if (string.IsNullOrEmpty(EventName))
-			validationErrors.Add(new ValidationError(nameof(EventName), "Value cannot be null"));
+				validationErrors.Add(new ValidationError(nameof(EventName), "Value cannot be null"));
 			if (!string.IsNullOrEmpty(EventName) && EventName.Length > 100)
-			validationErrors.Add(new ValidationError(nameof(EventName), "Max length is 100"));
-			
+				validationErrors.Add(new ValidationError(nameof(EventName), "Max length is 100"));
+
 			return validationErrors;
 		}
 	}
