@@ -748,7 +748,22 @@ namespace {{NAMESPACE}}.Base
             using (var cn = new SqlConnection(ConnectionString))
             {
                 var sb = new StringBuilder();
+				var pkCols = Columns.Where(x => x.PrimaryKey).ToList();
                 
+                if (Columns.Any(x => x.PrimaryKey))
+                {
+                    sb.AppendLine("DECLARE @tempo TABLE (");
+					foreach (var pk in pkCols)
+					{
+@@@CSharp4 || CSharp5@@@
+					    sb.Append("[" + pk.ColumnName + "]  {pk.SqlDataType}");
+@@@ELSE [CSharp4 || CSharp5]
+						sb.Append($"[{pk.ColumnName}]  {pk.SqlDataType}");
+@@@//CSharp4 || CSharp5@@@
+						sb.AppendLine(pk != pkCols[pkCols.Count - 1] ? "," : string.Empty);
+					}
+                    sb.AppendLine(")");
+                }
 @@@CSharp4 || CSharp5@@@
                 sb.AppendLine("INSERT [" + _schema + "].[" + _tableName + "] (");
 @@@ELSE [CSharp4 || CSharp5]
@@ -771,7 +786,6 @@ namespace {{NAMESPACE}}.Base
                 {
 					sb.Append("OUTPUT ");
                 
-					var pkCols = Columns.Where(x => x.PrimaryKey).ToList();
 					foreach (var pk in pkCols)
 					{
 @@@CSharp4 || CSharp5@@@
@@ -781,6 +795,8 @@ namespace {{NAMESPACE}}.Base
 @@@//CSharp4 || CSharp5@@@
 						sb.AppendLine(pk != pkCols[pkCols.Count - 1] ? "," : string.Empty);
 					}
+                    
+                    sb.AppendLine("INTO @tempo ");
 				}
 
                 sb.AppendLine("VALUES (");
@@ -797,6 +813,11 @@ namespace {{NAMESPACE}}.Base
 
                 }
 
+                if (Columns.Any(x => x.PrimaryKey))
+                {
+                    sb.AppendLine("SELECT * FROM @tempo");
+                }
+                
                 var sql = sb.ToString();
 
                 if (HasInjection(sql))
@@ -993,7 +1014,7 @@ namespace {{NAMESPACE}}.Base
                 var sb = new StringBuilder();
 
 @@@CSharp4 || CSharp5@@@
-                sb.Append(@"DELETE [" + Schema + "].[" + TableName + "] WHERE [ " + columnName + "] IN (");
+                sb.Append(@"DELETE [" + _schema + "].[" + _tableName + "] WHERE [ " + columnName + "] IN (");
 @@@ELSE [CSharp4 || CSharp5]
                 sb.Append($@"DELETE [{Schema}].[{TableName}] WHERE [{columnName}] IN (");
 @@@//CSharp4 || CSharp5@@@

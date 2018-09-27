@@ -34,7 +34,7 @@ namespace NS
 		bool Delete(Int32 id, String anotherId);
 		bool Delete(AddressKeys compositeId);
 		bool Delete(IEnumerable<AddressKeys> compositeIds);
-	    bool Merge(List<Address> items);
+		bool Merge(List<Address> items);
 
 		IEnumerable<Address> Search(
 			Int32? id = null,

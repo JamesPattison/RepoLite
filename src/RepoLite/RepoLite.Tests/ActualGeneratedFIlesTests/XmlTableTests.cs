@@ -16,8 +16,8 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestInitialize]
         public void TestInitialize()
         {
-            _repository = new XmltableRepository(ConnectionString);
             Data.DropAndCreateDatabase();
+            _repository = new XmltableRepository(ConnectionString);
         }
 
         [TestMethod]

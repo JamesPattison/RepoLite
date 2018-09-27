@@ -52,8 +52,8 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestInitialize]
         public void TestInitialize()
         {
-            _repository = new AddressRepository(ConnectionString);
             Data.DropAndCreateDatabase();
+            _repository = new AddressRepository(ConnectionString);
         }
 
         [TestMethod]

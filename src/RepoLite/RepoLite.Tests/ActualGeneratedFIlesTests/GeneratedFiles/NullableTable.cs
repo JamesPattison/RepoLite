@@ -19,7 +19,7 @@ namespace NS
 		bool Update(NullableTable item);
 		bool Delete(Int32 id);
 		bool Delete(IEnumerable<Int32> ids);
-	    bool Merge(List<NullableTable> items);
+		bool Merge(List<NullableTable> items);
 
 		IEnumerable<NullableTable> Search(
 			Int32? id = null,

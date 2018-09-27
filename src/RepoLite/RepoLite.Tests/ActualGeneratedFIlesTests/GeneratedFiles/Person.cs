@@ -19,7 +19,7 @@ namespace NS
 		bool Update(Person item);
 		bool Delete(Int32 id);
 		bool Delete(IEnumerable<Int32> ids);
-	    bool Merge(List<Person> items);
+		bool Merge(List<Person> items);
 
 		IEnumerable<Person> Search(
 			Int32? id = null,

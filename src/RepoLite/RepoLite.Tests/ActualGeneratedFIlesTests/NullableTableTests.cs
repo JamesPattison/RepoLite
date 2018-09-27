@@ -21,8 +21,8 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestInitialize]
         public void TestInitialize()
         {
-            _repository = new NullableTableRepository(ConnectionString);
             Data.DropAndCreateDatabase();
+            _repository = new NullableTableRepository(ConnectionString);
         }
 
         [TestMethod]

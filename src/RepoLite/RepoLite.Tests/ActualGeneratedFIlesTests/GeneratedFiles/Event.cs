@@ -19,7 +19,7 @@ namespace NS
 		bool Update(Event item);
 		bool Delete(String eventId);
 		bool Delete(IEnumerable<String> eventIds);
-	    bool Merge(List<Event> items);
+		bool Merge(List<Event> items);
 
 		IEnumerable<Event> Search(
 			String eventId = null,

@@ -70,13 +70,8 @@
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\AddressDto.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\Base\BaseModel.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\Base\BaseRepository.cs" />
-    <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\BIN_MASTER.cs" />
-    <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\BIN_MASTERDto.cs" />
-    <Compile Include="ActualGeneratedFIlesTests\BIN_MASTERTests.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\Event.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\EventDto.cs" />
-    <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\ExampleTable.cs" />
-    <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\ExampleTableDto.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\NullableTable.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\NullableTableDto.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\Person.cs" />
