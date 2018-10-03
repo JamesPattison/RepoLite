@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
-namespace MODELNAMESPACE
+namespace MODELNAMESPACE.Base
 {
     public class ValidationError
     {
@@ -25,7 +26,7 @@ namespace MODELNAMESPACE
             DirtyColumns.Clear();
         }
 
-        protected void SetValue<T>(ref T prop, T value, string propName = "")
+        protected void SetValue<T>(ref T prop, T value, [CallerMemberName] string propName = "")
         {
             if (!DirtyColumns.Contains(propName))
             {

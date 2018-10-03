@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace NS.Models.Base
 {
-	public class ValidationError
+    public class ValidationError
     {
         public string PropertyName { get; set; }
         public string Error { get; set; }

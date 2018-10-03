@@ -1,5 +1,4 @@
 ﻿using RepoLite.Common;
-using RepoLite.Common.Enums;
 using RepoLite.Common.Extensions;
 using RepoLite.Common.Interfaces;
 using RepoLite.Common.Models;
@@ -16,8 +15,6 @@ namespace RepoLite.GeneratorEngine.Generators
     public class CSharpSqlServerGenerator : CodeGenerator
     {
         private const int VARIABLE_BLOCK_SCOPE = 5;
-        private readonly TargetFramework _targetFramework;
-        private readonly CSharpVersion _cSharpVersion;
 
         //private Func<string, string, string, string> GetColName = (s, table, name) => $"{(s == name ? $"nameof({table}.{name})" : $"\"{name}\"")}";
 
@@ -37,11 +34,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
         public CSharpSqlServerGenerator()
         {
-            _targetFramework = AppSettings.Generation.TargetFramework;
-            _cSharpVersion = AppSettings.Generation.CSharpVersion;
             _plugin = PluginHelper.GetPlugin();
-
-
         }
 
         public override StringBuilder ModelForTable(Table table)
@@ -52,10 +45,8 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine("using System.Xml;");
             sb.AppendLine($"using {AppSettings.Generation.ModelGenerationNamespace}.Base;");
-            if (_targetFramework >= TargetFramework.Framework4)
-                sb.AppendLine("using System.ComponentModel.DataAnnotations;");
-            if (_targetFramework >= TargetFramework.Framework45)
-                sb.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
+            sb.AppendLine("using System.ComponentModel.DataAnnotations;");
+            sb.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
 
             sb.Append(Environment.NewLine);
             sb.AppendLine(CreateModel(table).ToString());
@@ -133,9 +124,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 var sqlPrecisionColumns = new[] { 35, 60, 62, 99, 106, 108, 122, 165, 167, 173, 175, 231, 239 };
                 var colLengthVal = sqlPrecisionColumns.Contains(column.SqlDataTypeCode) ? $"({Math.Max(column.MaxLength, column.MaxIntLength)})" : string.Empty;
                 sb.AppendLine(Tab3,
-                    _cSharpVersion >= CSharpVersion.CSharp6
-                        ? $"Columns.Add(new ColumnDefinition({(column.DbColName == nameof(column.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{column.DbColName})" : $"\"{column.DbColName}\"")}, typeof({column.DataType}), \"[{column.SqlDataType}]{colLengthVal}\", {column.IsNullable.ToString().ToLower()}, {column.PrimaryKey.ToString().ToLower()}, {column.IsIdentity.ToString().ToLower()}));"
-                        : $"Columns.Add(new ColumnDefinition(\"{column.DbColName}\", typeof({column.DataType}), \"[{column.SqlDataType}]{colLengthVal}\", {column.IsNullable.ToString().ToLower()}, {column.PrimaryKey.ToString().ToLower()}, {column.IsIdentity.ToString().ToLower()}));");
+                    $"Columns.Add(new ColumnDefinition({(column.DbColName == nameof(column.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{column.DbColName})" : $"\"{column.DbColName}\"")}, typeof({column.DataType}), \"[{column.SqlDataType}]{colLengthVal}\", {column.IsNullable.ToString().ToLower()}, {column.PrimaryKey.ToString().ToLower()}, {column.IsIdentity.ToString().ToLower()}));");
             }
             sb.AppendLine(Tab2, "}");
 
@@ -182,8 +171,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             var tableNameAndSchema = table.DbTableName.GetTableAndSchema();
 
-            if (_targetFramework >= TargetFramework.Framework45)
-                sb.AppendLine(Tab1, $"[Table(\"{tableNameAndSchema.Table}\", Schema=\"{tableNameAndSchema.Schema}\")]");
+            sb.AppendLine(Tab1, $"[Table(\"{tableNameAndSchema.Table}\", Schema=\"{tableNameAndSchema.Schema}\")]");
             sb.AppendLine(Tab1, $"public partial class {GetClassName(table.ClassName)} : BaseModel");
             sb.AppendLine(Tab1, "{");
 
@@ -197,35 +185,14 @@ namespace RepoLite.GeneratorEngine.Generators
             foreach (var column in table.Columns)
             {
                 //Property
-                if (column.PrimaryKey && _targetFramework >= TargetFramework.Framework4)
+                if (column.PrimaryKey)
                     sb.AppendLine(Tab2, "[Key]");
                 var fieldName = $"_{column.FieldName}";
                 sb.AppendLine(Tab2, $"public virtual {column.DataType.Name}{(IsNullable(column.DataType.Name) && column.IsNullable ? "?" : "")} {column.PropertyName}");
                 sb.AppendLine(Tab2, "{");
-                if (_cSharpVersion >= CSharpVersion.CSharp7)
-                {
-                    sb.AppendLine(Tab3, $"get => {fieldName};");
-                    sb.AppendLine(Tab3,
-                        _targetFramework >= TargetFramework.Framework45
-                            ? $"set => SetValue(ref {fieldName}, value);"
-                            : $"set => SetValue(ref {fieldName}, value, nameof({column.PropertyName}));");
-                }
-                else if (_cSharpVersion == CSharpVersion.CSharp6)
-                {
-                    sb.AppendLine(Tab3, $"get {{ return {fieldName}; }}");
-                    sb.AppendLine(Tab3,
-                        _targetFramework >= TargetFramework.Framework45
-                            ? $"set {{ SetValue(ref {fieldName}, value); }}"
-                            : $"set {{ SetValue(ref {fieldName}, value, nameof({column.PropertyName})); }}");
-                }
-                else
-                {
-                    sb.AppendLine(Tab3, $"get {{ return {fieldName}; }}");
-                    sb.AppendLine(Tab3,
-                        _targetFramework >= TargetFramework.Framework45
-                            ? $"set {{ SetValue(ref {fieldName}, value); }}"
-                            : $"set {{ SetValue(ref {fieldName}, value, \"{column.PropertyName}\"); }}");
-                }
+
+                sb.AppendLine(Tab3, $"get => {fieldName};");
+                sb.AppendLine(Tab3, $"set => SetValue(ref {fieldName}, value);");
 
 
                 sb.AppendLine(Tab2, "}");
@@ -253,20 +220,14 @@ namespace RepoLite.GeneratorEngine.Generators
                     if (!column.IsNullable)
                     {
                         sb.AppendLine(Tab3, $"if (string.IsNullOrEmpty({column.PropertyName}))");
-                        sb.AppendLine(Tab4,
-                            _cSharpVersion >= CSharpVersion.CSharp6
-                                ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot be null\"));"
-                                : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Value cannot be null\"));");
+                        sb.AppendLine(Tab4, $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot be null\"));");
                     }
 
                     if (column.MaxLength > 0)
                     {
                         sb.AppendLine(Tab3,
                             $"if (!string.IsNullOrEmpty({column.PropertyName}) && {column.PropertyName}.Length > {column.MaxLength})");
-                        sb.AppendLine(Tab4,
-                            _cSharpVersion >= CSharpVersion.CSharp6
-                                ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Max length is {column.MaxLength}\"));"
-                                : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Max length is {column.MaxLength}\"));");
+                        sb.AppendLine(Tab4, $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Max length is {column.MaxLength}\"));");
                     }
                 }
                 else if (column.DataType == typeof(Byte[]))
@@ -274,19 +235,13 @@ namespace RepoLite.GeneratorEngine.Generators
                     if (!column.IsNullable)
                     {
                         sb.AppendLine(Tab3, $"if ({column.PropertyName} == null)");
-                        sb.AppendLine(Tab4,
-                            _cSharpVersion >= CSharpVersion.CSharp6
-                                ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot be null\"));"
-                                : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Value cannot be null\"));");
+                        sb.AppendLine(Tab4, $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot be null\"));");
                     }
 
                     if (column.MaxLength > 0)
                     {
                         sb.AppendLine(Tab3, $"if ({column.PropertyName} != null && {column.PropertyName}.Length > {column.MaxLength})");
-                        sb.AppendLine(Tab4,
-                            _cSharpVersion >= CSharpVersion.CSharp6
-                                ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Binary array values exceed database size\"));"
-                                : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Binary array values exceed database size\"));");
+                        sb.AppendLine(Tab4, $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Binary array values exceed database size\"));");
                     }
                 }
                 else
@@ -302,48 +257,30 @@ namespace RepoLite.GeneratorEngine.Generators
 
                             sb.AppendLine(Tab3, $"if ({(column.IsNullable ? $"{column.PropertyName}.HasValue && " : "")}Math.Floor({column.PropertyName}{(column.IsNullable ? ".Value" : "")}) > {maxValueForNum})");
 
-                            sb.AppendLine(Tab4,
-                                _cSharpVersion >= CSharpVersion.CSharp6
-                                    ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot exceed {maxValueForNum}\"));"
-                                    : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Value cannot exceed {maxValueForNum}\"));");
+                            sb.AppendLine(Tab4, $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot exceed {maxValueForNum}\"));");
                             sb.AppendLine(Tab3, $"if ({(column.IsNullable ? $"{column.PropertyName}.HasValue && " : "")}GetDecimalPlaces({column.PropertyName}{(column.IsNullable ? ".Value" : "")}) > {column.MaxDecimalLength})");
 
-                            sb.AppendLine(Tab4,
-                                _cSharpVersion >= CSharpVersion.CSharp6
-                                    ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot have more than {column.MaxDecimalLength} decimal place{(column.MaxDecimalLength > 1 ? "s" : "")}\"));"
-                                    : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Value cannot have more than {column.MaxDecimalLength} decimal place{(column.MaxDecimalLength > 1 ? "s" : "")}\"));");
+                            sb.AppendLine(Tab4, $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot have more than {column.MaxDecimalLength} decimal place{(column.MaxDecimalLength > 1 ? "s" : "")}\"));");
                             break;
                         case DateTime _:
                             sb.AppendLine(Tab3, $"if ({column.PropertyName} == DateTime.MinValue)");
 
-                            sb.AppendLine(Tab4,
-                                _cSharpVersion >= CSharpVersion.CSharp6
-                                    ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot be default.\"));"
-                                    : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Value cannot be default.\"));");
+                            sb.AppendLine(Tab4, $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot be default.\"));");
                             break;
                         case TimeSpan _:
                             sb.AppendLine(Tab3, $"if ({column.PropertyName} == TimeSpan.MinValue)");
 
-                            sb.AppendLine(Tab4,
-                                _cSharpVersion >= CSharpVersion.CSharp6
-                                    ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot be default.\"));"
-                                    : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Value cannot be default.\"));");
+                            sb.AppendLine(Tab4, $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot be default.\"));");
                             break;
                         case DateTimeOffset _:
                             sb.AppendLine(Tab3, $"if ({column.PropertyName} == DateTimeOffset.MinValue)");
 
-                            sb.AppendLine(Tab4,
-                                _cSharpVersion >= CSharpVersion.CSharp6
-                                    ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot be default.\"));"
-                                    : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Value cannot be default.\"));");
+                            sb.AppendLine(Tab4, $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot be default.\"));");
                             break;
                         case Guid _:
                             sb.AppendLine(Tab3, $"if ({column.PropertyName} == Guid.Empty)");
 
-                            sb.AppendLine(Tab4,
-                                _cSharpVersion >= CSharpVersion.CSharp6
-                                    ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot be default.\"));"
-                                    : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Value cannot be default.\"));");
+                            sb.AppendLine(Tab4, $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot be default.\"));");
                             break;
                     }
             }
@@ -429,21 +366,10 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Search(");
             foreach (var column in table.Columns)
             {
-                if (_cSharpVersion >= CSharpVersion.CSharp4)
-                {
-                    sb.Append(Tab3,
-                        column.DataType != typeof(XmlDocument)
-                            ? $"{column.DataType.Name}{(IsNullable(column.DataType.Name) ? "?" : string.Empty)} {column.FieldName} = null"
-                            : $"String {column.FieldName} = null");
-                }
-                else
-                {
-                    sb.Append(Tab3,
-                        column.DataType != typeof(XmlDocument)
-                            ? $"{column.DataType.Name}{(IsNullable(column.DataType.Name) ? "?" : string.Empty)} {column.FieldName}"
-                            : $"String {column.FieldName}");
-                }
-
+                sb.Append(Tab3,
+                           column.DataType != typeof(XmlDocument)
+                               ? $"{column.DataType.Name}{(IsNullable(column.DataType.Name) ? "?" : string.Empty)} {column.FieldName} = null"
+                               : $"String {column.FieldName} = null");
                 sb.AppendLine(column == table.Columns.Last() ? ");" : ",");
             }
 
@@ -500,9 +426,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.Append(Tab3, "return Where(");
                 foreach (var pk in table.PrimaryKeys)
                 {
-                    sb.Append(_cSharpVersion >= CSharpVersion.CSharp6
-                        ? $"{(pk.DbColName == nameof(pk.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{pk.DbColName})" : $"\"{pk.DbColName}\"")}, Comparison.Equals, {pk.FieldName}"
-                        : $"\"{pk.PropertyName}\", Comparison.Equals, {pk.FieldName}");
+                    sb.Append($"{(pk.DbColName == nameof(pk.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{pk.DbColName})" : $"\"{pk.DbColName}\"")}, Comparison.Equals, {pk.FieldName}");
                     if (pk != table.PrimaryKeys.Last())
                     {
                         sb.Append(").And(");
@@ -518,9 +442,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.Append(Tab3, "return Where(");
                 foreach (var pk in table.PrimaryKeys)
                 {
-                    sb.Append(_cSharpVersion >= CSharpVersion.CSharp6
-                        ? $"{(pk.DbColName == nameof(pk.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{pk.DbColName})" : $"\"{pk.DbColName}\"")}, Comparison.Equals, compositeId.{pk.PropertyName}"
-                        : $"\"{pk.PropertyName}\", Comparison.Equals, compositeId.{pk.PropertyName}");
+                    sb.Append($"{(pk.DbColName == nameof(pk.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{pk.DbColName})" : $"\"{pk.DbColName}\"")}, Comparison.Equals, compositeId.{pk.PropertyName}");
                     if (pk != table.PrimaryKeys.Last())
                     {
                         sb.Append(").And(");
@@ -543,9 +465,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.Append(Tab3, "var result = Where(");
                 foreach (var pk in table.PrimaryKeys)
                 {
-                    sb.Append(_cSharpVersion >= CSharpVersion.CSharp6
-                        ? $"{(pk.DbColName == nameof(pk.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{pk.DbColName})" : $"\"{pk.DbColName}\"")}, Comparison.In, compositeIds.Select(x => x.{pk.PropertyName}).ToList()"
-                        : $"\"{pk.PropertyName}\", Comparison.In, compositeIds.Select(x => x.{pk.PropertyName}).ToList()");
+                    sb.Append($"{(pk.DbColName == nameof(pk.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{pk.DbColName})" : $"\"{pk.DbColName}\"")}, Comparison.In, compositeIds.Select(x => x.{pk.PropertyName}).ToList()");
                     if (pk != table.PrimaryKeys.Last())
                     {
                         sb.Append(").Or(");
@@ -582,10 +502,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine("");
                 sb.AppendLine(Tab2, $"public {GetClassName(table.ClassName)} Get({pk.DataType.Name} {pk.FieldName})");
                 sb.AppendLine(Tab2, "{");
-                sb.AppendLine(Tab3,
-                    _cSharpVersion >= CSharpVersion.CSharp6
-                        ? $"return Where({(pk.DbColName == nameof(pk.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{pk.DbColName})" : $"\"{pk.DbColName}\"")}, Comparison.Equals, {pk.FieldName}).Results().FirstOrDefault();"
-                        : $"return Where(\"{pk.PropertyName}\", Comparison.Equals, {pk.FieldName}).Results().FirstOrDefault();");
+                sb.AppendLine(Tab3, $"return Where({(pk.DbColName == nameof(pk.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{pk.DbColName})" : $"\"{pk.DbColName}\"")}, Comparison.Equals, {pk.FieldName}).Results().FirstOrDefault();");
                 sb.AppendLine(Tab2, "}");
 
                 sb.AppendLine("");
@@ -598,10 +515,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine("");
                 sb.AppendLine(Tab2, $"public IEnumerable<{GetClassName(table.ClassName)}> Get(params {pk.DataType.Name}[] {pk.FieldName}s)");
                 sb.AppendLine(Tab2, "{");
-                sb.AppendLine(Tab3,
-                    _cSharpVersion >= CSharpVersion.CSharp6
-                        ? $"return Where({(pk.DbColName == nameof(pk.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{pk.DbColName})" : $"\"{pk.DbColName}\"")}, Comparison.In, {pk.FieldName}s).Results();"
-                        : $"return Where(\"{pk.PropertyName}\", Comparison.In, {pk.FieldName}s).Results();");
+                sb.AppendLine(Tab3, $"return Where({(pk.DbColName == nameof(pk.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{pk.DbColName})" : $"\"{pk.DbColName}\"")}, Comparison.In, {pk.FieldName}s).Results();");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
             }
@@ -633,10 +547,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("");
             foreach (var pk in table.PrimaryKeys)
             {
-                sb.AppendLine(Tab3,
-                    _cSharpVersion >= CSharpVersion.CSharp6
-                        ? $"item.{pk.PropertyName} = ({pk.DataType.Name})createdKeys[nameof({GetClassName(table.ClassName)}.{pk.PropertyName})];"
-                        : $"item.{pk.PropertyName} = ({pk.DataType.Name})createdKeys[\"{pk.PropertyName}\"];");
+                sb.AppendLine(Tab3, $"item.{pk.PropertyName} = ({pk.DataType.Name})createdKeys[nameof({GetClassName(table.ClassName)}.{pk.PropertyName})];");
             }
 
             sb.AppendLine(Tab3, "item.ResetDirty();");
@@ -793,27 +704,37 @@ namespace RepoLite.GeneratorEngine.Generators
                         sb.Append(",");
                 }
 
-                sb.AppendLine(Tab4, ");");
+                sb.AppendLine(");");
                 sb.AppendLine(Tab3, "}");
 
                 sb.AppendLine(Tab3, "CreateStagingTable(tempTableName, true);");
                 sb.AppendLine(Tab3, "BulkInsert(dt, tempTableName);");
+
                 sb.AppendLine(Tab3, "using (var cn = new SqlConnection(ConnectionString))");
                 sb.AppendLine(Tab3, "{");
-                sb.AppendLine(Tab4, "return cn.Execute($@\";WITH cte AS (");
-                sb.AppendLine(Tab6, $"SELECT * FROM {table.Schema}.{table.DbTableName} o");
-                sb.Append(Tab6, "WHERE EXISTS (SELECT 'x' FROM {tempTableName} i WHERE ");
+                sb.Append(Tab4, "using (var cmd = CreateCommand(cn, $@\";WITH cte AS (");
+                sb.AppendLine($"SELECT * FROM {table.Schema}.{table.DbTableName} o");
+                sb.Append(Tab7, "WHERE EXISTS (SELECT 'x' FROM {tempTableName} i WHERE ");
                 foreach (var pk in table.PrimaryKeys)
                 {
                     sb.Append($"i.[{pk.PropertyName}] = o.[{pk.PropertyName}]");
                     if (pk != table.PrimaryKeys.Last())
                         sb.Append(" AND ");
                 }
-                sb.Append(Tab6, "))");
+                sb.AppendLine("))");
 
-                sb.AppendLine(Tab6, "DELETE FROM cte\") > 0; ");
+                sb.AppendLine(Tab7, "DELETE FROM cte\"))");
+
+                sb.AppendLine(Tab4, "{");
+                sb.AppendLine(Tab5, "try");
+                sb.AppendLine(Tab5, "{");
+                sb.AppendLine(Tab6, "cn.Open();");
+                sb.AppendLine(Tab6, "return (int)cmd.ExecuteScalar() > 0;");
+                sb.AppendLine(Tab5, "}");
+                sb.AppendLine(Tab5, "finally { cn.Close(); }");
+                sb.AppendLine(Tab4, "}");
+
                 sb.AppendLine(Tab3, "}");
-
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
             }
@@ -877,10 +798,7 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.Append(Tab5, $"item.{column.PropertyName}");
                 else
                 {
-                    sb.Append(Tab5,
-                        _cSharpVersion >= CSharpVersion.CSharp6
-                            ? $"item.{column.PropertyName}, item.DirtyColumns.Contains({(column.DbColName == nameof(column.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{column.DbColName})" : $"\"{column.DbColName}\"")})"
-                            : $"item.{column.PropertyName}, item.DirtyColumns.Contains(\"{column.DbColName}\")");
+                    sb.Append(Tab5, $"item.{column.PropertyName}, item.DirtyColumns.Contains({(column.DbColName == nameof(column.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{column.DbColName})" : $"\"{column.DbColName}\"")})");
                 }
 
                 sb.AppendLine(column != table.Columns.Last() ? "," : "");
@@ -907,10 +825,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             foreach (var column in table.Columns)
             {
-                sb.AppendLine(Tab4,
-                    _cSharpVersion >= CSharpVersion.CSharp6
-                        ? $"{column.PropertyName} = Get{(IsNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, {(column.DbColName == nameof(column.DbColName) ? $"nameof({table.ClassName}.{column.DbColName})" : $"\"{column.DbColName}\"")}),"
-                        : $"{column.PropertyName} = Get{(IsNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, \"{column.DbColName}\"),");
+                sb.AppendLine(Tab4, $"{column.PropertyName} = Get{(IsNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, {(column.DbColName == nameof(column.DbColName) ? $"nameof({table.ClassName}.{column.DbColName})" : $"\"{column.DbColName}\"")}),");
             }
             sb.AppendLine(Tab3, "};");
             sb.AppendLine("");
@@ -930,20 +845,10 @@ namespace RepoLite.GeneratorEngine.Generators
 
             foreach (var column in table.Columns)
             {
-                if (_cSharpVersion >= CSharpVersion.CSharp4)
-                {
-                    sb.Append(Tab3,
-                        column.DataType != typeof(XmlDocument)
-                            ? $"{column.DataType.Name}{(IsNullable(column.DataType.Name) ? "?" : string.Empty)} {column.FieldName} = null"
-                            : $"String {column.FieldName} = null");
-                }
-                else
-                {
-                    sb.Append(Tab3,
-                        column.DataType != typeof(XmlDocument)
-                            ? $"{column.DataType.Name}{(IsNullable(column.DataType.Name) ? "?" : string.Empty)} {column.FieldName}"
-                            : $"String {column.FieldName}");
-                }
+                sb.Append(Tab3,
+                    column.DataType != typeof(XmlDocument)
+                        ? $"{column.DataType.Name}{(IsNullable(column.DataType.Name) ? "?" : string.Empty)} {column.FieldName} = null"
+                        : $"String {column.FieldName} = null");
 
                 sb.AppendLine(column == table.Columns.Last() ? ")" : ",");
             }
@@ -971,17 +876,11 @@ namespace RepoLite.GeneratorEngine.Generators
 
                 if (column.DataType != typeof(XmlDocument))
                 {
-                    sb.AppendLine(Tab4,
-                        _cSharpVersion >= CSharpVersion.CSharp6
-                            ? $"queries.Add(new QueryItem({(column.DbColName == nameof(column.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{column.DbColName})" : $"\"{column.DbColName}\"")}, {column.FieldName}));"
-                            : $"queries.Add(new QueryItem(\"{column.DbColName}\", {column.FieldName}));");
+                    sb.AppendLine(Tab4, $"queries.Add(new QueryItem({(column.DbColName == nameof(column.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{column.DbColName})" : $"\"{column.DbColName}\"")}, {column.FieldName}));");
                 }
                 else
                 {
-                    sb.AppendLine(Tab4,
-                        _cSharpVersion >= CSharpVersion.CSharp6
-                            ? $"queries.Add(new QueryItem({(column.DbColName == nameof(column.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{column.DbColName})" : $"\"{column.DbColName}\"")}, {column.FieldName}, typeof(XmlDocument)));"
-                            : $"queries.Add(new QueryItem(\"{column.DbColName}\", {column.FieldName}, typeof(XmlDocument)));");
+                    sb.AppendLine(Tab4, $"queries.Add(new QueryItem({(column.DbColName == nameof(column.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{column.DbColName})" : $"\"{column.DbColName}\"")}, {column.FieldName}, typeof(XmlDocument)));");
                 }
             }
 
@@ -1012,10 +911,7 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab2, $"public IEnumerable<{GetClassName(table.ClassName)}> FindBy{primaryKey.DbColName}(FindComparison comparison, {primaryKey.DataType.Name} {primaryKey.FieldName})");
                     sb.AppendLine(Tab2, "{");
 
-                    sb.AppendLine(Tab3,
-                        _cSharpVersion >= CSharpVersion.CSharp6
-                            ? $"return Where({(primaryKey.PropertyName == nameof(primaryKey.PropertyName) ? $"nameof({GetClassName(table.ClassName)}.{primaryKey.PropertyName})" : $"\"{primaryKey.PropertyName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {primaryKey.FieldName}).Results();"
-                            : $"return Where(\"{primaryKey.PropertyName}\", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {primaryKey.FieldName}).Results();");
+                    sb.AppendLine(Tab3, $"return Where({(primaryKey.PropertyName == nameof(primaryKey.PropertyName) ? $"nameof({GetClassName(table.ClassName)}.{primaryKey.PropertyName})" : $"\"{primaryKey.PropertyName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {primaryKey.FieldName}).Results();");
                     sb.AppendLine(Tab2, "}");
                 }
             }
@@ -1039,17 +935,11 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, "{");
                 if (nonPrimaryKey.DataType != typeof(XmlDocument))
                 {
-                    sb.AppendLine(Tab3,
-                        _cSharpVersion >= CSharpVersion.CSharp6
-                            ? $"return Where({(nonPrimaryKey.DbColName == nameof(nonPrimaryKey.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{nonPrimaryKey.DbColName})" : $"\"{nonPrimaryKey.DbColName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {nonPrimaryKey.FieldName}).Results();"
-                            : $"return Where(\"{nonPrimaryKey.DbColName}\", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {nonPrimaryKey.FieldName}).Results();");
+                    sb.AppendLine(Tab3, $"return Where({(nonPrimaryKey.DbColName == nameof(nonPrimaryKey.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{nonPrimaryKey.DbColName})" : $"\"{nonPrimaryKey.DbColName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {nonPrimaryKey.FieldName}).Results();");
                 }
                 else
                 {
-                    sb.AppendLine(Tab3,
-                        _cSharpVersion >= CSharpVersion.CSharp6
-                            ? $"return Where({(nonPrimaryKey.DbColName == nameof(nonPrimaryKey.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{nonPrimaryKey.DbColName})" : $"\"{nonPrimaryKey.DbColName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {nonPrimaryKey.FieldName}, typeof(XmlDocument)).Results();"
-                            : $"return Where(\"{nonPrimaryKey.DbColName}\", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {nonPrimaryKey.FieldName}, typeof(XmlDocument)).Results();");
+                    sb.AppendLine(Tab3, $"return Where({(nonPrimaryKey.DbColName == nameof(nonPrimaryKey.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{nonPrimaryKey.DbColName})" : $"\"{nonPrimaryKey.DbColName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {nonPrimaryKey.FieldName}, typeof(XmlDocument)).Results();");
                 }
                 sb.AppendLine(Tab2, "}");
             }

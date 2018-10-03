@@ -211,15 +211,23 @@ namespace NS
 			}
 			foreach (var compositeId in compositeIds)
 			{
-				dt.Rows.Add(compositeId.Id,compositeId.AnotherId				);
+				dt.Rows.Add(compositeId.Id,compositeId.AnotherId);
 			}
 			CreateStagingTable(tempTableName, true);
 			BulkInsert(dt, tempTableName);
 			using (var cn = new SqlConnection(ConnectionString))
 			{
-				return cn.Execute($@";WITH cte AS (
-						SELECT * FROM dbo.Address o
-						WHERE EXISTS (SELECT 'x' FROM {tempTableName} i WHERE i.[Id] = o.[Id] AND i.[AnotherId] = o.[AnotherId]						))						DELETE FROM cte") > 0; 
+				using (var cmd = CreateCommand(cn, $@";WITH cte AS (SELECT * FROM dbo.Address o
+							WHERE EXISTS (SELECT 'x' FROM {tempTableName} i WHERE i.[Id] = o.[Id] AND i.[AnotherId] = o.[AnotherId]))
+							DELETE FROM cte"))
+				{
+					try
+					{
+						cn.Open();
+						return (int)cmd.ExecuteScalar() > 0;
+					}
+					finally { cn.Close(); }
+				}
 			}
 		}
 

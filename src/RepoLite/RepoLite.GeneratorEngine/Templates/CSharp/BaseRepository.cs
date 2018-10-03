@@ -1,4 +1,4 @@
-﻿using MODELNAMESPACE;
+﻿using MODELNAMESPACE.Base;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 
-namespace REPOSITORYNAMESPACE
+namespace REPOSITORYNAMESPACE.Base
 {
     public interface IBaseRepository<T>
     {
@@ -475,9 +475,9 @@ namespace REPOSITORYNAMESPACE
             ConnectionString = connectionString;
             Logger = logMethod ?? (exception => { });
 
-            var sql = @"SELECT COUNT(*)
+            var sql = $@"SELECT COUNT(*)
                             FROM INFORMATION_SCHEMA.COLUMNS
-                            WHERE TABLE_NAME = '" + table + "' AND TABLE_SCHEMA = '" + schema + "'";
+                            WHERE TABLE_NAME = '{table}' AND TABLE_SCHEMA = '{schema}'";
 
             using (var cn = new SqlConnection(ConnectionString))
             {
@@ -528,7 +528,7 @@ namespace REPOSITORYNAMESPACE
                     sb.Append(", ");
             }
 
-            sb.Append(" FROM [" + _schema + "].[" + _tableName + "]");
+            sb.Append($" FROM [{_schema}].[{_tableName}]");
 
             return sb.ToString();
         }
@@ -551,7 +551,7 @@ namespace REPOSITORYNAMESPACE
             //Get
             using (var cn = new SqlConnection(ConnectionString))
             {
-                using (var cmd = CreateCommand(cn, WhereQuery() + " WHERE " + query))
+                using (var cmd = CreateCommand(cn, $"{WhereQuery()} WHERE {query}"))
                 {
                     if (HasInjection(cmd.CommandText))
                         throw new Exception("Sql Injection attempted. Aborted");
@@ -624,17 +624,17 @@ namespace REPOSITORYNAMESPACE
                     sb.AppendLine("DECLARE @tempo TABLE (");
                     foreach (var pk in pkCols)
                     {
-                        sb.Append("[" + pk.ColumnName + "]  {pk.SqlDataType}");
+                        sb.Append($"[{pk.ColumnName}]  {pk.SqlDataType}");
                         sb.AppendLine(pk != pkCols[pkCols.Count - 1] ? "," : string.Empty);
                     }
                     sb.AppendLine(")");
                 }
-                sb.AppendLine("INSERT [" + _schema + "].[" + _tableName + "] (");
+                sb.AppendLine($"INSERT [{_schema}].[{_tableName}] (");
 
                 var toCreate = Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity).ToList();
                 foreach (var createColumn in toCreate)
                 {
-                    sb.Append("[" + createColumn.ColumnName + "]");
+                    sb.Append($"[{createColumn.ColumnName}]");
 
                     sb.AppendLine(createColumn != Columns.Last() ? "," : ")");
                 }
@@ -645,7 +645,7 @@ namespace REPOSITORYNAMESPACE
 
                     foreach (var pk in pkCols)
                     {
-                        sb.Append("[Inserted].[" + pk.ColumnName + "] ");
+                        sb.Append($"[Inserted].[{pk.ColumnName}] ");
                         sb.AppendLine(pk != pkCols[pkCols.Count - 1] ? "," : string.Empty);
                     }
 
@@ -746,7 +746,7 @@ namespace REPOSITORYNAMESPACE
 
         protected bool BulkInsert(DataTable dt)
         {
-            return BulkInsert(dt, "[" + _schema + "].[" + _tableName + "]");
+            return BulkInsert(dt, $"[{_schema}].[{_tableName}]");
         }
 
         protected bool BaseUpdate(List<string> dirtyColumns, params object[] values)
@@ -754,12 +754,12 @@ namespace REPOSITORYNAMESPACE
             bool isSuccess;
 
             var sb = new StringBuilder();
-            sb.AppendLine("UPDATE [" + _schema + "].[" + _tableName + "] SET");
+            sb.AppendLine($"UPDATE [{_schema}].[{_tableName}] SET");
 
             var nonpkCols = Columns.Where(x => !x.PrimaryKey).ToArray();
             foreach (var col in nonpkCols.Where(x => dirtyColumns.Contains(x.ColumnName)))
             {
-                sb.Append("[" + col.ColumnName + "] = @" + col.ColumnName);
+                sb.Append($"[{col.ColumnName}] = @{col.ColumnName}");
                 sb.AppendLine(col != nonpkCols.Last(x => dirtyColumns.Contains(x.ColumnName)) ? "," : "");
             }
             sb.AppendLine("WHERE");
@@ -768,8 +768,8 @@ namespace REPOSITORYNAMESPACE
             foreach (var pk in pkCols)
             {
                 sb.AppendLine(pk == pkCols.First()
-                    ? "[" + pk.ColumnName + "] = @" + pk.ColumnName
-                        : "AND [" + pk.ColumnName + "] = @" + pk.ColumnName);
+                    ? $"[{pk.ColumnName}] = @{pk.ColumnName}"
+                        : $"AND [{pk.ColumnName}] = @{pk.ColumnName}");
             }
 
             var sql = sb.ToString();
@@ -809,8 +809,8 @@ namespace REPOSITORYNAMESPACE
             using (var cn = new SqlConnection(ConnectionString))
             {
                 var sb = new StringBuilder();
-                sb.Append(@"DELETE [" + _schema + "].[" + _tableName + "] WHERE ");
-                sb.Append("[" + deleteColumn.ColumnName + "] = @" + deleteColumn.ColumnName + "");
+                sb.Append($"DELETE [{_schema}].[{_tableName}] WHERE ");
+                sb.Append($"[{ deleteColumn.ColumnName}] = @{deleteColumn.ColumnName}");
 
                 var sql = sb.ToString();
                 if (HasInjection(sql))
@@ -838,7 +838,7 @@ namespace REPOSITORYNAMESPACE
             {
                 var sb = new StringBuilder();
 
-                sb.Append(@"DELETE [" + _schema + "].[" + _tableName + "] WHERE [ " + columnName + "] IN (");
+                sb.Append($"DELETE [{_schema}].[{_tableName}] WHERE [{columnName}] IN (");
 
                 foreach (var dataValue in dataValues)
                 {
@@ -887,8 +887,8 @@ namespace REPOSITORYNAMESPACE
                 using (var cn = new SqlConnection(ConnectionString))
                 {
                     var mergeSql = new StringBuilder();
-                    mergeSql.AppendLine("MERGE INTO [" + _schema + "].[" + _tableName + "] AS [Target]");
-                    mergeSql.AppendLine("USING " + tempTableName + " AS Source");
+                    mergeSql.AppendLine($"MERGE INTO [{_schema}].[{_tableName}] AS [Target]");
+                    mergeSql.AppendLine($"USING {tempTableName} AS Source");
                     mergeSql.AppendLine("ON");
 
                     var pks = Columns.Where(x => x.PrimaryKey).ToArray();
@@ -897,7 +897,7 @@ namespace REPOSITORYNAMESPACE
                     {
                         if (pk != pks.First())
                             mergeSql.Append("AND ");
-                        mergeSql.AppendLine("[Target].[" + pk.ColumnName + "] = [Source].[" + pk.ColumnName + "]");
+                        mergeSql.AppendLine($"[Target].[{pk.ColumnName}] = [Source].[{pk.ColumnName}]");
                     }
 
 
@@ -908,17 +908,17 @@ namespace REPOSITORYNAMESPACE
                     foreach (var mergeColumn in nonpks)
                     {
                         mergeSql.Append(
-                            "[Target].[" + mergeColumn.ColumnName + "] = CASE WHEN [Source].[" + mergeColumn.ColumnName + "Changed] = 1 THEN [Source].[" + mergeColumn.ColumnName + "] ELSE [Target].[" + mergeColumn.ColumnName + "] END");
+                            $"[Target].[{mergeColumn.ColumnName}] = CASE WHEN [Source].[{mergeColumn.ColumnName}Changed] = 1 THEN [Source].[{mergeColumn.ColumnName}] ELSE [Target].[{mergeColumn.ColumnName}] END");
 
                         mergeSql.AppendLine(mergeColumn != nonpks.Last() ? "," : Environment.NewLine);
                     }
 
                     mergeSql.AppendLine("WHEN NOT MATCHED THEN INSERT (");
 
-                    mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => "[" + x.ColumnName + "]").ToArray()) + ")");
+                    mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[{x.ColumnName}]").ToArray()) + ")");
                     mergeSql.AppendLine("VALUES (");
-                    mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => "[Source].[" + x.ColumnName + "]").ToArray()) + ");");
-                    mergeSql.AppendLine("DROP TABLE " + tempTableName);
+                    mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[Source].[{x.ColumnName}]").ToArray()) + ");");
+                    mergeSql.AppendLine($"DROP TABLE {tempTableName}");
 
                     var sql = mergeSql.ToString();
                     if (HasInjection(sql))
@@ -959,7 +959,7 @@ namespace REPOSITORYNAMESPACE
                     {
                         Connection = cn,
                         CommandType = CommandType.Text,
-                        CommandText = "DROP TABLE " + tempTableName
+                        CommandText = $"DROP TABLE {tempTableName}"
                     };
 
                     try
@@ -1177,13 +1177,12 @@ namespace REPOSITORYNAMESPACE
             stagingSqlBuilder.AppendLine(@"CREATE TABLE " + tempTableName + " (");
             foreach (var mergeColumn in Columns.Where(x => onlyPrimaryKeys && x.PrimaryKey || !onlyPrimaryKeys))
             {
-                stagingSqlBuilder.Append(
-                    "[" + mergeColumn.ColumnName + "] " + mergeColumn.SqlDataType + " " + "NULL");
+                stagingSqlBuilder.Append($"[{mergeColumn.ColumnName}] {mergeColumn.SqlDataType} NULL");
 
                 if (!mergeColumn.PrimaryKey)
                 {
                     stagingSqlBuilder.AppendLine(",");
-                    stagingSqlBuilder.Append("[" + mergeColumn.ColumnName + "Changed] [BIT] NOT NULL");
+                    stagingSqlBuilder.Append($"[{mergeColumn.ColumnName}Changed] [BIT] NOT NULL");
                 }
                 stagingSqlBuilder.AppendLine(mergeColumn != Columns[Columns.Count - 1] ? "," : ")");
             }

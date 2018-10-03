@@ -22,7 +22,7 @@ namespace NS.Base
         IEnumerable<T> Where(string query);
     }
 
-	public interface IPkRepository<T> : IBaseRepository<T>
+    public interface IPkRepository<T> : IBaseRepository<T>
     {
         bool Update(T item);
         bool Delete(T item);
@@ -101,7 +101,7 @@ namespace NS.Base
         public bool PrimaryKey { get; set; }
         public object Data { get; set; }
     }
-	
+
     public class DeleteColumn
     {
         public string ColumnName { get; set; }
@@ -116,7 +116,12 @@ namespace NS.Base
 
     public class MergeTable
     {
-        public List<object[]> Data { get; set; } = new List<object[]>();
+        public List<object[]> Data { get; set; }
+
+        public MergeTable()
+        {
+            Data = new List<object[]>();
+        }
     }
 
     public class ColumnDefinition
@@ -197,12 +202,12 @@ namespace NS.Base
         private string MakeClause(string col, Comparison comparison, object val, ClauseType clauseType, Type valueType)
         {
             var query = new StringBuilder();
-						
+
             switch (comparison)
             {
                 case Comparison.In:
                 case Comparison.NotIn:
-                    if (val is IEnumerable list && !(list as object[] ?? list.Cast<object>().ToArray()).Any())
+                    if (val is IEnumerable list && !(val as object[] ?? (val as IEnumerable).Cast<object>().ToArray()).Any())
                     {
                         //No elements in list, append a clause which will return no values
                         query.Append("1=0");
@@ -212,30 +217,31 @@ namespace NS.Base
                     break;
             }
 
+            float floatVal;
             if (new[]
                 {
                     Comparison.GreaterThan, Comparison.GreaterThanOrEquals, Comparison.LessThan,
                     Comparison.LessThanOrEquals
                 }.Contains(comparison)
-                && !float.TryParse(val.ToString(), out var _))
+                && !float.TryParse(val.ToString(), out floatVal))
                 throw new Exception("Numeric comparison used on a non numeric value.");
 
             switch (clauseType)
             {
-                case ClauseType.Initial:        
-					query.Append(valueType == typeof(XmlDocument)
-                        ? $"CONVERT(NVARCHAR(MAX), [{col}])"
-                        : $"[{col}]");
+                case ClauseType.Initial:
+                    query.Append(valueType == typeof(XmlDocument)
+                        ? "CONVERT(NVARCHAR(MAX), [" + col + "])"
+                        : "[" + col + "]");
                     break;
                 case ClauseType.And:
                     query.Append(valueType == typeof(XmlDocument)
-                        ? $" AND CONVERT(NVARCHAR(MAX), [{col}])"
-                        : $" AND [{col}]");
+                        ? " AND CONVERT(NVARCHAR(MAX), [" + col + "])"
+                        : " AND [" + col + "]");
                     break;
                 case ClauseType.Or:
                     query.Append(valueType == typeof(XmlDocument)
-                        ? $" OR CONVERT(NVARCHAR(MAX), [{col}])"
-                        : $" OR [{col}]");
+                        ? " OR CONVERT(NVARCHAR(MAX), [" + col + "])"
+                        : " OR [" + col + "]");
                     break;
             }
 
@@ -300,30 +306,33 @@ namespace NS.Base
 
         private string GetTypeVal(string col, object val)
         {
-            switch (val)
+            var typeName = val is IList ? "List" : val.GetType().Name;
+            switch (typeName)
             {
-                case bool boolVal:
-                    return $"{(boolVal ? "1" : "0")}";
-                case short _:
-                case ushort _:
-                case int _:
-                case uint _:
-                case long _:
-                case ulong _:
-                case decimal _:
-                case double _:
-                    return $"{val}";
-                case DateTime _:
-                case char _:
-                case string _:
-                case Guid _:
-                case TimeSpan _:
-                case DateTimeOffset _:
-                    return $"'{val}'";
-                case IEnumerable list:
+                case "Boolean":
+                    if ((bool)val)
+                        return "1";
+                    return "0";
+                case "Int16":
+                case "UInt16":
+                case "Int32":
+                case "UInt32":
+                case "Int64":
+                case "UInt64":
+                case "Decimal":
+                case "Double":
+                    return val.ToString();
+                case "DateTime":
+                case "Char":
+                case "String":
+                case "Guid":
+                case "TimeSpan":
+                case "DateTimeOffset":
+                    return "'" + val + "'";
+                case "List":
                     var result = "";
 
-                    var enumerable = list as object[] ?? list.Cast<object>().ToArray();
+                    var enumerable = val as object[] ?? (val as IEnumerable).Cast<object>().ToArray();
 
                     const int batchSize = 2000;
                     var batches = Math.Ceiling((decimal)enumerable.Length / batchSize);
@@ -332,12 +341,12 @@ namespace NS.Base
                         result = enumerable
                             .Skip(i * batchSize)
                             .Take(batchSize)
-							.Aggregate(result, (current, o) => current + $"{GetTypeVal(col, o)}, ")
-							.TrimEnd(' ')
-							.TrimEnd(',');
+                            .Aggregate(result, (current, o) => current + GetTypeVal(col, o) + ", ")
+                            .TrimEnd(' ')
+                            .TrimEnd(',');
 
                         if (batches > i + 1)
-                            result += $") OR [{col}] IN (";
+                            result += ") OR [" + col + "] IN (";
                     }
 
                     return result;
@@ -355,7 +364,7 @@ namespace NS.Base
         public Where<T> And(string col, Comparison comparison)
         {
             if (comparison != Comparison.IsNull && comparison != Comparison.IsNotNull)
-                throw new Exception($"{nameof(And)}({col}, {comparison}) can only be called with Comparison.{nameof(Comparison.IsNull)} or Comparison.{nameof(Comparison.IsNotNull)}");
+                throw new Exception("And(" + col + ", " + comparison + ") can only be called with Comparison.IsNull or Comparison.IsNotNull");
             _query.Append(MakeClause(col, comparison, ClauseType.And));
             return this;
         }
@@ -374,7 +383,7 @@ namespace NS.Base
         public Where<T> Or(string col, Comparison comparison)
         {
             if (comparison != Comparison.IsNull && comparison != Comparison.IsNotNull)
-                throw new Exception($"{nameof(Or)}({col}, {comparison}) can only be called with Comparison.{nameof(Comparison.IsNull)} or Comparison.{nameof(Comparison.IsNotNull)}");
+                throw new Exception("Or(" + col + ", " + comparison + ") can only be called with Comparison.IsNull or Comparison.IsNotNull");
 
             _query.Append(MakeClause(col, comparison, ClauseType.Or));
             return this;
@@ -394,10 +403,10 @@ namespace NS.Base
         public Where<T> AndBeginGroup(string col, Comparison comparison)
         {
             if (comparison != Comparison.IsNull && comparison != Comparison.IsNotNull)
-                throw new Exception($"{nameof(AndBeginGroup)}({col}, {comparison}) can only be called with Comparison.{nameof(Comparison.IsNull)} or Comparison.{nameof(Comparison.IsNotNull)}");
+                throw new Exception("AndBeginGroup(" + col + ", " + comparison + ") can only be called with Comparison.IsNull or Comparison.IsNotNull");
 
             _activeGroups++;
-            _query.Append($" AND ({MakeClause(col, comparison, ClauseType.Initial)}");
+            _query.Append(" AND (" + MakeClause(col, comparison, ClauseType.Initial));
             return this;
         }
 
@@ -409,17 +418,17 @@ namespace NS.Base
         public Where<T> AndBeginGroup(string col, Comparison comparison, object val, Type valueType)
         {
             _activeGroups++;
-            _query.Append($" AND ({MakeClause(col, comparison, val, ClauseType.Initial, valueType)}");
+            _query.Append(" AND (" + MakeClause(col, comparison, val, ClauseType.Initial, valueType));
             return this;
         }
 
         public Where<T> OrBeginGroup(string col, Comparison comparison)
         {
             if (comparison != Comparison.IsNull && comparison != Comparison.IsNotNull)
-                throw new Exception($"{nameof(OrBeginGroup)}({col}, {comparison}) can only be called with Comparison.{nameof(Comparison.IsNull)} or Comparison.{nameof(Comparison.IsNotNull)}");
+                throw new Exception("OrBeginGroup(" + col + ", " + comparison + ") can only be called with Comparison.IsNull or Comparison.IsNotNull");
 
             _activeGroups++;
-            _query.Append($" OR ({MakeClause(col, comparison, ClauseType.Initial)}");
+            _query.Append(" OR (" + MakeClause(col, comparison, ClauseType.Initial));
             return this;
         }
 
@@ -431,7 +440,7 @@ namespace NS.Base
         public Where<T> OrBeginGroup(string col, Comparison comparison, object val, Type valueType)
         {
             _activeGroups++;
-            _query.Append($" OR ({MakeClause(col, comparison, val, ClauseType.Initial, valueType)}");
+            _query.Append(" OR (" + MakeClause(col, comparison, val, ClauseType.Initial, valueType));
             return this;
         }
 
@@ -444,7 +453,7 @@ namespace NS.Base
 
         public string QueryString()
         {
-            return $"{_repository.WhereQuery()} WHERE {_query}";
+            return _repository.WhereQuery() + " WHERE " + _query;
         }
     }
 
@@ -454,17 +463,18 @@ namespace NS.Base
     {
         protected Action<Exception> Logger;
         protected string ConnectionString;
-        private string Schema { get; }
-        private string TableName { get; }
-        public List<ColumnDefinition> Columns { get; set; } = new List<ColumnDefinition>();
+        private readonly string _schema;
+        private readonly string _tableName;
+        public List<ColumnDefinition> Columns { get; set; }
 
         protected BaseRepository(string connectionString, Action<Exception> logMethod, string schema, string table, int columnCount)
         {
-            Schema = schema;
-            TableName = table;
+            Columns = new List<ColumnDefinition>();
+            _schema = schema;
+            _tableName = table;
             ConnectionString = connectionString;
             Logger = logMethod ?? (exception => { });
-            
+
             var sql = $@"SELECT COUNT(*)
                             FROM INFORMATION_SCHEMA.COLUMNS
                             WHERE TABLE_NAME = '{table}' AND TABLE_SCHEMA = '{schema}'";
@@ -492,7 +502,7 @@ namespace NS.Base
         }
 
         public abstract bool Create(T item);
-        public abstract bool BulkCreate(List<T> items);		
+        public abstract bool BulkCreate(List<T> items);
         public abstract bool BulkCreate(params T[] items);
         protected abstract T ToItem(DataRow row);
 
@@ -518,7 +528,7 @@ namespace NS.Base
                     sb.Append(", ");
             }
 
-            sb.Append($" FROM [{Schema}].[{TableName}]");
+            sb.Append($" FROM [{_schema}].[{_tableName}]");
 
             return sb.ToString();
         }
@@ -586,7 +596,7 @@ namespace NS.Base
         {
             if (!queries.Any())
                 return new List<T>();
-                
+
             var first = queries.First();
             var whereQuery = Where(first.DbColumnName, Comparison.Equals, first.Value, first.DataType);
 
@@ -607,19 +617,19 @@ namespace NS.Base
             using (var cn = new SqlConnection(ConnectionString))
             {
                 var sb = new StringBuilder();
-				var pkCols = Columns.Where(x => x.PrimaryKey).ToList();
-                
+                var pkCols = Columns.Where(x => x.PrimaryKey).ToList();
+
                 if (Columns.Any(x => x.PrimaryKey))
                 {
                     sb.AppendLine("DECLARE @tempo TABLE (");
-					foreach (var pk in pkCols)
-					{
-						sb.Append($"[{pk.ColumnName}]  {pk.SqlDataType}");
-						sb.AppendLine(pk != pkCols[pkCols.Count - 1] ? "," : string.Empty);
-					}
+                    foreach (var pk in pkCols)
+                    {
+                        sb.Append($"[{pk.ColumnName}]  {pk.SqlDataType}");
+                        sb.AppendLine(pk != pkCols[pkCols.Count - 1] ? "," : string.Empty);
+                    }
                     sb.AppendLine(")");
                 }
-                sb.AppendLine($"INSERT [{Schema}].[{TableName}] (");
+                sb.AppendLine($"INSERT [{_schema}].[{_tableName}] (");
 
                 var toCreate = Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity).ToList();
                 foreach (var createColumn in toCreate)
@@ -628,26 +638,26 @@ namespace NS.Base
 
                     sb.AppendLine(createColumn != Columns.Last() ? "," : ")");
                 }
-				
-				if (Columns.Any(x => x.PrimaryKey))
+
+                if (Columns.Any(x => x.PrimaryKey))
                 {
-					sb.Append("OUTPUT ");
-                
-					foreach (var pk in pkCols)
-					{
-						sb.Append($"[Inserted].[{pk.ColumnName}] ");
-						sb.AppendLine(pk != pkCols[pkCols.Count - 1] ? "," : string.Empty);
-					}
-                    
+                    sb.Append("OUTPUT ");
+
+                    foreach (var pk in pkCols)
+                    {
+                        sb.Append($"[Inserted].[{pk.ColumnName}] ");
+                        sb.AppendLine(pk != pkCols[pkCols.Count - 1] ? "," : string.Empty);
+                    }
+
                     sb.AppendLine("INTO @tempo ");
-				}
+                }
 
                 sb.AppendLine("VALUES (");
 
                 var valueCols = Columns.Where(x => !x.PrimaryKey || (x.PrimaryKey && !x.Identity)).ToList();
                 foreach (var createColumn in valueCols)
                 {
-                    sb.Append($"@{createColumn.ColumnName}");
+                    sb.Append("@" + createColumn.ColumnName);
                     sb.AppendLine(createColumn != valueCols.Last() ? "," : ")");
 
                 }
@@ -677,20 +687,21 @@ namespace NS.Base
                                     : values[i])
                                 : DBNull.Value);
                     }
-                    
-                    var isSuccess = ToDataTable(cmd, cn, out var dt);
+
+                    DataTable dt;
+                    var isSuccess = ToDataTable(cmd, cn, out dt);
                     //Extract the primary keys
 
                     if (!isSuccess) return returnIds;
-					
-					if (dt.Rows.Count > 0)
+
+                    if (dt.Rows.Count > 0)
                     {
-						for (var i = 0; i < dt.Columns.Count; i++)
-						{
-							var dataColumn = dt.Columns[i];
-							returnIds.Add(dataColumn.ColumnName, dt.Rows[0][i]);
-						}
-					}
+                        for (var i = 0; i < dt.Columns.Count; i++)
+                        {
+                            var dataColumn = dt.Columns[i];
+                            returnIds.Add(dataColumn.ColumnName, dt.Rows[0][i]);
+                        }
+                    }
                 }
             }
 
@@ -735,7 +746,7 @@ namespace NS.Base
 
         protected bool BulkInsert(DataTable dt)
         {
-            return BulkInsert(dt, $"[{Schema}].[{TableName}]");
+            return BulkInsert(dt, $"[{_schema}].[{_tableName}]");
         }
 
         protected bool BaseUpdate(List<string> dirtyColumns, params object[] values)
@@ -743,11 +754,11 @@ namespace NS.Base
             bool isSuccess;
 
             var sb = new StringBuilder();
-            sb.AppendLine($"UPDATE [{Schema}].[{TableName}] SET");
+            sb.AppendLine($"UPDATE [{_schema}].[{_tableName}] SET");
 
             var nonpkCols = Columns.Where(x => !x.PrimaryKey).ToArray();
             foreach (var col in nonpkCols.Where(x => dirtyColumns.Contains(x.ColumnName)))
-            {            
+            {
                 sb.Append($"[{col.ColumnName}] = @{col.ColumnName}");
                 sb.AppendLine(col != nonpkCols.Last(x => dirtyColumns.Contains(x.ColumnName)) ? "," : "");
             }
@@ -758,7 +769,7 @@ namespace NS.Base
             {
                 sb.AppendLine(pk == pkCols.First()
                     ? $"[{pk.ColumnName}] = @{pk.ColumnName}"
-                    : $"AND [{pk.ColumnName}] = @{pk.ColumnName}");
+                        : $"AND [{pk.ColumnName}] = @{pk.ColumnName}");
             }
 
             var sql = sb.ToString();
@@ -774,6 +785,8 @@ namespace NS.Base
                     for (var i = 0; i < Columns.Count; i++)
                     {
                         var updateColumn = Columns[i];
+                        if (!dirtyColumns.Contains(updateColumn.ColumnName) && !updateColumn.PrimaryKey) continue;
+
                         if (updateColumn.PrimaryKey)
                             cmd.Parameters.AddWithValue(updateColumn.ColumnName, values[i]);
                         else
@@ -796,8 +809,8 @@ namespace NS.Base
             using (var cn = new SqlConnection(ConnectionString))
             {
                 var sb = new StringBuilder();
-                sb.Append($@"DELETE [{Schema}].[{TableName}] WHERE ");
-				sb.Append($"[{deleteColumn.ColumnName}] = @{deleteColumn.ColumnName}");
+                sb.Append($"DELETE [{_schema}].[{_tableName}] WHERE ");
+                sb.Append($"[{ deleteColumn.ColumnName}] = @{deleteColumn.ColumnName}");
 
                 var sql = sb.ToString();
                 if (HasInjection(sql))
@@ -815,17 +828,17 @@ namespace NS.Base
             return isSuccess;
         }
 
-		protected bool BaseDelete(string columnName, List<object> dataValues)
-		{
-			bool isSuccess;
+        protected bool BaseDelete(string columnName, List<object> dataValues)
+        {
+            bool isSuccess;
 
-			
+
             //Creation
             using (var cn = new SqlConnection(ConnectionString))
             {
                 var sb = new StringBuilder();
 
-                sb.Append($@"DELETE [{Schema}].[{TableName}] WHERE [{columnName}] IN (");
+                sb.Append($"DELETE [{_schema}].[{_tableName}] WHERE [{columnName}] IN (");
 
                 foreach (var dataValue in dataValues)
                 {
@@ -839,7 +852,7 @@ namespace NS.Base
                 var sql = sb.ToString();
                 if (HasInjection(sql))
                     throw new Exception("Sql Injection attempted. Aborted");
-                
+
                 using (var cmd = CreateCommand(cn, sql))
                 {
                     isSuccess = NoneQuery(cn, cmd);
@@ -847,11 +860,11 @@ namespace NS.Base
             }
 
             return isSuccess;
-		}
+        }
 
         protected bool BaseMerge(List<object[]> mergeData)
         {
-            var tempTableName = $"staging{DateTime.Now.Ticks}";
+            var tempTableName = "staging" + DateTime.Now.Ticks;
 
             try
             {
@@ -860,7 +873,7 @@ namespace NS.Base
                 {
                     dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
                     if (!mergeColumn.PrimaryKey)
-                        dt.Columns.Add($"{mergeColumn.ColumnName}Changed", typeof(bool));
+                        dt.Columns.Add(mergeColumn.ColumnName + "Changed", typeof(bool));
                 }
 
                 foreach (var data in mergeData)
@@ -874,7 +887,7 @@ namespace NS.Base
                 using (var cn = new SqlConnection(ConnectionString))
                 {
                     var mergeSql = new StringBuilder();
-                    mergeSql.AppendLine($"MERGE INTO [{Schema}].[{TableName}] AS [Target]");
+                    mergeSql.AppendLine($"MERGE INTO [{_schema}].[{_tableName}] AS [Target]");
                     mergeSql.AppendLine($"USING {tempTableName} AS Source");
                     mergeSql.AppendLine("ON");
 
@@ -902,10 +915,10 @@ namespace NS.Base
 
                     mergeSql.AppendLine("WHEN NOT MATCHED THEN INSERT (");
 
-                    mergeSql.AppendLine($"{string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[{x.ColumnName}]"))})");
+                    mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[{x.ColumnName}]").ToArray()) + ")");
                     mergeSql.AppendLine("VALUES (");
-                    mergeSql.AppendLine($"{string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[Source].[{x.ColumnName}]"))});");
-                    mergeSql.AppendLine("IF OBJECT_ID('dbo.DropTmpTable') IS NULL EXEC ('CREATE PROCEDURE dbo.DropTmpTable @table NVARCHAR(250) AS DECLARE @sql NVARCHAR(300) = N''DROP TABLE '' + @table; EXECUTE sp_executesql @sql')");
+                    mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[Source].[{x.ColumnName}]").ToArray()) + ");");
+                    mergeSql.AppendLine($"DROP TABLE {tempTableName}");
 
                     var sql = mergeSql.ToString();
                     if (HasInjection(sql))
@@ -921,9 +934,9 @@ namespace NS.Base
 
                     cn.Open();
                     cmd.ExecuteNonQuery();
-					cmd.Dispose();
+                    cmd.Dispose();
 
-					var dropCmd = new SqlCommand
+                    var dropCmd = new SqlCommand
                     {
                         Connection = cn,
                         CommandType = CommandType.StoredProcedure,
@@ -1161,16 +1174,15 @@ namespace NS.Base
         protected void CreateStagingTable(string tempTableName, bool onlyPrimaryKeys = false)
         {
             var stagingSqlBuilder = new StringBuilder();
-            stagingSqlBuilder.AppendLine($@"CREATE TABLE {tempTableName} (");
+            stagingSqlBuilder.AppendLine(@"CREATE TABLE " + tempTableName + " (");
             foreach (var mergeColumn in Columns.Where(x => onlyPrimaryKeys && x.PrimaryKey || !onlyPrimaryKeys))
             {
-                stagingSqlBuilder.Append(
-                $@"[{mergeColumn.ColumnName}] {mergeColumn.SqlDataType} NULL");
+                stagingSqlBuilder.Append($"[{mergeColumn.ColumnName}] {mergeColumn.SqlDataType} NULL");
 
                 if (!mergeColumn.PrimaryKey)
                 {
                     stagingSqlBuilder.AppendLine(",");
-                    stagingSqlBuilder.Append($@"[{mergeColumn.ColumnName}Changed] [BIT] NOT NULL");
+                    stagingSqlBuilder.Append($"[{mergeColumn.ColumnName}Changed] [BIT] NOT NULL");
                 }
                 stagingSqlBuilder.AppendLine(mergeColumn != Columns[Columns.Count - 1] ? "," : ")");
             }

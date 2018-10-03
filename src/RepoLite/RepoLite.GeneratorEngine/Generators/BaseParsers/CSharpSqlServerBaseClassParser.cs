@@ -17,7 +17,7 @@ namespace RepoLite.GeneratorEngine.Generators.BaseParsers
 
         public string BuildBaseModel()
         {
-            var template = File.ReadAllText(@"Templates\CSharp\BaseModel.txt");
+            var template = File.ReadAllText(@"Templates\CSharp\BaseModel.cs");
             template = template.Replace("MODELNAMESPACE", AppSettings.Generation.ModelGenerationNamespace);
             return template;
         }

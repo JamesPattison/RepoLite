@@ -9,19 +9,9 @@
              xmlns:System="clr-namespace:System;assembly=mscorlib"
              xmlns:StyleAlias="clr-namespace:RepoLite.Common.Enums;assembly=RepoLite.Common"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="360"
+             d:DesignHeight="247" d:DesignWidth="360"
              d:DataContext="{d:DesignInstance settings:AllSettingsViewModel}">
     <UserControl.Resources>
-        <ObjectDataProvider x:Key="targetFramework" MethodName="GetValues" ObjectType="{x:Type System:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="StyleAlias:TargetFramework"/>
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        <ObjectDataProvider x:Key="cSharpVersion" MethodName="GetValues" ObjectType="{x:Type System:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="StyleAlias:CSharpVersion"/>
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
         <ObjectDataProvider x:Key="pluginEnum" MethodName="GetValues" ObjectType="{x:Type System:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="StyleAlias:PluginEnum"/>
@@ -91,18 +81,6 @@
                         <Label Style="{StaticResource LeftLabel}" Content="Repository FileName Format" Target="{Binding ElementName=RepositoryFileNameFormat}"
                                ToolTip="The format for Repository filenames. Available variables: {Schema}, {Name}"/>
                         <TextBox x:Name="RepositoryFileNameFormat" Text="{Binding Path=GenerationSettings.RepositoryFileNameFormat}"/>
-                    </StackPanel>
-                    <StackPanel>
-                        <Label Style="{StaticResource LeftLabel}" Content="Target Framework" Target="{Binding ElementName=TargetFramework}"
-                               ToolTip="The target framework to support in the generated code"/>
-                        <ComboBox x:Name="TargetFramework" ItemsSource="{Binding Source={StaticResource targetFramework}}"
-                                  SelectedItem="{Binding Path=GenerationSettings.TargetFramework}"/>
-                    </StackPanel>
-                    <StackPanel>
-                        <Label Style="{StaticResource LeftLabel}" Content="C# Version" Target="{Binding ElementName=CSharpVersion}"
-                               ToolTip="The language version to use (not framework, the language version)"/>
-                        <ComboBox x:Name="CSharpVersion" ItemsSource="{Binding Source={StaticResource cSharpVersion}}"
-                                  SelectedItem="{Binding Path=GenerationSettings.CSharpVersion}"/>
                     </StackPanel>
                     <StackPanel>
                         <Label Style="{StaticResource LeftLabel}" Content="Plugin" Target="{Binding ElementName=Plugin}"
