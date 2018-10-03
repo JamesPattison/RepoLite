@@ -48,15 +48,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Generators\BaseParsers\Base\BaseClassParseOptions.cs" />
-    <Compile Include="Generators\BaseParsers\Base\BaseClassParser.cs" />
     <Compile Include="CodeGenerator.cs" />
     <Compile Include="Generators\BaseParsers\CSharpSqlServerBaseClassParser.cs" />
+    <Compile Include="Generators\BaseParsers\Base\IParser.cs" />
     <Compile Include="Generators\CSharpSqlServerGenerator.cs" />
     <Compile Include="IGenerator.cs" />
     <Compile Include="Models\TableToGenerate.cs" />
     <Compile Include="PluginHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Templates\CSharp\BaseModel.cs" />
+    <Compile Include="Templates\CSharp\BaseRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Plugins\RepoLite.Plugins.K3\RepoLite.Plugins.K3.csproj">

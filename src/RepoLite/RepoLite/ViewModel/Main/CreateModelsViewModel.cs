@@ -191,13 +191,12 @@ namespace RepoLite.ViewModel.Main
             if (!Directory.Exists($"{outputDirectory}/Base"))
                 Directory.CreateDirectory($"{outputDirectory}/Base");
 
-            BaseClassParser parser;
+            IParser parser;
 
             switch (AppSettings.System.GenerationLanguage)
             {
                 case GenerationLanguage.CSharp:
-                    parser = new CSharpSqlServerBaseClassParser(AppSettings.Generation.TargetFramework,
-                        AppSettings.Generation.CSharpVersion);
+                    parser = new CSharpSqlServerBaseClassParser();
                     break;
                 default:
                     //"If you've added a new language to the enum, the generator needs creating and hooking up here"

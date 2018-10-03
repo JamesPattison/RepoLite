@@ -84,8 +84,6 @@
     <Compile Include="ActualGeneratedFIlesTests\NullableTableTests.cs" />
     <Compile Include="ActualGeneratedFIlesTests\PersonTableTests.cs" />
     <Compile Include="ActualGeneratedFIlesTests\XmlTableTests.cs" />
-    <Compile Include="BaseClassParser\BaseClassParserTests.cs" />
-    <Compile Include="BaseClassParser\CSharpSqlServerBaseClassParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
