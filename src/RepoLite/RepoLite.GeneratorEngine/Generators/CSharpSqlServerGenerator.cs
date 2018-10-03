@@ -130,7 +130,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab2, "{");
             foreach (var column in table.Columns)
             {
-                var sqlPrecisionColumns = new[] { 35, 60, 62, 99, 106, 108, 122, 167, 175, 231, 239 };
+                var sqlPrecisionColumns = new[] { 35, 60, 62, 99, 106, 108, 122, 165, 167, 173, 175, 231, 239 };
                 var colLengthVal = sqlPrecisionColumns.Contains(column.SqlDataTypeCode) ? $"({Math.Max(column.MaxLength, column.MaxIntLength)})" : string.Empty;
                 sb.AppendLine(Tab3,
                     _cSharpVersion >= CSharpVersion.CSharp6
@@ -278,6 +278,15 @@ namespace RepoLite.GeneratorEngine.Generators
                             _cSharpVersion >= CSharpVersion.CSharp6
                                 ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Value cannot be null\"));"
                                 : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Value cannot be null\"));");
+                    }
+
+                    if (column.MaxLength > 0)
+                    {
+                        sb.AppendLine(Tab3, $"if ({column.PropertyName} != null && {column.PropertyName}.Length > {column.MaxLength})");
+                        sb.AppendLine(Tab4,
+                            _cSharpVersion >= CSharpVersion.CSharp6
+                                ? $"validationErrors.Add(new ValidationError(nameof({column.PropertyName}), \"Binary array values exceed database size\"));"
+                                : $"validationErrors.Add(new ValidationError(\"{column.PropertyName}\", \"Binary array values exceed database size\"));");
                     }
                 }
                 else

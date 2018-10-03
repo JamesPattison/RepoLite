@@ -15,6 +15,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests.Base
             RunSql(@"DROP TABLE IF EXISTS [dbo].[Event]");
             RunSql(@"DROP TABLE IF EXISTS [dbo].[xmltable]");
             RunSql(@"DROP TABLE IF EXISTS [dbo].[NullableTable]");
+	        RunSql(@"DROP TABLE IF EXISTS [dbo].[BinMan]");
 
             RunSql(@"CREATE TABLE [dbo].[Person](
 	                    [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
@@ -57,59 +58,11 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests.Base
             	        [DoB] DATETIME NULL,
             	        [lolVal] UNIQUEIDENTIFIER NULL
                     )");
-
-            RunSql(@"CREATE TABLE [AWM].[BIN_MASTER](
-	                        [BIN_ID] [int] NOT NULL,
-	                        [RACK_ID] [int] NOT NULL,
-	                        [STATION_ID] [int] NULL,
-	                        [BIN_BIN_ID] [int] NULL,
-	                        [WH_ID] [int] NULL,
-	                        [BIN_NAME] [char](30) NOT NULL,
-	                        [BIN_BAR_CODE] [char](20) NULL,
-	                        [BIN_PACKING_ORDER] [int] NULL,
-	                        [MAX_CONTAINERS] [int] NULL,
-	                        [MAX_WEIGHT] [decimal](28, 6) NOT NULL,
-	                        [MAX_VOLUME] [decimal](28, 6) NOT NULL,
-	                        [MAX_HEIGHT] [decimal](28, 6) NOT NULL,
-	                        [MAX_DEPTH] [decimal](28, 6) NOT NULL,
-	                        [MAX_WIDTH] [decimal](28, 6) NOT NULL,
-	                        [ALLOW_MULTI_STOCK] [bit] NOT NULL,
-	                        [TRANSITION_BIN] [bit] NOT NULL,
-	                        [DEFAULT_RECEIPT_BIN] [bit] NOT NULL,
-	                        [CONTAINER_STORAGE_BIN] [bit] NOT NULL,
-	                        [PICK_SEQUENCE] [int] NULL,
-	                        [STOCK_TAKE] [bit] NOT NULL,
-	                        [AUTO_ALLOCATE] [bit] NOT NULL,
-	                        [BIN_FULL] [bit] NOT NULL,
-	                        [PALLETISATION_BIN] [bit] NOT NULL,
-	                        [ZONE_ID] [int] NULL,
-	                        [POSTMAN_WALK_HOUSE_NO] [int] NULL,
-	                        [Z_PICK_NO] [int] NULL,
-	                        [VIRTUAL_CONTAINERS_ONLY] [bit] NOT NULL,
-	                        [TRANSITIONAL_BIN] [bit] NOT NULL,
-	                        [TYPE_ET] [bit] NOT NULL,
-	                        [INNER_HEIGHT] [decimal](18, 3) NULL,
-	                        [IS_TOP_SHELF] [bit] NOT NULL,
-	                        [TRANSIT_IN] [bit] NULL,
-	                        [TRANSIT_OUT] [bit] NULL,
-	                        [WIP_RECEIVING] [bit] NOT NULL,
-	                        [ON_HOLD] [bit] NOT NULL,
-	                        [RACK_LEVEL] [char](1) NOT NULL,
-	                        [RACK_SEQUENCE] [int] NOT NULL,
-	                        [WIP_RETURN_BIN] [int] NULL,
-	                        [CHECK_DIGIT] [int] NOT NULL,
-	                        [SoftAllocWHArea] [int] NULL,
-	                        [InPickingProcess] [bit] NOT NULL,
-	                        [PickingByRacId] [int] NOT NULL,
-	                        [InPickingInstanceID] [int] NOT NULL,
-	                        [UsePickFaceBinsForWIP] [bit] NOT NULL,
-	                        [SingleInwardMovementsForWIP] [bit] NOT NULL,
-	                        [SuspenseBin] [bit] NOT NULL,
-                         CONSTRAINT [PK_BIN_MASTER] PRIMARY KEY CLUSTERED 
-                        (
-	                        [BIN_ID] ASC
-                        )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-                        ) ON [PRIMARY]");
+	        
+	        RunSql(@"CREATE TABLE [BinMan](
+						[Id] INT NOT NULL,
+						[Data] BINARY(8) NOT NULL
+					)");
 
             RunSql("INSERT [dbo].[Person] ([Name],[Age],[Nationality],[Registered]) VALUES ('Jim Pattison', 31, 'British', 1)");
             RunSql("INSERT [dbo].[Person] ([Name],[Age],[Nationality],[Registered]) VALUES ('Rebecca Pattison', 30, 'British', 0)");

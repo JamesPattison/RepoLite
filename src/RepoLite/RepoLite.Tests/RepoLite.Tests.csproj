@@ -65,11 +65,14 @@
     <Compile Include="ActualGeneratedFIlesTests\AddressTableTests.cs" />
     <Compile Include="ActualGeneratedFIlesTests\Base\BaseTests.cs" />
     <Compile Include="ActualGeneratedFIlesTests\Base\Data.cs" />
+    <Compile Include="ActualGeneratedFIlesTests\BinManTests.cs" />
     <Compile Include="ActualGeneratedFIlesTests\EventTableTests.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\Address.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\AddressDto.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\Base\BaseModel.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\Base\BaseRepository.cs" />
+    <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\Binman.cs" />
+    <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\BinmanDto.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\Event.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\EventDto.cs" />
     <Compile Include="ActualGeneratedFIlesTests\GeneratedFiles\NullableTable.cs" />

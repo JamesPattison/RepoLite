@@ -285,18 +285,3 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         }
     }
 }
-/*
- *
- *             RunSql("INSERT [dbo].[xmltable] VALUES ('XML1','<xml>Value</xml>')");
-            RunSql("INSERT [dbo].[xmltable] VALUES ('XML2', '<xml>Another Value</xml>')");
-            RunSql("INSERT [dbo].[xmltable] VALUES ('XML3', '<xml>Yet Another Value</xml>')");
-            RunSql("INSERT [dbo].[xmltable] VALUES ('XML4', '<xml><nest>Nested!</nest></xml>')");
-            RunSql("INSERT [dbo].[xmltable] VALUES ('XML5', '<xml><nest><nest>Nested Further!</nest></nest></xml>')");
-
-    
-        bool Create(Xmltable item);
-        bool BulkCreate(List<Xmltable> items);
-
-        Where<Xmltable> Where(string col, Comparison comparison, object val);
-        IEnumerable<Xmltable> Where(string query);
- */
