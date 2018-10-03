@@ -957,6 +957,8 @@ namespace {{NAMESPACE}}.Base
                     for (var i = 0; i < Columns.Count; i++)
                     {
                         var updateColumn = Columns[i];
+                        if (!dirtyColumns.Contains(updateColumn.ColumnName) && !updateColumn.PrimaryKey) continue;
+
                         if (updateColumn.PrimaryKey)
                             cmd.Parameters.AddWithValue(updateColumn.ColumnName, values[i]);
                         else
