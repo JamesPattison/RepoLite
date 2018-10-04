@@ -518,6 +518,24 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab3, $"return Where({(pk.DbColName == nameof(pk.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{pk.DbColName})" : $"\"{pk.DbColName}\"")}, Comparison.In, {pk.FieldName}s).Results();");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
+
+                if (table.PrimaryKeys.Count == 1 &&
+                    new[] {typeof(short), typeof(int), typeof(long), typeof(decimal), typeof(double), typeof(float)}
+                        .Contains(pk.DataType))
+                {
+                    //Get Max ID
+                    sb.AppendLine(Tab2, $"public {pk.DataType.Name} GetMaxId()");
+                    sb.AppendLine(Tab2, "{");
+                    sb.AppendLine(Tab3, "using (var cn = new SqlConnection(ConnectionString))");
+                    sb.AppendLine(Tab3, "{");
+                    sb.AppendLine(Tab4, $"using (var cmd = CreateCommand(cn, \"SELECT MAX({pk.DbColName}) FROM {table.DbTableName}\"))");
+                    sb.AppendLine(Tab4, "{");
+                    sb.AppendLine(Tab5, "cn.Open();");
+                    sb.AppendLine(Tab5, $"return ({pk.DataType.Name})cmd.ExecuteScalar();");
+                    sb.AppendLine(Tab4, "}");
+                    sb.AppendLine(Tab3, "}");
+                    sb.AppendLine(Tab2, "}");
+                }
             }
 
             return sb;
