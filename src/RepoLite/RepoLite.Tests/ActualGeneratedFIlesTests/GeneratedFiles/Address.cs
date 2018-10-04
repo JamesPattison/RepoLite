@@ -76,16 +76,16 @@ namespace NS
 		public AddressRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
 			"dbo", "Address", 10)
 		{
-			Columns.Add(new ColumnDefinition("Id", typeof(System.Int32), "[INT]", false, true, true));
-			Columns.Add(new ColumnDefinition("AnotherId", typeof(System.String), "[NVARCHAR](10)", false, true, false));
-			Columns.Add(new ColumnDefinition("PersonId", typeof(System.Int32), "[INT]", false, false, false));
-			Columns.Add(new ColumnDefinition("Line1", typeof(System.String), "[NVARCHAR](100)", false, false, false));
-			Columns.Add(new ColumnDefinition("Line2", typeof(System.String), "[NVARCHAR](100)", true, false, false));
-			Columns.Add(new ColumnDefinition("Line3", typeof(System.String), "[NVARCHAR](100)", true, false, false));
-			Columns.Add(new ColumnDefinition("Line4", typeof(System.String), "[NVARCHAR](100)", true, false, false));
-			Columns.Add(new ColumnDefinition("PostCode", typeof(System.String), "[NVARCHAR](15)", false, false, false));
-			Columns.Add(new ColumnDefinition("PhoneNumber", typeof(System.String), "[NVARCHAR](20)", true, false, false));
-			Columns.Add(new ColumnDefinition("COUNTRY_CODE", typeof(System.String), "[NVARCHAR](2)", true, false, false));
+			Columns.Add(new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, true, true));
+			Columns.Add(new ColumnDefinition("AnotherId", typeof(System.String), "[NVARCHAR](10)", SqlDbType.NVarChar, false, true, false));
+			Columns.Add(new ColumnDefinition("PersonId", typeof(System.Int32), "[INT]", SqlDbType.Int, false, false, false));
+			Columns.Add(new ColumnDefinition("Line1", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, false, false, false));
+			Columns.Add(new ColumnDefinition("Line2", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, true, false, false));
+			Columns.Add(new ColumnDefinition("Line3", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, true, false, false));
+			Columns.Add(new ColumnDefinition("Line4", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, true, false, false));
+			Columns.Add(new ColumnDefinition("PostCode", typeof(System.String), "[NVARCHAR](15)", SqlDbType.NVarChar, false, false, false));
+			Columns.Add(new ColumnDefinition("PhoneNumber", typeof(System.String), "[NVARCHAR](20)", SqlDbType.NVarChar, true, false, false));
+			Columns.Add(new ColumnDefinition("COUNTRY_CODE", typeof(System.String), "[NVARCHAR](2)", SqlDbType.NVarChar, true, false, false));
 		}
 
 		public Address Get(Int32 id, String anotherId)
@@ -186,7 +186,7 @@ namespace NS
 			if (address == null)
 				return false;
 
-			var deleteColumn = new DeleteColumn("Id", address.Id);
+			var deleteColumn = new DeleteColumn("Id", address.Id, SqlDbType.Int);
 
 			return BaseDelete(deleteColumn);
 		}

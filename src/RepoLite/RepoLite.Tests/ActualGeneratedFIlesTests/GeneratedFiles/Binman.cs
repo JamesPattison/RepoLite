@@ -29,8 +29,8 @@ namespace NS
 		public BinManRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
 			"dbo", "BinMan", 2)
 		{
-			Columns.Add(new ColumnDefinition("Id", typeof(System.Int32), "[INT]", false, false, false));
-			Columns.Add(new ColumnDefinition("Data", typeof(System.Byte[]), "[BINARY](8)", false, false, false));
+			Columns.Add(new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, false, false));
+			Columns.Add(new ColumnDefinition("Data", typeof(System.Byte[]), "[BINARY](8)", SqlDbType.Binary, false, false, false));
 		}
 		public override bool Create(BinMan item)
 		{
@@ -77,11 +77,11 @@ namespace NS
 		}
 		public bool DeleteById(Int32 id)
 		{
-			return BaseDelete(new DeleteColumn("Id", id));
+			return BaseDelete(new DeleteColumn("Id", id, SqlDbType.Int));
 		}
 		public bool DeleteByData(Byte[] data)
 		{
-			return BaseDelete(new DeleteColumn("Data", data));
+			return BaseDelete(new DeleteColumn("Data", data, SqlDbType.Binary));
 		}
 
 		public bool Merge(List<BinMan> items)

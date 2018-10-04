@@ -3,6 +3,7 @@ using RepoLite.Common.Extensions;
 using RepoLite.Common.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Xml;
@@ -29,7 +30,7 @@ namespace RepoLite.DataAccess.Accessors
                             TABLE_TYPE = 'BASE TABLE'
                         AND
                             (@schema IS NULL OR TABLE_SCHEMA = @schema)",
-                    new { schema });
+                    new {schema});
 
                 var toReturn = tables.Select(table => table.GetTableAndSchema()).ToList();
                 return toReturn;
@@ -108,6 +109,7 @@ namespace RepoLite.DataAccess.Accessors
                 foreach (var column in columns)
                 {
                     column.DataType = GetDataType(column.SqlDataTypeCode);
+                    column.DbType = GetDbType(column.SqlDataTypeCode);
                 }
 
                 return columns;
@@ -119,55 +121,91 @@ namespace RepoLite.DataAccess.Accessors
         {
             switch (sqlType)
             {
-                case 104:   //BIT
+                case 104: //BIT
                     return typeof(bool);
-                case 48:    //TINYINT
+                case 48: //TINYINT
                     return typeof(byte);
-                case 34:    //IMAGE
-                case 165:   //VARBINARY
-                case 173:   //BINARY
-                case 189:   //TIMESTAMP -- hmm
+                case 34: //IMAGE
+                case 165: //VARBINARY
+                case 173: //BINARY
+                case 189: //TIMESTAMP -- hmm
                     return typeof(byte[]);
-                case 40:    //DATE
-                case 42:    //DATETIME2
-                case 58:    //SMALLDATETIME
-                case 61:    //DATETIME
+                case 40: //DATE
+                case 42: //DATETIME2
+                case 58: //SMALLDATETIME
+                case 61: //DATETIME
                     return typeof(DateTime);
-                case 43:    //DATETIMEOFFSET
+                case 43: //DATETIMEOFFSET
                     return typeof(DateTimeOffset);
-                case 59:    //REAL
-                case 60:    //MONEY
-                case 62:    //FLOAT
-                case 106:   //DECIMAL
-                case 108:   //NUMERIC
-                case 122:   //SMALLMONEY
+                case 59: //REAL
+                case 60: //MONEY
+                case 62: //FLOAT
+                case 106: //DECIMAL
+                case 108: //NUMERIC
+                case 122: //SMALLMONEY
                     return typeof(decimal);
-                case 36:    //UNIQUEIDENTIFIER
+                case 36: //UNIQUEIDENTIFIER
                     return typeof(Guid);
-                case 52:    //SMALLINT
+                case 52: //SMALLINT
                     return typeof(short);
-                case 56:    //INT
+                case 56: //INT
                     return typeof(int);
-                case 127:   //BIGINT
+                case 127: //BIGINT
                     return typeof(long);
-                case 98:    //SQL_VARIANT
+                case 98: //SQL_VARIANT
                     return typeof(object);
-                case 41:    //TIME
+                case 41: //TIME
                     return typeof(TimeSpan);
                 //case 240:   //GEOGRAPHY          //Not supporting
                 //    return typeof(SqlGeography);
-                case 241:   //XML
+                case 241: //XML
                     return typeof(XmlDocument);
-                case 35:    //TEXT
-                case 99:    //NTEXT
-                case 167:   //VARCHAR
-                case 175:   //CHAR
-                case 231:   //NVARCHAR
-                case 239:   //NCHAR
+                case 35: //TEXT
+                case 99: //NTEXT
+                case 167: //VARCHAR
+                case 175: //CHAR
+                case 231: //NVARCHAR
+                case 239: //NCHAR
                 default:
                     return typeof(string);
             }
         }
 
+
+        private SqlDbType GetDbType(int sqlType)
+        {
+            switch (sqlType)
+            {
+                case 34: return SqlDbType.Image;
+                case 35: return SqlDbType.Text;
+                case 36: return SqlDbType.UniqueIdentifier;
+                case 40: return SqlDbType.Date;
+                case 41: return SqlDbType.Time;
+                case 42: return SqlDbType.DateTime2;
+                case 43: return SqlDbType.DateTimeOffset;
+                case 48: return SqlDbType.TinyInt;
+                case 52: return SqlDbType.SmallInt;
+                case 56: return SqlDbType.Int;
+                case 58: return SqlDbType.SmallDateTime;
+                case 59: return SqlDbType.Real;
+                case 60: return SqlDbType.Money;
+                case 61: return SqlDbType.DateTime;
+                case 62: return SqlDbType.Float;
+                case 98: return SqlDbType.Variant;
+                case 104: return SqlDbType.Bit;
+                case 106: return SqlDbType.Decimal;
+                case 122: return SqlDbType.SmallMoney;
+                case 127: return SqlDbType.BigInt;
+                case 165: return SqlDbType.VarBinary;
+                case 167: return SqlDbType.VarChar;
+                case 173: return SqlDbType.Binary;
+                case 175: return SqlDbType.Char;
+                case 189: return SqlDbType.Timestamp;
+                case 231: return SqlDbType.NVarChar;
+                case 239: return SqlDbType.NChar;
+                case 241: return SqlDbType.Xml;
+            }
+            throw new Exception("SQL Type not supported");
+        }
     }
 }

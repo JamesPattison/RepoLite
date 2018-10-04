@@ -34,8 +34,8 @@ namespace NS
 		public EventRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
 			"dbo", "Event", 2)
 		{
-			Columns.Add(new ColumnDefinition("EventId", typeof(System.String), "[NVARCHAR](20)", false, true, false));
-			Columns.Add(new ColumnDefinition("EventName", typeof(System.String), "[NVARCHAR](100)", false, false, false));
+			Columns.Add(new ColumnDefinition("EventId", typeof(System.String), "[NVARCHAR](20)", SqlDbType.NVarChar, false, true, false));
+			Columns.Add(new ColumnDefinition("EventName", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, false, false, false));
 		}
 
 		public Event Get(String eventId)
@@ -120,7 +120,7 @@ namespace NS
 			if (@event == null)
 				return false;
 
-			var deleteColumn = new DeleteColumn("EventId", @event.EventId);
+			var deleteColumn = new DeleteColumn("EventId", @event.EventId, SqlDbType.NVarChar);
 
 			return BaseDelete(deleteColumn);
 		}

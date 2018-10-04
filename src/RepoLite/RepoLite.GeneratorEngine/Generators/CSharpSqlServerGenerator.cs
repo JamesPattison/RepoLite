@@ -124,7 +124,13 @@ namespace RepoLite.GeneratorEngine.Generators
                 var sqlPrecisionColumns = new[] { 35, 60, 62, 99, 106, 108, 122, 165, 167, 173, 175, 231, 239 };
                 var colLengthVal = sqlPrecisionColumns.Contains(column.SqlDataTypeCode) ? $"({Math.Max(column.MaxLength, column.MaxIntLength)})" : string.Empty;
                 sb.AppendLine(Tab3,
-                    $"Columns.Add(new ColumnDefinition({(column.DbColName == nameof(column.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{column.DbColName})" : $"\"{column.DbColName}\"")}, typeof({column.DataType}), \"[{column.SqlDataType}]{colLengthVal}\", {column.IsNullable.ToString().ToLower()}, {column.PrimaryKey.ToString().ToLower()}, {column.IsIdentity.ToString().ToLower()}));");
+                    $"Columns.Add(new ColumnDefinition({(column.DbColName == nameof(column.DbColName) ? $"nameof({GetClassName(table.ClassName)}.{column.DbColName})" : $"\"{column.DbColName}\"")}, " +
+                    $"typeof({column.DataType}), " +
+                    $"\"[{column.SqlDataType}]{colLengthVal}\", " +
+                    $"SqlDbType.{column.DbType}, " +
+                    $"{column.IsNullable.ToString().ToLower()}, " +
+                    $"{column.PrimaryKey.ToString().ToLower()}, " +
+                    $"{column.IsIdentity.ToString().ToLower()}));");
             }
             sb.AppendLine(Tab2, "}");
 
@@ -649,7 +655,8 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab3, $"if ({table.LowerClassName} == null)");
             sb.AppendLine(Tab4, "return false;");
             sb.AppendLine("");
-            sb.AppendLine(Tab3, $"var deleteColumn = new DeleteColumn(\"{table.PrimaryKeys[0].DbColName}\", {table.LowerClassName}.{table.PrimaryKeys[0].DbColName});");
+            var tpk = table.PrimaryKeys[0];
+            sb.AppendLine(Tab3, $"var deleteColumn = new DeleteColumn(\"{tpk.DbColName}\", {table.LowerClassName}.{tpk.DbColName}, SqlDbType.{tpk.DbType});");
             sb.AppendLine("");
             sb.AppendLine(Tab3, "return BaseDelete(deleteColumn);");
             sb.AppendLine(Tab2, "}");
@@ -789,7 +796,7 @@ namespace RepoLite.GeneratorEngine.Generators
             {
                 sb.AppendLine(Tab2, $"public bool DeleteBy{column.DbColName}({column.DataType.Name} {column.FieldName})");
                 sb.AppendLine(Tab2, "{");
-                sb.AppendLine(Tab3, $"return BaseDelete(new DeleteColumn(\"{column.DbColName}\", {column.FieldName}));");
+                sb.AppendLine(Tab3, $"return BaseDelete(new DeleteColumn(\"{column.DbColName}\", {column.FieldName}, SqlDbType.{column.DbType}));");
                 sb.AppendLine(Tab2, "}");
             }
 

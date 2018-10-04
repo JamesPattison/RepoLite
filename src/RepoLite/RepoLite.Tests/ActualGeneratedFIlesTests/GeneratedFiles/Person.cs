@@ -43,11 +43,11 @@ namespace NS
 		public PersonRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
 			"dbo", "Person", 5)
 		{
-			Columns.Add(new ColumnDefinition("Id", typeof(System.Int32), "[INT]", false, true, true));
-			Columns.Add(new ColumnDefinition("Name", typeof(System.String), "[NVARCHAR](50)", false, false, false));
-			Columns.Add(new ColumnDefinition("Age", typeof(System.Int32), "[INT]", false, false, false));
-			Columns.Add(new ColumnDefinition("Nationality", typeof(System.String), "[NVARCHAR](50)", false, false, false));
-			Columns.Add(new ColumnDefinition("Registered", typeof(System.Boolean), "[BIT]", false, false, false));
+			Columns.Add(new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, true, true));
+			Columns.Add(new ColumnDefinition("Name", typeof(System.String), "[NVARCHAR](50)", SqlDbType.NVarChar, false, false, false));
+			Columns.Add(new ColumnDefinition("Age", typeof(System.Int32), "[INT]", SqlDbType.Int, false, false, false));
+			Columns.Add(new ColumnDefinition("Nationality", typeof(System.String), "[NVARCHAR](50)", SqlDbType.NVarChar, false, false, false));
+			Columns.Add(new ColumnDefinition("Registered", typeof(System.Boolean), "[BIT]", SqlDbType.Bit, false, false, false));
 		}
 
 		public Person Get(Int32 id)
@@ -65,6 +65,17 @@ namespace NS
 			return Where("Id", Comparison.In, ids).Results();
 		}
 
+		public Int32 GetMaxId()
+		{
+			using (var cn = new SqlConnection(ConnectionString))
+			{
+				using (var cmd = CreateCommand(cn, "SELECT MAX(Id) FROM Person"))
+				{
+					cn.Open();
+					return (Int32)cmd.ExecuteScalar();
+				}
+			}
+		}
 		public override bool Create(Person item)
 		{
 			//Validation
@@ -132,7 +143,7 @@ namespace NS
 			if (person == null)
 				return false;
 
-			var deleteColumn = new DeleteColumn("Id", person.Id);
+			var deleteColumn = new DeleteColumn("Id", person.Id, SqlDbType.Int);
 
 			return BaseDelete(deleteColumn);
 		}

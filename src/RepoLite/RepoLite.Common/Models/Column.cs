@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Diagnostics;
 
 namespace RepoLite.Common.Models
@@ -10,6 +11,7 @@ namespace RepoLite.Common.Models
         public bool IsComputed { get; set; }
         public int SqlDataTypeCode { get; set; }
         public string SqlDataType { get; set; }
+        public SqlDbType DbType { get; set; }
         public bool IsNullable { get; set; }
         public bool IsIdentity { get; set; }
         public object DefaultValue { get; set; }

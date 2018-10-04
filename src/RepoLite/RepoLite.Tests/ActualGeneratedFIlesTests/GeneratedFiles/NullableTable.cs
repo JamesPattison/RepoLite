@@ -40,10 +40,10 @@ namespace NS
 		public NullableTableRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
 			"dbo", "NullableTable", 4)
 		{
-			Columns.Add(new ColumnDefinition("Id", typeof(System.Int32), "[INT]", false, true, true));
-			Columns.Add(new ColumnDefinition("Age", typeof(System.Int32), "[INT]", true, false, false));
-			Columns.Add(new ColumnDefinition("DoB", typeof(System.DateTime), "[DATETIME]", true, false, false));
-			Columns.Add(new ColumnDefinition("lolVal", typeof(System.Guid), "[UNIQUEIDENTIFIER]", true, false, false));
+			Columns.Add(new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, true, true));
+			Columns.Add(new ColumnDefinition("Age", typeof(System.Int32), "[INT]", SqlDbType.Int, true, false, false));
+			Columns.Add(new ColumnDefinition("DoB", typeof(System.DateTime), "[DATETIME]", SqlDbType.DateTime, true, false, false));
+			Columns.Add(new ColumnDefinition("lolVal", typeof(System.Guid), "[UNIQUEIDENTIFIER]", SqlDbType.UniqueIdentifier, true, false, false));
 		}
 
 		public NullableTable Get(Int32 id)
@@ -61,6 +61,17 @@ namespace NS
 			return Where("Id", Comparison.In, ids).Results();
 		}
 
+		public Int32 GetMaxId()
+		{
+			using (var cn = new SqlConnection(ConnectionString))
+			{
+				using (var cmd = CreateCommand(cn, "SELECT MAX(Id) FROM NullableTable"))
+				{
+					cn.Open();
+					return (Int32)cmd.ExecuteScalar();
+				}
+			}
+		}
 		public override bool Create(NullableTable item)
 		{
 			//Validation
@@ -128,7 +139,7 @@ namespace NS
 			if (nullableTable == null)
 				return false;
 
-			var deleteColumn = new DeleteColumn("Id", nullableTable.Id);
+			var deleteColumn = new DeleteColumn("Id", nullableTable.Id, SqlDbType.Int);
 
 			return BaseDelete(deleteColumn);
 		}

@@ -29,8 +29,8 @@ namespace NS
 		public XmltableRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
 			"dbo", "xmltable", 2)
 		{
-			Columns.Add(new ColumnDefinition("name", typeof(System.String), "[VARCHAR](12)", false, false, false));
-			Columns.Add(new ColumnDefinition("data", typeof(System.Xml.XmlDocument), "[XML]", false, false, false));
+			Columns.Add(new ColumnDefinition("name", typeof(System.String), "[VARCHAR](12)", SqlDbType.VarChar, false, false, false));
+			Columns.Add(new ColumnDefinition("data", typeof(System.Xml.XmlDocument), "[XML]", SqlDbType.Xml, false, false, false));
 		}
 		public override bool Create(Xmltable item)
 		{
@@ -77,11 +77,11 @@ namespace NS
 		}
 		public bool DeleteByname(String name)
 		{
-			return BaseDelete(new DeleteColumn("name", name));
+			return BaseDelete(new DeleteColumn("name", name, SqlDbType.VarChar));
 		}
 		public bool DeleteBydata(XmlDocument data)
 		{
-			return BaseDelete(new DeleteColumn("data", data));
+			return BaseDelete(new DeleteColumn("data", data, SqlDbType.Xml));
 		}
 
 		public bool Merge(List<Xmltable> items)

@@ -105,12 +105,14 @@ namespace REPOSITORYNAMESPACE.Base
     public class DeleteColumn
     {
         public string ColumnName { get; set; }
+        public SqlDbType SqlDbType { get; set; }
         public object Data { get; set; }
 
-        public DeleteColumn(string columnName, object data)
+        public DeleteColumn(string columnName, object data, SqlDbType dbType)
         {
             ColumnName = columnName;
             Data = data;
+            SqlDbType = dbType;
         }
     }
 
@@ -128,19 +130,21 @@ namespace REPOSITORYNAMESPACE.Base
     {
         public string ColumnName { get; set; }
         public Type ValueType { get; set; }
-        public string SqlDataType { get; set; }
+        public string SqlDataTypeText { get; set; }
+        public SqlDbType SqlDbType { get; set; }
         public bool Identity { get; set; }
         public bool PrimaryKey { get; set; }
         public bool Nullable { get; set; }
 
-        public ColumnDefinition(string columnName, Type valueType, string sqlDataType) : this(columnName, valueType, sqlDataType, false, false, false) { }
-        public ColumnDefinition(string columnName, Type valueType, string sqlDataType, bool nullable) : this(columnName, valueType, sqlDataType, nullable, false, false) { }
-        public ColumnDefinition(string columnName, Type valueType, string sqlDataType, bool nullable, bool primaryKey) : this(columnName, valueType, sqlDataType, nullable, primaryKey, false) { }
-        public ColumnDefinition(string columnName, Type valueType, string sqlDataType, bool nullable, bool primaryKey, bool identity)
+        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType) : this(columnName, valueType, sqlDataTypeText, dbType, false, false, false) { }
+        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType, bool nullable) : this(columnName, valueType, sqlDataTypeText, dbType, nullable, false, false) { }
+        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType, bool nullable, bool primaryKey) : this(columnName, valueType, sqlDataTypeText, dbType, nullable, primaryKey, false) { }
+        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType, bool nullable, bool primaryKey, bool identity)
         {
             ColumnName = columnName;
             ValueType = valueType;
-            SqlDataType = sqlDataType;
+            SqlDataTypeText = sqlDataTypeText;
+            SqlDbType = dbType;
             Nullable = nullable;
             PrimaryKey = primaryKey;
             Identity = identity;
@@ -624,7 +628,7 @@ namespace REPOSITORYNAMESPACE.Base
                     sb.AppendLine("DECLARE @tempo TABLE (");
                     foreach (var pk in pkCols)
                     {
-                        sb.Append($"[{pk.ColumnName}]  {pk.SqlDataType}");
+                        sb.Append($"[{pk.ColumnName}]  {pk.SqlDataTypeText}");
                         sb.AppendLine(pk != pkCols[pkCols.Count - 1] ? "," : string.Empty);
                     }
                     sb.AppendLine(")");
@@ -680,12 +684,12 @@ namespace REPOSITORYNAMESPACE.Base
                         if (createColumn.PrimaryKey && (!createColumn.PrimaryKey || createColumn.Identity))
                             continue;
 
-                        cmd.Parameters.AddWithValue(createColumn.ColumnName,
-                            values[i] != null
-                                ? (values[i].GetType() == typeof(XmlDocument)
-                                    ? ((XmlDocument)values[i]).InnerXml
-                                    : values[i])
-                                : DBNull.Value);
+                        var parameter = cmd.Parameters.Add(createColumn.ColumnName, createColumn.SqlDbType);
+                                                                   parameter.Value = values[i] != null
+                                                                       ? (values[i].GetType() == typeof(XmlDocument)
+                                                                           ? ((XmlDocument) values[i]).InnerXml
+                                                                           : values[i])
+                                                                       : DBNull.Value;
                     }
 
                     DataTable dt;
@@ -787,10 +791,15 @@ namespace REPOSITORYNAMESPACE.Base
                         var updateColumn = Columns[i];
                         if (!dirtyColumns.Contains(updateColumn.ColumnName) && !updateColumn.PrimaryKey) continue;
 
+                        var parameter = cmd.Parameters.Add(updateColumn.ColumnName, updateColumn.SqlDbType);
                         if (updateColumn.PrimaryKey)
-                            cmd.Parameters.AddWithValue(updateColumn.ColumnName, values[i]);
+                        {
+                            parameter.Value = values[i];
+                        }
                         else
-                            cmd.Parameters.AddWithValue(updateColumn.ColumnName, dirtyColumns.Contains(updateColumn.ColumnName) ? values[i] ?? DBNull.Value : values[i]);
+                        {
+                            parameter.Value = dirtyColumns.Contains(updateColumn.ColumnName) ? values[i] ?? DBNull.Value : values[i];
+                        }
                     }
 
                     //Execute
@@ -818,7 +827,8 @@ namespace REPOSITORYNAMESPACE.Base
 
                 using (var cmd = CreateCommand(cn, sql))
                 {
-                    cmd.Parameters.AddWithValue(deleteColumn.ColumnName, deleteColumn.Data);
+                    var parameter = cmd.Parameters.Add(deleteColumn.ColumnName, deleteColumn.SqlDbType);
+                    parameter.Value = deleteColumn.Data;
 
                     //Execute
                     isSuccess = NoneQuery(cn, cmd);
@@ -942,6 +952,7 @@ namespace REPOSITORYNAMESPACE.Base
                         CommandType = CommandType.StoredProcedure,
                         CommandText = "dbo.DropTmpTable"
                     };
+                    
                     dropCmd.Parameters.AddWithValue("table", tempTableName);
                     dropCmd.ExecuteNonQuery();
                     dropCmd.Dispose();
@@ -1177,7 +1188,7 @@ namespace REPOSITORYNAMESPACE.Base
             stagingSqlBuilder.AppendLine(@"CREATE TABLE " + tempTableName + " (");
             foreach (var mergeColumn in Columns.Where(x => onlyPrimaryKeys && x.PrimaryKey || !onlyPrimaryKeys))
             {
-                stagingSqlBuilder.Append($"[{mergeColumn.ColumnName}] {mergeColumn.SqlDataType} NULL");
+                stagingSqlBuilder.Append($"[{mergeColumn.ColumnName}] {mergeColumn.SqlDataTypeText} NULL");
 
                 if (!mergeColumn.PrimaryKey)
                 {
