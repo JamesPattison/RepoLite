@@ -145,6 +145,19 @@ namespace RepoLite.Plugins.K3
                 sb.AppendLine(Tab4, $".Get({pk.FieldName}s);");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
+                
+                if (table.PrimaryKeys.Count == 1 &&
+                    new[] {typeof(short), typeof(int), typeof(long), typeof(decimal), typeof(double), typeof(float)}
+                        .Contains(pk.DataType))
+                {
+                    sb.AppendLine(Tab2, $"public static {pk.DataType.Name} GetMaxId(string profile, IEnumerable<{pk.DataType.Name}> {pk.FieldName}s)");
+                    sb.AppendLine(Tab2, "{");
+                    sb.AppendLine(Tab3, $"Log.Activity(\"Calling GetMaxId in {table.ClassName}Repository\");");
+                    sb.AppendLine(Tab3, $"return new {table.ClassName}Repository(Settings.Instance[profile].ConnectionString, exception => Log.Error(exception, \"GetMaxId\"))");
+                    sb.AppendLine(Tab4, $".GetMaxId();");
+                    sb.AppendLine(Tab2, "}");
+                    sb.AppendLine("");
+                }
 
                 sb.AppendLine(Tab2, $"public static bool Delete(string profile, {pk.DataType.Name} {pk.FieldName})");
                 sb.AppendLine(Tab2, "{");
