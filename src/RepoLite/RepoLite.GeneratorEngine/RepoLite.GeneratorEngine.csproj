@@ -57,13 +57,13 @@
     <Compile Include="Models\TableToGenerate.cs" />
     <Compile Include="PluginHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="Templates\CSharp\SqlServer\BaseModel.cs.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\CSharp\SqlServer\BaseRepository.cs.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Templates\VB\BaseModel.vb.txt" />
-    <Content Include="Templates\CSharp\BaseModel.cs.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Templates\CSharp\BaseRepository.cs.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Templates\VB\BaseRepository.vb.txt" />
   </ItemGroup>
   <ItemGroup>

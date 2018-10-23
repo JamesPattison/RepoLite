@@ -16,7 +16,7 @@ namespace MODELNAMESPACE.Base
         }
     }
     
-    public interface IBaseModel
+    public partial interface IBaseModel
     {
         string EntityName { get; }
     }

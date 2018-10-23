@@ -5,12 +5,16 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml;
 
 namespace NS.Base
 {
     public interface IBaseRepository<T>
+        where T : IBaseModel
     {
         IEnumerable<T> GetAll();
         bool Create(T item);
@@ -23,6 +27,7 @@ namespace NS.Base
     }
 
     public interface IPkRepository<T> : IBaseRepository<T>
+        where T : IBaseModel
     {
         bool Update(T item);
         bool Delete(T item);
@@ -141,6 +146,7 @@ namespace NS.Base
     #region Where
 
     public class Where<T>
+        where T : IBaseModel
     {
         private readonly StringBuilder _query = new StringBuilder();
         private readonly BaseRepository<T> _repository;
@@ -421,8 +427,211 @@ namespace NS.Base
     }
 
     #endregion
+    
+    #region [ExpressionParser]
+
+    internal static class ExpressionParser
+    {
+        private static readonly Dictionary<ExpressionType, string> NodeStr = new Dictionary<ExpressionType, string>
+        {
+            {ExpressionType.Add, "+"},
+            {ExpressionType.And, "&"},
+            {ExpressionType.AndAlso, "AND"},
+            {ExpressionType.Divide, "/"},
+            {ExpressionType.Equal, "="},
+            {ExpressionType.ExclusiveOr, "^"},
+            {ExpressionType.GreaterThan, ">"},
+            {ExpressionType.GreaterThanOrEqual, ">="},
+            {ExpressionType.LessThan, "<="},
+            {ExpressionType.LessThanOrEqual, "<="},
+            {ExpressionType.Modulo, "%"},
+            {ExpressionType.Multiply, "*"},
+            {ExpressionType.Negate, "-"},
+            {ExpressionType.Not, "NOT"},
+            {ExpressionType.NotEqual, "<>"},
+            {ExpressionType.Or, "|"},
+            {ExpressionType.OrElse, "OR"},
+            {ExpressionType.Subtract, "-"}
+        };
+        
+        internal static string ToSql<T, TK>(Expression<Func<T, TK, bool>> expression)
+            where T : IBaseModel
+            where TK : IBaseModel
+        {
+            return Parse(expression.Body, true).Sql;
+        }
+
+        private static Clause Parse(Expression expression, bool isUnary = false, string prefix = null, string postfix = null)
+        {
+            while (true)
+            {
+                switch (expression)
+                {
+                    case UnaryExpression unary:
+                        return Clause.Make(NodeStr[unary.NodeType], Parse(unary.Operand, true));
+                    case BinaryExpression body:
+                        return Clause.Make(Parse(body.Left), NodeStr[body.NodeType], Parse(body.Right));
+                    case ConstantExpression constant:
+                    {
+                        var value = constant.Value;
+                        switch (value)
+                        {
+                            case int _:
+                                return Clause.Make(value.ToString());
+                            case string _:
+                                value = prefix + (string) value + postfix;
+                                break;
+                        }
+
+                        if (value is bool && isUnary)
+                        {
+                            return Clause.Make(Clause.Make($"'{value}'"), "=", Clause.Make("1"));
+                        }
+
+                        return Clause.Make($"'{value}'");
+                    }
+                    case MemberExpression _:
+                    {
+                        var member = (MemberExpression) expression;
+
+                        switch (member.Member)
+                        {
+                            case PropertyInfo property:
+                            {
+                                var colName = property.Name;
+                                if (!(Activator.CreateInstance(property.DeclaringType ?? throw new Exception()) is IBaseModel model)) throw new Exception();
+
+                                if (member.Type == typeof(bool))
+                                    if (isUnary)
+                                    {
+                                        isUnary = false;
+                                        prefix = null;
+                                        postfix = null;
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        return Clause.Make(Clause.Make($"[{model.EntityName}].[{colName}]"), "=", Clause.Make("1"));
+                                    }
+                                else
+                                    return Clause.Make($"[{model.EntityName}].[{colName}]");
+                            }
+                            case FieldInfo _:
+                            {
+                                var value = GetValue(member);
+                                if (value is string)
+                                {
+                                    value = prefix + (string) value + postfix;
+                                }
+
+                                return Clause.Make($"'{value}'");
+                            }
+                            default:
+                                throw new Exception($"Expression does not refer to a property or field: {expression}");
+                        }
+                    }
+                    case MethodCallExpression _:
+                    {
+                        var methodCall = (MethodCallExpression) expression;
+                        // LIKE queries:
+                        if (methodCall.Method == typeof(string).GetMethod("Contains", new[] {typeof(string)}))
+                        {
+                            return Clause.Make(Parse(methodCall.Object), "LIKE", Parse(methodCall.Arguments[0], prefix: "%", postfix: "%"));
+                        }
+
+                        if (methodCall.Method == typeof(string).GetMethod("StartsWith", new[] {typeof(string)}))
+                        {
+                            return Clause.Make(Parse(methodCall.Object), "LIKE", Parse(methodCall.Arguments[0], postfix: "%"));
+                        }
+
+                        if (methodCall.Method == typeof(string).GetMethod("EndsWith", new[] {typeof(string)}))
+                        {
+                            return Clause.Make(Parse(methodCall.Object), "LIKE", Parse(methodCall.Arguments[0], prefix: "%"));
+                        }
+
+                        // IN queries:
+                        if (methodCall.Method.Name == "Contains")
+                        {
+                            Expression collection;
+                            Expression property;
+                            if (methodCall.Method.IsDefined(typeof(ExtensionAttribute)) && methodCall.Arguments.Count == 2)
+                            {
+                                collection = methodCall.Arguments[0];
+                                property = methodCall.Arguments[1];
+                            }
+                            else if (!methodCall.Method.IsDefined(typeof(ExtensionAttribute)) && methodCall.Arguments.Count == 1)
+                            {
+                                collection = methodCall.Object;
+                                property = methodCall.Arguments[0];
+                            }
+                            else
+                            {
+                                throw new Exception("Unsupported method call: " + methodCall.Method.Name);
+                            }
+
+                            var sb = new StringBuilder();
+                            foreach (var val in (IEnumerable) GetValue(collection))
+                            {
+                                sb.Append($"'{val}',");
+                            }
+
+                            var values = sb.ToString();
+                            values = values.Substring(0, values.Length - 1);
+                            return Clause.Make(Parse(property), "IN", Clause.Make($"({values})"));
+                        }
+
+                        throw new Exception("Unsupported method call: " + methodCall.Method.Name);
+                    }
+                    default:
+                        throw new Exception("Unsupported expression: " + expression.GetType().Name);
+                }
+
+                break;
+            }
+        }
+
+        private static object GetValue(Expression member)
+        {
+            var objectMember = Expression.Convert(member, typeof(object));
+            var getterLambda = Expression.Lambda<Func<object>>(objectMember);
+            var getter = getterLambda.Compile();
+            return getter();
+        }
+        
+        private class Clause
+        {
+            public string Sql { get; private set; }
+
+            public static Clause Make(string sql)
+            {
+                return new Clause
+                {
+                    Sql = sql
+                };
+            }
+
+            public static Clause Make(string @operator, Clause operand)
+            {
+                return new Clause
+                {
+                    Sql = $"({@operator} {operand.Sql})"
+                };
+            }
+
+            public static Clause Make(Clause left, string @operator, Clause right)
+            {
+                return new Clause
+                {
+                    Sql = $"({left.Sql} {@operator} {right.Sql})"
+                };
+            }
+        }
+    }
+    
+    #endregion
 
     public abstract class BaseRepository<T> : IBaseRepository<T>
+        where T : IBaseModel
     {
         protected Action<Exception> Logger;
         protected string ConnectionString;

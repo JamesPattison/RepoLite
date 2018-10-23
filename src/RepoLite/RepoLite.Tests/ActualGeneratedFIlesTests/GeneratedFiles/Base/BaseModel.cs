@@ -16,7 +16,7 @@ namespace NS.Models.Base
         }
     }
     
-    public interface IBaseModel
+    public partial interface IBaseModel
     {
         string EntityName { get; }
     }
