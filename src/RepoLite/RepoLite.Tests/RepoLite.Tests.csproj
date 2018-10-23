@@ -67,6 +67,7 @@
     <Compile Include="ActualGeneratedFilesTests\Base\Data.cs" />
     <Compile Include="ActualGeneratedFilesTests\BinManTests.cs" />
     <Compile Include="ActualGeneratedFilesTests\EventTableTests.cs" />
+    <Compile Include="ActualGeneratedFilesTests\ExpressionParserTests.cs" />
     <Compile Include="ActualGeneratedFilesTests\GeneratedFiles\Address.cs" />
     <Compile Include="ActualGeneratedFilesTests\GeneratedFiles\AddressDto.cs" />
     <Compile Include="ActualGeneratedFilesTests\GeneratedFiles\Base\BaseModel.cs" />
