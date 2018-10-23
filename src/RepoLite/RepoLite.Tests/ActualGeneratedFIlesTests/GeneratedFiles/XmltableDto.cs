@@ -2,12 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Xml;
 using NS.Models.Base;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NS.Models
 {
-	[Table("xmltable", Schema="dbo")]
 	public partial class Xmltable : BaseModel
 	{
 		private String _name;

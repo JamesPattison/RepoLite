@@ -6,7 +6,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Xml;
-using Dapper;
 
 namespace NS
 {
@@ -29,13 +28,12 @@ namespace NS
 		Address Get(AddressKeys compositeId);
 		IEnumerable<Address> Get(List<AddressKeys> compositeIds);
 		IEnumerable<Address> Get(params AddressKeys[] compositeIds);
-
 		bool Update(Address item);
+		bool Delete(Address address);
 		bool Delete(Int32 id, String anotherId);
 		bool Delete(AddressKeys compositeId);
 		bool Delete(IEnumerable<AddressKeys> compositeIds);
 		bool Merge(List<Address> items);
-
 		IEnumerable<Address> Search(
 			Int32? id = null,
 			String anotherId = null,
@@ -47,12 +45,10 @@ namespace NS
 			String postCode = null,
 			String phoneNumber = null,
 			String cOUNTRY_CODE = null);
-
 		IEnumerable<Address> FindById(Int32 id);
 		IEnumerable<Address> FindById(FindComparison comparison, Int32 id);
 		IEnumerable<Address> FindByAnotherId(String anotherId);
 		IEnumerable<Address> FindByAnotherId(FindComparison comparison, String anotherId);
-
 		IEnumerable<Address> FindByPersonId(Int32 personId);
 		IEnumerable<Address> FindByPersonId(FindComparison comparison, Int32 personId);
 		IEnumerable<Address> FindByLine1(String line1);

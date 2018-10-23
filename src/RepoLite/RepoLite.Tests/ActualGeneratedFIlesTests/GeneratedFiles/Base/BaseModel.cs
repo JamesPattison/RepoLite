@@ -37,8 +37,8 @@ namespace NS.Models.Base
 
         public static int GetDecimalPlaces(decimal n)
         {
-            n = Math.Abs(n); //make sure it is positive.
-            n -= (int)n;     //remove the integer part of the number.
+            n = Math.Abs(n);
+            n -= (int)n;
             var decimalPlaces = 0;
             while (n > 0)
             {

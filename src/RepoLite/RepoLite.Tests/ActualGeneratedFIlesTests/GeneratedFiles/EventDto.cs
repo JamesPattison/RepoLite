@@ -2,18 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Xml;
 using NS.Models.Base;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NS.Models
 {
-	[Table("Event", Schema="dbo")]
 	public partial class Event : BaseModel
 	{
 		private String _eventId;
 		private String _eventName;
 
-		[Key]
 		public virtual String EventId
 		{
 			get => _eventId;

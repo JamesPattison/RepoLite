@@ -1,0 +1,47 @@
+Imports System
+Imports System.Collections.Generic
+Imports System.Runtime.CompilerServices
+
+Namespace MODELNAMESPACE.Base
+    Public Class ValidationError
+        Public Property PropertyName As String
+        Public Property [Error] As String
+
+        Public Sub New(ByVal [property] As String, ByVal [error] As String)
+            PropertyName = [property]
+            [Error] = [error]
+        End Sub
+    End Class
+
+    Public MustInherit Class BaseModel
+        Public MustOverride Function Validate() As List(Of ValidationError)
+        Public ReadOnly DirtyColumns As List(Of String) = New List(Of String)()
+
+        Public Sub ResetDirty()
+            DirtyColumns.Clear()
+        End Sub
+
+        Protected Sub SetValue (Of T)(ByRef prop As T, ByVal value As T,
+                                      <CallerMemberName> ByVal Optional propName As String = "")
+            If Not DirtyColumns.Contains(propName) Then
+                DirtyColumns.Add(propName)
+            End If
+
+            prop = value
+        End Sub
+
+        Public Shared Function GetDecimalPlaces(ByVal n As Decimal) As Integer
+            n = Math.Abs(n)
+            n -= CInt(n)
+            Dim decimalPlaces = 0
+
+            While n > 0
+                decimalPlaces += 1
+                n = n*10
+                n -= CInt(n)
+            End While
+
+            Return decimalPlaces
+        End Function
+    End Class
+End Namespace

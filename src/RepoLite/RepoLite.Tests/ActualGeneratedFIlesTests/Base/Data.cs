@@ -15,7 +15,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests.Base
             RunSql(@"DROP TABLE IF EXISTS [dbo].[Event]");
             RunSql(@"DROP TABLE IF EXISTS [dbo].[xmltable]");
             RunSql(@"DROP TABLE IF EXISTS [dbo].[NullableTable]");
-	        RunSql(@"DROP TABLE IF EXISTS [dbo].[BinMan]");
+            RunSql(@"DROP TABLE IF EXISTS [dbo].[BinMan]");
 
             RunSql(@"CREATE TABLE [dbo].[Person](
 	                    [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
@@ -58,8 +58,8 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests.Base
             	        [DoB] DATETIME NULL,
             	        [lolVal] UNIQUEIDENTIFIER NULL
                     )");
-	        
-	        RunSql(@"CREATE TABLE [BinMan](
+
+            RunSql(@"CREATE TABLE [BinMan](
 						[Id] INT NOT NULL,
 						[Data] BINARY(8) NOT NULL
 					)");
@@ -113,7 +113,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests.Base
 
         private static void RunSql(string sql)
         {
-            using (var cn = new SqlConnection("Data Source=.;Initial Catalog=RepoDev;Integrated Security=true;"))
+            using (var cn = new SqlConnection(new BaseTests().ConnectionString))
             {
                 using (var cmd = new SqlCommand
                 {

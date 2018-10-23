@@ -45,8 +45,6 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine("using System.Xml;");
             sb.AppendLine($"using {AppSettings.Generation.ModelGenerationNamespace}.Base;");
-            sb.AppendLine("using System.ComponentModel.DataAnnotations;");
-            sb.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
 
             sb.Append(Environment.NewLine);
             sb.AppendLine(CreateModel(table).ToString());
@@ -65,7 +63,6 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("using System.Data.SqlClient;");
             sb.AppendLine("using System.Linq;");
             sb.AppendLine("using System.Xml;");
-            sb.AppendLine("using Dapper;");
             sb.Append(Environment.NewLine);
 
             sb.AppendLine($"namespace {AppSettings.Generation.RepositoryGenerationNamespace}");
@@ -136,10 +133,11 @@ namespace RepoLite.GeneratorEngine.Generators
 
             //get
             sb.Append(Repo_Get(table));
+            
             //create
             sb.Append(Repo_Create(table));
-            //update
-
+            
+            //update & delete
             if (table.PrimaryKeys.Any())
             {
                 sb.Append(Repo_Update(table));
@@ -147,12 +145,19 @@ namespace RepoLite.GeneratorEngine.Generators
             }
             else
                 sb.Append(Repo_NonPkDelete(table));
+            
             //merge
-            sb.Append(Repo_Merge(table));
+            if (table.PrimaryKeys.Any())
+            {
+                sb.Append(Repo_Merge(table));
+            }
+
             //toItem
             sb.Append(Repo_ToItem(table));
+            
             //search
             sb.Append(Repo_Search(table));
+            
             //find
             sb.Append(Repo_Find(table));
 
@@ -177,7 +182,6 @@ namespace RepoLite.GeneratorEngine.Generators
 
             var tableNameAndSchema = table.DbTableName.GetTableAndSchema();
 
-            sb.AppendLine(Tab1, $"[Table(\"{tableNameAndSchema.Table}\", Schema=\"{tableNameAndSchema.Schema}\")]");
             sb.AppendLine(Tab1, $"public partial class {GetClassName(table.ClassName)} : BaseModel");
             sb.AppendLine(Tab1, "{");
 
@@ -191,8 +195,6 @@ namespace RepoLite.GeneratorEngine.Generators
             foreach (var column in table.Columns)
             {
                 //Property
-                if (column.PrimaryKey)
-                    sb.AppendLine(Tab2, "[Key]");
                 var fieldName = $"_{column.FieldName}";
                 sb.AppendLine(Tab2, $"public virtual {column.DataType.Name}{(IsNullable(column.DataType.Name) && column.IsNullable ? "?" : "")} {column.PropertyName}");
                 sb.AppendLine(Tab2, "{");
@@ -327,39 +329,61 @@ namespace RepoLite.GeneratorEngine.Generators
                     : $"public partial interface I{table.ClassName}Repository : IBaseRepository<{GetClassName(table.ClassName)}>");
 
             sb.AppendLine(Tab1, "{");
+            
+            var pk = table.PrimaryKeys.FirstOrDefault();
+            
+            var pkParamList = table.PrimaryKeys.Aggregate("",
+                    (current, column) => current + $"{column.DataType.Name} {column.FieldName}, ")
+                .TrimEnd(' ', ',');
+
+            //get
             if (table.HasCompositeKey)
             {
-                var pkParamList = table.PrimaryKeys.Aggregate("",
-                        (current, column) => current + $"{column.DataType.Name} {column.FieldName}, ")
-                    .TrimEnd(' ', ',');
-
                 sb.AppendLine(Tab2, $"{GetClassName(table.ClassName)} Get({pkParamList});");
                 sb.AppendLine(Tab2, $"{GetClassName(table.ClassName)} Get({GetClassName(table.ClassName)}Keys compositeId);");
                 sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Get(List<{GetClassName(table.ClassName)}Keys> compositeIds);");
                 sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Get(params {GetClassName(table.ClassName)}Keys[] compositeIds);");
-                sb.AppendLine("");
-                sb.AppendLine(Tab2, $"bool Update({GetClassName(table.ClassName)} item);");
-                sb.AppendLine(Tab2, $"bool Delete({pkParamList});");
-                sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)}Keys compositeId);");
-                sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{GetClassName(table.ClassName)}Keys> compositeIds);");
-                sb.AppendLine(Tab2, $"bool Merge(List<{GetClassName(table.ClassName)}> items);");
-                sb.AppendLine("");
             }
             else if (table.PrimaryKeys.Any())
             {
-                var pk = table.PrimaryKeys.First();
                 sb.AppendLine(Tab2, $"{GetClassName(table.ClassName)} Get({pk.DataType.Name} {pk.FieldName});");
                 sb.AppendLine(Tab2,
                     $"IEnumerable<{GetClassName(table.ClassName)}> Get(List<{pk.DataType.Name}> {pk.FieldName}s);");
                 sb.AppendLine(Tab2,
                     $"IEnumerable<{GetClassName(table.ClassName)}> Get(params {pk.DataType.Name}[] {pk.FieldName}s);");
-                sb.AppendLine("");
 
+                if (table.PrimaryKeys.Count == 1 &&
+                    new[] {typeof(short), typeof(int), typeof(long), typeof(decimal), typeof(double), typeof(float)}
+                        .Contains(pk.DataType))
+                {
+                    sb.AppendLine(Tab2, $"{pk.DataType.Name} GetMaxId();");
+                }
+            }
+            
+            //update & delete
+            if (table.PrimaryKeys.Any())
+            {
+                //update
                 sb.AppendLine(Tab2, $"bool Update({GetClassName(table.ClassName)} item);");
-                sb.AppendLine(Tab2, $"bool Delete({pk.DataType.Name} {pk.FieldName});");
-                sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{pk.DataType.Name}> {pk.FieldName}s);");
-                sb.AppendLine(Tab2, $"bool Merge(List<{GetClassName(table.ClassName)}> items);");
-                sb.AppendLine("");
+                
+                //delete
+                sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)} {table.LowerClassName});");
+                if (!table.HasCompositeKey)
+                {
+                    sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{GetClassName(table.ClassName)}> items);");
+                }
+
+                else if (table.HasCompositeKey)
+                {
+                    sb.AppendLine(Tab2, $"bool Delete({pkParamList});");
+                    sb.AppendLine(Tab2, $"bool Delete({GetClassName(table.ClassName)}Keys compositeId);");
+                    sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{GetClassName(table.ClassName)}Keys> compositeIds);");
+                }
+                else if (table.PrimaryKeys.Any())
+                {
+                    sb.AppendLine(Tab2, $"bool Delete({pk.DataType.Name} {pk.FieldName});");
+                    sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{pk.DataType.Name}> {pk.FieldName}s);");
+                }
             }
             else
             {
@@ -368,21 +392,27 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab2, $"bool DeleteBy{column.DbColName}({column.DataType.Name} {column.FieldName});");
                 }
             }
-
+            
+            //merge
+            if (table.PrimaryKeys.Any())
+            {
+                sb.AppendLine(Tab2, $"bool Merge(List<{GetClassName(table.ClassName)}> items);");
+            }
+            
+            //search
             sb.AppendLine(Tab2, $"IEnumerable<{GetClassName(table.ClassName)}> Search(");
             foreach (var column in table.Columns)
             {
                 sb.Append(Tab3,
-                           column.DataType != typeof(XmlDocument)
-                               ? $"{column.DataType.Name}{(IsNullable(column.DataType.Name) ? "?" : string.Empty)} {column.FieldName} = null"
-                               : $"String {column.FieldName} = null");
+                    column.DataType != typeof(XmlDocument)
+                        ? $"{column.DataType.Name}{(IsNullable(column.DataType.Name) ? "?" : string.Empty)} {column.FieldName} = null"
+                        : $"String {column.FieldName} = null");
                 sb.AppendLine(column == table.Columns.Last() ? ");" : ",");
             }
-
+            
+            //find
             if (table.HasCompositeKey)
             {
-                sb.AppendLine("");
-                //Find methods on PK'S are available as there's a composite primary key
                 foreach (var primaryKey in table.PrimaryKeys)
                 {
                     sb.AppendLine(Tab2,
@@ -392,27 +422,19 @@ namespace RepoLite.GeneratorEngine.Generators
                 }
             }
 
-            sb.AppendLine("");
-
             foreach (var nonPrimaryKey in table.NonPrimaryKeys)
             {
-
-                if (nonPrimaryKey.DataType != typeof(XmlDocument))
-                {
-                    sb.AppendLine(Tab2,
-                        $"IEnumerable<{GetClassName(table.ClassName)}> FindBy{nonPrimaryKey.PropertyName}({nonPrimaryKey.DataType.Name} {nonPrimaryKey.FieldName});");
-                    sb.AppendLine(Tab2,
-                        $"IEnumerable<{GetClassName(table.ClassName)}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, {nonPrimaryKey.DataType.Name} {nonPrimaryKey.FieldName});");
-                }
-                else
-                {
-                    sb.AppendLine(Tab2,
-                        $"IEnumerable<{GetClassName(table.ClassName)}> FindBy{nonPrimaryKey.PropertyName}(String {nonPrimaryKey.FieldName});");
-                    sb.AppendLine(Tab2,
-                        $"IEnumerable<{GetClassName(table.ClassName)}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, String {nonPrimaryKey.FieldName});");
-                }
+                sb.AppendLine(Tab2,
+                    nonPrimaryKey.DataType != typeof(XmlDocument)
+                        ? $"IEnumerable<{GetClassName(table.ClassName)}> FindBy{nonPrimaryKey.PropertyName}({nonPrimaryKey.DataType.Name} {nonPrimaryKey.FieldName});"
+                        : $"IEnumerable<{GetClassName(table.ClassName)}> FindBy{nonPrimaryKey.PropertyName}(String {nonPrimaryKey.FieldName});");
+                
+                sb.AppendLine(Tab2,
+                    nonPrimaryKey.DataType != typeof(XmlDocument)
+                        ? $"IEnumerable<{GetClassName(table.ClassName)}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, {nonPrimaryKey.DataType.Name} {nonPrimaryKey.FieldName});"
+                        : $"IEnumerable<{GetClassName(table.ClassName)}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, String {nonPrimaryKey.FieldName});");
             }
-
+            
             sb.AppendLine(Tab1, "}");
             return sb;
         }

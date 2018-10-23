@@ -6,7 +6,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Xml;
-using Dapper;
 
 namespace NS
 {
@@ -15,18 +14,16 @@ namespace NS
 		NullableTable Get(Int32 id);
 		IEnumerable<NullableTable> Get(List<Int32> ids);
 		IEnumerable<NullableTable> Get(params Int32[] ids);
-
+		Int32 GetMaxId();
 		bool Update(NullableTable item);
-		bool Delete(Int32 id);
-		bool Delete(IEnumerable<Int32> ids);
+		bool Delete(NullableTable nullableTable);
+		bool Delete(IEnumerable<NullableTable> items);
 		bool Merge(List<NullableTable> items);
-
 		IEnumerable<NullableTable> Search(
 			Int32? id = null,
 			Int32? age = null,
 			DateTime? doB = null,
 			Guid? lolVal = null);
-
 		IEnumerable<NullableTable> FindByAge(Int32 age);
 		IEnumerable<NullableTable> FindByAge(FindComparison comparison, Int32 age);
 		IEnumerable<NullableTable> FindByDoB(DateTime doB);

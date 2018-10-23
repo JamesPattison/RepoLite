@@ -6,7 +6,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Xml;
-using Dapper;
 
 namespace NS
 {
@@ -15,19 +14,17 @@ namespace NS
 		Person Get(Int32 id);
 		IEnumerable<Person> Get(List<Int32> ids);
 		IEnumerable<Person> Get(params Int32[] ids);
-
+		Int32 GetMaxId();
 		bool Update(Person item);
-		bool Delete(Int32 id);
-		bool Delete(IEnumerable<Int32> ids);
+		bool Delete(Person person);
+		bool Delete(IEnumerable<Person> items);
 		bool Merge(List<Person> items);
-
 		IEnumerable<Person> Search(
 			Int32? id = null,
 			String name = null,
 			Int32? age = null,
 			String nationality = null,
 			Boolean? registered = null);
-
 		IEnumerable<Person> FindByName(String name);
 		IEnumerable<Person> FindByName(FindComparison comparison, String name);
 		IEnumerable<Person> FindByAge(Int32 age);

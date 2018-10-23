@@ -2,12 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Xml;
 using NS.Models.Base;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NS.Models
 {
-	[Table("Address", Schema="dbo")]
 	public partial class Address : BaseModel
 	{
 		private Int32 _id;
@@ -21,13 +18,11 @@ namespace NS.Models
 		private String _phoneNumber;
 		private String _cOUNTRY_CODE;
 
-		[Key]
 		public virtual Int32 Id
 		{
 			get => _id;
 			set => SetValue(ref _id, value);
 		}
-		[Key]
 		public virtual String AnotherId
 		{
 			get => _anotherId;

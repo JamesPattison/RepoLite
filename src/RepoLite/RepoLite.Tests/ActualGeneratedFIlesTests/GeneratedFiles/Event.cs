@@ -6,7 +6,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Xml;
-using Dapper;
 
 namespace NS
 {
@@ -15,16 +14,13 @@ namespace NS
 		Event Get(String eventId);
 		IEnumerable<Event> Get(List<String> eventIds);
 		IEnumerable<Event> Get(params String[] eventIds);
-
 		bool Update(Event item);
-		bool Delete(String eventId);
-		bool Delete(IEnumerable<String> eventIds);
+		bool Delete(Event @event);
+		bool Delete(IEnumerable<Event> items);
 		bool Merge(List<Event> items);
-
 		IEnumerable<Event> Search(
 			String eventId = null,
 			String eventName = null);
-
 		IEnumerable<Event> FindByEventName(String eventName);
 		IEnumerable<Event> FindByEventName(FindComparison comparison, String eventName);
 	}

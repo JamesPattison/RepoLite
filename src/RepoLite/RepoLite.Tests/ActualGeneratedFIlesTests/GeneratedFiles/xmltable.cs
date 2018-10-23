@@ -6,7 +6,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Xml;
-using Dapper;
 
 namespace NS
 {
@@ -17,7 +16,6 @@ namespace NS
 		IEnumerable<Xmltable> Search(
 			String name = null,
 			String data = null);
-
 		IEnumerable<Xmltable> FindByName(String name);
 		IEnumerable<Xmltable> FindByName(FindComparison comparison, String name);
 		IEnumerable<Xmltable> FindByData(String data);
@@ -82,20 +80,6 @@ namespace NS
 		public bool DeleteBydata(XmlDocument data)
 		{
 			return BaseDelete(new DeleteColumn("data", data, SqlDbType.Xml));
-		}
-
-		public bool Merge(List<Xmltable> items)
-		{
-			var mergeTable = new List<object[]>();
-			foreach (var item in items)
-			{
-				mergeTable.Add(new object[]
-				{
-					item.Name, item.DirtyColumns.Contains("name"),
-					item.Data, item.DirtyColumns.Contains("data")
-				});
-			}
-			return BaseMerge(mergeTable);
 		}
 
 		protected override Xmltable ToItem(DataRow row)

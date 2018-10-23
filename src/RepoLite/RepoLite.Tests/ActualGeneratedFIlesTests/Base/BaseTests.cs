@@ -2,6 +2,6 @@
 {
     public class BaseTests
     {
-        protected string ConnectionString = "Data Source=.;Initial Catalog=RepoDev;Integrated Security=true;";
+        protected internal string ConnectionString = "Data Source=.;Initial Catalog=RepoDev;Integrated Security=true;";
     }
 }

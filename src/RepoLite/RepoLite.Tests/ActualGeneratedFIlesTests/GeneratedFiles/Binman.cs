@@ -6,7 +6,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Xml;
-using Dapper;
 
 namespace NS
 {
@@ -17,7 +16,6 @@ namespace NS
 		IEnumerable<BinMan> Search(
 			Int32? id = null,
 			Byte[] data = null);
-
 		IEnumerable<BinMan> FindById(Int32 id);
 		IEnumerable<BinMan> FindById(FindComparison comparison, Int32 id);
 		IEnumerable<BinMan> FindByData(Byte[] data);
@@ -82,20 +80,6 @@ namespace NS
 		public bool DeleteByData(Byte[] data)
 		{
 			return BaseDelete(new DeleteColumn("Data", data, SqlDbType.Binary));
-		}
-
-		public bool Merge(List<BinMan> items)
-		{
-			var mergeTable = new List<object[]>();
-			foreach (var item in items)
-			{
-				mergeTable.Add(new object[]
-				{
-					item.Id, item.DirtyColumns.Contains("Id"),
-					item.Data, item.DirtyColumns.Contains("Data")
-				});
-			}
-			return BaseMerge(mergeTable);
 		}
 
 		protected override BinMan ToItem(DataRow row)
