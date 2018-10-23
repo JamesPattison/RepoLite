@@ -94,17 +94,5 @@ namespace RepoLite.Common.Properties {
                 this["Plugin"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("{Name}")]
-        public string ModelClassNameFormat {
-            get {
-                return ((string)(this["ModelClassNameFormat"]));
-            }
-            set {
-                this["ModelClassNameFormat"] = value;
-            }
-        }
     }
 }

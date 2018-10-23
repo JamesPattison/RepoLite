@@ -53,7 +53,7 @@ namespace RepoLite.DataAccess.Accessors
             {
                 var columns = cn.Query<Column>(@"
                             SELECT
-	                            c.COLUMN_NAME AS DbColName,	
+	                            c.COLUMN_NAME AS DbColumnName,	
 	                            COLUMNPROPERTY(object_id('[' + c.TABLE_SCHEMA + '].[' + c.TABLE_NAME + ']'), c.COLUMN_NAME, 'IsComputed') as IsComputed,	
 								UPPER(c.DATA_TYPE) AS SqlDataType,
 	                            t.system_type_id AS SqlDataTypeCode,

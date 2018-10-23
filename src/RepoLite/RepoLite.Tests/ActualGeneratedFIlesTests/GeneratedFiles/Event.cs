@@ -11,18 +11,18 @@ namespace NS
 {
 	public partial interface IEventRepository : IPkRepository<Event>
 	{
-		Event Get(String eventId);
-		IEnumerable<Event> Get(List<String> eventIds);
-		IEnumerable<Event> Get(params String[] eventIds);
+		Event Get(String eventid);
+		IEnumerable<Event> Get(List<String> eventids);
+		IEnumerable<Event> Get(params String[] eventids);
 		bool Update(Event item);
 		bool Delete(Event @event);
 		bool Delete(IEnumerable<Event> items);
 		bool Merge(List<Event> items);
 		IEnumerable<Event> Search(
-			String eventId = null,
-			String eventName = null);
-		IEnumerable<Event> FindByEventName(String eventName);
-		IEnumerable<Event> FindByEventName(FindComparison comparison, String eventName);
+			String eventid = null,
+			String eventname = null);
+		IEnumerable<Event> FindByEventName(String eventname);
+		IEnumerable<Event> FindByEventName(FindComparison comparison, String eventname);
 	}
 	public sealed partial class EventRepository : BaseRepository<Event>, IEventRepository
 	{
@@ -34,19 +34,19 @@ namespace NS
 			Columns.Add(new ColumnDefinition("EventName", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, false, false, false));
 		}
 
-		public Event Get(String eventId)
+		public Event Get(String eventid)
 		{
-			return Where("EventId", Comparison.Equals, eventId).Results().FirstOrDefault();
+			return Where("EventId", Comparison.Equals, eventid).Results().FirstOrDefault();
 		}
 
-		public IEnumerable<Event> Get(List<String> eventIds)
+		public IEnumerable<Event> Get(List<String> eventids)
 		{
-			return Get(eventIds.ToArray());
+			return Get(eventids.ToArray());
 		}
 
-		public IEnumerable<Event> Get(params String[] eventIds)
+		public IEnumerable<Event> Get(params String[] eventids)
 		{
-			return Where("EventId", Comparison.In, eventIds).Results();
+			return Where("EventId", Comparison.In, eventids).Results();
 		}
 
 		public override bool Create(Event item)
@@ -132,15 +132,15 @@ namespace NS
 			return BaseDelete("EventId", deleteValues);
 		}
 
-		public bool Delete(String eventId)
+		public bool Delete(String eventid)
 		{
-			return Delete(new Event { EventId = eventId });
+			return Delete(new Event { EventId = eventid });
 		}
 
 
-		public bool Delete(IEnumerable<String> eventIds)
+		public bool Delete(IEnumerable<String> eventids)
 		{
-			return Delete(eventIds.Select(x => new Event { EventId = x }));
+			return Delete(eventids.Select(x => new Event { EventId = x }));
 		}
 
 
@@ -171,27 +171,27 @@ namespace NS
 		}
 
 		public IEnumerable<Event> Search(
-			String eventId = null,
-			String eventName = null)
+			String eventid = null,
+			String eventname = null)
 		{
 			var queries = new List<QueryItem>(); 
 
-			if (!string.IsNullOrEmpty(eventId))
-				queries.Add(new QueryItem("EventId", eventId));
-			if (!string.IsNullOrEmpty(eventName))
-				queries.Add(new QueryItem("EventName", eventName));
+			if (!string.IsNullOrEmpty(eventid))
+				queries.Add(new QueryItem("EventId", eventid));
+			if (!string.IsNullOrEmpty(eventname))
+				queries.Add(new QueryItem("EventName", eventname));
 
 			return BaseSearch(queries);
 		}
 
-		public IEnumerable<Event> FindByEventName(String eventName)
+		public IEnumerable<Event> FindByEventName(String eventname)
 		{
-			return FindByEventName(FindComparison.Equals, eventName);
+			return FindByEventName(FindComparison.Equals, eventname);
 		}
 
-		public IEnumerable<Event> FindByEventName(FindComparison comparison, String eventName)
+		public IEnumerable<Event> FindByEventName(FindComparison comparison, String eventname)
 		{
-			return Where("EventName", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), eventName).Results();
+			return Where("EventName", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), eventname).Results();
 		}
 	}
 }

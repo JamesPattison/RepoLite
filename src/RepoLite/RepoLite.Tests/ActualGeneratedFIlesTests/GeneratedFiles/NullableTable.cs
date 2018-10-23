@@ -16,20 +16,20 @@ namespace NS
 		IEnumerable<NullableTable> Get(params Int32[] ids);
 		Int32 GetMaxId();
 		bool Update(NullableTable item);
-		bool Delete(NullableTable nullableTable);
+		bool Delete(NullableTable nullabletable);
 		bool Delete(IEnumerable<NullableTable> items);
 		bool Merge(List<NullableTable> items);
 		IEnumerable<NullableTable> Search(
 			Int32? id = null,
 			Int32? age = null,
-			DateTime? doB = null,
-			Guid? lolVal = null);
+			DateTime? dob = null,
+			Guid? lolval = null);
 		IEnumerable<NullableTable> FindByAge(Int32 age);
 		IEnumerable<NullableTable> FindByAge(FindComparison comparison, Int32 age);
-		IEnumerable<NullableTable> FindByDoB(DateTime doB);
-		IEnumerable<NullableTable> FindByDoB(FindComparison comparison, DateTime doB);
-		IEnumerable<NullableTable> FindByLolVal(Guid lolVal);
-		IEnumerable<NullableTable> FindByLolVal(FindComparison comparison, Guid lolVal);
+		IEnumerable<NullableTable> FindByDoB(DateTime dob);
+		IEnumerable<NullableTable> FindByDoB(FindComparison comparison, DateTime dob);
+		IEnumerable<NullableTable> FindBylolVal(Guid lolval);
+		IEnumerable<NullableTable> FindBylolVal(FindComparison comparison, Guid lolval);
 	}
 	public sealed partial class NullableTableRepository : BaseRepository<NullableTable>, INullableTableRepository
 	{
@@ -79,7 +79,7 @@ namespace NS
 			if (validationErrors.Any())
 				throw new ValidationException(validationErrors);
 
-			var createdKeys = BaseCreate(item.Id, item.Age, item.DoB, item.LolVal);
+			var createdKeys = BaseCreate(item.Id, item.Age, item.DoB, item.lolVal);
 			if (createdKeys.Count != Columns.Count(x => x.PrimaryKey))
 				return false;
 
@@ -104,7 +104,7 @@ namespace NS
 
 			foreach (var item in items)
 			{
-				dt.Rows.Add(item.Age, item.DoB, item.LolVal); 
+				dt.Rows.Add(item.Age, item.DoB, item.lolVal); 
 			}
 
 			return BulkInsert(dt);
@@ -124,19 +124,19 @@ namespace NS
 				throw new ValidationException(validationErrors);
 
 			var success = BaseUpdate(item.DirtyColumns, 
-				item.Id, item.Age, item.DoB, item.LolVal);
+				item.Id, item.Age, item.DoB, item.lolVal);
 
 			if (success)
 			item.ResetDirty();
 
 			return success;
 		}
-		public bool Delete(NullableTable nullableTable)
+		public bool Delete(NullableTable nullabletable)
 		{
-			if (nullableTable == null)
+			if (nullabletable == null)
 				return false;
 
-			var deleteColumn = new DeleteColumn("Id", nullableTable.Id, SqlDbType.Int);
+			var deleteColumn = new DeleteColumn("Id", nullabletable.Id, SqlDbType.Int);
 
 			return BaseDelete(deleteColumn);
 		}
@@ -174,7 +174,7 @@ namespace NS
 					item.Id,
 					item.Age, item.DirtyColumns.Contains("Age"),
 					item.DoB, item.DirtyColumns.Contains("DoB"),
-					item.LolVal, item.DirtyColumns.Contains("lolVal")
+					item.lolVal, item.DirtyColumns.Contains("lolVal")
 				});
 			}
 			return BaseMerge(mergeTable);
@@ -187,7 +187,7 @@ namespace NS
 				Id = GetInt32(row, "Id"),
 				Age = GetNullableInt32(row, "Age"),
 				DoB = GetNullableDateTime(row, "DoB"),
-				LolVal = GetNullableGuid(row, "lolVal"),
+				lolVal = GetNullableGuid(row, "lolVal"),
 			};
 
 			item.ResetDirty();
@@ -197,8 +197,8 @@ namespace NS
 		public IEnumerable<NullableTable> Search(
 			Int32? id = null,
 			Int32? age = null,
-			DateTime? doB = null,
-			Guid? lolVal = null)
+			DateTime? dob = null,
+			Guid? lolval = null)
 		{
 			var queries = new List<QueryItem>(); 
 
@@ -206,10 +206,10 @@ namespace NS
 				queries.Add(new QueryItem("Id", id));
 			if (age.HasValue)
 				queries.Add(new QueryItem("Age", age));
-			if (doB.HasValue)
-				queries.Add(new QueryItem("DoB", doB));
-			if (lolVal.HasValue)
-				queries.Add(new QueryItem("lolVal", lolVal));
+			if (dob.HasValue)
+				queries.Add(new QueryItem("DoB", dob));
+			if (lolval.HasValue)
+				queries.Add(new QueryItem("lolVal", lolval));
 
 			return BaseSearch(queries);
 		}
@@ -224,24 +224,24 @@ namespace NS
 			return Where("Age", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), age).Results();
 		}
 
-		public IEnumerable<NullableTable> FindByDoB(DateTime doB)
+		public IEnumerable<NullableTable> FindByDoB(DateTime dob)
 		{
-			return FindByDoB(FindComparison.Equals, doB);
+			return FindByDoB(FindComparison.Equals, dob);
 		}
 
-		public IEnumerable<NullableTable> FindByDoB(FindComparison comparison, DateTime doB)
+		public IEnumerable<NullableTable> FindByDoB(FindComparison comparison, DateTime dob)
 		{
-			return Where("DoB", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), doB).Results();
+			return Where("DoB", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), dob).Results();
 		}
 
-		public IEnumerable<NullableTable> FindByLolVal(Guid lolVal)
+		public IEnumerable<NullableTable> FindBylolVal(Guid lolval)
 		{
-			return FindByLolVal(FindComparison.Equals, lolVal);
+			return FindBylolVal(FindComparison.Equals, lolval);
 		}
 
-		public IEnumerable<NullableTable> FindByLolVal(FindComparison comparison, Guid lolVal)
+		public IEnumerable<NullableTable> FindBylolVal(FindComparison comparison, Guid lolval)
 		{
-			return Where("lolVal", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), lolVal).Results();
+			return Where("lolVal", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), lolval).Results();
 		}
 	}
 }

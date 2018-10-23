@@ -7,6 +7,7 @@ namespace NS.Models
 {
 	public partial class BinMan : BaseModel
 	{
+		public override string EntityName => "BinMan";
 		private Int32 _id;
 		private Byte[] _data;
 

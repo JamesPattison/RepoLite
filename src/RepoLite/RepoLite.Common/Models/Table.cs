@@ -12,13 +12,24 @@ namespace RepoLite.Common.Models
         //public string SequenceName;
         //public bool Ignore;
         public string DbTableName { get; set; }
-        public string ClassName => Helpers.UpperFirst(DbTableName);
-
+        
         public string LowerClassName
         {
             get
             {
-                var name = Helpers.LowerFirst(DbTableName);
+                var name = DbTableName.ToLower();
+                if (Helpers.ReservedWord(name))
+                    name = "@" + name;
+
+                return name;
+            }
+        }
+
+        public string ClassName
+        {
+            get
+            {
+                var name = DbTableName;
                 if (Helpers.ReservedWord(name))
                     name = "@" + name;
 

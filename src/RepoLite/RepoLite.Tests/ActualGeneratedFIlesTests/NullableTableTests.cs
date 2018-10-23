@@ -53,7 +53,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
             {
                 Age = 1,
                 DoB = DateTime.Now,
-                LolVal = Guid.NewGuid()
+                lolVal = Guid.NewGuid()
             };
 
             var expected = true;

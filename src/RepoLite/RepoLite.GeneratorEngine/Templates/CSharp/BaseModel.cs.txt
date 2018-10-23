@@ -15,9 +15,15 @@ namespace MODELNAMESPACE.Base
             Error = error;
         }
     }
-
-    public abstract class BaseModel
+    
+    public interface IBaseModel
     {
+        string EntityName { get; }
+    }
+
+    public abstract partial class BaseModel : IBaseModel
+    {
+        public abstract string EntityName { get; }
         public abstract List<ValidationError> Validate();
         public readonly List<string> DirtyColumns = new List<string>();
 

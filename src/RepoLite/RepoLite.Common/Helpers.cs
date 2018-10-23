@@ -15,14 +15,10 @@ namespace RepoLite.Common
         public static string Tab8 = "\t\t\t\t\t\t\t\t";
         public static string Tab9 = "\t\t\t\t\t\t\t\t\t";
 
-        public static bool IsNullable(string type)
+        public static bool IsCSharpNullable(string type)
         {
             return type != "Byte[]" && type != "Object" && type != "String" && type != "XmlDocument";
         }
-
-
-        public static Func<string, string> LowerFirst = s => char.ToLowerInvariant(s[0]) + s.Substring(1);
-        public static Func<string, string> UpperFirst = s => char.ToUpperInvariant(s[0]) + s.Substring(1);
 
         public static bool ReservedWord(string value)
         {

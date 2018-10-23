@@ -1,5 +1,3 @@
-Imports System
-Imports System.Collections.Generic
 Imports System.Runtime.CompilerServices
 
 Namespace MODELNAMESPACE.Base
@@ -7,9 +5,9 @@ Namespace MODELNAMESPACE.Base
         Public Property PropertyName As String
         Public Property [Error] As String
 
-        Public Sub New(ByVal [property] As String, ByVal [error] As String)
+        Public Sub New([property] As String, [error] As String)
             PropertyName = [property]
-            [Error] = [error]
+            Me.[error] = [error]
         End Sub
     End Class
 
@@ -21,8 +19,8 @@ Namespace MODELNAMESPACE.Base
             DirtyColumns.Clear()
         End Sub
 
-        Protected Sub SetValue (Of T)(ByRef prop As T, ByVal value As T,
-                                      <CallerMemberName> ByVal Optional propName As String = "")
+        Protected Sub SetValue(Of T)(ByRef prop As T, value As T,
+                                      <CallerMemberName> Optional propName As String = "")
             If Not DirtyColumns.Contains(propName) Then
                 DirtyColumns.Add(propName)
             End If
@@ -30,7 +28,7 @@ Namespace MODELNAMESPACE.Base
             prop = value
         End Sub
 
-        Public Shared Function GetDecimalPlaces(ByVal n As Decimal) As Integer
+        Public Shared Function GetDecimalPlaces(n As Decimal) As Integer
             n = Math.Abs(n)
             n -= CInt(n)
             Dim decimalPlaces = 0

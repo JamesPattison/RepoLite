@@ -7,18 +7,19 @@ namespace NS.Models
 {
 	public partial class Event : BaseModel
 	{
-		private String _eventId;
-		private String _eventName;
+		public override string EntityName => "Event";
+		private String _eventid;
+		private String _eventname;
 
 		public virtual String EventId
 		{
-			get => _eventId;
-			set => SetValue(ref _eventId, value);
+			get => _eventid;
+			set => SetValue(ref _eventid, value);
 		}
 		public virtual String EventName
 		{
-			get => _eventName;
-			set => SetValue(ref _eventName, value);
+			get => _eventname;
+			set => SetValue(ref _eventname, value);
 		}
 		public override List<ValidationError> Validate()
 		{

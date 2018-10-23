@@ -71,37 +71,6 @@ namespace NS.Base
 
     #region Models
 
-    public class UpdateTable
-    {
-        public List<string> DirtyColumns { get; set; }
-        public object[] Data { get; set; }
-
-
-        internal List<UpdateColumn> Columns = new List<UpdateColumn>();
-
-        public void AddColumn(UpdateColumn column)
-        {
-            Columns.Add(column);
-        }
-
-        public void AddColumn(string columnName, object data)
-        {
-            AddColumn(new UpdateColumn { ColumnName = columnName, Data = data, PrimaryKey = false });
-        }
-
-        public void AddColumn(string columnName, object data, bool primaryKey)
-        {
-            AddColumn(new UpdateColumn { ColumnName = columnName, Data = data, PrimaryKey = primaryKey });
-        }
-    }
-
-    public class UpdateColumn
-    {
-        public string ColumnName { get; set; }
-        public bool PrimaryKey { get; set; }
-        public object Data { get; set; }
-    }
-
     public class DeleteColumn
     {
         public string ColumnName { get; set; }
@@ -113,16 +82,6 @@ namespace NS.Base
             ColumnName = columnName;
             Data = data;
             SqlDbType = dbType;
-        }
-    }
-
-    public class MergeTable
-    {
-        public List<object[]> Data { get; set; }
-
-        public MergeTable()
-        {
-            Data = new List<object[]>();
         }
     }
 
@@ -928,7 +887,7 @@ namespace NS.Base
                     mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[{x.ColumnName}]").ToArray()) + ")");
                     mergeSql.AppendLine("VALUES (");
                     mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[Source].[{x.ColumnName}]").ToArray()) + ");");
-                    mergeSql.AppendLine($"DROP TABLE {tempTableName}");
+                    mergeSql.AppendLine("IF OBJECT_ID('dbo.DropTmpTable') IS NULL EXEC ('CREATE PROCEDURE dbo.DropTmpTable @table NVARCHAR(250) AS DECLARE @sql NVARCHAR(300) = N''DROP TABLE '' + @table; EXECUTE sp_executesql @sql')");
 
                     var sql = mergeSql.ToString();
                     if (HasInjection(sql))
@@ -1036,74 +995,74 @@ namespace NS.Base
             return isSuccess;
         }
 
-        protected Boolean GetBoolean(DataRow row, string fieldName)
+        protected bool GetBoolean(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) && row.Field<bool>(fieldName);
+            return row.GetValue<bool>(fieldName) ?? false;
         }
 
-        protected Boolean? GetNullableBoolean(DataRow row, string fieldName)
+        protected bool? GetNullableBoolean(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<Boolean?>(fieldName) : default(Boolean?);
+            return row.GetValue<bool>(fieldName);
         }
 
-        protected Int16 GetInt16(DataRow row, string fieldName)
+        protected short GetInt16(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<Int16>(fieldName) : default(Int16);
+            return row.GetValue<short>(fieldName) ?? default(Int16);
         }
 
-        protected Int16? GetNullableInt16(DataRow row, string fieldName)
+        protected short? GetNullableInt16(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<Int16?>(fieldName) : default(Int16?);
+            return row.GetValue<short>(fieldName);
         }
 
-        protected Int32 GetInt32(DataRow row, string fieldName)
+        protected int GetInt32(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<Int32>(fieldName) : default(Int32);
+            return row.GetValue<int>(fieldName) ?? default(Int32);
         }
 
-        protected Int32? GetNullableInt32(DataRow row, string fieldName)
+        protected int? GetNullableInt32(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<Int32?>(fieldName) : default(Int32?);
+            return row.GetValue<int>(fieldName);
         }
 
-        protected Int64 GetInt64(DataRow row, string fieldName)
+        protected long GetInt64(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<Int64>(fieldName) : default(Int64);
+            return row.GetValue<long>(fieldName) ?? default(Int64);
         }
 
-        protected Int64? GetNullableInt64(DataRow row, string fieldName)
+        protected long? GetNullableInt64(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<Int64?>(fieldName) : default(Int64?);
+            return row.GetValue<long>(fieldName);
         }
 
-        protected Decimal GetDecimal(DataRow row, string fieldName)
+        protected decimal GetDecimal(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<Decimal>(fieldName) : default(Decimal);
+            return row.GetValue<decimal>(fieldName) ?? default(decimal);
         }
 
-        protected Decimal? GetNullableDecimal(DataRow row, string fieldName)
+        protected decimal? GetNullableDecimal(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<Decimal?>(fieldName) : default(Decimal?);
+            return row.GetValue<decimal>(fieldName);
         }
 
-        protected Double GetDouble(DataRow row, string fieldName)
+        protected double GetDouble(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<Double>(fieldName) : default(Double);
+            return row.GetValue<double>(fieldName) ?? default(double);
         }
 
-        protected Double? GetNullableDouble(DataRow row, string fieldName)
+        protected double? GetNullableDouble(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<Double?>(fieldName) : default(Double?);
+            return row.GetValue<double>(fieldName);
         }
 
         protected DateTime GetDateTime(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<DateTime>(fieldName) : default(DateTime);
+            return row.GetValue<DateTime>(fieldName) ?? default(DateTime);
         }
 
         protected DateTime? GetNullableDateTime(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<DateTime?>(fieldName) : default(DateTime?);
+            return row.GetValue<DateTime>(fieldName);
         }
 
         protected byte GetByte(DataRow row, string fieldName)
@@ -1123,45 +1082,45 @@ namespace NS.Base
 
         protected DateTimeOffset GetDateTimeOffset(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<DateTimeOffset>(fieldName) : default(DateTimeOffset);
+            return row.GetValue<DateTimeOffset>(fieldName) ?? default(DateTimeOffset);
         }
 
         protected DateTimeOffset? GetNullableDateTimeOffset(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<DateTimeOffset?>(fieldName) : default(DateTimeOffset?);
+            return row.GetValue<DateTimeOffset>(fieldName);
         }
 
         protected Guid GetGuid(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<Guid>(fieldName) : Guid.Empty;
+            return row.GetValue<Guid>(fieldName) ?? Guid.Empty;
         }
 
         protected Guid? GetNullableGuid(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<Guid?>(fieldName) : default(Guid?);
+            return row.GetValue<Guid>(fieldName);
         }
 
         protected TimeSpan GetTimeSpan(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<TimeSpan>(fieldName) : default(TimeSpan);
+            return row.GetValue<TimeSpan>(fieldName) ?? default(TimeSpan);
         }
 
         protected TimeSpan? GetNullableTimeSpan(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<TimeSpan?>(fieldName) : default(TimeSpan?);
+            return row.GetValue<TimeSpan>(fieldName);
         }
 
         protected XmlDocument GetXmlDocument(DataRow row, string fieldName)
         {
             return new XmlDocument
             {
-                InnerXml = row.Table.Columns.Contains(fieldName) ? row.Field<string>(fieldName) : ""
+                InnerXml = row.Table.Columns.Contains(fieldName) ? row.GetText(fieldName) : ""
             };
         }
 
         protected string GetString(DataRow row, string fieldName)
         {
-            return row.Table.Columns.Contains(fieldName) ? row.Field<string>(fieldName) : default(string);
+            return row.Table.Columns.Contains(fieldName) ? row.GetText(fieldName) : default(string);
         }
 
         #region [Private]
@@ -1217,5 +1176,24 @@ namespace NS.Base
         }
 
         #endregion
+    }
+    
+    public static class Ext
+    {
+        public static T? GetValue<T>(this DataRow row, string columnName) where T : struct
+        {
+            if (row.IsNull(columnName) || !row.Table.Columns.Contains(columnName))
+                return null;
+    
+            return row[columnName] as T?;
+        }
+    
+        public static string GetText(this DataRow row, string columnName)
+        {
+            if (row.IsNull(columnName) || !row.Table.Columns.Contains(columnName))
+                return null;
+    
+            return row[columnName] as string;
+        }
     }
 }

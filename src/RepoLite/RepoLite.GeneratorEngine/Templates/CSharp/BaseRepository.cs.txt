@@ -71,37 +71,6 @@ namespace NS.Base
 
     #region Models
 
-    public class UpdateTable
-    {
-        public List<string> DirtyColumns { get; set; }
-        public object[] Data { get; set; }
-
-
-        internal List<UpdateColumn> Columns = new List<UpdateColumn>();
-
-        public void AddColumn(UpdateColumn column)
-        {
-            Columns.Add(column);
-        }
-
-        public void AddColumn(string columnName, object data)
-        {
-            AddColumn(new UpdateColumn { ColumnName = columnName, Data = data, PrimaryKey = false });
-        }
-
-        public void AddColumn(string columnName, object data, bool primaryKey)
-        {
-            AddColumn(new UpdateColumn { ColumnName = columnName, Data = data, PrimaryKey = primaryKey });
-        }
-    }
-
-    public class UpdateColumn
-    {
-        public string ColumnName { get; set; }
-        public bool PrimaryKey { get; set; }
-        public object Data { get; set; }
-    }
-
     public class DeleteColumn
     {
         public string ColumnName { get; set; }
@@ -113,16 +82,6 @@ namespace NS.Base
             ColumnName = columnName;
             Data = data;
             SqlDbType = dbType;
-        }
-    }
-
-    public class MergeTable
-    {
-        public List<object[]> Data { get; set; }
-
-        public MergeTable()
-        {
-            Data = new List<object[]>();
         }
     }
 
@@ -928,7 +887,7 @@ namespace NS.Base
                     mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[{x.ColumnName}]").ToArray()) + ")");
                     mergeSql.AppendLine("VALUES (");
                     mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[Source].[{x.ColumnName}]").ToArray()) + ");");
-                    mergeSql.AppendLine($"DROP TABLE {tempTableName}");
+                    mergeSql.AppendLine("IF OBJECT_ID('dbo.DropTmpTable') IS NULL EXEC ('CREATE PROCEDURE dbo.DropTmpTable @table NVARCHAR(250) AS DECLARE @sql NVARCHAR(300) = N''DROP TABLE '' + @table; EXECUTE sp_executesql @sql')");
 
                     var sql = mergeSql.ToString();
                     if (HasInjection(sql))
@@ -1232,9 +1191,9 @@ namespace NS.Base
         public static string GetText(this DataRow row, string columnName)
         {
             if (row.IsNull(columnName) || !row.Table.Columns.Contains(columnName))
-                return string.Empty;
+                return null;
     
-            return row[columnName] as string ?? string.Empty;
+            return row[columnName] as string;
         }
     }
 }

@@ -7,16 +7,17 @@ namespace NS.Models
 {
 	public partial class Address : BaseModel
 	{
+		public override string EntityName => "Address";
 		private Int32 _id;
-		private String _anotherId;
-		private Int32 _personId;
+		private String _anotherid;
+		private Int32 _personid;
 		private String _line1;
 		private String _line2;
 		private String _line3;
 		private String _line4;
-		private String _postCode;
-		private String _phoneNumber;
-		private String _cOUNTRY_CODE;
+		private String _postcode;
+		private String _phonenumber;
+		private String _country_code;
 
 		public virtual Int32 Id
 		{
@@ -25,13 +26,13 @@ namespace NS.Models
 		}
 		public virtual String AnotherId
 		{
-			get => _anotherId;
-			set => SetValue(ref _anotherId, value);
+			get => _anotherid;
+			set => SetValue(ref _anotherid, value);
 		}
 		public virtual Int32 PersonId
 		{
-			get => _personId;
-			set => SetValue(ref _personId, value);
+			get => _personid;
+			set => SetValue(ref _personid, value);
 		}
 		public virtual String Line1
 		{
@@ -55,18 +56,18 @@ namespace NS.Models
 		}
 		public virtual String PostCode
 		{
-			get => _postCode;
-			set => SetValue(ref _postCode, value);
+			get => _postcode;
+			set => SetValue(ref _postcode, value);
 		}
 		public virtual String PhoneNumber
 		{
-			get => _phoneNumber;
-			set => SetValue(ref _phoneNumber, value);
+			get => _phonenumber;
+			set => SetValue(ref _phonenumber, value);
 		}
 		public virtual String COUNTRY_CODE
 		{
-			get => _cOUNTRY_CODE;
-			set => SetValue(ref _cOUNTRY_CODE, value);
+			get => _country_code;
+			set => SetValue(ref _country_code, value);
 		}
 		public override List<ValidationError> Validate()
 		{

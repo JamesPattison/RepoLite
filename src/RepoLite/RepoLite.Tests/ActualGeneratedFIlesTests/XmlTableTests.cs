@@ -11,13 +11,13 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
     [TestClass]
     public class XmlTableTests : BaseTests
     {
-        private IXmltableRepository _repository;
+        private IxmltableRepository _repository;
 
         [TestInitialize]
         public void TestInitialize()
         {
             Data.DropAndCreateDatabase();
-            _repository = new XmltableRepository(ConnectionString);
+            _repository = new xmltableRepository(ConnectionString);
         }
 
         [TestMethod]
@@ -33,7 +33,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml1_Data_Count()
         {
             var expected = 1;
-            var actual = _repository.FindByData("<xml>Value</xml>").Count();
+            var actual = _repository.FindBydata("<xml>Value</xml>").Count();
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -42,7 +42,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml1_Data_Name()
         {
             var expected = "XML1";
-            var actual = _repository.FindByData("<xml>Value</xml>").FirstOrDefault()?.Name;
+            var actual = _repository.FindBydata("<xml>Value</xml>").FirstOrDefault()?.name;
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -51,7 +51,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml1_Name_Count()
         {
             var expected = 1;
-            var actual = _repository.FindByName("XML1").Count();
+            var actual = _repository.FindByname("XML1").Count();
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -60,7 +60,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml1_Name_Data()
         {
             var expected = "<xml>Value</xml>";
-            var actual = _repository.FindByName("XML1").FirstOrDefault()?.Data;
+            var actual = _repository.FindByname("XML1").FirstOrDefault()?.data;
 
             Assert.IsTrue(actual.InnerXml == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -69,7 +69,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml2_Data_Count()
         {
             var expected = 1;
-            var actual = _repository.FindByData("<xml>Another Value</xml>").Count();
+            var actual = _repository.FindBydata("<xml>Another Value</xml>").Count();
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -78,7 +78,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml2_Data_Name()
         {
             var expected = "XML2";
-            var actual = _repository.FindByData("<xml>Another Value</xml>").FirstOrDefault()?.Name;
+            var actual = _repository.FindBydata("<xml>Another Value</xml>").FirstOrDefault()?.name;
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -87,7 +87,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml2_Name_Count()
         {
             var expected = 1;
-            var actual = _repository.FindByName("XML2").Count();
+            var actual = _repository.FindByname("XML2").Count();
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -96,7 +96,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml2_Name_Data()
         {
             var expected = "<xml>Another Value</xml>";
-            var actual = _repository.FindByName("XML2").FirstOrDefault()?.Data;
+            var actual = _repository.FindByname("XML2").FirstOrDefault()?.data;
 
             Assert.IsTrue(actual.InnerXml == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -106,7 +106,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml3_Data_Count()
         {
             var expected = 1;
-            var actual = _repository.FindByData("<xml>Yet Another Value</xml>").Count();
+            var actual = _repository.FindBydata("<xml>Yet Another Value</xml>").Count();
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -115,7 +115,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml3_Data_Name()
         {
             var expected = "XML3";
-            var actual = _repository.FindByData("<xml>Yet Another Value</xml>").FirstOrDefault()?.Name;
+            var actual = _repository.FindBydata("<xml>Yet Another Value</xml>").FirstOrDefault()?.name;
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -124,7 +124,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml3_Name_Count()
         {
             var expected = 1;
-            var actual = _repository.FindByName("XML3").Count();
+            var actual = _repository.FindByname("XML3").Count();
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -133,7 +133,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml3_Name_Data()
         {
             var expected = "<xml>Yet Another Value</xml>";
-            var actual = _repository.FindByName("XML3").FirstOrDefault()?.Data;
+            var actual = _repository.FindByname("XML3").FirstOrDefault()?.data;
 
             Assert.IsTrue(actual.InnerXml == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -143,7 +143,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml4_Data_Count()
         {
             var expected = 1;
-            var actual = _repository.FindByData("<xml><nest>Nested!</nest></xml>").Count();
+            var actual = _repository.FindBydata("<xml><nest>Nested!</nest></xml>").Count();
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -152,7 +152,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml4_Data_Name()
         {
             var expected = "XML4";
-            var actual = _repository.FindByData("<xml><nest>Nested!</nest></xml>").FirstOrDefault()?.Name;
+            var actual = _repository.FindBydata("<xml><nest>Nested!</nest></xml>").FirstOrDefault()?.name;
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -161,7 +161,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml4_Name_Count()
         {
             var expected = 1;
-            var actual = _repository.FindByName("XML4").Count();
+            var actual = _repository.FindByname("XML4").Count();
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -170,7 +170,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml4_Name_Data()
         {
             var expected = "<xml><nest>Nested!</nest></xml>";
-            var actual = _repository.FindByName("XML4").FirstOrDefault()?.Data;
+            var actual = _repository.FindByname("XML4").FirstOrDefault()?.data;
 
             Assert.IsTrue(actual.InnerXml == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -180,7 +180,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml5_Data_Count()
         {
             var expected = 1;
-            var actual = _repository.FindByData("<xml><nest><nest>Nested Further!</nest></nest></xml>").Count();
+            var actual = _repository.FindBydata("<xml><nest><nest>Nested Further!</nest></nest></xml>").Count();
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -189,7 +189,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml5_Data_Name()
         {
             var expected = "XML5";
-            var actual = _repository.FindByData("<xml><nest><nest>Nested Further!</nest></nest></xml>").FirstOrDefault()?.Name;
+            var actual = _repository.FindBydata("<xml><nest><nest>Nested Further!</nest></nest></xml>").FirstOrDefault()?.name;
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -198,7 +198,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml5_Name_Count()
         {
             var expected = 1;
-            var actual = _repository.FindByName("XML5").Count();
+            var actual = _repository.FindByname("XML5").Count();
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -207,7 +207,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Xml5_Name_Data()
         {
             var expected = "<xml><nest><nest>Nested Further!</nest></nest></xml>";
-            var actual = _repository.FindByName("XML5").FirstOrDefault()?.Data;
+            var actual = _repository.FindByname("XML5").FirstOrDefault()?.data;
 
             Assert.IsTrue(actual.InnerXml == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -217,7 +217,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Data_Contains_Value()
         {
             var expected = 3;
-            var actual = _repository.FindByData(FindComparison.Like, "Value").Count();
+            var actual = _repository.FindBydata(FindComparison.Like, "Value").Count();
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -226,7 +226,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Data_Contains_xml()
         {
             var expected = 5;
-            var actual = _repository.FindByData(FindComparison.Like, "xml").Count();
+            var actual = _repository.FindBydata(FindComparison.Like, "xml").Count();
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -235,7 +235,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestFindByData_Data_Contains_nest()
         {
             var expected = 2;
-            var actual = _repository.FindByData(FindComparison.Like, "nest").Count();
+            var actual = _repository.FindBydata(FindComparison.Like, "nest").Count();
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
         }
@@ -261,10 +261,10 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestCreate()
         {
-            var data = new Xmltable
+            var data = new xmltable
             {
-                Name = "Inserted",
-                Data = new XmlDocument { InnerXml = "<xml>Xml</xml>" }
+                name = "Inserted",
+                data = new XmlDocument { InnerXml = "<xml>Xml</xml>" }
             };
 
             var expected = true;

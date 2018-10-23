@@ -1,12 +1,6 @@
-﻿Imports Microsoft.VisualBasic
-Imports MODELNAMESPACE.Base
+﻿Imports System.Data.SqlClient
+Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
-Imports System
-Imports System.Collections
-Imports System.Collections.Generic
-Imports System.Data
-Imports System.Data.SqlClient
-Imports System.Linq
 Imports System.Text
 Imports System.Xml
 Imports RepoLite.VB.Tests.MODELNAMESPACE.Base
@@ -14,111 +8,70 @@ Imports RepoLite.VB.Tests.MODELNAMESPACE.Base
 Namespace REPOSITORYNAMESPACE.Base
     Public Interface IBaseRepository (Of T)
         Function GetAll() As IEnumerable(Of T)
-        Function Create(ByVal item As T) As Boolean
-        Function BulkCreate(ByVal items As List(Of T)) As Boolean
-        Function BulkCreate(ParamArray ByVal items() As T) As Boolean
+        Function Create(item As T) As Boolean
+        Function BulkCreate(items As List(Of T)) As Boolean
+        Function BulkCreate(ParamArray items() As T) As Boolean
 
-        Function Where(ByVal col As String, ByVal comparison As Comparison, ByVal val As Object) As Where(Of T)
+        Function Where(col As String, comparison As Comparison, val As Object) As Where(Of T)
 
-        Function Where(ByVal col As String, ByVal comparison As Comparison, ByVal val As Object, ByVal valueType As Type) _
-            As Where(Of T)
+        Function Where(col As String, comparison As Comparison, val As Object, valueType As Type) As Where(Of T)
 
-        Function Where(ByVal query As String) As IEnumerable(Of T)
+        Function Where(query As String) As IEnumerable(Of T)
     End Interface
 
     Public Interface IPkRepository (Of T)
         Inherits IBaseRepository(Of T)
-        Function Update(ByVal item As T) As Boolean
-        Function Delete(ByVal item As T) As Boolean
-        Function Delete(ByVal items As IEnumerable(Of T)) As Boolean
-        Function Merge(ByVal items As List(Of T)) As Boolean
+        Function Update(item As T) As Boolean
+        Function Delete(item As T) As Boolean
+        Function Delete(items As IEnumerable(Of T)) As Boolean
+        Function Merge(items As List(Of T)) As Boolean
     End Interface
 
 #Region "Enums"
 
     Friend Enum ClauseType
-        Initial
+        [Initial]
         [And]
         [Or]
     End Enum
 
     Public Enum FindComparison
-        Equals
-        NotEquals
+        [Equals]
+        [NotEquals]
         [Like]
-        NotLike
-        GreaterThan
-        GreaterThanOrEquals
-        LessThan
-        LessThanOrEquals
+        [NotLike]
+        [GreaterThan]
+        [GreaterThanOrEquals]
+        [LessThan]
+        [LessThanOrEquals]
     End Enum
 
     Public Enum Comparison
-        Equals
-        NotEquals
+        [Equals]
+        [NotEquals]
         [Like]
-        NotLike
-        GreaterThan
-        GreaterThanOrEquals
-        LessThan
-        LessThanOrEquals
+        [NotLike]
+        [GreaterThan]
+        [GreaterThanOrEquals]
+        [LessThan]
+        [LessThanOrEquals]
         [In]
-        NotIn
-        IsNull
-        IsNotNull
+        [NotIn]
+        [IsNull]
+        [IsNotNull]
     End Enum
 
 #End Region
-
-    Public Class UpdateTable
-        Public Property DirtyColumns As List(Of String)
-        Public Property Data As Object()
-        Friend Columns As List(Of UpdateColumn) = New List(Of UpdateColumn)()
-
-        Public Sub AddColumn(ByVal column As UpdateColumn)
-            Columns.Add(column)
-        End Sub
-
-        Public Sub AddColumn(ByVal columnName As String, ByVal data As Object)
-            AddColumn(New UpdateColumn With {
-                         .ColumnName = columnName,
-                         .Data = data,
-                         .PrimaryKey = False
-                         })
-        End Sub
-
-        Public Sub AddColumn(ByVal columnName As String, ByVal data As Object, ByVal primaryKey As Boolean)
-            AddColumn(New UpdateColumn With {
-                         .ColumnName = columnName,
-                         .Data = data,
-                         .PrimaryKey = primaryKey
-                         })
-        End Sub
-    End Class
-
-    Public Class UpdateColumn
-        Public Property ColumnName As String
-        Public Property PrimaryKey As Boolean
-        Public Property Data As Object
-    End Class
 
     Public Class DeleteColumn
         Public Property ColumnName As String
         Public Property SqlDbType As SqlDbType
         Public Property Data As Object
 
-        Public Sub New(ByVal columnName As String, ByVal data As Object, ByVal dbType As SqlDbType)
-            ColumnName = columnName
-            Data = data
-            SqlDbType = dbType
-        End Sub
-    End Class
-
-    Public Class MergeTable
-        Public Property Data As List(Of Object())
-
-        Public Sub New()
-            Data = New List(Of Object())()
+        Public Sub New(columnName As String, data As Object, sqlDbType As SqlDbType)
+            Me.ColumnName = columnName
+            Me.Data = data
+            Me.SqlDbType = sqlDbType
         End Sub
     End Class
 
@@ -131,31 +84,31 @@ Namespace REPOSITORYNAMESPACE.Base
         Public Property PrimaryKey As Boolean
         Public Property Nullable As Boolean
 
-        Public Sub New(ByVal columnName As String, ByVal valueType As Type, ByVal sqlDataTypeText As String,
-                       ByVal dbType As SqlDbType)
-            Me.New(columnName, valueType, sqlDataTypeText, dbType, False, False, False)
+        Public Sub New(columnName As String, valueType As Type, sqlDataTypeText As String,
+                       sqlDbType As SqlDbType)
+            Me.New(columnName, valueType, sqlDataTypeText, sqlDbType, False, False, False)
         End Sub
 
-        Public Sub New(ByVal columnName As String, ByVal valueType As Type, ByVal sqlDataTypeText As String,
-                       ByVal dbType As SqlDbType, ByVal nullable As Boolean)
-            Me.New(columnName, valueType, sqlDataTypeText, dbType, nullable, False, False)
+        Public Sub New(columnName As String, valueType As Type, sqlDataTypeText As String,
+                       sqlDbType As SqlDbType, nullable As Boolean)
+            Me.New(columnName, valueType, sqlDataTypeText, sqlDbType, nullable, False, False)
         End Sub
 
-        Public Sub New(ByVal columnName As String, ByVal valueType As Type, ByVal sqlDataTypeText As String,
-                       ByVal dbType As SqlDbType, ByVal nullable As Boolean, ByVal primaryKey As Boolean)
-            Me.New(columnName, valueType, sqlDataTypeText, dbType, nullable, primaryKey, False)
+        Public Sub New(columnName As String, valueType As Type, sqlDataTypeText As String,
+                       sqlDbType As SqlDbType, nullable As Boolean, primaryKey As Boolean)
+            Me.New(columnName, valueType, sqlDataTypeText, sqlDbType, nullable, primaryKey, False)
         End Sub
 
-        Public Sub New(ByVal columnName As String, ByVal valueType As Type, ByVal sqlDataTypeText As String,
-                       ByVal dbType As SqlDbType, ByVal nullable As Boolean, ByVal primaryKey As Boolean,
-                       ByVal identity As Boolean)
-            ColumnName = columnName
-            ValueType = valueType
-            SqlDataTypeText = sqlDataTypeText
-            SqlDbType = dbType
-            Nullable = nullable
-            PrimaryKey = primaryKey
-            Identity = identity
+        Public Sub New(columnName As String, valueType As Type, sqlDataTypeText As String,
+                       sqlDbType As SqlDbType, nullable As Boolean, primaryKey As Boolean,
+                       identity As Boolean)
+            Me.ColumnName = columnName
+            Me.ValueType = valueType
+            Me.SqlDataTypeText = sqlDataTypeText
+            Me.SqlDbType = sqlDbType
+            Me.Nullable = nullable
+            Me.PrimaryKey = primaryKey
+            Me.Identity = identity
         End Sub
     End Class
 
@@ -164,14 +117,14 @@ Namespace REPOSITORYNAMESPACE.Base
         Public Property Value As Object
         Public Property DataType As Type
 
-        Public Sub New(ByVal dbColName As String, ByVal value As Object)
+        Public Sub New(dbColName As String, value As Object)
             Me.New(dbColName, value, value.[GetType]())
         End Sub
 
-        Public Sub New(ByVal dbColName As String, ByVal value As Object, ByVal dataType As Type)
-            DbColumnName = dbColName
-            Value = value
-            DataType = dataType
+        Public Sub New(dbColumnName As String, value As Object, dataType As Type)
+            Me.DbColumnName = dbColumnName
+            Me.Value = value
+            Me.DataType = dataType
         End Sub
     End Class
 
@@ -180,8 +133,8 @@ Namespace REPOSITORYNAMESPACE.Base
 
         Public Property ValidationErrors As List(Of ValidationError)
 
-        Public Sub New(ByVal validationErrors As List(Of ValidationError))
-            ValidationErrors = validationErrors
+        Public Sub New(validationErrors As List(Of ValidationError))
+            Me.ValidationErrors = validationErrors
         End Sub
     End Class
 
@@ -190,34 +143,28 @@ Namespace REPOSITORYNAMESPACE.Base
         Private ReadOnly _repository As BaseRepository(Of T)
         Private _activeGroups As Integer
 
-        Public Sub New(ByVal baseRepository As BaseRepository(Of T), ByVal col As String, ByVal comparison As Comparison,
-                       ByVal val As Object)
+        Public Sub New(baseRepository As BaseRepository(Of T), col As String, comparison As Comparison,
+                       val As Object)
             Me.New(baseRepository, col, comparison, val, val.[GetType]())
         End Sub
 
-        Public Sub New(ByVal baseRepository As BaseRepository(Of T), ByVal col As String, ByVal comparison As Comparison,
-                       ByVal val As Object, ByVal valueType As Type)
+        Public Sub New(baseRepository As BaseRepository(Of T), col As String, comparison As Comparison,
+                       val As Object, valueType As Type)
             _repository = baseRepository
             _query.Append(MakeClause(col, comparison, val, ClauseType.Initial, valueType))
         End Sub
 
-        Private Function MakeClause(ByVal col As String, ByVal comparison As Comparison, ByVal clauseType As ClauseType) _
-            As String
+        Private Function MakeClause(col As String, comparison As Comparison, clauseType As ClauseType) As String
             Return MakeClause(col, comparison, Nothing, clauseType, Nothing)
         End Function
 
-        Private Function MakeClause(ByVal col As String, ByVal comparison As Comparison, ByVal val As Object,
-                                    ByVal clauseType As ClauseType, ByVal valueType As Type) As String
+        Private Function MakeClause(col As String, comparison As Comparison, val As Object,
+                                    clauseType As ClauseType, valueType As Type) As String
             Dim query = New StringBuilder()
-            Dim list As IEnumerable = Nothing
 
             Select Case comparison
                 Case Comparison.[In], Comparison.NotIn
-
-                    If _
-                        CSharpImpl.__Assign(list, TryCast(val, IEnumerable)) IsNot Nothing AndAlso
-                        Not (If(TryCast(val, Object()), (TryCast(val, IEnumerable)).Cast (Of Object)().ToArray())).Any() _
-                        Then
+                    If TryCast(val, IEnumerable) IsNot Nothing And Not If(TryCast(val, Object()), TryCast(val, IEnumerable).Cast (Of Object)().ToArray()).Any() Then
                         query.Append("1=0")
                         Return query.ToString()
                     End If
@@ -227,7 +174,9 @@ Namespace REPOSITORYNAMESPACE.Base
             If _
                 {Comparison.GreaterThan, Comparison.GreaterThanOrEquals, Comparison.LessThan,
                  Comparison.LessThanOrEquals}.Contains(comparison) AndAlso Not Single.TryParse(val.ToString(), floatVal) _
-                Then Throw New Exception("Numeric comparison used on a non numeric value.")
+                Then
+                Throw New Exception("Numeric comparison used on a non numeric value.")
+            End If
 
             Select Case clauseType
                 Case ClauseType.Initial
@@ -264,7 +213,7 @@ Namespace REPOSITORYNAMESPACE.Base
             Return query.ToString()
         End Function
 
-        Private Shared Function GetComparison(ByVal comparison As Comparison) As String
+        Private Shared Function GetComparison(comparison As Comparison) As String
             Select Case comparison
                 Case Comparison.Equals
                     Return " = "
@@ -295,12 +244,12 @@ Namespace REPOSITORYNAMESPACE.Base
             End Select
         End Function
 
-        Private Function GetTypeVal(ByVal col As String, ByVal val As Object) As String
+        Private Function GetTypeVal(col As String, val As Object) As String
             Dim typeName = If(TypeOf val Is IList, "List", val.[GetType]().Name)
 
             Select Case typeName
                 Case "Boolean"
-                    If CBool(val) Then Return "1"
+                    If val Then Return "1"
                     Return "0"
                 Case "Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64", "Decimal", "Double"
                     Return val.ToString()
@@ -309,8 +258,8 @@ Namespace REPOSITORYNAMESPACE.Base
                 Case "List"
                     Dim result = ""
                     Dim enumerable =
-                            If(TryCast(val, Object()), (TryCast(val, IEnumerable)).Cast (Of Object)().ToArray())
-                    Const batchSize As Integer = 2000
+                            If(TryCast(val, Object()), TryCast(val, IEnumerable).Cast (Of Object)().ToArray())
+                    Const batchSize = 2000
                     Dim batches = Math.Ceiling(CDec(enumerable.Length)/batchSize)
 
                     For i = 0 To batches - 1
@@ -333,70 +282,67 @@ Namespace REPOSITORYNAMESPACE.Base
             Return _repository.Where(_query.ToString())
         End Function
 
-        Public Function [And](ByVal col As String, ByVal comparison As Comparison) As Where(Of T)
+        Public Function [And](col As String, comparison As Comparison) As Where(Of T)
             If comparison <> Comparison.IsNull AndAlso comparison <> Comparison.IsNotNull Then _
-                Throw _
-                    New Exception(
-                        "And(" & col & ", " & comparison &
-                        ") can only be called with Comparison.IsNull or Comparison.IsNotNull")
+                Throw New Exception(
+                    "And(" & col & ", " & comparison &
+                    ") can only be called with Comparison.IsNull or Comparison.IsNotNull")
             _query.Append(MakeClause(col, comparison, ClauseType.[And]))
             Return Me
         End Function
 
-        Public Function [And](ByVal col As String, ByVal comparison As Comparison, ByVal val As Object) As Where(Of T)
+        Public Function [And](col As String, comparison As Comparison, val As Object) As Where(Of T)
             Return [And](col, comparison, val, val.[GetType]())
         End Function
 
-        Public Function [And](ByVal col As String, ByVal comparison As Comparison, ByVal val As Object,
-                              ByVal valueType As Type) As Where(Of T)
+        Public Function [And](col As String, comparison As Comparison, val As Object,
+                              valueType As Type) As Where(Of T)
             _query.Append(MakeClause(col, comparison, val, ClauseType.[And], valueType))
             Return Me
         End Function
 
-        Public Function [Or](ByVal col As String, ByVal comparison As Comparison) As Where(Of T)
+        Public Function [Or](col As String, comparison As Comparison) As Where(Of T)
             If comparison <> Comparison.IsNull AndAlso comparison <> Comparison.IsNotNull Then _
-                Throw _
-                    New Exception(
-                        "Or(" & col & ", " & comparison &
-                        ") can only be called with Comparison.IsNull or Comparison.IsNotNull")
+                Throw New Exception(
+                    "Or(" & col & ", " & comparison &
+                    ") can only be called with Comparison.IsNull or Comparison.IsNotNull")
             _query.Append(MakeClause(col, comparison, ClauseType.[Or]))
             Return Me
         End Function
 
-        Public Function [Or](ByVal col As String, ByVal comparison As Comparison, ByVal val As Object) As Where(Of T)
+        Public Function [Or](col As String, comparison As Comparison, val As Object) As Where(Of T)
             Return [Or](col, comparison, val, val.[GetType]())
         End Function
 
-        Public Function [Or](ByVal col As String, ByVal comparison As Comparison, ByVal val As Object,
-                             ByVal valueType As Type) As Where(Of T)
+        Public Function [Or](col As String, comparison As Comparison, val As Object,
+                             valueType As Type) As Where(Of T)
             _query.Append(MakeClause(col, comparison, val, ClauseType.[Or], valueType))
             Return Me
         End Function
 
-        Public Function AndBeginGroup(ByVal col As String, ByVal comparison As Comparison) As Where(Of T)
+        Public Function AndBeginGroup(col As String, comparison As Comparison) As Where(Of T)
             If comparison <> Comparison.IsNull AndAlso comparison <> Comparison.IsNotNull Then _
-                Throw _
-                    New Exception(
-                        "AndBeginGroup(" & col & ", " & comparison &
-                        ") can only be called with Comparison.IsNull or Comparison.IsNotNull")
+                Throw New Exception(
+                    "AndBeginGroup(" & col & ", " & comparison &
+                    ") can only be called with Comparison.IsNull or Comparison.IsNotNull")
             _activeGroups += 1
             _query.Append(" AND (" & MakeClause(col, comparison, ClauseType.Initial))
             Return Me
         End Function
 
-        Public Function AndBeginGroup(ByVal col As String, ByVal comparison As Comparison, ByVal val As Object) _
+        Public Function AndBeginGroup(col As String, comparison As Comparison, val As Object) _
             As Where(Of T)
             Return AndBeginGroup(col, comparison, val, val.[GetType]())
         End Function
 
-        Public Function AndBeginGroup(ByVal col As String, ByVal comparison As Comparison, ByVal val As Object,
-                                      ByVal valueType As Type) As Where(Of T)
+        Public Function AndBeginGroup(col As String, comparison As Comparison, val As Object,
+                                      valueType As Type) As Where(Of T)
             _activeGroups += 1
             _query.Append(" AND (" & MakeClause(col, comparison, val, ClauseType.Initial, valueType))
             Return Me
         End Function
 
-        Public Function OrBeginGroup(ByVal col As String, ByVal comparison As Comparison) As Where(Of T)
+        Public Function OrBeginGroup(col As String, comparison As Comparison) As Where(Of T)
             If comparison <> Comparison.IsNull AndAlso comparison <> Comparison.IsNotNull Then _
                 Throw _
                     New Exception(
@@ -407,13 +353,13 @@ Namespace REPOSITORYNAMESPACE.Base
             Return Me
         End Function
 
-        Public Function OrBeginGroup(ByVal col As String, ByVal comparison As Comparison, ByVal val As Object) _
+        Public Function OrBeginGroup(col As String, comparison As Comparison, val As Object) _
             As Where(Of T)
             Return OrBeginGroup(col, comparison, val, val.[GetType]())
         End Function
 
-        Public Function OrBeginGroup(ByVal col As String, ByVal comparison As Comparison, ByVal val As Object,
-                                     ByVal valueType As Type) As Where(Of T)
+        Public Function OrBeginGroup(col As String, comparison As Comparison, val As Object,
+                                     valueType As Type) As Where(Of T)
             _activeGroups += 1
             _query.Append(" OR (" & MakeClause(col, comparison, val, ClauseType.Initial, valueType))
             Return Me
@@ -428,14 +374,6 @@ Namespace REPOSITORYNAMESPACE.Base
         Public Function QueryString() As String
             Return _repository.WhereQuery() & " WHERE " & _query.ToString()
         End Function
-
-        Private Class CSharpImpl
-            <Obsolete("Please refactor calling code to use normal Visual Basic assignment")>
-            Shared Function __Assign (Of T)(ByRef target As T, value As T) As T
-                target = value
-                Return value
-            End Function
-        End Class
     End Class
 
     Public MustInherit Class BaseRepository (Of T)
@@ -447,12 +385,12 @@ Namespace REPOSITORYNAMESPACE.Base
         Private ReadOnly _tableName As String
         Public Property Columns As List(Of ColumnDefinition)
 
-        Protected Sub New(ByVal connectionString As String, ByVal logMethod As Action(Of Exception),
-                          ByVal schema As String, ByVal table As String, ByVal columnCount As Integer)
+        Protected Sub New(connectionString As String, logMethod As Action(Of Exception),
+                          schema As String, table As String, columnCount As Integer)
             Columns = New List(Of ColumnDefinition)()
             _schema = schema
             _tableName = table
-            ConnectionString = connectionString
+            Me.ConnectionString = connectionString
             Logger = If(logMethod, (Function(exception)
             End Function))
             Dim sql =
@@ -461,7 +399,7 @@ Namespace REPOSITORYNAMESPACE.Base
                             WHERE TABLE_NAME = '{ _
                     table}' AND TABLE_SCHEMA = '{schema}'"
 
-            Using cn = New SqlConnection(ConnectionString)
+            Using cn = New SqlConnection(connectionString)
 
                 Using cmd = CreateCommand(cn, sql)
 
@@ -469,9 +407,8 @@ Namespace REPOSITORYNAMESPACE.Base
                         cn.Open()
                         Dim count = CInt(cmd.ExecuteScalar())
                         If count <> columnCount Then _
-                            Throw _
-                                New Exception(
-                                    "Repository Definition does not match Database. Please re-run the code generator to get a new repository")
+                            Throw New Exception(
+                                "Repository Definition does not match Database. Please re-run the code generator to get a new repository")
                     Finally
                         cn.Close()
                     End Try
@@ -485,15 +422,15 @@ Namespace REPOSITORYNAMESPACE.Base
 
         Public MustOverride Function Create(item As T) As Boolean Implements IBaseRepository(Of T).Create
 
-        Public MustOverride Function BulkCreate(ByVal items As List(Of T)) As Boolean _
+        Public MustOverride Function BulkCreate(items As List(Of T)) As Boolean _
             Implements IBaseRepository(Of T).BulkCreate
 
         Public MustOverride Function BulkCreate(ParamArray items As T()) As Boolean _
             Implements IBaseRepository(Of T).BulkCreate
 
-        Protected MustOverride Function ToItem(ByVal row As DataRow) As T
+        Protected MustOverride Function ToItem(row As DataRow) As T
 
-        Protected Function CreateCommand(ByVal cn As SqlConnection, ByVal command As String) As SqlCommand
+        Protected Function CreateCommand(cn As SqlConnection, command As String) As SqlCommand
             Dim cmd = New SqlCommand With {
                     .Connection = cn,
                     .CommandType = CommandType.Text,
@@ -515,17 +452,17 @@ Namespace REPOSITORYNAMESPACE.Base
             Return sb.ToString()
         End Function
 
-        Public Function Where(ByVal col As String, ByVal comparison As Comparison, ByVal val As Object) As Where(Of T) _
+        Public Function Where(col As String, comparison As Comparison, val As Object) As Where(Of T) _
             Implements IBaseRepository(Of T).Where
             Return Where(col, comparison, val, val.[GetType]())
         End Function
 
-        Public Function Where(ByVal col As String, ByVal comparison As Comparison, ByVal val As Object,
-                              ByVal valueType As Type) As Where(Of T) Implements IBaseRepository(Of T).Where
+        Public Function Where(col As String, comparison As Comparison, val As Object,
+                              valueType As Type) As Where(Of T) Implements IBaseRepository(Of T).Where
             Return New Where(Of T)(Me, col, comparison, val, valueType)
         End Function
 
-        Public Function Where(ByVal query As String) As IEnumerable(Of T) Implements IBaseRepository(Of T).Where
+        Public Function Where(query As String) As IEnumerable(Of T) Implements IBaseRepository(Of T).Where
             If HasInjection(query) Then Throw New Exception("Sql Injection attempted. Aborted")
 
             Using cn = New SqlConnection(ConnectionString)
@@ -534,7 +471,7 @@ Namespace REPOSITORYNAMESPACE.Base
                     If HasInjection(cmd.CommandText) Then Throw New Exception("Sql Injection attempted. Aborted")
                     cn.Open()
                     Dim dt = ToDataTable(cmd)
-                    If dt Is Nothing Then Return New T(- 1) {}
+                    If dt Is Nothing Then Return New T() {}
                     Dim items = ToItems(dt)
                     cn.Close()
                     Return items
@@ -542,13 +479,13 @@ Namespace REPOSITORYNAMESPACE.Base
             End Using
         End Function
 
-        Protected Function HasInjection(ByVal query As String) As Boolean
+        Protected Function HasInjection(query As String) As Boolean
             Dim isSqlInjection = False
             Dim sqlCheckList As String() = {"--", ";--", "/*", "*/"}
             Dim checkString = query.Replace("'", "''")
 
             For i = 0 To sqlCheckList.Length - 1
-                If (checkString.IndexOf(sqlCheckList(i), StringComparison.OrdinalIgnoreCase) < 0) Then Continue For
+                If checkString.IndexOf(sqlCheckList(i), StringComparison.OrdinalIgnoreCase) < 0 Then Continue For
                 isSqlInjection = True
                 Exit For
             Next
@@ -556,7 +493,7 @@ Namespace REPOSITORYNAMESPACE.Base
             Return isSqlInjection
         End Function
 
-        Protected Function BaseSearch(ByVal queries As List(Of QueryItem)) As IEnumerable(Of T)
+        Protected Function BaseSearch(queries As List(Of QueryItem)) As IEnumerable(Of T)
             If Not queries.Any() Then Return New List(Of T)()
             Dim first = queries.First()
             Dim whereQuery = Where(first.DbColumnName, Comparison.Equals, first.Value, first.DataType)
@@ -633,11 +570,9 @@ Namespace REPOSITORYNAMESPACE.Base
                             Then Continue For
                         Dim parameter = cmd.Parameters.Add(createColumn.ColumnName, createColumn.SqlDbType)
                         parameter.Value =
-                            If _
-                                (values(i) IsNot Nothing,
-                                 (If _
-                                    (values(i).GetType() = GetType(XmlDocument),
-                                     (CType(values(i), XmlDocument)).InnerXml, values(i))), DBNull.Value)
+                            If(values(i) IsNot Nothing,
+                               If (values(i).GetType() = GetType(XmlDocument), CType(values(i), XmlDocument).InnerXml,
+                                   values(i)), DBNull.Value)
                     Next
 
                     Dim dt As DataTable
@@ -657,19 +592,17 @@ Namespace REPOSITORYNAMESPACE.Base
             Return returnIds
         End Function
 
-        Protected Function BulkInsert(ByVal dt As DataTable, ByVal tableName As String) As Boolean
+        Protected Function BulkInsert(dt As DataTable, tableName As String) As Boolean
             Try
-
                 Using cn = New SqlConnection(ConnectionString)
                     cn.Open()
 
-                    Using _
-                        bulkCopy =
-                            New SqlBulkCopy(cn,
-                                            SqlBulkCopyOptions.TableLock Or SqlBulkCopyOptions.FireTriggers Or
-                                            SqlBulkCopyOptions.UseInternalTransaction, Nothing) With {
-                                                .DestinationTableName = tableName
-                                                }
+                    Using bulkCopy =
+                        New SqlBulkCopy(cn,
+                                        SqlBulkCopyOptions.TableLock Or SqlBulkCopyOptions.FireTriggers Or
+                                        SqlBulkCopyOptions.UseInternalTransaction, Nothing) With {
+                                            .DestinationTableName = tableName
+                                            }
 
                         For Each dataColumn As DataColumn In dt.Columns
                             bulkCopy.ColumnMappings.Add(dataColumn.ColumnName, dataColumn.ColumnName)
@@ -688,19 +621,19 @@ Namespace REPOSITORYNAMESPACE.Base
             End Try
         End Function
 
-        Protected Function BulkInsert(ByVal dt As DataTable) As Boolean
+        Protected Function BulkInsert(dt As DataTable) As Boolean
             Return BulkInsert(dt, $"[{_schema}].[{_tableName}]")
         End Function
 
-        Protected Function BaseUpdate(ByVal dirtyColumns As List(Of String), ParamArray values As Object()) As Boolean
+        Protected Function BaseUpdate(dirtyColumns As List(Of String), ParamArray values As Object()) As Boolean
             Dim isSuccess As Boolean
             Dim sb = New StringBuilder()
             sb.AppendLine($"UPDATE [{_schema}].[{_tableName}] SET")
-            Dim nonpkCols = Columns.Where(Function(x) Not x.PrimaryKey).ToArray()
+            Dim nonPkCols = Columns.Where(Function(x) Not x.PrimaryKey).ToArray()
 
-            For Each col In nonpkCols.Where(Function(x) dirtyColumns.Contains(x.ColumnName))
+            For Each col In nonPkCols.Where(Function(x) dirtyColumns.Contains(x.ColumnName))
                 sb.Append($"[{col.ColumnName}] = @{col.ColumnName}")
-                sb.AppendLine(If(col IsNot nonpkCols.Last(Function(x) dirtyColumns.Contains(x.ColumnName)), ",", ""))
+                sb.AppendLine(If(col IsNot nonPkCols.Last(Function(x) dirtyColumns.Contains(x.ColumnName)), ",", ""))
             Next
 
             sb.AppendLine("WHERE")
@@ -743,7 +676,7 @@ Namespace REPOSITORYNAMESPACE.Base
             Return isSuccess
         End Function
 
-        Protected Function BaseDelete(ByVal deleteColumn As DeleteColumn) As Boolean
+        Protected Function BaseDelete(deleteColumn As DeleteColumn) As Boolean
             Dim isSuccess As Boolean
 
             Using cn = New SqlConnection(ConnectionString)
@@ -763,7 +696,7 @@ Namespace REPOSITORYNAMESPACE.Base
             Return isSuccess
         End Function
 
-        Protected Function BaseDelete(ByVal columnName As String, ByVal dataValues As List(Of Object)) As Boolean
+        Protected Function BaseDelete(columnName As String, dataValues As List(Of Object)) As Boolean
             Dim isSuccess As Boolean
 
             Using cn = New SqlConnection(ConnectionString)
@@ -787,7 +720,7 @@ Namespace REPOSITORYNAMESPACE.Base
             Return isSuccess
         End Function
 
-        Protected Function BaseMerge(ByVal mergeData As List(Of Object())) As Boolean
+        Protected Function BaseMerge(mergeData As List(Of Object())) As Boolean
             Dim tempTableName = "staging" & DateTime.Now.Ticks
 
             Try
@@ -847,6 +780,12 @@ Namespace REPOSITORYNAMESPACE.Base
                             .CommandType = CommandType.Text,
                             .CommandText = sql
                             }
+                    
+With cmd
+    .Connection = cn
+    .CommandType = CommandType.Text
+    .CommandText = sql
+End With
                     cn.Open()
                     cmd.ExecuteNonQuery()
                     cmd.Dispose()
@@ -883,7 +822,7 @@ Namespace REPOSITORYNAMESPACE.Base
             End Try
         End Function
 
-        Protected Iterator Function ToItems(ByVal table As DataTable) As IEnumerable(Of T)
+        Protected Iterator Function ToItems(table As DataTable) As IEnumerable(Of T)
             For Each row As DataRow In table.Rows
                 Dim item = Nothing
 
@@ -897,8 +836,7 @@ Namespace REPOSITORYNAMESPACE.Base
             Next
         End Function
 
-        Protected Function ToDataTable(ByVal cmd As SqlCommand, ByVal cn As SqlConnection, <Out> ByRef dt As DataTable) _
-            As Boolean
+        Protected Function ToDataTable(cmd As SqlCommand, cn As SqlConnection, <Out> ByRef dt As DataTable) As Boolean
             Dim isSuccess = True
             If HasInjection(cmd.CommandText) Then Throw New Exception("Sql Injection attempted. Aborted")
             cn.Open()
@@ -908,7 +846,7 @@ Namespace REPOSITORYNAMESPACE.Base
             Return isSuccess
         End Function
 
-        Protected Function NoneQuery(ByVal cn As SqlConnection, ByVal cmd As SqlCommand) As Boolean
+        Protected Function NoneQuery(cn As SqlConnection, cmd As SqlCommand) As Boolean
             If HasInjection(cmd.CommandText) Then Throw New Exception("Sql Injection attempted. Aborted")
             Dim isSuccess = True
             cn.Open()
@@ -924,109 +862,109 @@ Namespace REPOSITORYNAMESPACE.Base
             Return isSuccess
         End Function
 
-        Protected Function GetBoolean(ByVal row As DataRow, ByVal fieldName As String) As Boolean
-            Return row.Table.Columns.Contains(fieldName) AndAlso row.Field (Of Boolean)(fieldName)
+        Protected Function GetBoolean(row As DataRow, fieldName As String) As Boolean
+            Return If(row.GetValue (Of Boolean)(fieldName), False)
         End Function
 
-        Protected Function GetNullableBoolean(ByVal row As DataRow, ByVal fieldName As String) As Boolean?
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of Boolean?)(fieldName), Nothing)
+        Protected Function GetNullableBoolean(row As DataRow, fieldName As String) As Boolean?
+            Return row.GetValue (Of Boolean)(fieldName)
         End Function
 
-        Protected Function GetInt16(ByVal row As DataRow, ByVal fieldName As String) As Int16
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of Int16)(fieldName), Nothing)
+        Protected Function GetInt16(row As DataRow, fieldName As String) As Short
+            Return If(row.GetValue (Of Short)(fieldName), Nothing)
         End Function
 
-        Protected Function GetNullableInt16(ByVal row As DataRow, ByVal fieldName As String) As Int16?
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of Int16?)(fieldName), Nothing)
+        Protected Function GetNullableInt16(row As DataRow, fieldName As String) As Short?
+            Return row.GetValue (Of Short)(fieldName)
         End Function
 
-        Protected Function GetInt32(ByVal row As DataRow, ByVal fieldName As String) As Int32
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of Int32)(fieldName), Nothing)
+        Protected Function GetInt32(row As DataRow, fieldName As String) As Integer
+            Return If(row.GetValue (Of Integer)(fieldName), Nothing)
         End Function
 
-        Protected Function GetNullableInt32(ByVal row As DataRow, ByVal fieldName As String) As Int32?
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of Int32?)(fieldName), Nothing)
+        Protected Function GetNullableInt32(row As DataRow, fieldName As String) As Integer?
+            Return row.GetValue (Of Integer)(fieldName)
         End Function
 
-        Protected Function GetInt64(ByVal row As DataRow, ByVal fieldName As String) As Int64
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of Int64)(fieldName), Nothing)
+        Protected Function GetInt64(row As DataRow, fieldName As String) As Long
+            Return If(row.GetValue (Of Long)(fieldName), Nothing)
         End Function
 
-        Protected Function GetNullableInt64(ByVal row As DataRow, ByVal fieldName As String) As Int64?
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of Int64?)(fieldName), Nothing)
+        Protected Function GetNullableInt64(row As DataRow, fieldName As String) As Long?
+            Return row.GetValue (Of Long)(fieldName)
         End Function
 
-        Protected Function GetDecimal(ByVal row As DataRow, ByVal fieldName As String) As Decimal
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of Decimal)(fieldName), Nothing)
+        Protected Function GetDecimal(row As DataRow, fieldName As String) As Decimal
+            Return If(row.GetValue (Of Decimal)(fieldName), Nothing)
         End Function
 
-        Protected Function GetNullableDecimal(ByVal row As DataRow, ByVal fieldName As String) As Decimal?
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of Decimal?)(fieldName), Nothing)
+        Protected Function GetNullableDecimal(row As DataRow, fieldName As String) As Decimal?
+            Return row.GetValue (Of Decimal)(fieldName)
         End Function
 
-        Protected Function GetDouble(ByVal row As DataRow, ByVal fieldName As String) As Double
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of Double)(fieldName), Nothing)
+        Protected Function GetDouble(row As DataRow, fieldName As String) As Double
+            Return If(row.GetValue (Of Double)(fieldName), Nothing)
         End Function
 
-        Protected Function GetNullableDouble(ByVal row As DataRow, ByVal fieldName As String) As Double?
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of Double?)(fieldName), Nothing)
+        Protected Function GetNullableDouble(row As DataRow, fieldName As String) As Double?
+            Return row.GetValue (Of Double)(fieldName)
         End Function
 
-        Protected Function GetDateTime(ByVal row As DataRow, ByVal fieldName As String) As DateTime
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of DateTime)(fieldName), Nothing)
+        Protected Function GetDateTime(row As DataRow, fieldName As String) As DateTime
+            Return If(row.GetValue (Of DateTime)(fieldName), Nothing)
         End Function
 
-        Protected Function GetNullableDateTime(ByVal row As DataRow, ByVal fieldName As String) As DateTime?
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of DateTime?)(fieldName), Nothing)
+        Protected Function GetNullableDateTime(row As DataRow, fieldName As String) As DateTime?
+            Return row.GetValue (Of DateTime)(fieldName)
         End Function
 
-        Protected Function GetByte(ByVal row As DataRow, ByVal fieldName As String) As Byte
+        Protected Function GetByte(row As DataRow, fieldName As String) As Byte
             Return CByte(row(fieldName))
         End Function
 
-        Protected Function GetNullableByte(ByVal row As DataRow, ByVal fieldName As String) As Byte?
+        Protected Function GetNullableByte(row As DataRow, fieldName As String) As Byte?
             Return CType(row(fieldName), Byte?)
         End Function
 
-        Protected Function GetByteArray(ByVal row As DataRow, ByVal fieldName As String) As Byte()
+        Protected Function GetByteArray(row As DataRow, fieldName As String) As Byte()
             Return CType(row(fieldName), Byte())
         End Function
 
-        Protected Function GetDateTimeOffset(ByVal row As DataRow, ByVal fieldName As String) As DateTimeOffset
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of DateTimeOffset)(fieldName), Nothing)
+        Protected Function GetDateTimeOffset(row As DataRow, fieldName As String) As DateTimeOffset
+            Return If(row.GetValue (Of DateTimeOffset)(fieldName), Nothing)
         End Function
 
-        Protected Function GetNullableDateTimeOffset(ByVal row As DataRow, ByVal fieldName As String) As DateTimeOffset?
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of DateTimeOffset?)(fieldName), Nothing)
+        Protected Function GetNullableDateTimeOffset(row As DataRow, fieldName As String) As DateTimeOffset?
+            Return row.GetValue (Of DateTimeOffset)(fieldName)
         End Function
 
-        Protected Function GetGuid(ByVal row As DataRow, ByVal fieldName As String) As Guid
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of Guid)(fieldName), Guid.Empty)
+        Protected Function GetGuid(row As DataRow, fieldName As String) As Guid
+            Return If(row.GetValue (Of Guid)(fieldName), Guid.Empty)
         End Function
 
-        Protected Function GetNullableGuid(ByVal row As DataRow, ByVal fieldName As String) As Guid?
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of Guid?)(fieldName), Nothing)
+        Protected Function GetNullableGuid(row As DataRow, fieldName As String) As Guid?
+            Return row.GetValue (Of Guid)(fieldName)
         End Function
 
-        Protected Function GetTimeSpan(ByVal row As DataRow, ByVal fieldName As String) As TimeSpan
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of TimeSpan)(fieldName), Nothing)
+        Protected Function GetTimeSpan(row As DataRow, fieldName As String) As TimeSpan
+            Return If(row.GetValue (Of TimeSpan)(fieldName), Nothing)
         End Function
 
-        Protected Function GetNullableTimeSpan(ByVal row As DataRow, ByVal fieldName As String) As TimeSpan?
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of TimeSpan?)(fieldName), Nothing)
+        Protected Function GetNullableTimeSpan(row As DataRow, fieldName As String) As TimeSpan?
+            Return row.GetValue (Of TimeSpan)(fieldName)
         End Function
 
-        Protected Function GetXmlDocument(ByVal row As DataRow, ByVal fieldName As String) As XmlDocument
+        Protected Function GetXmlDocument(row As DataRow, fieldName As String) As XmlDocument
             Return New XmlDocument With {
-                .InnerXml = If(row.Table.Columns.Contains(fieldName), row.Field (Of String)(fieldName), "")
+                .InnerXml = If(row.Table.Columns.Contains(fieldName), row.GetText(fieldName), "")
                 }
         End Function
 
-        Protected Function GetString(ByVal row As DataRow, ByVal fieldName As String) As String
-            Return If(row.Table.Columns.Contains(fieldName), row.Field (Of String)(fieldName), Nothing)
+        Protected Function GetString(row As DataRow, fieldName As String) As String
+            Return If(row.Table.Columns.Contains(fieldName), row.GetText(fieldName), Nothing)
         End Function
 
-        Private Function ToDataTable(ByVal cmd As SqlCommand) As DataTable
+        Private Function ToDataTable(cmd As SqlCommand) As DataTable
             Try
                 Dim da = New SqlDataAdapter(cmd)
                 Dim dt = New DataTable()
@@ -1038,8 +976,8 @@ Namespace REPOSITORYNAMESPACE.Base
             End Try
         End Function
 
-        Protected Sub CreateStagingTable(ByVal tempTableName As String,
-                                         ByVal Optional onlyPrimaryKeys As Boolean = False)
+        Protected Sub CreateStagingTable(tempTableName As String,
+                                         Optional onlyPrimaryKeys As Boolean = False)
             Dim stagingSqlBuilder = New StringBuilder()
             stagingSqlBuilder.AppendLine("CREATE TABLE " & tempTableName & " (")
 
@@ -1069,4 +1007,18 @@ Namespace REPOSITORYNAMESPACE.Base
             End Using
         End Sub
     End Class
+
+    Module Ext
+        <Extension>
+        Function GetValue (Of T As Structure)(row As DataRow, columnName As String) As T?
+            If row.IsNull(columnName) OrElse Not row.Table.Columns.Contains(columnName) Then Return Nothing
+            Return row(columnName)
+        End Function
+
+        <Extension>
+        Function GetText(row As DataRow, columnName As String) As String
+            If row.IsNull(columnName) OrElse Not row.Table.Columns.Contains(columnName) Then Return Nothing
+            Return If(TryCast(row(columnName), String), Nothing)
+        End Function
+    End Module
 End Namespace

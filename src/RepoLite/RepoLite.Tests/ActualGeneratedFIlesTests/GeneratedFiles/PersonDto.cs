@@ -7,6 +7,7 @@ namespace NS.Models
 {
 	public partial class Person : BaseModel
 	{
+		public override string EntityName => "Person";
 		private Int32 _id;
 		private String _name;
 		private Int32 _age;

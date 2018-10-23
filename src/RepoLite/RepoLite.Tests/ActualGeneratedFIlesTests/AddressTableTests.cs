@@ -568,7 +568,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestAddress_Search_ByAnotherId()
         {
-            var actual = _repository.Search(anotherId: "47").ToArray();
+            var actual = _repository.Search(anotherid: "47").ToArray();
 
             foreach (var addr in actual)
             {
@@ -582,7 +582,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestAddress_Search_ByPersonId()
         {
-            var actual = _repository.Search(personId: 7).ToArray();
+            var actual = _repository.Search(personid: 7).ToArray();
 
             foreach (var addr in actual)
             {
@@ -652,7 +652,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestAddress_Search_ByPostCode()
         {
-            var actual = _repository.Search(postCode: "05472-9584").ToArray();
+            var actual = _repository.Search(postcode: "05472-9584").ToArray();
 
             foreach (var addr in actual)
             {
@@ -666,7 +666,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestAddress_Search_ByPhoneNumber()
         {
-            var actual = _repository.Search(phoneNumber: "01833 406229").ToArray();
+            var actual = _repository.Search(phonenumber: "01833 406229").ToArray();
 
             foreach (var addr in actual)
             {
@@ -680,7 +680,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestAddress_Search_ByCountryCode()
         {
-            var actual = _repository.Search(cOUNTRY_CODE: "AE").ToArray();
+            var actual = _repository.Search(country_code: "AE").ToArray();
 
             foreach (var addr in actual)
             {

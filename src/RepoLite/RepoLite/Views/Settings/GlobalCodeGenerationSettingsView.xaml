@@ -73,11 +73,6 @@
                         <TextBox x:Name="ModelFileNameFormat" Text="{Binding Path=GenerationSettings.ModelFileNameFormat}"/>
                     </StackPanel>
                     <StackPanel>
-                        <Label Style="{StaticResource LeftLabel}" Content="Model Class Name Format" Target="{Binding ElementName=ModelClassNameFormat}"
-                               ToolTip="The format for Model Class Names. Available variables: {Name}"/>
-                        <TextBox x:Name="ModelClassNameFormat" Text="{Binding Path=GenerationSettings.ModelClassNameFormat}"/>
-                    </StackPanel>
-                    <StackPanel>
                         <Label Style="{StaticResource LeftLabel}" Content="Repository FileName Format" Target="{Binding ElementName=RepositoryFileNameFormat}"
                                ToolTip="The format for Repository filenames. Available variables: {Schema}, {Name}"/>
                         <TextBox x:Name="RepositoryFileNameFormat" Text="{Binding Path=GenerationSettings.RepositoryFileNameFormat}"/>

@@ -16,41 +16,41 @@ namespace NS
 		public AddressKeys() {}
 		public AddressKeys(
 			Int32 id,
-			String anotherId)
+			String anotherid)
 		{
 			Id = id;
-			AnotherId = anotherId;
+			AnotherId = anotherid;
 		}
 	}
 	public partial interface IAddressRepository : IBaseRepository<Address>
 	{
-		Address Get(Int32 id, String anotherId);
+		Address Get(Int32 id, String anotherid);
 		Address Get(AddressKeys compositeId);
 		IEnumerable<Address> Get(List<AddressKeys> compositeIds);
 		IEnumerable<Address> Get(params AddressKeys[] compositeIds);
 		bool Update(Address item);
 		bool Delete(Address address);
-		bool Delete(Int32 id, String anotherId);
+		bool Delete(Int32 id, String anotherid);
 		bool Delete(AddressKeys compositeId);
 		bool Delete(IEnumerable<AddressKeys> compositeIds);
 		bool Merge(List<Address> items);
 		IEnumerable<Address> Search(
 			Int32? id = null,
-			String anotherId = null,
-			Int32? personId = null,
+			String anotherid = null,
+			Int32? personid = null,
 			String line1 = null,
 			String line2 = null,
 			String line3 = null,
 			String line4 = null,
-			String postCode = null,
-			String phoneNumber = null,
-			String cOUNTRY_CODE = null);
+			String postcode = null,
+			String phonenumber = null,
+			String country_code = null);
 		IEnumerable<Address> FindById(Int32 id);
 		IEnumerable<Address> FindById(FindComparison comparison, Int32 id);
-		IEnumerable<Address> FindByAnotherId(String anotherId);
-		IEnumerable<Address> FindByAnotherId(FindComparison comparison, String anotherId);
-		IEnumerable<Address> FindByPersonId(Int32 personId);
-		IEnumerable<Address> FindByPersonId(FindComparison comparison, Int32 personId);
+		IEnumerable<Address> FindByAnotherId(String anotherid);
+		IEnumerable<Address> FindByAnotherId(FindComparison comparison, String anotherid);
+		IEnumerable<Address> FindByPersonId(Int32 personid);
+		IEnumerable<Address> FindByPersonId(FindComparison comparison, Int32 personid);
 		IEnumerable<Address> FindByLine1(String line1);
 		IEnumerable<Address> FindByLine1(FindComparison comparison, String line1);
 		IEnumerable<Address> FindByLine2(String line2);
@@ -59,12 +59,12 @@ namespace NS
 		IEnumerable<Address> FindByLine3(FindComparison comparison, String line3);
 		IEnumerable<Address> FindByLine4(String line4);
 		IEnumerable<Address> FindByLine4(FindComparison comparison, String line4);
-		IEnumerable<Address> FindByPostCode(String postCode);
-		IEnumerable<Address> FindByPostCode(FindComparison comparison, String postCode);
-		IEnumerable<Address> FindByPhoneNumber(String phoneNumber);
-		IEnumerable<Address> FindByPhoneNumber(FindComparison comparison, String phoneNumber);
-		IEnumerable<Address> FindByCOUNTRY_CODE(String cOUNTRY_CODE);
-		IEnumerable<Address> FindByCOUNTRY_CODE(FindComparison comparison, String cOUNTRY_CODE);
+		IEnumerable<Address> FindByPostCode(String postcode);
+		IEnumerable<Address> FindByPostCode(FindComparison comparison, String postcode);
+		IEnumerable<Address> FindByPhoneNumber(String phonenumber);
+		IEnumerable<Address> FindByPhoneNumber(FindComparison comparison, String phonenumber);
+		IEnumerable<Address> FindByCOUNTRY_CODE(String country_code);
+		IEnumerable<Address> FindByCOUNTRY_CODE(FindComparison comparison, String country_code);
 	}
 	public sealed partial class AddressRepository : BaseRepository<Address>, IAddressRepository
 	{
@@ -84,9 +84,9 @@ namespace NS
 			Columns.Add(new ColumnDefinition("COUNTRY_CODE", typeof(System.String), "[NVARCHAR](2)", SqlDbType.NVarChar, true, false, false));
 		}
 
-		public Address Get(Int32 id, String anotherId)
+		public Address Get(Int32 id, String anotherid)
 		{
-			return Where("Id", Comparison.Equals, id).And("AnotherId", Comparison.Equals, anotherId).Results().FirstOrDefault();
+			return Where("Id", Comparison.Equals, id).And("AnotherId", Comparison.Equals, anotherid).Results().FirstOrDefault();
 		}
 
 		public Address Get(AddressKeys compositeId)
@@ -187,9 +187,9 @@ namespace NS
 			return BaseDelete(deleteColumn);
 		}
 
-		public bool Delete(Int32 id, String anotherId)
+		public bool Delete(Int32 id, String anotherid)
 		{
-			return Delete(new Address { Id = id,AnotherId = anotherId});
+			return Delete(new Address { Id = id,AnotherId = anotherid});
 		}
 
 		public bool Delete(AddressKeys compositeId)
@@ -272,24 +272,24 @@ namespace NS
 
 		public IEnumerable<Address> Search(
 			Int32? id = null,
-			String anotherId = null,
-			Int32? personId = null,
+			String anotherid = null,
+			Int32? personid = null,
 			String line1 = null,
 			String line2 = null,
 			String line3 = null,
 			String line4 = null,
-			String postCode = null,
-			String phoneNumber = null,
-			String cOUNTRY_CODE = null)
+			String postcode = null,
+			String phonenumber = null,
+			String country_code = null)
 		{
 			var queries = new List<QueryItem>(); 
 
 			if (id.HasValue)
 				queries.Add(new QueryItem("Id", id));
-			if (!string.IsNullOrEmpty(anotherId))
-				queries.Add(new QueryItem("AnotherId", anotherId));
-			if (personId.HasValue)
-				queries.Add(new QueryItem("PersonId", personId));
+			if (!string.IsNullOrEmpty(anotherid))
+				queries.Add(new QueryItem("AnotherId", anotherid));
+			if (personid.HasValue)
+				queries.Add(new QueryItem("PersonId", personid));
 			if (!string.IsNullOrEmpty(line1))
 				queries.Add(new QueryItem("Line1", line1));
 			if (!string.IsNullOrEmpty(line2))
@@ -298,12 +298,12 @@ namespace NS
 				queries.Add(new QueryItem("Line3", line3));
 			if (!string.IsNullOrEmpty(line4))
 				queries.Add(new QueryItem("Line4", line4));
-			if (!string.IsNullOrEmpty(postCode))
-				queries.Add(new QueryItem("PostCode", postCode));
-			if (!string.IsNullOrEmpty(phoneNumber))
-				queries.Add(new QueryItem("PhoneNumber", phoneNumber));
-			if (!string.IsNullOrEmpty(cOUNTRY_CODE))
-				queries.Add(new QueryItem("COUNTRY_CODE", cOUNTRY_CODE));
+			if (!string.IsNullOrEmpty(postcode))
+				queries.Add(new QueryItem("PostCode", postcode));
+			if (!string.IsNullOrEmpty(phonenumber))
+				queries.Add(new QueryItem("PhoneNumber", phonenumber));
+			if (!string.IsNullOrEmpty(country_code))
+				queries.Add(new QueryItem("COUNTRY_CODE", country_code));
 
 			return BaseSearch(queries);
 		}
@@ -319,24 +319,24 @@ namespace NS
 			return Where("Id", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), id).Results();
 		}
 
-		public IEnumerable<Address> FindByAnotherId(String anotherId)
+		public IEnumerable<Address> FindByAnotherId(String anotherid)
 		{
-			return FindByAnotherId(FindComparison.Equals, anotherId);
+			return FindByAnotherId(FindComparison.Equals, anotherid);
 		}
 
-		public IEnumerable<Address> FindByAnotherId(FindComparison comparison, String anotherId)
+		public IEnumerable<Address> FindByAnotherId(FindComparison comparison, String anotherid)
 		{
-			return Where("AnotherId", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), anotherId).Results();
+			return Where("AnotherId", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), anotherid).Results();
 		}
 
-		public IEnumerable<Address> FindByPersonId(Int32 personId)
+		public IEnumerable<Address> FindByPersonId(Int32 personid)
 		{
-			return FindByPersonId(FindComparison.Equals, personId);
+			return FindByPersonId(FindComparison.Equals, personid);
 		}
 
-		public IEnumerable<Address> FindByPersonId(FindComparison comparison, Int32 personId)
+		public IEnumerable<Address> FindByPersonId(FindComparison comparison, Int32 personid)
 		{
-			return Where("PersonId", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), personId).Results();
+			return Where("PersonId", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), personid).Results();
 		}
 
 		public IEnumerable<Address> FindByLine1(String line1)
@@ -379,34 +379,34 @@ namespace NS
 			return Where("Line4", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), line4).Results();
 		}
 
-		public IEnumerable<Address> FindByPostCode(String postCode)
+		public IEnumerable<Address> FindByPostCode(String postcode)
 		{
-			return FindByPostCode(FindComparison.Equals, postCode);
+			return FindByPostCode(FindComparison.Equals, postcode);
 		}
 
-		public IEnumerable<Address> FindByPostCode(FindComparison comparison, String postCode)
+		public IEnumerable<Address> FindByPostCode(FindComparison comparison, String postcode)
 		{
-			return Where("PostCode", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), postCode).Results();
+			return Where("PostCode", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), postcode).Results();
 		}
 
-		public IEnumerable<Address> FindByPhoneNumber(String phoneNumber)
+		public IEnumerable<Address> FindByPhoneNumber(String phonenumber)
 		{
-			return FindByPhoneNumber(FindComparison.Equals, phoneNumber);
+			return FindByPhoneNumber(FindComparison.Equals, phonenumber);
 		}
 
-		public IEnumerable<Address> FindByPhoneNumber(FindComparison comparison, String phoneNumber)
+		public IEnumerable<Address> FindByPhoneNumber(FindComparison comparison, String phonenumber)
 		{
-			return Where("PhoneNumber", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), phoneNumber).Results();
+			return Where("PhoneNumber", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), phonenumber).Results();
 		}
 
-		public IEnumerable<Address> FindByCOUNTRY_CODE(String cOUNTRY_CODE)
+		public IEnumerable<Address> FindByCOUNTRY_CODE(String country_code)
 		{
-			return FindByCOUNTRY_CODE(FindComparison.Equals, cOUNTRY_CODE);
+			return FindByCOUNTRY_CODE(FindComparison.Equals, country_code);
 		}
 
-		public IEnumerable<Address> FindByCOUNTRY_CODE(FindComparison comparison, String cOUNTRY_CODE)
+		public IEnumerable<Address> FindByCOUNTRY_CODE(FindComparison comparison, String country_code)
 		{
-			return Where("COUNTRY_CODE", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), cOUNTRY_CODE).Results();
+			return Where("COUNTRY_CODE", (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), country_code).Results();
 		}
 	}
 }

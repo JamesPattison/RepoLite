@@ -7,10 +7,11 @@ namespace NS.Models
 {
 	public partial class NullableTable : BaseModel
 	{
+		public override string EntityName => "NullableTable";
 		private Int32 _id;
 		private Int32? _age;
-		private DateTime? _doB;
-		private Guid? _lolVal;
+		private DateTime? _dob;
+		private Guid? _lolval;
 
 		public virtual Int32 Id
 		{
@@ -24,13 +25,13 @@ namespace NS.Models
 		}
 		public virtual DateTime? DoB
 		{
-			get => _doB;
-			set => SetValue(ref _doB, value);
+			get => _dob;
+			set => SetValue(ref _dob, value);
 		}
-		public virtual Guid? LolVal
+		public virtual Guid? lolVal
 		{
-			get => _lolVal;
-			set => SetValue(ref _lolVal, value);
+			get => _lolval;
+			set => SetValue(ref _lolval, value);
 		}
 		public override List<ValidationError> Validate()
 		{
@@ -38,8 +39,8 @@ namespace NS.Models
 
 			if (DoB == DateTime.MinValue)
 				validationErrors.Add(new ValidationError(nameof(DoB), "Value cannot be default."));
-			if (LolVal == Guid.Empty)
-				validationErrors.Add(new ValidationError(nameof(LolVal), "Value cannot be default."));
+			if (lolVal == Guid.Empty)
+				validationErrors.Add(new ValidationError(nameof(lolVal), "Value cannot be default."));
 
 			return validationErrors;
 		}

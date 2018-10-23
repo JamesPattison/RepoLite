@@ -1,14 +1,7 @@
-Imports System
-Imports System.Collections.Generic
-Imports System.Xml
-Imports NS.Models.Base
-Imports System.ComponentModel.DataAnnotations
-Imports System.ComponentModel.DataAnnotations.Schema
 Imports RepoLite.VB.Tests.MODELNAMESPACE.Base
 
 Namespace NS.Models
-    <Table("Address", Schema:="dbo")>
-    Public Partial Class Address
+    Partial Public Class Address
         Inherits BaseModel
 
         Private _id As Int32
@@ -22,22 +15,20 @@ Namespace NS.Models
         Private _phoneNumber As String
         Private _cOUNTRY_CODE As String
 
-        <Key>
         Public Overridable Property Id As Int32
             Get
                 Return _id
             End Get
-            Set(ByVal value As Int32)
+            Set(value As Int32)
                 SetValue(_id, value)
             End Set
         End Property
 
-        <Key>
         Public Overridable Property AnotherId As String
             Get
                 Return _anotherId
             End Get
-            Set(ByVal value As String)
+            Set(value As String)
                 SetValue(_anotherId, value)
             End Set
         End Property
@@ -46,7 +37,7 @@ Namespace NS.Models
             Get
                 Return _personId
             End Get
-            Set(ByVal value As Int32)
+            Set(value As Int32)
                 SetValue(_personId, value)
             End Set
         End Property
@@ -55,7 +46,7 @@ Namespace NS.Models
             Get
                 Return _line1
             End Get
-            Set(ByVal value As String)
+            Set(value As String)
                 SetValue(_line1, value)
             End Set
         End Property
@@ -64,7 +55,7 @@ Namespace NS.Models
             Get
                 Return _line2
             End Get
-            Set(ByVal value As String)
+            Set(value As String)
                 SetValue(_line2, value)
             End Set
         End Property
@@ -73,7 +64,7 @@ Namespace NS.Models
             Get
                 Return _line3
             End Get
-            Set(ByVal value As String)
+            Set(value As String)
                 SetValue(_line3, value)
             End Set
         End Property
@@ -82,7 +73,7 @@ Namespace NS.Models
             Get
                 Return _line4
             End Get
-            Set(ByVal value As String)
+            Set(value As String)
                 SetValue(_line4, value)
             End Set
         End Property
@@ -91,7 +82,7 @@ Namespace NS.Models
             Get
                 Return _postCode
             End Get
-            Set(ByVal value As String)
+            Set(value As String)
                 SetValue(_postCode, value)
             End Set
         End Property
@@ -100,7 +91,7 @@ Namespace NS.Models
             Get
                 Return _phoneNumber
             End Get
-            Set(ByVal value As String)
+            Set(value As String)
                 SetValue(_phoneNumber, value)
             End Set
         End Property
@@ -109,7 +100,7 @@ Namespace NS.Models
             Get
                 Return _cOUNTRY_CODE
             End Get
-            Set(ByVal value As String)
+            Set(value As String)
                 SetValue(_cOUNTRY_CODE, value)
             End Set
         End Property
