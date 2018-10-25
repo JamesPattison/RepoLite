@@ -256,6 +256,14 @@ namespace RepoLite.Plugins.K3
             }
             
             //IBaseRepository<T>
+            sb.AppendLine(Tab2, $"public static long RecordCount(string profile)");
+            sb.AppendLine(Tab2, "{");
+            sb.AppendLine(Tab3, $"Log.Activity(\"Calling RecordCount in {table.ClassName}Repository\");");
+            sb.AppendLine(Tab3, $"return new {table.ClassName}Repository(Settings.Instance[profile].ConnectionString, exception => Log.Error(exception, \"RecordCount\"))");
+            sb.AppendLine(Tab4, ".RecordCount();");
+            sb.AppendLine(Tab2, "}");
+            sb.AppendLine("");
+            
             sb.AppendLine(Tab2, $"public static IEnumerable<{table.ClassName}> GetAll(string profile)");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, $"Log.Activity(\"Calling GetAll in {table.ClassName}Repository\");");

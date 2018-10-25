@@ -16,6 +16,7 @@ namespace NS.Base
     public interface IBaseRepository<T>
         where T : IBaseModel
     {
+        long RecordCount();
         IEnumerable<T> GetAll();
         bool Create(T item);
         bool BulkCreate(List<T> items);
@@ -100,6 +101,7 @@ namespace NS.Base
         public bool PrimaryKey { get; set; }
         public bool Nullable { get; set; }
 
+        internal ColumnDefinition(string columnName) : this(columnName, typeof(string), "NVARCHAR(MAX)", SqlDbType.NVarChar, false, false, false) { }
         public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType) : this(columnName, valueType, sqlDataTypeText, dbType, false, false, false) { }
         public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType, bool nullable) : this(columnName, valueType, sqlDataTypeText, dbType, nullable, false, false) { }
         public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType, bool nullable, bool primaryKey) : this(columnName, valueType, sqlDataTypeText, dbType, nullable, primaryKey, false) { }
@@ -199,18 +201,18 @@ namespace NS.Base
             {
                 case ClauseType.Initial:
                     query.Append(valueType == typeof(XmlDocument)
-                        ? "CONVERT(NVARCHAR(MAX), [" + col + "])"
-                        : "[" + col + "]");
+                        ? $"CONVERT(NVARCHAR(MAX), [{col}])"
+                        : $"[{col}]");
                     break;
                 case ClauseType.And:
                     query.Append(valueType == typeof(XmlDocument)
-                        ? " AND CONVERT(NVARCHAR(MAX), [" + col + "])"
-                        : " AND [" + col + "]");
+                        ? $" AND CONVERT(NVARCHAR(MAX), [{col}])"
+                        : $" AND [{col}]");
                     break;
                 case ClauseType.Or:
                     query.Append(valueType == typeof(XmlDocument)
-                        ? " OR CONVERT(NVARCHAR(MAX), [" + col + "])"
-                        : " OR [" + col + "]");
+                        ? $" OR CONVERT(NVARCHAR(MAX), [{col}])"
+                        : $" OR [{col}]");
                     break;
             }
 
@@ -442,7 +444,7 @@ namespace NS.Base
             {ExpressionType.ExclusiveOr, "^"},
             {ExpressionType.GreaterThan, ">"},
             {ExpressionType.GreaterThanOrEqual, ">="},
-            {ExpressionType.LessThan, "<="},
+            {ExpressionType.LessThan, "<"},
             {ExpressionType.LessThanOrEqual, "<="},
             {ExpressionType.Modulo, "%"},
             {ExpressionType.Multiply, "*"},
@@ -454,6 +456,12 @@ namespace NS.Base
             {ExpressionType.Subtract, "-"}
         };
         
+        internal static string ToSql<T>(Expression<Func<T, bool>> expression)
+            where T : IBaseModel
+        {
+            return Parse(expression.Body, true).Sql;
+        }
+        
         internal static string ToSql<T, TK>(Expression<Func<T, TK, bool>> expression)
             where T : IBaseModel
             where TK : IBaseModel
@@ -461,7 +469,7 @@ namespace NS.Base
             return Parse(expression.Body, true).Sql;
         }
 
-        private static Clause Parse(Expression expression, bool isUnary = false, string prefix = null, string postfix = null)
+        private static Clause Parse(Expression expression, bool isUnary = false, string prefix = null, string postfix = null, bool boolComparison = false)
         {
             while (true)
             {
@@ -470,7 +478,11 @@ namespace NS.Base
                     case UnaryExpression unary:
                         return Clause.Make(NodeStr[unary.NodeType], Parse(unary.Operand, true));
                     case BinaryExpression body:
-                        return Clause.Make(Parse(body.Left), NodeStr[body.NodeType], Parse(body.Right));
+                        
+                        var left = body.Left.Type == typeof(bool) ? Parse(body.Left, boolComparison: true) : Parse(body.Left);
+                        var right = body.Right.Type == typeof(bool) ? Parse(body.Right, boolComparison: true) : Parse(body.Right);
+                        
+                        return Clause.Make(left, NodeStr[body.NodeType], right);
                     case ConstantExpression constant:
                     {
                         var value = constant.Value;
@@ -485,7 +497,7 @@ namespace NS.Base
 
                         if (value is bool && isUnary)
                         {
-                            return Clause.Make(Clause.Make($"'{value}'"), "=", Clause.Make("1"));
+                            return boolComparison ? Clause.Make($"'{value}'"): Clause.Make(Clause.Make($"'{value}'"), "=", Clause.Make("1"));
                         }
 
                         return Clause.Make($"'{value}'");
@@ -511,10 +523,19 @@ namespace NS.Base
                                     }
                                     else
                                     {
-                                        return Clause.Make(Clause.Make($"[{model.EntityName}].[{colName}]"), "=", Clause.Make("1"));
+                                        return boolComparison ? Clause.Make($"[{model.EntityName}].[{colName}]"): Clause.Make(Clause.Make($"[{model.EntityName}].[{colName}]"), "=",
+                                            Clause.Make("1"));
                                     }
                                 else
-                                    return Clause.Make($"[{model.EntityName}].[{colName}]");
+                                {
+                                    var value = $"[{model.EntityName}].[{colName}]";
+                                    if (!string.IsNullOrEmpty(prefix))
+                                        value = $"'{prefix}'+{value}";
+                                    if (!string.IsNullOrEmpty(postfix))
+                                        value = $"{value}+'{postfix}'";
+
+                                    return Clause.Make(value);
+                                }
                             }
                             case FieldInfo _:
                             {
@@ -668,6 +689,13 @@ namespace NS.Base
             }
         }
 
+        public long RecordCount()
+        {
+            var query = BuildWhereQuery(new[]{new ColumnDefinition("'x'") });
+            var dt = Where(query, "1=1");
+            return dt == null ? 0 : dt.Rows.Count;
+        }
+
         public IEnumerable<T> GetAll()
         {
             return Where("1=1");
@@ -691,13 +719,23 @@ namespace NS.Base
 
         protected internal string WhereQuery()
         {
+            return BuildWhereQuery(Columns);
+        }
+
+        private string BuildWhereQuery(IEnumerable<ColumnDefinition> columns)
+        {
             var sb = new StringBuilder();
             sb.AppendLine("SELECT ");
-            foreach (var column in Columns)
+
+            var columnArray = columns.ToArray();
+            if (columnArray.Any())
             {
-                sb.Append(column.ColumnName);
-                if (column != Columns.Last())
-                    sb.Append(", ");
+                foreach (var column in columnArray)
+                {
+                    sb.Append(column.ColumnName);
+                    if (column != columnArray.Last())
+                        sb.Append(", ");
+                }
             }
 
             sb.Append($" FROM [{_schema}].[{_tableName}]");
@@ -717,13 +755,19 @@ namespace NS.Base
 
         public IEnumerable<T> Where(string query)
         {
-            if (HasInjection(query))
+            var dt = Where(WhereQuery(), query);
+            return dt == null ? new T[0] : ToItems(dt);
+        }
+
+        private DataTable Where(string columnPart, string filterPart)
+        {
+            if (HasInjection(columnPart) || HasInjection(filterPart))
                 throw new Exception("Sql Injection attempted. Aborted");
 
             //Get
             using (var cn = new SqlConnection(ConnectionString))
             {
-                using (var cmd = CreateCommand(cn, $"{WhereQuery()} WHERE {query}"))
+                using (var cmd = CreateCommand(cn, $"{columnPart} WHERE {filterPart}"))
                 {
                     if (HasInjection(cmd.CommandText))
                         throw new Exception("Sql Injection attempted. Aborted");
@@ -732,12 +776,11 @@ namespace NS.Base
                     cn.Open();
                     var dt = ToDataTable(cmd);
                     if (dt == null)
-                        return new T[0];
+                        return null;
 
-                    var items = ToItems(dt);
                     cn.Close();
 
-                    return items;
+                    return dt;
                 }
             }
         }
