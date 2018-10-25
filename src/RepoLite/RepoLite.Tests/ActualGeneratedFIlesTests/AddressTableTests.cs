@@ -65,6 +65,14 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         }
 
         [TestMethod]
+        public void TestRecordCount()
+        {
+            var count = _repository.RecordCount();
+
+            Assert.IsTrue(count == 10);
+        }
+
+        [TestMethod]
         public void TestGetAddr1()
         {
             var retrieved = _repository.Get(new AddressKeys(1, "77"));

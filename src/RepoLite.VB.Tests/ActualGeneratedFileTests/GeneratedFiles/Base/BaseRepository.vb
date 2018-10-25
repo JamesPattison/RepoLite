@@ -1,4 +1,6 @@
 ﻿Imports System.Data.SqlClient
+Imports System.Linq.Expressions
+Imports System.Reflection
 Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
 Imports System.Text
@@ -6,7 +8,7 @@ Imports System.Xml
 Imports RepoLite.VB.Tests.MODELNAMESPACE.Base
 
 Namespace REPOSITORYNAMESPACE.Base
-    Public Interface IBaseRepository (Of T)
+    Public Interface IBaseRepository (Of T As IBaseModel)
         Function GetAll() As IEnumerable(Of T)
         Function Create(item As T) As Boolean
         Function BulkCreate(items As List(Of T)) As Boolean
@@ -19,7 +21,7 @@ Namespace REPOSITORYNAMESPACE.Base
         Function Where(query As String) As IEnumerable(Of T)
     End Interface
 
-    Public Interface IPkRepository (Of T)
+    Public Interface IPkRepository (Of T As IBaseModel)
         Inherits IBaseRepository(Of T)
         Function Update(item As T) As Boolean
         Function Delete(item As T) As Boolean
@@ -84,6 +86,11 @@ Namespace REPOSITORYNAMESPACE.Base
         Public Property PrimaryKey As Boolean
         Public Property Nullable As Boolean
 
+
+        Friend Sub New(columnName As String)
+            Me.New(columnName, GetType(String), "NVARCHAR(MAX)", SqlDbType.NVarChar, False, False, False)
+        End Sub
+
         Public Sub New(columnName As String, valueType As Type, sqlDataTypeText As String,
                        sqlDbType As SqlDbType)
             Me.New(columnName, valueType, sqlDataTypeText, sqlDbType, False, False, False)
@@ -138,42 +145,46 @@ Namespace REPOSITORYNAMESPACE.Base
         End Sub
     End Class
 
-    Public Class Where (Of T)
+    Public Class Where (Of T As IBaseModel)
         Private ReadOnly _query As StringBuilder = New StringBuilder()
         Private ReadOnly _repository As BaseRepository(Of T)
         Private _activeGroups As Integer
 
-        Public Sub New(baseRepository As BaseRepository(Of T), col As String, comparison As Comparison,
-                       val As Object)
+        Public Sub New(ByVal baseRepository As BaseRepository(Of T), ByVal col As String, ByVal comparison As Comparison,
+                       ByVal val As Object)
             Me.New(baseRepository, col, comparison, val, val.[GetType]())
         End Sub
 
-        Public Sub New(baseRepository As BaseRepository(Of T), col As String, comparison As Comparison,
-                       val As Object, valueType As Type)
+        Public Sub New(ByVal baseRepository As BaseRepository(Of T), ByVal col As String, ByVal comparison As Comparison,
+                       ByVal val As Object, ByVal valueType As Type)
             _repository = baseRepository
             _query.Append(MakeClause(col, comparison, val, ClauseType.Initial, valueType))
         End Sub
 
-        Private Function MakeClause(col As String, comparison As Comparison, clauseType As ClauseType) As String
+        Private Function MakeClause(ByVal col As String, ByVal comparison As Comparison, ByVal clauseType As ClauseType) _
+            As String
             Return MakeClause(col, comparison, Nothing, clauseType, Nothing)
         End Function
 
-        Private Function MakeClause(col As String, comparison As Comparison, val As Object,
-                                    clauseType As ClauseType, valueType As Type) As String
+
+        Private Function MakeClause(ByVal col As String, ByVal comparison As Comparison, ByVal val As Object,
+                                    ByVal clauseType As ClauseType, ByVal valueType As Type) As String
             Dim query = New StringBuilder()
 
             Select Case comparison
                 Case Comparison.[In], Comparison.NotIn
-                    If TryCast(val, IEnumerable) IsNot Nothing And Not If(TryCast(val, Object()), TryCast(val, IEnumerable).Cast (Of Object)().ToArray()).Any() Then
+                    If _
+                        TryCast(val, IEnumerable) IsNot Nothing And
+                        Not If(TryCast(val, Object()), TryCast(val, IEnumerable).Cast (Of Object)().ToArray()).Any() _
+                        Then
                         query.Append("1=0")
                         Return query.ToString()
                     End If
             End Select
 
             Dim floatVal As Single
-            If _
-                {Comparison.GreaterThan, Comparison.GreaterThanOrEquals, Comparison.LessThan,
-                 Comparison.LessThanOrEquals}.Contains(comparison) AndAlso Not Single.TryParse(val.ToString(), floatVal) _
+            If {Comparison.GreaterThan, Comparison.GreaterThanOrEquals, Comparison.LessThan,
+                Comparison.LessThanOrEquals}.Contains(comparison) AndAlso Not Single.TryParse(val.ToString(), floatVal) _
                 Then
                 Throw New Exception("Numeric comparison used on a non numeric value.")
             End If
@@ -184,14 +195,12 @@ Namespace REPOSITORYNAMESPACE.Base
                         If(valueType = GetType(XmlDocument), "CONVERT(NVARCHAR(MAX), [" & col & "])", "[" & col & "]"))
                 Case ClauseType.[And]
                     query.Append(
-                        If _
-                                    (valueType = GetType(XmlDocument), " AND CONVERT(NVARCHAR(MAX), [" & col & "])",
-                                     " AND [" & col & "]"))
+                        If (valueType = GetType(XmlDocument), " AND CONVERT(NVARCHAR(MAX), [" & col & "])",
+                            " AND [" & col & "]"))
                 Case ClauseType.[Or]
                     query.Append(
-                        If _
-                                    (valueType = GetType(XmlDocument), " OR CONVERT(NVARCHAR(MAX), [" & col & "])",
-                                     " OR [" & col & "]"))
+                        If (valueType = GetType(XmlDocument), " OR CONVERT(NVARCHAR(MAX), [" & col & "])",
+                            " OR [" & col & "]"))
             End Select
 
             query.Append(GetComparison(comparison))
@@ -213,7 +222,7 @@ Namespace REPOSITORYNAMESPACE.Base
             Return query.ToString()
         End Function
 
-        Private Shared Function GetComparison(comparison As Comparison) As String
+        Private Shared Function GetComparison(ByVal comparison As Comparison) As String
             Select Case comparison
                 Case Comparison.Equals
                     Return " = "
@@ -244,12 +253,12 @@ Namespace REPOSITORYNAMESPACE.Base
             End Select
         End Function
 
-        Private Function GetTypeVal(col As String, val As Object) As String
+        Private Function GetTypeVal(ByVal col As String, ByVal val As Object) As String
             Dim typeName = If(TypeOf val Is IList, "List", val.[GetType]().Name)
 
             Select Case typeName
                 Case "Boolean"
-                    If val Then Return "1"
+                    If CBool(val) Then Return "1"
                     Return "0"
                 Case "Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64", "Decimal", "Double"
                     Return val.ToString()
@@ -258,8 +267,8 @@ Namespace REPOSITORYNAMESPACE.Base
                 Case "List"
                     Dim result = ""
                     Dim enumerable =
-                            If(TryCast(val, Object()), TryCast(val, IEnumerable).Cast (Of Object)().ToArray())
-                    Const batchSize = 2000
+                            If(TryCast(val, Object()), (TryCast(val, IEnumerable)).Cast (Of Object)().ToArray())
+                    Const batchSize As Integer = 2000
                     Dim batches = Math.Ceiling(CDec(enumerable.Length)/batchSize)
 
                     For i = 0 To batches - 1
@@ -282,67 +291,70 @@ Namespace REPOSITORYNAMESPACE.Base
             Return _repository.Where(_query.ToString())
         End Function
 
-        Public Function [And](col As String, comparison As Comparison) As Where(Of T)
+        Public Function [And](ByVal col As String, ByVal comparison As Comparison) As Where(Of T)
             If comparison <> Comparison.IsNull AndAlso comparison <> Comparison.IsNotNull Then _
-                Throw New Exception(
-                    "And(" & col & ", " & comparison &
-                    ") can only be called with Comparison.IsNull or Comparison.IsNotNull")
+                Throw _
+                    New Exception(
+                        "And(" & col & ", " & comparison &
+                        ") can only be called with Comparison.IsNull or Comparison.IsNotNull")
             _query.Append(MakeClause(col, comparison, ClauseType.[And]))
             Return Me
         End Function
 
-        Public Function [And](col As String, comparison As Comparison, val As Object) As Where(Of T)
+        Public Function [And](ByVal col As String, ByVal comparison As Comparison, ByVal val As Object) As Where(Of T)
             Return [And](col, comparison, val, val.[GetType]())
         End Function
 
-        Public Function [And](col As String, comparison As Comparison, val As Object,
-                              valueType As Type) As Where(Of T)
+        Public Function [And](ByVal col As String, ByVal comparison As Comparison, ByVal val As Object,
+                              ByVal valueType As Type) As Where(Of T)
             _query.Append(MakeClause(col, comparison, val, ClauseType.[And], valueType))
             Return Me
         End Function
 
-        Public Function [Or](col As String, comparison As Comparison) As Where(Of T)
+        Public Function [Or](ByVal col As String, ByVal comparison As Comparison) As Where(Of T)
             If comparison <> Comparison.IsNull AndAlso comparison <> Comparison.IsNotNull Then _
-                Throw New Exception(
-                    "Or(" & col & ", " & comparison &
-                    ") can only be called with Comparison.IsNull or Comparison.IsNotNull")
+                Throw _
+                    New Exception(
+                        "Or(" & col & ", " & comparison &
+                        ") can only be called with Comparison.IsNull or Comparison.IsNotNull")
             _query.Append(MakeClause(col, comparison, ClauseType.[Or]))
             Return Me
         End Function
 
-        Public Function [Or](col As String, comparison As Comparison, val As Object) As Where(Of T)
+        Public Function [Or](ByVal col As String, ByVal comparison As Comparison, ByVal val As Object) As Where(Of T)
             Return [Or](col, comparison, val, val.[GetType]())
         End Function
 
-        Public Function [Or](col As String, comparison As Comparison, val As Object,
-                             valueType As Type) As Where(Of T)
+        Public Function [Or](ByVal col As String, ByVal comparison As Comparison, ByVal val As Object,
+                             ByVal valueType As Type) As Where(Of T)
             _query.Append(MakeClause(col, comparison, val, ClauseType.[Or], valueType))
             Return Me
         End Function
 
-        Public Function AndBeginGroup(col As String, comparison As Comparison) As Where(Of T)
+        Public Function AndBeginGroup(ByVal col As String, ByVal comparison As Comparison) As Where(Of T)
             If comparison <> Comparison.IsNull AndAlso comparison <> Comparison.IsNotNull Then _
-                Throw New Exception(
-                    "AndBeginGroup(" & col & ", " & comparison &
-                    ") can only be called with Comparison.IsNull or Comparison.IsNotNull")
+                Throw _
+                    New Exception(
+                        "AndBeginGroup(" & col & ", " & comparison &
+                        ") can only be called with Comparison.IsNull or Comparison.IsNotNull")
             _activeGroups += 1
             _query.Append(" AND (" & MakeClause(col, comparison, ClauseType.Initial))
             Return Me
         End Function
 
-        Public Function AndBeginGroup(col As String, comparison As Comparison, val As Object) _
+        Public Function AndBeginGroup(ByVal col As String, ByVal comparison As Comparison, ByVal val As Object) _
             As Where(Of T)
             Return AndBeginGroup(col, comparison, val, val.[GetType]())
         End Function
 
-        Public Function AndBeginGroup(col As String, comparison As Comparison, val As Object,
-                                      valueType As Type) As Where(Of T)
+        Public Function AndBeginGroup(ByVal col As String, ByVal comparison As Comparison, ByVal val As Object,
+                                      ByVal valueType As Type) As Where(Of T)
             _activeGroups += 1
             _query.Append(" AND (" & MakeClause(col, comparison, val, ClauseType.Initial, valueType))
             Return Me
         End Function
 
-        Public Function OrBeginGroup(col As String, comparison As Comparison) As Where(Of T)
+        Public Function OrBeginGroup(ByVal col As String, ByVal comparison As Comparison) As Where(Of T)
             If comparison <> Comparison.IsNull AndAlso comparison <> Comparison.IsNotNull Then _
                 Throw _
                     New Exception(
@@ -353,13 +365,13 @@ Namespace REPOSITORYNAMESPACE.Base
             Return Me
         End Function
 
-        Public Function OrBeginGroup(col As String, comparison As Comparison, val As Object) _
+        Public Function OrBeginGroup(ByVal col As String, ByVal comparison As Comparison, ByVal val As Object) _
             As Where(Of T)
             Return OrBeginGroup(col, comparison, val, val.[GetType]())
         End Function
 
-        Public Function OrBeginGroup(col As String, comparison As Comparison, val As Object,
-                                     valueType As Type) As Where(Of T)
+        Public Function OrBeginGroup(ByVal col As String, ByVal comparison As Comparison, ByVal val As Object,
+                                     ByVal valueType As Type) As Where(Of T)
             _activeGroups += 1
             _query.Append(" OR (" & MakeClause(col, comparison, val, ClauseType.Initial, valueType))
             Return Me
@@ -376,7 +388,218 @@ Namespace REPOSITORYNAMESPACE.Base
         End Function
     End Class
 
-    Public MustInherit Class BaseRepository (Of T)
+    Friend Class ExpressionParser
+        Shared Private ReadOnly NodeStr As Dictionary(Of ExpressionType, String) = New Dictionary(Of ExpressionType, String) From {
+            {ExpressionType.Add, "+"},
+            {ExpressionType.[And], "&"},
+            {ExpressionType.[AndAlso], "AND"},
+            {ExpressionType.Divide, "/"},
+            {ExpressionType.Equal, "="},
+            {ExpressionType.ExclusiveOr, "^"},
+            {ExpressionType.GreaterThan, ">"},
+            {ExpressionType.GreaterThanOrEqual, ">="},
+            {ExpressionType.LessThan, "<"},
+            {ExpressionType.LessThanOrEqual, "<="},
+            {ExpressionType.Modulo, "%"},
+            {ExpressionType.Multiply, "*"},
+            {ExpressionType.Negate, "-"},
+            {ExpressionType.[Not], "NOT"},
+            {ExpressionType.NotEqual, "<>"},
+            {ExpressionType.[Or], "|"},
+            {ExpressionType.[OrElse], "OR"},
+            {ExpressionType.Subtract, "-"}
+            }
+
+        Shared Friend Function ToSql (Of T As IBaseModel)(ByVal expression As Expression(Of Func(Of T, Boolean))) As String
+            Return Parse(expression.Body, True).Sql
+        End Function
+
+        Shared Friend Function ToSql (Of T As IBaseModel, TK As IBaseModel)(
+                                                                     ByVal expression As _
+                                                                        Expression(Of Func(Of T, TK, Boolean))) _
+            As String
+            Return Parse(expression.Body, True).Sql
+        End Function
+
+        Shared Private Function Parse(ByVal expression As Expression, ByVal Optional isUnary As Boolean = False,
+                               ByVal Optional prefix As String = Nothing, ByVal Optional postfix As String = Nothing,
+                               ByVal Optional boolComparison As Boolean = False) As Clause
+
+            While True
+
+                If TypeOf expression Is UnaryExpression Then
+                    Dim unary = TryCast(expression, UnaryExpression)
+                    Return Clause.Make(NodeStr(unary.NodeType), Parse(unary.Operand, True))
+                ElseIf TypeOf expression Is BinaryExpression Then
+                    Dim body = TryCast(expression, BinaryExpression)
+                    Dim left As Clause
+                    If (body.Left.Type = GetType(Boolean))
+                        left = Parse(body.Left, boolComparison := True)
+                    Else 
+                        left = Parse(body.Left)
+                    End If
+                        
+                    Dim right =
+                            If _
+                            (body.Right.Type = GetType(Boolean), Parse(body.Right, boolComparison := True),
+                             Parse(body.Right))
+                    Return Clause.Make(left, NodeStr(body.NodeType), right)
+                ElseIf TypeOf expression Is ConstantExpression Then
+                    Dim constant = TryCast(expression, ConstantExpression)
+                    Dim value = constant.Value
+
+                    If TypeOf value Is Integer Then
+                        Return Clause.Make(value.ToString())
+                    ElseIf TypeOf value Is String Then
+                        value = prefix & CStr(value) + postfix
+                    End If
+
+                    If TypeOf value Is Boolean AndAlso isUnary Then
+                        Return _
+                            If _
+                                (boolComparison, Clause.Make($"'{value}'"),
+                                 Clause.Make(Clause.Make($"'{value}'"), "=", Clause.Make("1")))
+                    End If
+
+                    Return Clause.Make($"'{value}'")
+                ElseIf TypeOf expression Is MemberExpression Then
+                    Dim member = TryCast(expression, MemberExpression)
+
+                    If TypeOf member.Member Is PropertyInfo Then
+                        Dim [property] = TryCast(member.Member, PropertyInfo)
+                        Dim colName = [property].Name
+                        Dim instance = Activator.CreateInstance([property].DeclaringType)
+                        If TypeOf instance Is IBaseModel Then
+                            Dim model = TryCast(instance, IBaseModel)
+                            If member.Type = GetType(Boolean) Then
+
+                                If isUnary Then
+                                    isUnary = False
+                                    prefix = Nothing
+                                    postfix = Nothing
+                                    Continue While
+                                Else
+                                    Return _
+                                        If _
+                                            (boolComparison, Clause.Make($"[{model.EntityName}].[{colName}]"),
+                                             Clause.Make(Clause.Make($"[{model.EntityName}].[{colName}]"), "=",
+                                                         Clause.Make("1")))
+                                End If
+                            Else
+                                Dim value = $"[{model.EntityName}].[{colName}]"
+                                If Not String.IsNullOrEmpty(prefix) Then value = $"'{prefix}'+{value}"
+                                If Not String.IsNullOrEmpty(postfix) Then value = $"{value}+'{postfix}'"
+                                Return Clause.Make(value)
+                            End If
+                        End If
+                    ElseIf TypeOf member.Member Is FieldInfo Then
+                        Dim value = GetValue(member)
+
+                        If TypeOf value Is String Then
+                            value = prefix & CStr(value) & postfix
+                        End If
+
+                        Return Clause.Make($"'{value}'")
+                    Else
+                        Throw New Exception($"Expression does not refer to a property or field: {expression}")
+                    End If
+                ElseIf TypeOf expression Is MethodCallExpression Then
+                    Dim methodCall = TryCast(expression, MethodCallExpression)
+
+                    If methodCall.Method = GetType(String).GetMethod("Contains", {GetType(String)}) Then
+                        Return _
+                            Clause.Make(Parse(methodCall.Object), "LIKE",
+                                        Parse(methodCall.Arguments(0), prefix := "%", postfix := "%"))
+                    End If
+
+                    If methodCall.Method = GetType(String).GetMethod("StartsWith", {GetType(String)}) Then
+                        Return _
+                            Clause.Make(Parse(methodCall.Object), "LIKE", Parse(methodCall.Arguments(0), postfix := "%"))
+                    End If
+
+                    If methodCall.Method = GetType(String).GetMethod("EndsWith", {GetType(String)}) Then
+                        Return _
+                            Clause.Make(Parse(methodCall.Object), "LIKE", Parse(methodCall.Arguments(0), prefix := "%"))
+                    End If
+
+                    If methodCall.Method.Name = "Contains" Then
+                        Dim collection As Expression
+                        Dim [property] As Expression
+
+                        If _
+                            methodCall.Method.IsDefined(GetType(ExtensionAttribute)) AndAlso
+                            methodCall.Arguments.Count = 2 Then
+                            collection = methodCall.Arguments(0)
+                            [property] = methodCall.Arguments(1)
+                        ElseIf _
+                            Not methodCall.Method.IsDefined(GetType(ExtensionAttribute)) AndAlso
+                            methodCall.Arguments.Count = 1 Then
+                            collection = methodCall.Object
+                            [property] = methodCall.Arguments(0)
+                        Else
+                            Throw New Exception("Unsupported method call: " & methodCall.Method.Name)
+                        End If
+
+                        Dim sb = New StringBuilder()
+
+                        For Each iVal In CType(GetValue(collection), IEnumerable)
+                            sb.Append($"'{iVal}',")
+                        Next
+
+                        Dim values = sb.ToString()
+                        values = values.Substring(0, values.Length - 1)
+                        Return Clause.Make(Parse([property]), "IN", Clause.Make($"({values})"))
+                    End If
+                    
+                    if (methodCall.Method.Name = "CompareString")
+                        If methodCall.Arguments.Count >= 2 Then
+                            If TypeOf methodCall.Arguments(2) is ConstantExpression
+                                Dim constantExpression = TryCast(methodCall.Arguments(2), ConstantExpression)
+                                Return Clause.Make(Parse(methodCall.Arguments(0)), If(constantExpression.Value.ToString().ToLower() = "false", "<>", "="), Parse(methodCall.Arguments(1)))
+                            End If
+                        End If
+                    End If
+
+                    Throw New Exception("Unsupported method call: " & methodCall.Method.Name)
+                Else
+                    Throw New Exception("Unsupported expression: " & expression.[GetType]().Name)
+                End If
+            End While
+        End Function
+
+        Shared Private Function GetValue(ByVal member As Expression) As Object
+            Dim objectMember = Expression.Convert(member, GetType(Object))
+            Dim getterLambda = Expression.Lambda (Of Func(Of Object))(objectMember)
+            Dim getter = getterLambda.Compile()
+            Return getter()
+        End Function
+
+        Private Class Clause
+            Public Property Sql As String
+
+            Public Shared Function Make(ByVal sql As String) As Clause
+                Return New Clause With {
+                    .Sql = sql
+                    }
+            End Function
+
+            Public Shared Function Make(ByVal [operator] As String, ByVal operand As Clause) As Clause
+                Return New Clause With {
+                    .Sql = $"({[operator]} {operand.Sql})"
+                    }
+            End Function
+
+            Public Shared Function Make(ByVal left As Clause, ByVal [operator] As String, ByVal right As Clause) _
+                As Clause
+                Return New Clause With {
+                    .Sql = $"({left.Sql} {[operator]} {right.Sql})"
+                    }
+            End Function
+        End Class
+    End Class
+
+
+    Public MustInherit Class BaseRepository (Of T As IBaseModel)
         Implements IBaseRepository(Of T)
 
         Protected Logger As Action(Of Exception)
@@ -399,7 +622,7 @@ Namespace REPOSITORYNAMESPACE.Base
                             WHERE TABLE_NAME = '{ _
                     table}' AND TABLE_SCHEMA = '{schema}'"
 
-            Using cn = New SqlConnection(connectionString)
+            Using cn = New SqlConnection(ConnectionString)
 
                 Using cmd = CreateCommand(cn, sql)
 
@@ -407,14 +630,21 @@ Namespace REPOSITORYNAMESPACE.Base
                         cn.Open()
                         Dim count = CInt(cmd.ExecuteScalar())
                         If count <> columnCount Then _
-                            Throw New Exception(
-                                "Repository Definition does not match Database. Please re-run the code generator to get a new repository")
+                            Throw _
+                                New Exception(
+                                    "Repository Definition does not match Database. Please re-run the code generator to get a new repository")
                     Finally
                         cn.Close()
                     End Try
                 End Using
             End Using
         End Sub
+
+        Public Function RecordCount() As Long
+            Dim query = BuildWhereQuery({New ColumnDefinition("'x'")})
+            Dim dt = Where(query, "1=1")
+            Return If(dt Is Nothing, 0, dt.Rows.Count)
+        End Function
 
         Public Function GetAll() As IEnumerable(Of T) Implements IBaseRepository(Of T).GetAll
             Return Where("1=1")
@@ -440,13 +670,21 @@ Namespace REPOSITORYNAMESPACE.Base
         End Function
 
         Protected Friend Function WhereQuery() As String
+            Return BuildWhereQuery(Columns)
+        End Function
+        
+        Private Function BuildWhereQuery(ByVal columns As IEnumerable(Of ColumnDefinition)) As String
             Dim sb = New StringBuilder()
             sb.AppendLine("SELECT ")
+            Dim columnArray = columns.ToArray()
 
-            For Each column In Columns
-                sb.Append(column.ColumnName)
-                If column IsNot Columns.Last() Then sb.Append(", ")
-            Next
+            If columnArray.Any() Then
+
+                For Each column In columnArray
+                    sb.Append(column.ColumnName)
+                    If column IsNot columnArray.Last() Then sb.Append(", ")
+                Next
+            End If
 
             sb.Append($" FROM [{_schema}].[{_tableName}]")
             Return sb.ToString()
@@ -461,20 +699,24 @@ Namespace REPOSITORYNAMESPACE.Base
                               valueType As Type) As Where(Of T) Implements IBaseRepository(Of T).Where
             Return New Where(Of T)(Me, col, comparison, val, valueType)
         End Function
-
-        Public Function Where(query As String) As IEnumerable(Of T) Implements IBaseRepository(Of T).Where
-            If HasInjection(query) Then Throw New Exception("Sql Injection attempted. Aborted")
+        
+        Public Function Where(ByVal query As String) As IEnumerable(Of T) Implements IBaseRepository(Of T).Where
+            Dim dt = Where(WhereQuery(), query)
+            Return If(dt Is Nothing, New T(-1) {}, ToItems(dt))
+        End Function
+        
+        Private Function Where(columnPart As String, filterPart As String) As DataTable
+            If HasInjection(columnPart) OrElse HasInjection(filterPart) Then Throw New Exception("Sql Injection attempted. Aborted")
 
             Using cn = New SqlConnection(ConnectionString)
 
-                Using cmd = CreateCommand(cn, $"{WhereQuery()} WHERE {query}")
+                Using cmd = CreateCommand(cn, $"{columnPart} WHERE {filterPart}")
                     If HasInjection(cmd.CommandText) Then Throw New Exception("Sql Injection attempted. Aborted")
                     cn.Open()
                     Dim dt = ToDataTable(cmd)
-                    If dt Is Nothing Then Return New T() {}
-                    Dim items = ToItems(dt)
+                    If dt Is Nothing Then Return Nothing
                     cn.Close()
-                    Return items
+                    Return dt
                 End Using
             End Using
         End Function
@@ -780,12 +1022,12 @@ Namespace REPOSITORYNAMESPACE.Base
                             .CommandType = CommandType.Text,
                             .CommandText = sql
                             }
-                    
-With cmd
-    .Connection = cn
-    .CommandType = CommandType.Text
-    .CommandText = sql
-End With
+
+                    With cmd
+                        .Connection = cn
+                        .CommandType = CommandType.Text
+                        .CommandText = sql
+                    End With
                     cn.Open()
                     cmd.ExecuteNonQuery()
                     cmd.Dispose()

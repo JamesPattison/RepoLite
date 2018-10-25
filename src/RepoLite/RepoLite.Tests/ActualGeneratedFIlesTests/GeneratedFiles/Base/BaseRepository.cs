@@ -502,10 +502,8 @@ namespace NS.Base
 
                         return Clause.Make($"'{value}'");
                     }
-                    case MemberExpression _:
+                    case MemberExpression member:
                     {
-                        var member = (MemberExpression) expression;
-
                         switch (member.Member)
                         {
                             case PropertyInfo property:
@@ -551,9 +549,8 @@ namespace NS.Base
                                 throw new Exception($"Expression does not refer to a property or field: {expression}");
                         }
                     }
-                    case MethodCallExpression _:
+                    case MethodCallExpression methodCall:
                     {
-                        var methodCall = (MethodCallExpression) expression;
                         // LIKE queries:
                         if (methodCall.Method == typeof(string).GetMethod("Contains", new[] {typeof(string)}))
                         {

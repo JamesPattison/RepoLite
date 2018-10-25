@@ -74,6 +74,7 @@
     <Compile Include="ActualGeneratedFileTests\AddressTableTests.vb" />
     <Compile Include="ActualGeneratedFileTests\Base\BaseTests.vb" />
     <Compile Include="ActualGeneratedFileTests\Base\Data.vb" />
+    <Compile Include="ActualGeneratedFileTests\ExpressionParserTests.vb" />
     <Compile Include="ActualGeneratedFileTests\GeneratedFiles\Address.vb" />
     <Compile Include="ActualGeneratedFileTests\GeneratedFiles\AddressDto.vb" />
     <Compile Include="ActualGeneratedFileTests\GeneratedFiles\Base\BaseModel.vb" />

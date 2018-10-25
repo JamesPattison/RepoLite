@@ -4,6 +4,8 @@ Namespace NS.Models
     Partial Public Class Address
         Inherits BaseModel
 
+        Public Overrides ReadOnly Property EntityName As String = "Address"
+
         Private _id As Int32
         Private _anotherId As String
         Private _personId As Int32
