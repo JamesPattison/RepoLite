@@ -188,6 +188,38 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, "}");
             }
 
+            sb.AppendLine(Tab2, "public override void SetValues(DataRow row, string propertyPrefix)");
+            sb.AppendLine(Tab2, "{");
+            foreach (var column in table.Columns)
+            {
+                if (column.DataType == typeof(string))
+                {
+                    sb.AppendLine(Tab3, $"_{column.FieldName} = row.GetText($\"{{propertyPrefix}}{column.PropertyName}\");");
+                }
+                else if (column.DataType == typeof(byte))
+                {
+                    sb.AppendLine(Tab3, $"_{column.FieldName} = (byte)row[$\"{{propertyPrefix}}{column.PropertyName}\"];");
+                }
+                else if (column.DataType == typeof(byte?))
+                {
+                    sb.AppendLine(Tab3, $"_{column.FieldName} = (byte?)row[$\"{{propertyPrefix}}{column.PropertyName}\"];");
+                }
+                else if (column.DataType == typeof(byte[]))
+                {
+                    sb.AppendLine(Tab3, $"_{column.FieldName} = (byte[])row[$\"{{propertyPrefix}}{column.PropertyName}\"];");
+                }
+                else if (column.DataType == typeof(XmlDocument))
+                { 
+                    sb.AppendLine(Tab3, $"_{column.FieldName} = new XmlDocument{{InnerXml = row.GetText($\"{{propertyPrefix}}{column.PropertyName}\")}};");
+                }
+                else
+                {
+                    sb.AppendLine(Tab3, $"_{column.FieldName} = row.GetValue<{column.DataType.Name}>($\"{{propertyPrefix}}{column.PropertyName}\"){(IsCSharpNullable(column.DataType.Name) && column.IsNullable ? ";" : $" ?? default({column.DataType.Name});")} ");
+                }
+            }
+            
+            sb.AppendLine(Tab2, "}");
+
             CreateModelValidation(table, sb);
 
             sb.AppendLine(Tab2, "internal static List<ColumnDefinition> Columns => new List<ColumnDefinition>");

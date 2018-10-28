@@ -14,6 +14,10 @@ Namespace RepoLite.VB.Tests.ActualGeneratedFIlesTests
             End Get
         End Property
 
+        Public Sub SetValues(row As DataRow, propertyPrefix As String) Implements IBaseModel.SetValues
+            Throw New NotImplementedException
+        End Sub
+
         Public Property A_StringProperty As String
         Public Property A_IntProperty As Integer
         Public Property A_BoolProperty As Boolean
@@ -28,6 +32,10 @@ Namespace RepoLite.VB.Tests.ActualGeneratedFIlesTests
                 Return "ClassB"
             End Get
         End Property
+
+        Public Sub SetValues(row As DataRow, propertyPrefix As String) Implements IBaseModel.SetValues
+            Throw New NotImplementedException
+        End Sub
 
         Public Property B_StringProperty As String
         Public Property B_IntProperty As Integer

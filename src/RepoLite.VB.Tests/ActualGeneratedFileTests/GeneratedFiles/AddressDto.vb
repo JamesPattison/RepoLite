@@ -108,6 +108,19 @@ Namespace NS.Models
             End Set
         End Property
 
+        Public Overrides Sub SetValues(ByVal row As DataRow, ByVal propertyPrefix As String)
+            _id = If(row.GetValue(Of Int32)($"{propertyPrefix}Id"), Nothing)
+            _anotherid = row.GetText($"{propertyPrefix}AnotherId")
+            _personid = If(row.GetValue(Of Int32)($"{propertyPrefix}PersonId"), Nothing)
+            _line1 = row.GetText($"{propertyPrefix}Line1")
+            _line2 = row.GetText($"{propertyPrefix}Line2")
+            _line3 = row.GetText($"{propertyPrefix}Line3")
+            _line4 = row.GetText($"{propertyPrefix}Line4")
+            _postcode = row.GetText($"{propertyPrefix}PostCode")
+            _phonenumber = row.GetText($"{propertyPrefix}PhoneNumber")
+            _country_code = row.GetText($"{propertyPrefix}COUNTRY_CODE")
+        End Sub
+
         Public Overrides Function Validate() As List(Of ValidationError)
             Dim validationErrors = New List(Of ValidationError)()
             If String.IsNullOrEmpty(AnotherId) Then validationErrors.Add(New ValidationError(NameOf(AnotherId), "Value cannot be null"))

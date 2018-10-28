@@ -14,7 +14,7 @@ using System.Xml;
 namespace REPOSITORYNAMESPACE.Base
 {
     public partial interface IBaseRepository<T>
-        where T : IBaseModel
+        where T : IBaseModel, new()
     {
         long RecordCount();
         IEnumerable<T> GetAll();
@@ -28,7 +28,7 @@ namespace REPOSITORYNAMESPACE.Base
     }
 
     public interface IPkRepository<T> : IBaseRepository<T>
-        where T : IBaseModel
+        where T : IBaseModel, new()
     {
         bool Update(T item);
         bool Delete(T item);
@@ -148,7 +148,7 @@ namespace REPOSITORYNAMESPACE.Base
     #region Where
 
     public class Where<T>
-        where T : IBaseModel
+        where T : IBaseModel, new()
     {
         private readonly StringBuilder _query = new StringBuilder();
         private readonly BaseRepository<T> _repository;
@@ -462,14 +462,14 @@ namespace REPOSITORYNAMESPACE.Base
         }       
         
         internal static string ToSql<T>(Expression<Func<T, bool>> expression)
-            where T : IBaseModel
+            where T : IBaseModel, new()
         {
             return ToSql((LambdaExpression)expression);
         }
         
         internal static string ToSql<T, TK>(Expression<Func<T, TK, bool>> expression)
-            where T : IBaseModel
-            where TK : IBaseModel
+            where T : IBaseModel, new()
+            where TK : IBaseModel, new()
         {
             return ToSql((LambdaExpression)expression);
         }
@@ -731,7 +731,7 @@ namespace REPOSITORYNAMESPACE.Base
     }
 
     public abstract partial class BaseRepository<T> : RepositoryDataAccess, IBaseRepository<T>
-        where T : IBaseModel
+        where T : IBaseModel, new()
     {     
         private readonly string _schema;
         private readonly string _tableName;

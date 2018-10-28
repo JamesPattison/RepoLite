@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Runtime.CompilerServices;
 using REPOSITORYNAMESPACE.Base;
 
@@ -20,11 +21,13 @@ namespace MODELNAMESPACE.Base
     public partial interface IBaseModel
     {
         string EntityName { get; }
+        void SetValues(DataRow row, string propertyPrefix);
     }
 
     public abstract partial class BaseModel : IBaseModel
     {
         public abstract string EntityName { get; }
+        public abstract void SetValues(DataRow row, string propertyPrefix);
         public abstract List<ValidationError> Validate();
         public readonly List<string> DirtyColumns = new List<string>();
 
