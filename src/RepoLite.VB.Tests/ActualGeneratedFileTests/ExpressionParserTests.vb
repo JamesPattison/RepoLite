@@ -14,9 +14,9 @@ Namespace RepoLite.VB.Tests.ActualGeneratedFIlesTests
             End Get
         End Property
 
-        Public Sub SetValues(row As DataRow, propertyPrefix As String) Implements IBaseModel.SetValues
-            Throw New NotImplementedException
-        End Sub
+        Public Function SetValues(row As DataRow, propertyPrefix As String) As IBaseModel Implements IBaseModel.SetValues
+            Return Me
+        End Function
 
         Public Property A_StringProperty As String
         Public Property A_IntProperty As Integer
@@ -33,9 +33,9 @@ Namespace RepoLite.VB.Tests.ActualGeneratedFIlesTests
             End Get
         End Property
 
-        Public Sub SetValues(row As DataRow, propertyPrefix As String) Implements IBaseModel.SetValues
-            Throw New NotImplementedException
-        End Sub
+        Public Function SetValues(row As DataRow, propertyPrefix As String) As IBaseModel Implements IBaseModel.SetValues
+            Return Me
+        End Function
 
         Public Property B_StringProperty As String
         Public Property B_IntProperty As Integer

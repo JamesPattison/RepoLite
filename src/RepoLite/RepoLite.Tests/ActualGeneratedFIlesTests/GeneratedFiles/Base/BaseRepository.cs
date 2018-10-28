@@ -14,7 +14,7 @@ using System.Xml;
 namespace NS.Base
 {
     public partial interface IBaseRepository<T>
-        where T : IBaseModel
+        where T : IBaseModel, new()
     {
         long RecordCount();
         IEnumerable<T> GetAll();
@@ -28,7 +28,7 @@ namespace NS.Base
     }
 
     public interface IPkRepository<T> : IBaseRepository<T>
-        where T : IBaseModel
+        where T : IBaseModel, new()
     {
         bool Update(T item);
         bool Delete(T item);
@@ -101,29 +101,11 @@ namespace NS.Base
         public bool PrimaryKey { get; set; }
         public bool Nullable { get; set; }
 
-        internal ColumnDefinition(string columnName) : this(columnName, typeof(string), "NVARCHAR(MAX)",
-            SqlDbType.NVarChar, false, false, false)
-        {
-        }
-
-        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType) : this(
-            columnName, valueType, sqlDataTypeText, dbType, false, false, false)
-        {
-        }
-
-        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType,
-            bool nullable) : this(columnName, valueType, sqlDataTypeText, dbType, nullable, false, false)
-        {
-        }
-
-        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType,
-            bool nullable, bool primaryKey) : this(columnName, valueType, sqlDataTypeText, dbType, nullable, primaryKey,
-            false)
-        {
-        }
-
-        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType,
-            bool nullable, bool primaryKey, bool identity)
+        internal ColumnDefinition(string columnName) : this(columnName, typeof(string), "NVARCHAR(MAX)", SqlDbType.NVarChar, false, false, false) { }
+        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType) : this(columnName, valueType, sqlDataTypeText, dbType, false, false, false) { }
+        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType, bool nullable) : this(columnName, valueType, sqlDataTypeText, dbType, nullable, false, false) { }
+        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType, bool nullable, bool primaryKey) : this(columnName, valueType, sqlDataTypeText, dbType, nullable, primaryKey, false) { }
+        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType, bool nullable, bool primaryKey, bool identity)
         {
             ColumnName = columnName;
             ValueType = valueType;
@@ -141,9 +123,7 @@ namespace NS.Base
         public object Value { get; set; }
         public Type DataType { get; set; }
 
-        public QueryItem(string dbColName, object value) : this(dbColName, value, value.GetType())
-        {
-        }
+        public QueryItem(string dbColName, object value) : this(dbColName, value, value.GetType()) { }
 
         public QueryItem(string dbColName, object value, Type dataType)
         {
@@ -168,7 +148,7 @@ namespace NS.Base
     #region Where
 
     public class Where<T>
-        where T : IBaseModel
+        where T : IBaseModel, new()
     {
         private readonly StringBuilder _query = new StringBuilder();
         private readonly BaseRepository<T> _repository;
@@ -176,8 +156,7 @@ namespace NS.Base
 
         public Where(BaseRepository<T> baseRepository, string col, Comparison comparison, object val) : this(
             baseRepository, col, comparison, val, val.GetType())
-        {
-        }
+        { }
 
         public Where(BaseRepository<T> baseRepository, string col, Comparison comparison, object val, Type valueType)
         {
@@ -199,8 +178,7 @@ namespace NS.Base
             {
                 case Comparison.In:
                 case Comparison.NotIn:
-                    if (val is IEnumerable list &&
-                        !(val as object[] ?? (val as IEnumerable).Cast<object>().ToArray()).Any())
+                    if (val is IEnumerable list && !(val as object[] ?? (val as IEnumerable).Cast<object>().ToArray()).Any())
                     {
                         //No elements in list, append a clause which will return no values
                         query.Append("1=0");
@@ -303,7 +281,7 @@ namespace NS.Base
             switch (typeName)
             {
                 case "Boolean":
-                    if ((bool) val)
+                    if ((bool)val)
                         return "1";
                     return "0";
                 case "Int16":
@@ -328,7 +306,7 @@ namespace NS.Base
                     var enumerable = val as object[] ?? (val as IEnumerable).Cast<object>().ToArray();
 
                     const int batchSize = 2000;
-                    var batches = Math.Ceiling((decimal) enumerable.Length / batchSize);
+                    var batches = Math.Ceiling((decimal)enumerable.Length / batchSize);
                     for (var i = 0; i < batches; i++)
                     {
                         result = enumerable
@@ -357,8 +335,7 @@ namespace NS.Base
         public Where<T> And(string col, Comparison comparison)
         {
             if (comparison != Comparison.IsNull && comparison != Comparison.IsNotNull)
-                throw new Exception("And(" + col + ", " + comparison +
-                                    ") can only be called with Comparison.IsNull or Comparison.IsNotNull");
+                throw new Exception("And(" + col + ", " + comparison + ") can only be called with Comparison.IsNull or Comparison.IsNotNull");
             _query.Append(MakeClause(col, comparison, ClauseType.And));
             return this;
         }
@@ -377,8 +354,7 @@ namespace NS.Base
         public Where<T> Or(string col, Comparison comparison)
         {
             if (comparison != Comparison.IsNull && comparison != Comparison.IsNotNull)
-                throw new Exception("Or(" + col + ", " + comparison +
-                                    ") can only be called with Comparison.IsNull or Comparison.IsNotNull");
+                throw new Exception("Or(" + col + ", " + comparison + ") can only be called with Comparison.IsNull or Comparison.IsNotNull");
 
             _query.Append(MakeClause(col, comparison, ClauseType.Or));
             return this;
@@ -398,8 +374,7 @@ namespace NS.Base
         public Where<T> AndBeginGroup(string col, Comparison comparison)
         {
             if (comparison != Comparison.IsNull && comparison != Comparison.IsNotNull)
-                throw new Exception("AndBeginGroup(" + col + ", " + comparison +
-                                    ") can only be called with Comparison.IsNull or Comparison.IsNotNull");
+                throw new Exception("AndBeginGroup(" + col + ", " + comparison + ") can only be called with Comparison.IsNull or Comparison.IsNotNull");
 
             _activeGroups++;
             _query.Append(" AND (" + MakeClause(col, comparison, ClauseType.Initial));
@@ -421,8 +396,7 @@ namespace NS.Base
         public Where<T> OrBeginGroup(string col, Comparison comparison)
         {
             if (comparison != Comparison.IsNull && comparison != Comparison.IsNotNull)
-                throw new Exception("OrBeginGroup(" + col + ", " + comparison +
-                                    ") can only be called with Comparison.IsNull or Comparison.IsNotNull");
+                throw new Exception("OrBeginGroup(" + col + ", " + comparison + ") can only be called with Comparison.IsNull or Comparison.IsNotNull");
 
             _activeGroups++;
             _query.Append(" OR (" + MakeClause(col, comparison, ClauseType.Initial));
@@ -455,7 +429,7 @@ namespace NS.Base
     }
 
     #endregion
-
+    
     #region [ExpressionParser]
 
     internal static class ExpressionParser
@@ -481,27 +455,26 @@ namespace NS.Base
             {ExpressionType.OrElse, "OR"},
             {ExpressionType.Subtract, "-"}
         };
-
+        
         internal static string ToSql(LambdaExpression expression)
         {
             return Parse(expression.Body, true).Sql;
-        }
-
+        }       
+        
         internal static string ToSql<T>(Expression<Func<T, bool>> expression)
-            where T : IBaseModel
+            where T : IBaseModel, new()
         {
-            return ToSql((LambdaExpression) expression);
+            return ToSql((LambdaExpression)expression);
         }
-
+        
         internal static string ToSql<T, TK>(Expression<Func<T, TK, bool>> expression)
-            where T : IBaseModel
-            where TK : IBaseModel
+            where T : IBaseModel, new()
+            where TK : IBaseModel, new()
         {
-            return ToSql((LambdaExpression) expression);
+            return ToSql((LambdaExpression)expression);
         }
 
-        private static Clause Parse(Expression expression, bool isUnary = false, string prefix = null,
-            string postfix = null, bool boolComparison = false)
+        private static Clause Parse(Expression expression, bool isUnary = false, string prefix = null, string postfix = null, bool boolComparison = false)
         {
             while (true)
             {
@@ -510,14 +483,10 @@ namespace NS.Base
                     case UnaryExpression unary:
                         return Clause.Make(NodeStr[unary.NodeType], Parse(unary.Operand, true));
                     case BinaryExpression body:
-
-                        var left = body.Left.Type == typeof(bool)
-                            ? Parse(body.Left, boolComparison: true)
-                            : Parse(body.Left);
-                        var right = body.Right.Type == typeof(bool)
-                            ? Parse(body.Right, boolComparison: true)
-                            : Parse(body.Right);
-
+                        
+                        var left = body.Left.Type == typeof(bool) ? Parse(body.Left, boolComparison: true) : Parse(body.Left);
+                        var right = body.Right.Type == typeof(bool) ? Parse(body.Right, boolComparison: true) : Parse(body.Right);
+                        
                         return Clause.Make(left, NodeStr[body.NodeType], right);
                     case ConstantExpression constant:
                     {
@@ -533,9 +502,7 @@ namespace NS.Base
 
                         if (value is bool && isUnary)
                         {
-                            return boolComparison
-                                ? Clause.Make($"'{value}'")
-                                : Clause.Make(Clause.Make($"'{value}'"), "=", Clause.Make("1"));
+                            return boolComparison ? Clause.Make($"'{value}'"): Clause.Make(Clause.Make($"'{value}'"), "=", Clause.Make("1"));
                         }
 
                         return Clause.Make($"'{value}'");
@@ -547,8 +514,7 @@ namespace NS.Base
                             case PropertyInfo property:
                             {
                                 var colName = property.Name;
-                                if (!(Activator.CreateInstance(property.DeclaringType ?? throw new Exception()) is
-                                    IBaseModel model)) throw new Exception();
+                                if (!(Activator.CreateInstance(property.DeclaringType ?? throw new Exception()) is IBaseModel model)) throw new Exception();
 
                                 if (member.Type == typeof(bool))
                                     if (isUnary)
@@ -560,10 +526,8 @@ namespace NS.Base
                                     }
                                     else
                                     {
-                                        return boolComparison
-                                            ? Clause.Make($"[{model.EntityName}].[{colName}]")
-                                            : Clause.Make(Clause.Make($"[{model.EntityName}].[{colName}]"), "=",
-                                                Clause.Make("1"));
+                                        return boolComparison ? Clause.Make($"[{model.EntityName}].[{colName}]"): Clause.Make(Clause.Make($"[{model.EntityName}].[{colName}]"), "=",
+                                            Clause.Make("1"));
                                     }
                                 else
                                 {
@@ -595,20 +559,17 @@ namespace NS.Base
                         // LIKE queries:
                         if (methodCall.Method == typeof(string).GetMethod("Contains", new[] {typeof(string)}))
                         {
-                            return Clause.Make(Parse(methodCall.Object), "LIKE",
-                                Parse(methodCall.Arguments[0], prefix: "%", postfix: "%"));
+                            return Clause.Make(Parse(methodCall.Object), "LIKE", Parse(methodCall.Arguments[0], prefix: "%", postfix: "%"));
                         }
 
                         if (methodCall.Method == typeof(string).GetMethod("StartsWith", new[] {typeof(string)}))
                         {
-                            return Clause.Make(Parse(methodCall.Object), "LIKE",
-                                Parse(methodCall.Arguments[0], postfix: "%"));
+                            return Clause.Make(Parse(methodCall.Object), "LIKE", Parse(methodCall.Arguments[0], postfix: "%"));
                         }
 
                         if (methodCall.Method == typeof(string).GetMethod("EndsWith", new[] {typeof(string)}))
                         {
-                            return Clause.Make(Parse(methodCall.Object), "LIKE",
-                                Parse(methodCall.Arguments[0], prefix: "%"));
+                            return Clause.Make(Parse(methodCall.Object), "LIKE", Parse(methodCall.Arguments[0], prefix: "%"));
                         }
 
                         // IN queries:
@@ -616,14 +577,12 @@ namespace NS.Base
                         {
                             Expression collection;
                             Expression property;
-                            if (methodCall.Method.IsDefined(typeof(ExtensionAttribute)) &&
-                                methodCall.Arguments.Count == 2)
+                            if (methodCall.Method.IsDefined(typeof(ExtensionAttribute)) && methodCall.Arguments.Count == 2)
                             {
                                 collection = methodCall.Arguments[0];
                                 property = methodCall.Arguments[1];
                             }
-                            else if (!methodCall.Method.IsDefined(typeof(ExtensionAttribute)) &&
-                                     methodCall.Arguments.Count == 1)
+                            else if (!methodCall.Method.IsDefined(typeof(ExtensionAttribute)) && methodCall.Arguments.Count == 1)
                             {
                                 collection = methodCall.Object;
                                 property = methodCall.Arguments[0];
@@ -661,7 +620,7 @@ namespace NS.Base
             var getter = getterLambda.Compile();
             return getter();
         }
-
+        
         private class Clause
         {
             public string Sql { get; private set; }
@@ -691,9 +650,9 @@ namespace NS.Base
             }
         }
     }
-
+    
     #endregion
-
+        
     public abstract class RepositoryDataAccess
     {
         protected Action<Exception> Logger;
@@ -772,14 +731,13 @@ namespace NS.Base
     }
 
     public abstract partial class BaseRepository<T> : RepositoryDataAccess, IBaseRepository<T>
-        where T : IBaseModel
-    {
+        where T : IBaseModel, new()
+    {     
         private readonly string _schema;
         private readonly string _tableName;
         private List<ColumnDefinition> Columns;
 
-        protected BaseRepository(string connectionString, Action<Exception> logMethod, string schema, string table,
-            List<ColumnDefinition> columns) : base(connectionString)
+        protected BaseRepository(string connectionString, Action<Exception> logMethod, string schema, string table, List<ColumnDefinition> columns) : base(connectionString)
         {
             _schema = schema;
             _tableName = table;
@@ -797,22 +755,19 @@ namespace NS.Base
                     try
                     {
                         cn.Open();
-                        var count = (int) cmd.ExecuteScalar();
+                        var count = (int)cmd.ExecuteScalar();
                         if (count != columns.Count)
                             throw new Exception(
                                 "Repository Definition does not match Database. Please re-run the code generator to get a new repository");
                     }
-                    finally
-                    {
-                        cn.Close();
-                    }
+                    finally { cn.Close(); }
                 }
             }
         }
 
         public long RecordCount()
         {
-            var query = BuildWhereQuery(new[] {new ColumnDefinition("'x'")});
+            var query = BuildWhereQuery(new[]{new ColumnDefinition("'x'") });
             var dt = Where(query, "1=1");
             return dt == null ? 0 : dt.Rows.Count;
         }
@@ -906,8 +861,7 @@ namespace NS.Base
             if (queries.Count > 1)
             {
                 whereQuery = queries.Skip(1).Aggregate(whereQuery,
-                    (current, query) =>
-                        current.And(query.DbColumnName, Comparison.Equals, query.Value, first.DataType));
+                    (current, query) => current.And(query.DbColumnName, Comparison.Equals, query.Value, first.DataType));
             }
 
             return whereQuery.Results();
@@ -931,10 +885,8 @@ namespace NS.Base
                         sb.Append($"[{pk.ColumnName}]  {pk.SqlDataTypeText}");
                         sb.AppendLine(pk != pkCols[pkCols.Count - 1] ? "," : string.Empty);
                     }
-
                     sb.AppendLine(")");
                 }
-
                 sb.AppendLine($"INSERT [{_schema}].[{_tableName}] (");
 
                 var toCreate = Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity).ToList();
@@ -965,6 +917,7 @@ namespace NS.Base
                 {
                     sb.Append("@" + createColumn.ColumnName);
                     sb.AppendLine(createColumn != valueCols.Last() ? "," : ")");
+
                 }
 
                 if (Columns.Any(x => x.PrimaryKey))
@@ -986,11 +939,11 @@ namespace NS.Base
                             continue;
 
                         var parameter = cmd.Parameters.Add(createColumn.ColumnName, createColumn.SqlDbType);
-                        parameter.Value = values[i] != null
-                            ? (values[i].GetType() == typeof(XmlDocument)
-                                ? ((XmlDocument) values[i]).InnerXml
-                                : values[i])
-                            : DBNull.Value;
+                                                                   parameter.Value = values[i] != null
+                                                                       ? (values[i].GetType() == typeof(XmlDocument)
+                                                                           ? ((XmlDocument) values[i]).InnerXml
+                                                                           : values[i])
+                                                                       : DBNull.Value;
                     }
 
                     DataTable dt;
@@ -1027,7 +980,7 @@ namespace NS.Base
                                 SqlBulkCopyOptions.TableLock |
                                 SqlBulkCopyOptions.FireTriggers |
                                 SqlBulkCopyOptions.UseInternalTransaction, null)
-                            {DestinationTableName = tableName})
+                        { DestinationTableName = tableName })
                     {
                         //Needed if there is an identity column on the table
                         foreach (DataColumn dataColumn in dt.Columns)
@@ -1067,7 +1020,6 @@ namespace NS.Base
                 sb.Append($"[{col.ColumnName}] = @{col.ColumnName}");
                 sb.AppendLine(col != nonpkCols.Last(x => dirtyColumns.Contains(x.ColumnName)) ? "," : "");
             }
-
             sb.AppendLine("WHERE");
 
             var pkCols = Columns.Where(x => x.PrimaryKey).ToArray();
@@ -1075,7 +1027,7 @@ namespace NS.Base
             {
                 sb.AppendLine(pk == pkCols.First()
                     ? $"[{pk.ColumnName}] = @{pk.ColumnName}"
-                    : $"AND [{pk.ColumnName}] = @{pk.ColumnName}");
+                        : $"AND [{pk.ColumnName}] = @{pk.ColumnName}");
             }
 
             var sql = sb.ToString();
@@ -1100,9 +1052,7 @@ namespace NS.Base
                         }
                         else
                         {
-                            parameter.Value = dirtyColumns.Contains(updateColumn.ColumnName)
-                                ? values[i] ?? DBNull.Value
-                                : values[i];
+                            parameter.Value = dirtyColumns.Contains(updateColumn.ColumnName) ? values[i] ?? DBNull.Value : values[i];
                         }
                     }
 
@@ -1123,7 +1073,7 @@ namespace NS.Base
             {
                 var sb = new StringBuilder();
                 sb.Append($"DELETE [{_schema}].[{_tableName}] WHERE ");
-                sb.Append($"[{deleteColumn.ColumnName}] = @{deleteColumn.ColumnName}");
+                sb.Append($"[{ deleteColumn.ColumnName}] = @{deleteColumn.ColumnName}");
 
                 var sql = sb.ToString();
                 if (HasInjection(sql))
@@ -1229,15 +1179,10 @@ namespace NS.Base
 
                     mergeSql.AppendLine("WHEN NOT MATCHED THEN INSERT (");
 
-                    mergeSql.AppendLine(string.Join(",",
-                                            Columns.Where(x => !x.Identity).Select(x => $"[{x.ColumnName}]")
-                                                .ToArray()) + ")");
+                    mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[{x.ColumnName}]").ToArray()) + ")");
                     mergeSql.AppendLine("VALUES (");
-                    mergeSql.AppendLine(string.Join(",",
-                                            Columns.Where(x => !x.Identity).Select(x => $"[Source].[{x.ColumnName}]")
-                                                .ToArray()) + ");");
-                    mergeSql.AppendLine(
-                        "IF OBJECT_ID('dbo.DropTmpTable') IS NULL EXEC ('CREATE PROCEDURE dbo.DropTmpTable @table NVARCHAR(250) AS DECLARE @sql NVARCHAR(300) = N''DROP TABLE '' + @table; EXECUTE sp_executesql @sql')");
+                    mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[Source].[{x.ColumnName}]").ToArray()) + ");");
+                    mergeSql.AppendLine("IF OBJECT_ID('dbo.DropTmpTable') IS NULL EXEC ('CREATE PROCEDURE dbo.DropTmpTable @table NVARCHAR(250) AS DECLARE @sql NVARCHAR(300) = N''DROP TABLE '' + @table; EXECUTE sp_executesql @sql')");
 
                     var sql = mergeSql.ToString();
                     if (HasInjection(sql))
@@ -1261,7 +1206,7 @@ namespace NS.Base
                         CommandType = CommandType.StoredProcedure,
                         CommandText = "dbo.DropTmpTable"
                     };
-
+                    
                     dropCmd.Parameters.AddWithValue("table", tempTableName);
                     dropCmd.ExecuteNonQuery();
                     dropCmd.Dispose();
@@ -1286,12 +1231,8 @@ namespace NS.Base
                     {
                         cmd.ExecuteNonQuery();
                     }
-                    catch (Exception ex2)
-                    {
-                        Logger(ex2);
-                    }
+                    catch (Exception ex2) { Logger(ex2); }
                 }
-
                 return false;
             }
         }
@@ -1309,7 +1250,6 @@ namespace NS.Base
                 {
                     Logger(ex);
                 }
-
                 yield return item;
             }
         }
@@ -1330,7 +1270,6 @@ namespace NS.Base
                 Logger(ex);
                 isSuccess = false;
             }
-
             cn.Close();
             return isSuccess;
         }
@@ -1407,17 +1346,17 @@ namespace NS.Base
 
         protected byte GetByte(DataRow row, string fieldName)
         {
-            return (byte) row[fieldName];
+            return (byte)row[fieldName];
         }
 
         protected byte? GetNullableByte(DataRow row, string fieldName)
         {
-            return (byte?) row[fieldName];
+            return (byte?)row[fieldName];
         }
 
         protected byte[] GetByteArray(DataRow row, string fieldName)
         {
-            return (byte[]) row[fieldName];
+            return (byte[])row[fieldName];
         }
 
         protected DateTimeOffset GetDateTimeOffset(DataRow row, string fieldName)
@@ -1478,7 +1417,6 @@ namespace NS.Base
                     stagingSqlBuilder.AppendLine(",");
                     stagingSqlBuilder.Append($"[{mergeColumn.ColumnName}Changed] [BIT] NOT NULL");
                 }
-
                 stagingSqlBuilder.AppendLine(mergeColumn != Columns[Columns.Count - 1] ? "," : ")");
             }
 
@@ -1502,22 +1440,22 @@ namespace NS.Base
 
         #endregion
     }
-
+    
     public static class Ext
     {
         public static T? GetValue<T>(this DataRow row, string columnName) where T : struct
         {
             if (row.IsNull(columnName) || !row.Table.Columns.Contains(columnName))
                 return null;
-
+    
             return row[columnName] as T?;
         }
-
+    
         public static string GetText(this DataRow row, string columnName)
         {
             if (row.IsNull(columnName) || !row.Table.Columns.Contains(columnName))
                 return null;
-
+    
             return row[columnName] as string;
         }
     }

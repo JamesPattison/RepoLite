@@ -35,6 +35,14 @@ namespace NS.Models
 			get => _lolval;
 			set => SetValue(ref _lolval, value);
 		}
+		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
+		{
+			_id = row.GetValue<Int32>($"{propertyPrefix}Id") ?? default(Int32); 
+			_age = row.GetValue<Int32>($"{propertyPrefix}Age"); 
+			_dob = row.GetValue<DateTime>($"{propertyPrefix}DoB"); 
+			_lolval = row.GetValue<Guid>($"{propertyPrefix}lolVal"); 
+			return this;
+		}
 		public override List<ValidationError> Validate()
 		{
 			var validationErrors = new List<ValidationError>();

@@ -23,6 +23,12 @@ namespace NS.Models
 			get => _eventname;
 			set => SetValue(ref _eventname, value);
 		}
+		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
+		{
+			_eventid = row.GetText($"{propertyPrefix}EventId");
+			_eventname = row.GetText($"{propertyPrefix}EventName");
+			return this;
+		}
 		public override List<ValidationError> Validate()
 		{
 			var validationErrors = new List<ValidationError>();

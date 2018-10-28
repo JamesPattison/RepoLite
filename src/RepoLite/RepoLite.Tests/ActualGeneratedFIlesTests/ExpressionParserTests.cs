@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NS.Base;
@@ -10,7 +11,11 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
     internal class ClassA : IBaseModel
     {
         public string EntityName => "ClassA";
-        
+        public IBaseModel SetValues(DataRow row, string propertyPrefix)
+        {
+            return this;
+        }
+
         public string A_StringProperty { get; set; }
         public int A_IntProperty { get; set; }
         public bool A_BoolProperty { get; set; }
@@ -20,6 +25,11 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
     internal class ClassB : IBaseModel
     {
         public string EntityName => "ClassB";
+        public IBaseModel SetValues(DataRow row, string propertyPrefix)
+        {
+            return this;
+        }
+
         public string B_StringProperty { get; set; }
         public int B_IntProperty { get; set; }
         public bool B_BoolProperty { get; set; }

@@ -41,6 +41,15 @@ namespace NS.Models
 			get => _registered;
 			set => SetValue(ref _registered, value);
 		}
+		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
+		{
+			_id = row.GetValue<Int32>($"{propertyPrefix}Id") ?? default(Int32); 
+			_name = row.GetText($"{propertyPrefix}Name");
+			_age = row.GetValue<Int32>($"{propertyPrefix}Age") ?? default(Int32); 
+			_nationality = row.GetText($"{propertyPrefix}Nationality");
+			_registered = row.GetValue<Boolean>($"{propertyPrefix}Registered") ?? default(Boolean); 
+			return this;
+		}
 		public override List<ValidationError> Validate()
 		{
 			var validationErrors = new List<ValidationError>();

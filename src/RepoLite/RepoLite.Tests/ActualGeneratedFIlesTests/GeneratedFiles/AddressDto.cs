@@ -71,6 +71,20 @@ namespace NS.Models
 			get => _country_code;
 			set => SetValue(ref _country_code, value);
 		}
+		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
+		{
+			_id = row.GetValue<Int32>($"{propertyPrefix}Id") ?? default(Int32); 
+			_anotherid = row.GetText($"{propertyPrefix}AnotherId");
+			_personid = row.GetValue<Int32>($"{propertyPrefix}PersonId") ?? default(Int32); 
+			_line1 = row.GetText($"{propertyPrefix}Line1");
+			_line2 = row.GetText($"{propertyPrefix}Line2");
+			_line3 = row.GetText($"{propertyPrefix}Line3");
+			_line4 = row.GetText($"{propertyPrefix}Line4");
+			_postcode = row.GetText($"{propertyPrefix}PostCode");
+			_phonenumber = row.GetText($"{propertyPrefix}PhoneNumber");
+			_country_code = row.GetText($"{propertyPrefix}COUNTRY_CODE");
+			return this;
+		}
 		public override List<ValidationError> Validate()
 		{
 			var validationErrors = new List<ValidationError>();

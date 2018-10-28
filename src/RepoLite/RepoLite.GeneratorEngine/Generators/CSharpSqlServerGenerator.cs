@@ -188,7 +188,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, "}");
             }
 
-            sb.AppendLine(Tab2, "public override void SetValues(DataRow row, string propertyPrefix)");
+            sb.AppendLine(Tab2, "public override IBaseModel SetValues(DataRow row, string propertyPrefix)");
             sb.AppendLine(Tab2, "{");
             foreach (var column in table.Columns)
             {
@@ -217,7 +217,8 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab3, $"_{column.FieldName} = row.GetValue<{column.DataType.Name}>($\"{{propertyPrefix}}{column.PropertyName}\"){(IsCSharpNullable(column.DataType.Name) && column.IsNullable ? ";" : $" ?? default({column.DataType.Name});")} ");
                 }
             }
-            
+
+            sb.AppendLine(Tab3, "return this;");
             sb.AppendLine(Tab2, "}");
 
             CreateModelValidation(table, sb);

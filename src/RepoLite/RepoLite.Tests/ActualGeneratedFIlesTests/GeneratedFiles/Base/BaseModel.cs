@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Runtime.CompilerServices;
 using NS.Base;
 
@@ -20,11 +21,13 @@ namespace NS.Models.Base
     public partial interface IBaseModel
     {
         string EntityName { get; }
+        IBaseModel SetValues(DataRow row, string propertyPrefix);
     }
 
     public abstract partial class BaseModel : IBaseModel
     {
         public abstract string EntityName { get; }
+        public abstract IBaseModel SetValues(DataRow row, string propertyPrefix);
         public abstract List<ValidationError> Validate();
         public readonly List<string> DirtyColumns = new List<string>();
 

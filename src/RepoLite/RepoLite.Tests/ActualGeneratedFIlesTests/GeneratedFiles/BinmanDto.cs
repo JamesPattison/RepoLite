@@ -23,6 +23,12 @@ namespace NS.Models
 			get => _data;
 			set => SetValue(ref _data, value);
 		}
+		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
+		{
+			_id = row.GetValue<Int32>($"{propertyPrefix}Id") ?? default(Int32); 
+			_data = (byte[])row[$"{propertyPrefix}Data"];
+			return this;
+		}
 		public override List<ValidationError> Validate()
 		{
 			var validationErrors = new List<ValidationError>();

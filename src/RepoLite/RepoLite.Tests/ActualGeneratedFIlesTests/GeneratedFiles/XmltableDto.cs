@@ -23,6 +23,12 @@ namespace NS.Models
 			get => _data;
 			set => SetValue(ref _data, value);
 		}
+		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
+		{
+			_name = row.GetText($"{propertyPrefix}name");
+			_data = new XmlDocument{InnerXml = row.GetText($"{propertyPrefix}data")};
+			return this;
+		}
 		public override List<ValidationError> Validate()
 		{
 			var validationErrors = new List<ValidationError>();

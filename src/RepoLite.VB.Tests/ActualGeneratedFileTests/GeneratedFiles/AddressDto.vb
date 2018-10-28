@@ -108,7 +108,7 @@ Namespace NS.Models
             End Set
         End Property
 
-        Public Overrides Sub SetValues(ByVal row As DataRow, ByVal propertyPrefix As String)
+        Public Overrides Function SetValues(ByVal row As DataRow, ByVal propertyPrefix As String) As IBaseModel
             _id = If(row.GetValue(Of Int32)($"{propertyPrefix}Id"), Nothing)
             _anotherid = row.GetText($"{propertyPrefix}AnotherId")
             _personid = If(row.GetValue(Of Int32)($"{propertyPrefix}PersonId"), Nothing)
@@ -119,7 +119,7 @@ Namespace NS.Models
             _postcode = row.GetText($"{propertyPrefix}PostCode")
             _phonenumber = row.GetText($"{propertyPrefix}PhoneNumber")
             _country_code = row.GetText($"{propertyPrefix}COUNTRY_CODE")
-        End Sub
+        End Function
 
         Public Overrides Function Validate() As List(Of ValidationError)
             Dim validationErrors = New List(Of ValidationError)()
