@@ -1,4 +1,5 @@
 Imports RepoLite.VB.Tests.MODELNAMESPACE.Base
+Imports RepoLite.VB.Tests.REPOSITORYNAMESPACE.Base
 
 Namespace NS.Models
     Partial Public Class Address
@@ -122,5 +123,23 @@ Namespace NS.Models
             If Not String.IsNullOrEmpty(COUNTRY_CODE) AndAlso COUNTRY_CODE.Length > 2 Then validationErrors.Add(New ValidationError(NameOf(COUNTRY_CODE), "Max length is 2"))
             Return validationErrors
         End Function
+
+        Shared Friend ReadOnly Property Columns As List(Of ColumnDefinition)
+            Get
+                Return New List(Of ColumnDefinition) From {
+                    New ColumnDefinition("Id", GetType(System.Int32), "[INT]", SqlDbType.Int, False, True, True),
+                    New ColumnDefinition("AnotherId", GetType(System.String), "[NVARCHAR](10)", SqlDbType.NVarChar, False, True, False),
+                    New ColumnDefinition("PersonId", GetType(System.Int32), "[INT]", SqlDbType.Int, False, False, False),
+                    New ColumnDefinition("Line1", GetType(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, False, False, False),
+                    New ColumnDefinition("Line2", GetType(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, True, False, False),
+                    New ColumnDefinition("Line3", GetType(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, True, False, False),
+                    New ColumnDefinition("Line4", GetType(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, True, False, False),
+                    New ColumnDefinition("PostCode", GetType(System.String), "[NVARCHAR](15)", SqlDbType.NVarChar, False, False, False),
+                    New ColumnDefinition("PhoneNumber", GetType(System.String), "[NVARCHAR](20)", SqlDbType.NVarChar, True, False, False),
+                    New ColumnDefinition("COUNTRY_CODE", GetType(System.String), "[NVARCHAR](2)", SqlDbType.NVarChar, True, False, False)
+                    }
+            End Get
+        End Property
+
     End Class
 End Namespace

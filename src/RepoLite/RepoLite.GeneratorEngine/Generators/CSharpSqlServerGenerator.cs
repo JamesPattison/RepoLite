@@ -31,7 +31,9 @@ namespace RepoLite.GeneratorEngine.Generators
 
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections.Generic;");
+            sb.AppendLine("using System.Data;");
             sb.AppendLine("using System.Xml;");
+            sb.AppendLine($"using {AppSettings.Generation.RepositoryGenerationNamespace}.Base;");
             sb.AppendLine($"using {AppSettings.Generation.ModelGenerationNamespace}.Base;");
 
             sb.Append(Environment.NewLine);
@@ -105,24 +107,8 @@ namespace RepoLite.GeneratorEngine.Generators
                 $"public {table.ClassName}Repository(string connectionString) : this(connectionString, exception => {{ }}) {{ }}");
             sb.AppendLine(Tab2,
                 $"public {table.ClassName}Repository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,");
-            sb.AppendLine(Tab3, $"\"{table.Schema}\", \"{table.DbTableName}\", {table.Columns.Count})");
+            sb.AppendLine(Tab3, $"\"{table.Schema}\", \"{table.DbTableName}\", {table.ClassName}.Columns)");
             sb.AppendLine(Tab2, "{");
-            foreach (var column in table.Columns)
-            {
-                var sqlPrecisionColumns = new[] {35, 60, 62, 99, 106, 108, 122, 165, 167, 173, 175, 231, 239};
-                var colLengthVal = sqlPrecisionColumns.Contains(column.SqlDataTypeCode)
-                    ? $"({Math.Max(column.MaxLength, column.MaxIntLength)})"
-                    : string.Empty;
-                sb.AppendLine(Tab3,
-                    $"Columns.Add(new ColumnDefinition({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}, " +
-                    $"typeof({column.DataType}), " +
-                    $"\"[{column.SqlDataType}]{colLengthVal}\", " +
-                    $"SqlDbType.{column.DbType}, " +
-                    $"{column.IsNullable.ToString().ToLower()}, " +
-                    $"{column.PrimaryKey.ToString().ToLower()}, " +
-                    $"{column.IsIdentity.ToString().ToLower()}));");
-            }
-
             sb.AppendLine(Tab2, "}");
 
             //get
@@ -203,6 +189,25 @@ namespace RepoLite.GeneratorEngine.Generators
             }
 
             CreateModelValidation(table, sb);
+
+            sb.AppendLine(Tab2, "internal static List<ColumnDefinition> Columns => new List<ColumnDefinition>");
+            sb.AppendLine(Tab2, "{");
+            foreach (var column in table.Columns)
+            {
+                var sqlPrecisionColumns = new[] {35, 60, 62, 99, 106, 108, 122, 165, 167, 173, 175, 231, 239};
+                var colLengthVal = sqlPrecisionColumns.Contains(column.SqlDataTypeCode)
+                    ? $"({Math.Max(column.MaxLength, column.MaxIntLength)})"
+                    : string.Empty;
+                sb.AppendLine(Tab3,
+                    $"new ColumnDefinition({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}, " +
+                    $"typeof({column.DataType}), " +
+                    $"\"[{column.SqlDataType}]{colLengthVal}\", " +
+                    $"SqlDbType.{column.DbType}, " +
+                    $"{column.IsNullable.ToString().ToLower()}, " +
+                    $"{column.PrimaryKey.ToString().ToLower()}, " +
+                    $"{column.IsIdentity.ToString().ToLower()}),");
+            }
+            sb.AppendLine(Tab2, "};");
 
             sb.AppendLine(Tab1, "}");
             sb.AppendLine("}");
@@ -612,7 +617,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.Append(PrintBlockScopedVariables(table.Columns));
             sb.AppendLine(");");
 
-            sb.AppendLine(Tab3, "if (createdKeys.Count != Columns.Count(x => x.PrimaryKey))");
+            sb.AppendLine(Tab3, $"if (createdKeys.Count != {table.ClassName}.Columns.Count(x => x.PrimaryKey))");
             sb.AppendLine(Tab4, "return false;");
             sb.AppendLine("");
             foreach (var pk in table.PrimaryKeys)
@@ -639,7 +644,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("");
             sb.AppendLine(Tab3, "var dt = new DataTable();");
             sb.AppendLine(Tab3,
-                "foreach (var mergeColumn in Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))");
+                $"foreach (var mergeColumn in {table.ClassName}.Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))");
             sb.AppendLine(Tab4, "dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);");
             sb.AppendLine("");
             sb.AppendLine(Tab3, "foreach (var item in items)");
@@ -767,7 +772,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
                 sb.AppendLine(Tab3, "var tempTableName = $\"staging{DateTime.Now.Ticks}\";");
                 sb.AppendLine(Tab3, "var dt = new DataTable();");
-                sb.AppendLine(Tab3, "foreach (var mergeColumn in Columns.Where(x => x.PrimaryKey))");
+                sb.AppendLine(Tab3, $"foreach (var mergeColumn in {table.ClassName}.Columns.Where(x => x.PrimaryKey))");
                 sb.AppendLine(Tab3, "{");
                 sb.AppendLine(Tab4, "dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);");
                 sb.AppendLine(Tab3, "}");

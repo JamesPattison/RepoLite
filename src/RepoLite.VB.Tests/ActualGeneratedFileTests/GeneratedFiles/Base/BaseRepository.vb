@@ -410,15 +410,16 @@ Namespace REPOSITORYNAMESPACE.Base
             {ExpressionType.Subtract, "-"}
             }
 
-        Shared Friend Function ToSql (Of T As IBaseModel)(ByVal expression As Expression(Of Func(Of T, Boolean))) As String
+        Friend Shared Function ToSql(ByVal expression As LambdaExpression) As String
             Return Parse(expression.Body, True).Sql
         End Function
 
-        Shared Friend Function ToSql (Of T As IBaseModel, TK As IBaseModel)(
-                                                                     ByVal expression As _
-                                                                        Expression(Of Func(Of T, TK, Boolean))) _
-            As String
-            Return Parse(expression.Body, True).Sql
+        Friend Shared Function ToSql(Of T As IBaseModel)(ByVal expression As Expression(Of Func(Of T, Boolean))) As String
+            Return ToSql(CType(expression, LambdaExpression))
+        End Function
+
+        Friend Shared Function ToSql(Of T As IBaseModel, TK As IBaseModel)(ByVal expression As Expression(Of Func(Of T, TK, Boolean))) As String
+            Return ToSql(CType(expression, LambdaExpression))
         End Function
 
         Shared Private Function Parse(ByVal expression As Expression, ByVal Optional isUnary As Boolean = False,
@@ -606,15 +607,17 @@ Namespace REPOSITORYNAMESPACE.Base
         Protected ConnectionString As String
         Private ReadOnly _schema As String
         Private ReadOnly _tableName As String
-        Public Property Columns As List(Of ColumnDefinition)
+        Private Property Columns As List(Of ColumnDefinition)
 
         Protected Sub New(connectionString As String, logMethod As Action(Of Exception),
-                          schema As String, table As String, columnCount As Integer)
+                          schema As String, table As String, columns As List(Of ColumnDefinition))
             Columns = New List(Of ColumnDefinition)()
             _schema = schema
             _tableName = table
             Me.ConnectionString = connectionString
             Logger = If(logMethod, (Function(exception)
+            Me.Columns = columns
+                
             End Function))
             Dim sql =
                     $"SELECT COUNT(*)
@@ -629,7 +632,7 @@ Namespace REPOSITORYNAMESPACE.Base
                     Try
                         cn.Open()
                         Dim count = CInt(cmd.ExecuteScalar())
-                        If count <> columnCount Then _
+                        If count <> columns.Count Then _
                             Throw _
                                 New Exception(
                                     "Repository Definition does not match Database. Please re-run the code generator to get a new repository")

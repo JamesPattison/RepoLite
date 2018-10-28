@@ -13,7 +13,7 @@ using System.Xml;
 
 namespace NS.Base
 {
-    public interface IBaseRepository<T>
+    public partial interface IBaseRepository<T>
         where T : IBaseModel
     {
         long RecordCount();
@@ -456,17 +456,22 @@ namespace NS.Base
             {ExpressionType.Subtract, "-"}
         };
         
+        internal static string ToSql(LambdaExpression expression)
+        {
+            return Parse(expression.Body, true).Sql;
+        }       
+        
         internal static string ToSql<T>(Expression<Func<T, bool>> expression)
             where T : IBaseModel
         {
-            return Parse(expression.Body, true).Sql;
+            return ToSql((LambdaExpression)expression);
         }
         
         internal static string ToSql<T, TK>(Expression<Func<T, TK, bool>> expression)
             where T : IBaseModel
             where TK : IBaseModel
         {
-            return Parse(expression.Body, true).Sql;
+            return ToSql((LambdaExpression)expression);
         }
 
         private static Clause Parse(Expression expression, bool isUnary = false, string prefix = null, string postfix = null, bool boolComparison = false)
@@ -648,22 +653,22 @@ namespace NS.Base
     
     #endregion
 
-    public abstract class BaseRepository<T> : IBaseRepository<T>
+    public abstract partial class BaseRepository<T> : IBaseRepository<T>
         where T : IBaseModel
     {
         protected Action<Exception> Logger;
         protected string ConnectionString;
         private readonly string _schema;
         private readonly string _tableName;
-        public List<ColumnDefinition> Columns { get; set; }
+        private List<ColumnDefinition> Columns;
 
-        protected BaseRepository(string connectionString, Action<Exception> logMethod, string schema, string table, int columnCount)
+        protected BaseRepository(string connectionString, Action<Exception> logMethod, string schema, string table, List<ColumnDefinition> columns)
         {
-            Columns = new List<ColumnDefinition>();
             _schema = schema;
             _tableName = table;
             ConnectionString = connectionString;
             Logger = logMethod ?? (exception => { });
+            Columns = columns;
 
             var sql = $@"SELECT COUNT(*)
                             FROM INFORMATION_SCHEMA.COLUMNS
@@ -677,7 +682,7 @@ namespace NS.Base
                     {
                         cn.Open();
                         var count = (int)cmd.ExecuteScalar();
-                        if (count != columnCount)
+                        if (count != columns.Count)
                             throw new Exception(
                                 "Repository Definition does not match Database. Please re-run the code generator to get a new repository");
                     }

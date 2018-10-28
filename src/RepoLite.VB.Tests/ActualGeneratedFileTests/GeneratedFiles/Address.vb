@@ -77,26 +77,7 @@ Namespace NS
         End Sub
 
         Public Sub New(connectionString As String, logMethod As Action(Of Exception))
-            MyBase.New(connectionString, logMethod, "dbo", "Address", 10)
-            Columns.Add(New ColumnDefinition("Id", GetType(System.Int32), "[INT]", SqlDbType.Int, False, True, True))
-            Columns.Add(New ColumnDefinition("AnotherId", GetType(System.String), "[NVARCHAR](10)", SqlDbType.NVarChar,
-                                             False, True, False))
-            Columns.Add(New ColumnDefinition("PersonId", GetType(System.Int32), "[INT]", SqlDbType.Int, False, False,
-                                             False))
-            Columns.Add(New ColumnDefinition("Line1", GetType(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar,
-                                             False, False, False))
-            Columns.Add(New ColumnDefinition("Line2", GetType(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar,
-                                             True, False, False))
-            Columns.Add(New ColumnDefinition("Line3", GetType(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar,
-                                             True, False, False))
-            Columns.Add(New ColumnDefinition("Line4", GetType(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar,
-                                             True, False, False))
-            Columns.Add(New ColumnDefinition("PostCode", GetType(System.String), "[NVARCHAR](15)", SqlDbType.NVarChar,
-                                             False, False, False))
-            Columns.Add(New ColumnDefinition("PhoneNumber", GetType(System.String), "[NVARCHAR](20)", SqlDbType.NVarChar,
-                                             True, False, False))
-            Columns.Add(New ColumnDefinition("COUNTRY_CODE", GetType(System.String), "[NVARCHAR](2)", SqlDbType.NVarChar,
-                                             True, False, False))
+            MyBase.New(connectionString, logMethod, "dbo", "Address", Address.Columns)
         End Sub
 
         Public Function [Get](id As Int32, anotherId As String) As Address _
@@ -149,7 +130,7 @@ Namespace NS
             If validationErrors.Any() Then Throw New ValidationException(validationErrors)
             Dim createdKeys = BaseCreate(item.Id, item.AnotherId, item.PersonId, item.Line1, item.Line2, item.Line3,
                                          item.Line4, item.PostCode, item.PhoneNumber, item.COUNTRY_CODE)
-            If createdKeys.Count <> Columns.AsEnumerable().Count(Function(definition) definition.PrimaryKey) Then Return False
+            If createdKeys.Count <> Address.Columns.AsEnumerable().Count(Function(definition) definition.PrimaryKey) Then Return False
             item.Id = CInt(createdKeys(NameOf(Address.Id)))
             item.AnotherId = CStr(createdKeys(NameOf(Address.AnotherId)))
             item.ResetDirty()
@@ -164,7 +145,7 @@ Namespace NS
             Dim dt = New DataTable()
 
             For Each mergeColumn In
-                Columns.Where(Function(x) Not x.PrimaryKey OrElse x.PrimaryKey AndAlso Not x.Identity)
+                Address.Columns.Where(Function(x) Not x.PrimaryKey OrElse x.PrimaryKey AndAlso Not x.Identity)
                 dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType)
             Next
 
@@ -217,7 +198,7 @@ Namespace NS
             Dim tempTableName = $"staging{DateTime.Now.Ticks}"
             Dim dt = New DataTable()
 
-            For Each mergeColumn In Columns.Where(Function(x) x.PrimaryKey)
+            For Each mergeColumn In Address.Columns.Where(Function(x) x.PrimaryKey)
                 dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType)
             Next
 

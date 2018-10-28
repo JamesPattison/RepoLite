@@ -1,4 +1,5 @@
 Imports System.Runtime.CompilerServices
+Imports RepoLite.VB.Tests.REPOSITORYNAMESPACE.Base
 
 Namespace MODELNAMESPACE.Base
     Public Class ValidationError
