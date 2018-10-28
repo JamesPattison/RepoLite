@@ -13,7 +13,7 @@ using System.Xml;
 
 namespace REPOSITORYNAMESPACE.Base
 {
-    public partial interface IBaseRepository<T>
+    public partial interface IBaseRepository<T> : IJoinable<T>
         where T : IBaseModel, new()
     {
         long RecordCount();
@@ -430,7 +430,7 @@ namespace REPOSITORYNAMESPACE.Base
 
     #endregion
     
-    #region [ExpressionParser]
+    #region ExpressionParser
 
     internal static class ExpressionParser
     {
@@ -456,36 +456,36 @@ namespace REPOSITORYNAMESPACE.Base
             {ExpressionType.Subtract, "-"}
         };
         
-        internal static string ToSql(LambdaExpression expression)
+        internal static string ToSql(LambdaExpression expression, Dictionary<string, string> xRef)
         {
-            return Parse(expression.Body, true).Sql;
+            return Parse(expression.Body, xRef, true).Sql;
         }       
         
-        internal static string ToSql<T>(Expression<Func<T, bool>> expression)
+        internal static string ToSql<T>(Expression<Func<T, bool>> expression, Dictionary<string, string> xRef)
             where T : IBaseModel, new()
         {
-            return ToSql((LambdaExpression)expression);
+            return ToSql((LambdaExpression)expression, xRef);
         }
         
-        internal static string ToSql<T, TK>(Expression<Func<T, TK, bool>> expression)
+        internal static string ToSql<T, TK>(Expression<Func<T, TK, bool>> expression, Dictionary<string, string> xRef)
             where T : IBaseModel, new()
             where TK : IBaseModel, new()
         {
-            return ToSql((LambdaExpression)expression);
+            return ToSql((LambdaExpression)expression, xRef);
         }
 
-        private static Clause Parse(Expression expression, bool isUnary = false, string prefix = null, string postfix = null, bool boolComparison = false)
+        private static Clause Parse(Expression expression, Dictionary<string, string> xRef, bool isUnary = false, string prefix = null, string postfix = null, bool boolComparison = false)
         {
             while (true)
             {
                 switch (expression)
                 {
                     case UnaryExpression unary:
-                        return Clause.Make(NodeStr[unary.NodeType], Parse(unary.Operand, true));
+                        return Clause.Make(NodeStr[unary.NodeType], Parse(unary.Operand, xRef, true));
                     case BinaryExpression body:
                         
-                        var left = body.Left.Type == typeof(bool) ? Parse(body.Left, boolComparison: true) : Parse(body.Left);
-                        var right = body.Right.Type == typeof(bool) ? Parse(body.Right, boolComparison: true) : Parse(body.Right);
+                        var left = body.Left.Type == typeof(bool) ? Parse(body.Left, xRef, boolComparison: true) : Parse(body.Left, xRef);
+                        var right = body.Right.Type == typeof(bool) ? Parse(body.Right, xRef, boolComparison: true) : Parse(body.Right, xRef);
                         
                         return Clause.Make(left, NodeStr[body.NodeType], right);
                     case ConstantExpression constant:
@@ -513,8 +513,12 @@ namespace REPOSITORYNAMESPACE.Base
                         {
                             case PropertyInfo property:
                             {
-                                var colName = property.Name;
-                                if (!(Activator.CreateInstance(property.DeclaringType ?? throw new Exception()) is IBaseModel model)) throw new Exception();
+                                var colName = property.Name; 
+                                var alias = "";
+                                if (member.Expression is ParameterExpression paramExpr && xRef.ContainsKey(paramExpr.Name))
+                                {
+                                    alias = xRef[paramExpr.Name];
+                                }
 
                                 if (member.Type == typeof(bool))
                                     if (isUnary)
@@ -526,12 +530,20 @@ namespace REPOSITORYNAMESPACE.Base
                                     }
                                     else
                                     {
-                                        return boolComparison ? Clause.Make($"[{model.EntityName}].[{colName}]"): Clause.Make(Clause.Make($"[{model.EntityName}].[{colName}]"), "=",
-                                            Clause.Make("1"));
+                                        return boolComparison
+                                            ? Clause.Make(!string.IsNullOrEmpty(alias)
+                                                ? $"[{alias}].[{colName}]"
+                                                : $"[{colName}]")
+                                            : Clause.Make(
+                                                Clause.Make(!string.IsNullOrEmpty(alias)
+                                                    ? $"[{alias}].[{colName}]"
+                                                    : $"[{colName}]"), "=", Clause.Make("1"));
                                     }
                                 else
                                 {
-                                    var value = $"[{model.EntityName}].[{colName}]";
+                                    var value =!string.IsNullOrEmpty(alias)
+                                        ? $"[{alias}].[{colName}]"
+                                        : $"[{colName}]";
                                     if (!string.IsNullOrEmpty(prefix))
                                         value = $"'{prefix}'+{value}";
                                     if (!string.IsNullOrEmpty(postfix))
@@ -559,17 +571,17 @@ namespace REPOSITORYNAMESPACE.Base
                         // LIKE queries:
                         if (methodCall.Method == typeof(string).GetMethod("Contains", new[] {typeof(string)}))
                         {
-                            return Clause.Make(Parse(methodCall.Object), "LIKE", Parse(methodCall.Arguments[0], prefix: "%", postfix: "%"));
+                            return Clause.Make(Parse(methodCall.Object, xRef), "LIKE", Parse(methodCall.Arguments[0], xRef, prefix: "%", postfix: "%"));
                         }
 
                         if (methodCall.Method == typeof(string).GetMethod("StartsWith", new[] {typeof(string)}))
                         {
-                            return Clause.Make(Parse(methodCall.Object), "LIKE", Parse(methodCall.Arguments[0], postfix: "%"));
+                            return Clause.Make(Parse(methodCall.Object, xRef), "LIKE", Parse(methodCall.Arguments[0], xRef, postfix: "%"));
                         }
 
                         if (methodCall.Method == typeof(string).GetMethod("EndsWith", new[] {typeof(string)}))
                         {
-                            return Clause.Make(Parse(methodCall.Object), "LIKE", Parse(methodCall.Arguments[0], prefix: "%"));
+                            return Clause.Make(Parse(methodCall.Object, xRef), "LIKE", Parse(methodCall.Arguments[0], xRef, prefix: "%"));
                         }
 
                         // IN queries:
@@ -600,7 +612,7 @@ namespace REPOSITORYNAMESPACE.Base
 
                             var values = sb.ToString();
                             values = values.Substring(0, values.Length - 1);
-                            return Clause.Make(Parse(property), "IN", Clause.Make($"({values})"));
+                            return Clause.Make(Parse(property, xRef), "IN", Clause.Make($"({values})"));
                         }
 
                         throw new Exception("Unsupported method call: " + methodCall.Method.Name);
@@ -653,6 +665,859 @@ namespace REPOSITORYNAMESPACE.Base
     
     #endregion
         
+    #region OnClause
+    
+    public interface IOnClause<T1, T2>
+        where T1 : IBaseModel, new() 
+        where T2 : IBaseModel, new()
+    {
+        ICombinedRepository<T1, T2> On(Expression<Func<T1, T2, bool>> expr);
+    }
+    
+    public interface IOnClause<T1, T2, T3>
+        where T1 : IBaseModel, new() 
+        where T2 : IBaseModel, new() 
+        where T3 : IBaseModel, new()
+    {
+        ICombinedRepository<T1, T2, T3> On(Expression<Func<T1, T2, T3, bool>> expr);
+    }
+    
+    public interface IOnClause<T1, T2, T3, T4>
+        where T1 : IBaseModel, new() 
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new() 
+        where T4 : IBaseModel, new()
+    {
+        ICombinedRepository<T1, T2, T3, T4> On(Expression<Func<T1, T2, T3, T4, bool>> expr);
+    }
+    
+    public interface IOnClause<T1, T2, T3, T4, T5>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new() 
+        where T4 : IBaseModel, new() 
+        where T5 : IBaseModel, new()
+    {
+        ICombinedRepository<T1, T2, T3, T4, T5> On(Expression<Func<T1, T2, T3, T4, T5, bool>> expr);
+    }
+    
+    public interface IOnClause<T1, T2, T3, T4, T5, T6>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+        where T5 : IBaseModel, new()
+        where T6 : IBaseModel, new()
+    {
+        ICombinedRepository<T1, T2, T3, T4, T5, T6> On(Expression<Func<T1, T2, T3, T4, T5, T6, bool>> expr);
+    }
+    
+    public interface IOnClause<T1, T2, T3, T4, T5, T6, T7>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+        where T5 : IBaseModel, new()
+        where T6 : IBaseModel, new()
+        where T7 : IBaseModel, new()
+    {
+        ICombinedRepository<T1, T2, T3, T4, T5, T6, T7> On(Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> expr);
+    }
+    
+    public abstract class BaseOnClause
+    {
+        protected internal string ConnectionString;
+        internal JoinInfo JoinInfo { get; }
+
+        protected BaseOnClause() : this(new JoinInfo())
+        {
+        }
+
+        protected BaseOnClause(JoinInfo previousJoinInfo)
+        {
+            JoinInfo = previousJoinInfo;
+        }
+
+        protected void AddJoin(Type type, JoinType joinType)
+        {
+            if (string.IsNullOrEmpty(type.FullName))
+                throw new Exception("Unsupported Type");
+
+            var lastJoinToTable = JoinInfo.Joins.LastOrDefault(x => x.ModelType == type);
+            var alias = $"c{JoinInfo.Joins.Count + 1}";
+            JoinInfo.Joins.Add(new Join(type, joinType, alias));
+        }
+
+        protected void AddExpression(Type type, LambdaExpression expr)
+        {
+            if (string.IsNullOrEmpty(type.FullName))
+                throw new Exception("Unsupported Type");
+
+            var paramXRef = new Dictionary<string, string>();
+            var i = 0;
+            foreach (var parameter in expr.Parameters)
+            {
+                paramXRef.Add(parameter.Name, $"c{i++}");
+            }
+            
+            JoinInfo.Joins.Last().Expression = expr;
+            JoinInfo.Joins.Last().XRef = paramXRef;
+        }
+    }
+
+    public class OnClause<T1, T2> : BaseOnClause, IOnClause<T1, T2>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+    {
+        public OnClause(string connectionString, JoinType joinType)
+        {
+            ConnectionString = connectionString;
+            JoinInfo.InitialType = typeof(T1);
+            AddJoin(typeof(T2), joinType);
+        }
+
+        public ICombinedRepository<T1, T2> On(Expression<Func<T1, T2, bool>> expr)
+        {
+            AddExpression(typeof(T2), expr);
+            return new CombinedRepository<T1, T2>(this);
+        }
+    }
+
+    public class OnClause<T1, T2, T3> : BaseOnClause, IOnClause<T1, T2, T3>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+    {
+        public OnClause(JoinInfo previousJoinInfo, JoinType joinType) : base(previousJoinInfo)
+        {
+            AddJoin(typeof(T3), joinType);
+        }
+
+
+        public ICombinedRepository<T1, T2, T3> On(Expression<Func<T1, T2, T3, bool>> expr)
+        {
+            AddExpression(typeof(T3), expr);
+            return new CombinedRepository<T1, T2, T3>(this);
+        }
+    }
+
+    public class OnClause<T1, T2, T3, T4> : BaseOnClause, IOnClause<T1, T2, T3, T4>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+    {
+        public OnClause(JoinInfo previousJoinInfo, JoinType joinType) : base(previousJoinInfo)
+        {
+            AddJoin(typeof(T4), joinType);
+        }
+
+
+        public ICombinedRepository<T1, T2, T3, T4> On(Expression<Func<T1, T2, T3, T4, bool>> expr)
+        {
+            AddExpression(typeof(T4), expr);
+            return new CombinedRepository<T1, T2, T3, T4>(this);
+        }
+    }
+
+    public class OnClause<T1, T2, T3, T4, T5> : BaseOnClause, IOnClause<T1, T2, T3, T4, T5>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+        where T5 : IBaseModel, new()
+    {
+        public OnClause(JoinInfo previousJoinInfo, JoinType joinType) : base(previousJoinInfo)
+        {
+            AddJoin(typeof(T5), joinType);
+        }
+
+        public ICombinedRepository<T1, T2, T3, T4, T5> On(Expression<Func<T1, T2, T3, T4, T5, bool>> expr)
+        {
+            AddExpression(typeof(T5), expr);
+            return new CombinedRepository<T1, T2, T3, T4, T5>(this);
+        }
+    }
+
+
+    public class OnClause<T1, T2, T3, T4, T5, T6> : BaseOnClause, IOnClause<T1, T2, T3, T4, T5, T6>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+        where T5 : IBaseModel, new()
+        where T6 : IBaseModel, new()
+    {
+        public OnClause(JoinInfo previousJoinInfo, JoinType joinType) : base(previousJoinInfo)
+        {
+            AddJoin(typeof(T6), joinType);
+        }
+
+
+        public ICombinedRepository<T1, T2, T3, T4, T5, T6> On(Expression<Func<T1, T2, T3, T4, T5, T6, bool>> expr)
+        {
+            AddExpression(typeof(T6), expr);
+            return new CombinedRepository<T1, T2, T3, T4, T5, T6>(this);
+        }
+    }
+
+
+    public class OnClause<T1, T2, T3, T4, T5, T6, T7> : BaseOnClause, IOnClause<T1, T2, T3, T4, T5, T6, T7>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+        where T5 : IBaseModel, new()
+        where T6 : IBaseModel, new()
+        where T7 : IBaseModel, new()
+    {
+        public OnClause(JoinInfo previousJoinInfo, JoinType joinType) : base(previousJoinInfo)
+        {
+            AddJoin(typeof(T7), joinType);
+        }
+
+
+        public ICombinedRepository<T1, T2, T3, T4, T5, T6, T7> On(
+            Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> expr)
+        {
+            AddExpression(typeof(T7), expr);
+            return new CombinedRepository<T1, T2, T3, T4, T5, T6, T7>(this);
+        }
+    }
+    
+    #endregion
+    
+    #region JoinInfo
+    
+    public enum JoinType
+    {
+        Inner,
+        Left,
+        Right,
+        Full
+    }
+
+    public class Join
+    {
+        public Type ModelType { get; }
+        public JoinType JoinType { get; }
+        public LambdaExpression Expression { get; set; }
+        public string Alias { get; set; }
+        public Dictionary<string, string> XRef { get; set; }
+
+        public Join(Type type, JoinType join, string alias)
+        {
+            ModelType = type;
+            JoinType = join;
+            Alias = alias;
+        }
+
+        public string JoinString()
+        {
+            switch (JoinType)
+            {
+                case JoinType.Inner:
+                    return "INNER JOIN ";
+                case JoinType.Left:
+                    return "LEFT OUTER JOIN ";
+                case JoinType.Right:
+                    return "RIGHT OUTER JOIN ";
+                case JoinType.Full:
+                    return "FULL OUTER JOIN ";
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+
+    public class JoinInfo
+    {
+        public Type InitialType { get; set; }
+
+        /// <summary>
+        /// Type: Type of IBaseModel we're joining to
+        /// JoinAndExpression the rules for joining to the previous (or initial) model
+        /// </summary>
+        public List<Join> Joins { get; } = new List<Join>();
+    }
+    
+    public interface IJoinable<T1>
+        where T1 : IBaseModel, new()
+    {
+        IOnClause<T1, T2> InnerJoin<T2>() where T2 : IBaseModel, new();
+        IOnClause<T1, T2> LeftJoin<T2>() where T2 : IBaseModel, new();
+        IOnClause<T1, T2> RightJoin<T2>() where T2 : IBaseModel, new();
+        IOnClause<T1, T2> FullJoin<T2>() where T2 : IBaseModel, new();
+    }
+
+    public interface IJoinable<T1, T2>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+    {
+        IOnClause<T1, T2, T3> InnerJoin<T3>() where T3 : IBaseModel, new();
+        IOnClause<T1, T2, T3> LeftJoin<T3>() where T3 : IBaseModel, new();
+        IOnClause<T1, T2, T3> RightJoin<T3>() where T3 : IBaseModel, new();
+        IOnClause<T1, T2, T3> FullJoin<T3>() where T3 : IBaseModel, new();
+    }
+
+    public interface IJoinable<T1, T2, T3>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+    {
+        IOnClause<T1, T2, T3, T4> InnerJoin<T4>() where T4 : IBaseModel, new();
+        IOnClause<T1, T2, T3, T4> LeftJoin<T4>() where T4 : IBaseModel, new();
+        IOnClause<T1, T2, T3, T4> RightJoin<T4>() where T4 : IBaseModel, new();
+        IOnClause<T1, T2, T3, T4> FullJoin<T4>() where T4 : IBaseModel, new();
+    }
+
+    public interface IJoinable<T1, T2, T3, T4>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+    {
+        IOnClause<T1, T2, T3, T4, T5> InnerJoin<T5>() where T5 : IBaseModel, new();
+        IOnClause<T1, T2, T3, T4, T5> LeftJoin<T5>() where T5 : IBaseModel, new();
+        IOnClause<T1, T2, T3, T4, T5> RightJoin<T5>() where T5 : IBaseModel, new();
+        IOnClause<T1, T2, T3, T4, T5> FullJoin<T5>() where T5 : IBaseModel, new();
+    }
+
+    public interface IJoinable<T1, T2, T3, T4, T5>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+        where T5 : IBaseModel, new()
+    {
+        IOnClause<T1, T2, T3, T4, T5, T6> InnerJoin<T6>() where T6 : IBaseModel, new();
+        IOnClause<T1, T2, T3, T4, T5, T6> LeftJoin<T6>() where T6 : IBaseModel, new();
+        IOnClause<T1, T2, T3, T4, T5, T6> RightJoin<T6>() where T6 : IBaseModel, new();
+        IOnClause<T1, T2, T3, T4, T5, T6> FullJoin<T6>() where T6 : IBaseModel, new();
+    }
+
+    public interface IJoinable<T1, T2, T3, T4, T5, T6>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+        where T5 : IBaseModel, new()
+        where T6 : IBaseModel, new()
+    {
+        IOnClause<T1, T2, T3, T4, T5, T6, T7> InnerJoin<T7>() where T7 : IBaseModel, new();
+        IOnClause<T1, T2, T3, T4, T5, T6, T7> LeftJoin<T7>() where T7 : IBaseModel, new();
+        IOnClause<T1, T2, T3, T4, T5, T6, T7> RightJoin<T7>() where T7 : IBaseModel, new();
+        IOnClause<T1, T2, T3, T4, T5, T6, T7> FullJoin<T7>() where T7 : IBaseModel, new();
+    }
+    
+    #endregion
+    
+    #region CombinedRepository
+    
+    public interface ICombinedRepository
+    {
+        JoinInfo JoinInfo { get; }
+    }
+    
+    public interface ICombinedRepository<T1, T2> : IJoinable<T1, T2>, ICombinedRepository
+        where T1 : IBaseModel, new()  
+        where T2 : IBaseModel, new() 
+    {
+        IEnumerable<Tuple<T1, T2>> Results();
+    }
+    
+    public interface ICombinedRepository<T1, T2, T3> : IJoinable<T1, T2, T3>, ICombinedRepository
+        where T1 : IBaseModel, new() 
+        where T2 : IBaseModel, new() 
+        where T3 : IBaseModel, new()
+    {
+        IEnumerable<Tuple<T1, T2, T3>> Results();
+    }
+    
+    
+    public interface ICombinedRepository<T1, T2, T3, T4> : IJoinable<T1, T2, T3, T4>, ICombinedRepository
+        where T1 : IBaseModel, new()  
+        where T2 : IBaseModel, new()  
+        where T3 : IBaseModel, new()  
+        where T4 : IBaseModel, new() 
+    {
+        IEnumerable<Tuple<T1, T2, T3, T4>> Results();
+    }
+    
+    public interface ICombinedRepository<T1, T2, T3, T4, T5> : IJoinable<T1, T2, T3, T4, T5>, ICombinedRepository
+        where T1 : IBaseModel, new()  
+        where T2 : IBaseModel, new()  
+        where T3 : IBaseModel, new() 
+        where T4 : IBaseModel, new()  
+        where T5 : IBaseModel, new() 
+    {
+        IEnumerable<Tuple<T1, T2, T3, T4, T5>> Results();
+    }
+    
+    public interface ICombinedRepository<T1, T2, T3, T4, T5, T6> : IJoinable<T1, T2, T3, T4, T5, T6>, ICombinedRepository
+        where T1 : IBaseModel, new() 
+        where T2 : IBaseModel, new() 
+        where T3 : IBaseModel, new() 
+        where T4 : IBaseModel, new() 
+        where T5 : IBaseModel, new() 
+        where T6 : IBaseModel, new() 
+    {
+        IEnumerable<Tuple<T1, T2, T3, T4, T5, T6>> Results();
+    }
+    
+    public interface ICombinedRepository<T1, T2, T3, T4, T5, T6, T7> : ICombinedRepository
+        where T1 : IBaseModel, new() 
+        where T2 : IBaseModel, new() 
+        where T3 : IBaseModel, new() 
+        where T4 : IBaseModel, new() 
+        where T5 : IBaseModel, new() 
+        where T6 : IBaseModel, new() 
+        where T7 : IBaseModel, new() 
+    {
+        IEnumerable<Tuple<T1, T2, T3, T4, T5, T6, T7>> Results();
+    }
+    
+    public abstract class CombinedRepositoryBase : RepositoryDataAccess, ICombinedRepository
+    {
+        protected const string SqlParamSeparator = "__";
+        
+        public JoinInfo JoinInfo { get; }
+
+        protected CombinedRepositoryBase(BaseOnClause previousOnClause) : base(previousOnClause.ConnectionString)
+        {
+            JoinInfo = previousOnClause.JoinInfo;
+        }
+
+        private string GenerateQuery()
+        {
+            var sql = $"SELECT ";
+            if (!(Activator.CreateInstance(JoinInfo.InitialType) is IBaseModel iInst))
+                throw new Exception($"Initial Type wasn't an IBaseModel, but was {JoinInfo.InitialType}");
+
+            var prop = JoinInfo.InitialType.GetProperty("Columns", BindingFlags.NonPublic | BindingFlags.Static);
+            if (prop == null)
+                throw new Exception(
+                    $"internal static Columns property could not be found on {JoinInfo.InitialType.FullName}");
+
+            if (!(prop.GetValue(iInst) is List<ColumnDefinition> iCols))
+                throw new Exception(
+                    $"internal static Columns property is not of type List<ColumnDefinition> on {JoinInfo.InitialType.FullName}");
+
+            foreach (var column in iCols)
+            {
+                sql += $"[c0].[{column.ColumnName}] AS '{iInst.EntityName}{SqlParamSeparator}{column.ColumnName}', ";
+            }
+
+
+            foreach (var @join in JoinInfo.Joins)
+            {
+                if (!(Activator.CreateInstance(@join.ModelType) is IBaseModel tInst))
+                    throw new Exception($"Join Type wasn't an IBaseModel, but was {@join.ModelType}");
+
+                prop = @join.ModelType.GetProperty("Columns", BindingFlags.NonPublic | BindingFlags.Static);
+                if (prop == null)
+                    throw new Exception(
+                        $"internal static Columns property could not be found on {@join.ModelType.FullName}");
+
+                if (!(prop.GetValue(tInst) is List<ColumnDefinition> tCols))
+                    throw new Exception(
+                        $"internal static Columns property is not of type List<ColumnDefinition> on {@join.ModelType.FullName}");
+
+                foreach (var column in tCols)
+                {
+                    sql +=
+                        $"[{@join.Alias}].[{column.ColumnName}] AS '{tInst.EntityName}{SqlParamSeparator}{column.ColumnName}', ";
+                }
+            }
+
+            sql = sql.Substring(0, sql.Length - 2);
+
+            sql += $" FROM [{iInst.EntityName}] c0 ";
+
+            foreach (var @join in JoinInfo.Joins)
+            {
+                if (!(Activator.CreateInstance(@join.ModelType) is IBaseModel tInst))
+                    throw new Exception($"Join Type wasn't an IBaseModel, but was {@join.ModelType}");
+
+                var expressionSql = ExpressionParser.ToSql(@join.Expression, @join.XRef);
+                sql += $" {@join.JoinString()} [{tInst.EntityName}] {@join.Alias} ON {expressionSql}";
+            }
+
+            return sql;
+        }
+
+        protected DataTable BaseResults()
+        {
+            var query = GenerateQuery();
+            DataTable dt;
+
+            using (var cn = new SqlConnection(ConnectionString))
+            {
+                using (var cmd = CreateCommand(cn, query))
+                {
+                    if (HasInjection(cmd.CommandText))
+                        throw new Exception("Sql Injection attempted. Aborted");
+
+                    //Execute
+                    cn.Open();
+                    dt = ToDataTable(cmd);
+                    if (dt == null)
+                        return null;
+
+                    cn.Close();
+                }
+            }
+
+            return dt;
+        }
+    }
+
+    public class CombinedRepository<T1, T2> : CombinedRepositoryBase, ICombinedRepository<T1, T2>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+    {
+        public CombinedRepository(BaseOnClause previousOnClause) : base(previousOnClause)
+        {
+        }
+
+        public IOnClause<T1, T2, T3> InnerJoin<T3>() where T3 : IBaseModel, new()
+        {
+            return Join<T3>(JoinType.Inner);
+        }
+
+        public IOnClause<T1, T2, T3> LeftJoin<T3>() where T3 : IBaseModel, new()
+        {
+            return Join<T3>(JoinType.Left);
+        }
+
+        public IOnClause<T1, T2, T3> RightJoin<T3>() where T3 : IBaseModel, new()
+        {
+            return Join<T3>(JoinType.Right);
+        }
+
+        public IOnClause<T1, T2, T3> FullJoin<T3>() where T3 : IBaseModel, new()
+        {
+            return Join<T3>(JoinType.Full);
+        }
+
+        private IOnClause<T1, T2, T3> Join<T3>(JoinType joinType) where T3 : IBaseModel, new()
+        {
+            var onClause = new OnClause<T1, T2, T3>(JoinInfo, joinType) {ConnectionString = ConnectionString};
+            return onClause;
+        }
+        
+        public IEnumerable<Tuple<T1, T2>> Results()
+        {
+            var dt = BaseResults();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                var t1Inst = new T1();
+                var t2Inst = new T2();
+
+                var tuple = new Tuple<T1, T2>(
+                    (T1) t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
+                    (T2) t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"));
+
+                yield return tuple;
+            }
+        }
+    }
+
+
+    public class CombinedRepository<T1, T2, T3> : CombinedRepositoryBase, ICombinedRepository<T1, T2, T3>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+    {
+        public CombinedRepository(BaseOnClause previousOnClause) : base(previousOnClause)
+        {
+        }
+
+        public IOnClause<T1, T2, T3, T4> InnerJoin<T4>() where T4 : IBaseModel, new()
+        {
+            return Join<T4>(JoinType.Inner);
+        }
+
+        public IOnClause<T1, T2, T3, T4> LeftJoin<T4>() where T4 : IBaseModel, new()
+        {
+            return Join<T4>(JoinType.Left);
+        }
+
+        public IOnClause<T1, T2, T3, T4> RightJoin<T4>() where T4 : IBaseModel, new()
+        {
+            return Join<T4>(JoinType.Right);
+        }
+
+        public IOnClause<T1, T2, T3, T4> FullJoin<T4>() where T4 : IBaseModel, new()
+        {
+            return Join<T4>(JoinType.Full);
+        }
+
+        private IOnClause<T1, T2, T3, T4> Join<T4>(JoinType joinType) where T4 : IBaseModel, new()
+        {
+            var onClause = new OnClause<T1, T2, T3, T4>(JoinInfo, joinType) {ConnectionString = ConnectionString};
+            return onClause;
+        }
+        
+        public IEnumerable<Tuple<T1, T2, T3>> Results()
+        {
+            var dt = BaseResults();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                var t1Inst = new T1();
+                var t2Inst = new T2();
+                var t3Inst = new T3();
+
+                var tuple = new Tuple<T1, T2, T3>(
+                    (T1) t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
+                    (T2) t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
+                    (T3) t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"));
+
+                yield return tuple;
+            }
+        }
+    }
+
+    public class CombinedRepository<T1, T2, T3, T4> : CombinedRepositoryBase, ICombinedRepository<T1, T2, T3, T4>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+    {
+        public CombinedRepository(BaseOnClause previousOnClause) : base(previousOnClause)
+        {
+        }
+
+        public IOnClause<T1, T2, T3, T4, T5> InnerJoin<T5>() where T5 : IBaseModel, new()
+        {
+            return Join<T5>(JoinType.Inner);
+        }
+
+        public IOnClause<T1, T2, T3, T4, T5> LeftJoin<T5>() where T5 : IBaseModel, new()
+        {
+            return Join<T5>(JoinType.Left);
+        }
+
+        public IOnClause<T1, T2, T3, T4, T5> RightJoin<T5>() where T5 : IBaseModel, new()
+        {
+            return Join<T5>(JoinType.Right);
+        }
+
+        public IOnClause<T1, T2, T3, T4, T5> FullJoin<T5>() where T5 : IBaseModel, new()
+        {
+            return Join<T5>(JoinType.Full);
+        }
+
+        private IOnClause<T1, T2, T3, T4, T5> Join<T5>(JoinType joinType) where T5 : IBaseModel, new()
+        {
+            var onClause = new OnClause<T1, T2, T3, T4, T5>(JoinInfo, joinType)
+            {
+                ConnectionString = ConnectionString
+            };
+            return onClause;
+        }
+
+        public IEnumerable<Tuple<T1, T2, T3, T4>> Results()
+        {
+            var dt = BaseResults();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                var t1Inst = new T1();
+                var t2Inst = new T2();
+                var t3Inst = new T3();
+                var t4Inst = new T4();
+
+                var tuple = new Tuple<T1, T2, T3, T4>(
+                    (T1) t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
+                    (T2) t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
+                    (T3) t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"),
+                    (T4) t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"));
+
+                yield return tuple;
+            }
+        }
+    }
+
+    public class CombinedRepository<T1, T2, T3, T4, T5> : CombinedRepositoryBase,
+        ICombinedRepository<T1, T2, T3, T4, T5>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+        where T5 : IBaseModel, new()
+    {
+        public CombinedRepository(BaseOnClause previousOnClause) : base(previousOnClause)
+        {
+        }
+
+        public IOnClause<T1, T2, T3, T4, T5, T6> InnerJoin<T6>() where T6 : IBaseModel, new()
+        {
+            return Join<T6>(JoinType.Inner);
+        }
+
+        public IOnClause<T1, T2, T3, T4, T5, T6> LeftJoin<T6>() where T6 : IBaseModel, new()
+        {
+            return Join<T6>(JoinType.Left);
+        }
+
+        public IOnClause<T1, T2, T3, T4, T5, T6> RightJoin<T6>() where T6 : IBaseModel, new()
+        {
+            return Join<T6>(JoinType.Right);
+        }
+
+        public IOnClause<T1, T2, T3, T4, T5, T6> FullJoin<T6>() where T6 : IBaseModel, new()
+        {
+            return Join<T6>(JoinType.Full);
+        }
+
+        private IOnClause<T1, T2, T3, T4, T5, T6> Join<T6>(JoinType joinType) where T6 : IBaseModel, new()
+        {
+            var onClause = new OnClause<T1, T2, T3, T4, T5, T6>(JoinInfo, joinType)
+            {
+                ConnectionString = ConnectionString
+            };
+            return onClause;
+        }
+
+        public IEnumerable<Tuple<T1, T2, T3, T4, T5>> Results()
+        {
+            var dt = BaseResults();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                var t1Inst = new T1();
+                var t2Inst = new T2();
+                var t3Inst = new T3();
+                var t4Inst = new T4();
+                var t5Inst = new T5();
+
+                var tuple = new Tuple<T1, T2, T3, T4, T5>(
+                    (T1) t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
+                    (T2) t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
+                    (T3) t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"),
+                    (T4) t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"),
+                    (T5) t5Inst.SetValues(row, $"{t5Inst.EntityName}{SqlParamSeparator}"));
+
+                yield return tuple;
+            }
+        }
+    }
+
+    public class CombinedRepository<T1, T2, T3, T4, T5, T6> : CombinedRepositoryBase,
+        ICombinedRepository<T1, T2, T3, T4, T5, T6>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+        where T5 : IBaseModel, new()
+        where T6 : IBaseModel, new()
+    {
+        public CombinedRepository(BaseOnClause previousOnClause) : base(previousOnClause)
+        {
+        }
+
+        public IOnClause<T1, T2, T3, T4, T5, T6, T7> InnerJoin<T7>() where T7 : IBaseModel, new()
+        {
+            return Join<T7>(JoinType.Inner);
+        }
+
+        public IOnClause<T1, T2, T3, T4, T5, T6, T7> LeftJoin<T7>() where T7 : IBaseModel, new()
+        {
+            return Join<T7>(JoinType.Left);
+        }
+
+        public IOnClause<T1, T2, T3, T4, T5, T6, T7> RightJoin<T7>() where T7 : IBaseModel, new()
+        {
+            return Join<T7>(JoinType.Right);
+        }
+
+        public IOnClause<T1, T2, T3, T4, T5, T6, T7> FullJoin<T7>() where T7 : IBaseModel, new()
+        {
+            return Join<T7>(JoinType.Full);
+        }
+
+        private IOnClause<T1, T2, T3, T4, T5, T6, T7> Join<T7>(JoinType joinType) where T7 : IBaseModel, new()
+        {
+            var onClause = new OnClause<T1, T2, T3, T4, T5, T6, T7>(JoinInfo, joinType)
+            {
+                ConnectionString = ConnectionString
+            };
+            return onClause;
+        }
+
+        public IEnumerable<Tuple<T1, T2, T3, T4, T5, T6>> Results()
+        {
+            var dt = BaseResults();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                var t1Inst = new T1();
+                var t2Inst = new T2();
+                var t3Inst = new T3();
+                var t4Inst = new T4();
+                var t5Inst = new T5();
+                var t6Inst = new T6();
+
+                var tuple = new Tuple<T1, T2, T3, T4, T5, T6>(
+                    (T1) t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
+                    (T2) t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
+                    (T3) t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"),
+                    (T4) t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"),
+                    (T5) t5Inst.SetValues(row, $"{t5Inst.EntityName}{SqlParamSeparator}"),
+                    (T6) t6Inst.SetValues(row, $"{t6Inst.EntityName}{SqlParamSeparator}"));
+
+                yield return tuple;
+            }
+        }
+    }
+
+    public class CombinedRepository<T1, T2, T3, T4, T5, T6, T7> : CombinedRepositoryBase,
+        ICombinedRepository<T1, T2, T3, T4, T5, T6, T7>
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+        where T5 : IBaseModel, new()
+        where T6 : IBaseModel, new()
+        where T7 : IBaseModel, new()
+    {
+        public CombinedRepository(BaseOnClause previousOnClause) : base(previousOnClause)
+        {
+        }
+
+        public IEnumerable<Tuple<T1, T2, T3, T4, T5, T6, T7>> Results()
+        {
+            var dt = BaseResults();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                var t1Inst = new T1();
+                var t2Inst = new T2();
+                var t3Inst = new T3();
+                var t4Inst = new T4();
+                var t5Inst = new T5();
+                var t6Inst = new T6();
+                var t7Inst = new T7();
+
+                var tuple = new Tuple<T1, T2, T3, T4, T5, T6, T7>(
+                    (T1) t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
+                    (T2) t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
+                    (T3) t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"),
+                    (T4) t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"),
+                    (T5) t5Inst.SetValues(row, $"{t5Inst.EntityName}{SqlParamSeparator}"),
+                    (T6) t6Inst.SetValues(row, $"{t6Inst.EntityName}{SqlParamSeparator}"),
+                    (T7) t7Inst.SetValues(row, $"{t7Inst.EntityName}{SqlParamSeparator}"));
+
+                yield return tuple;
+            }
+        }
+    }
+    
+    #endregion
+    
     public abstract class RepositoryDataAccess
     {
         protected Action<Exception> Logger;
@@ -1235,6 +2100,30 @@ namespace REPOSITORYNAMESPACE.Base
                 }
                 return false;
             }
+        }
+        
+        public IOnClause<T, T2> InnerJoin<T2>() where T2 : IBaseModel, new()
+        {
+            var onClause = new OnClause<T, T2>(ConnectionString, JoinType.Inner);
+            return onClause;
+        }
+
+        public IOnClause<T, T2> LeftJoin<T2>() where T2 : IBaseModel, new()
+        {
+            var onClause = new OnClause<T, T2>(ConnectionString, JoinType.Left);
+            return onClause;
+        }
+
+        public IOnClause<T, T2> RightJoin<T2>() where T2 : IBaseModel, new()
+        {
+            var onClause = new OnClause<T, T2>(ConnectionString, JoinType.Right);
+            return onClause;
+        }
+
+        public IOnClause<T, T2> FullJoin<T2>() where T2 : IBaseModel, new()
+        {
+            var onClause = new OnClause<T, T2>(ConnectionString, JoinType.Full);
+            return onClause;
         }
 
         protected IEnumerable<T> ToItems(DataTable table)

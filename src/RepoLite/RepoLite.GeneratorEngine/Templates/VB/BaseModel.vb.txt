@@ -13,14 +13,14 @@ Namespace MODELNAMESPACE.Base
 
     Public Partial Interface IBaseModel
         ReadOnly Property EntityName As String
-        Sub SetValues(row As DataRow, propertyPrefix as String)
+        Function SetValues(row As DataRow, propertyPrefix as String) As IBaseModel
     End Interface
 
     Public MustInherit Partial Class BaseModel
         Implements IBaseModel
 
         Public MustOverride ReadOnly Property EntityName As String Implements IBaseModel.EntityName
-        Public MustOverride Sub SetValues(row As DataRow, propertyPrefix as String) Implements IBaseModel.SetValues
+        Public MustOverride Function SetValues(row As DataRow, propertyPrefix as String) As IBaseModel Implements IBaseModel.SetValues
         Public MustOverride Function Validate() As List(Of ValidationError)
         Public ReadOnly DirtyColumns As List(Of String) = New List(Of String)()
 

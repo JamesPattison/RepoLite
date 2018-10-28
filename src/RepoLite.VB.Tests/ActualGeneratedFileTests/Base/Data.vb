@@ -92,7 +92,6 @@ Namespace ActualGeneratedFileTests.Base
             RunSql("INSERT [dbo].[NullableTable] (Age, DoB, lolVal) VALUES(31, '2018-02-19 09:55:16.057', '84F00717-BFDB-49ED-A116-02578C4D2513')")
             RunSql("INSERT [dbo].[NullableTable] (Age, DoB, lolVal) VALUES(27, '2016-11-12', '847ED511-C462-4478-BD98-02625D5F6BCF')")
             RunSql("INSERT [dbo].[NullableTable] (Age, DoB, lolVal) VALUES(2, '2017-05-01 21:21:21', '63C5DD71-060F-4DEE-81A4-5203277EEED8')")
-            RunSql("INSERT INTO [AWM].[BIN_MASTER] ([BIN_ID],[RACK_ID],[STATION_ID],[BIN_NAME],[MAX_WEIGHT],[MAX_VOLUME],[MAX_HEIGHT],[MAX_DEPTH],[MAX_WIDTH],[ALLOW_MULTI_STOCK],[TRANSITION_BIN],[DEFAULT_RECEIPT_BIN],[CONTAINER_STORAGE_BIN],[STOCK_TAKE],[AUTO_ALLOCATE],[BIN_FULL],[PALLETISATION_BIN],[VIRTUAL_CONTAINERS_ONLY],[TRANSITIONAL_BIN],[TYPE_ET],[IS_TOP_SHELF],[TRANSIT_IN],[TRANSIT_OUT],[WIP_RECEIVING],[ON_HOLD],[RACK_LEVEL],[RACK_SEQUENCE],[CHECK_DIGIT],[SoftAllocWHArea],[InPickingProcess],[PickingByRacId],[InPickingInstanceID],[UsePickFaceBinsForWIP],[SingleInwardMovementsForWIP],[SuspenseBin]) VALUES ('1', '1', '1', '1', '1','1', '1', '1', '1', '1','1', '1', '1', '1', '1','1', '1', '1', '1', '1','1', '1', '1', '1', '1','1', '1', '1', '1', '1','1', '1', '1', '1', '1')")
         End Sub
 
         Private Shared Sub RunSql(ByVal sql As String)

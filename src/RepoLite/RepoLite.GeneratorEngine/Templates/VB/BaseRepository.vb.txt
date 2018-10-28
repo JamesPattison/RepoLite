@@ -389,7 +389,8 @@ Namespace REPOSITORYNAMESPACE.Base
     End Class
 
     Friend Class ExpressionParser
-        Shared Private ReadOnly NodeStr As Dictionary(Of ExpressionType, String) = New Dictionary(Of ExpressionType, String) From {
+        Shared Private ReadOnly _
+            NodeStr As Dictionary(Of ExpressionType, String) = New Dictionary(Of ExpressionType, String) From {
             {ExpressionType.Add, "+"},
             {ExpressionType.[And], "&"},
             {ExpressionType.[AndAlso], "AND"},
@@ -410,40 +411,48 @@ Namespace REPOSITORYNAMESPACE.Base
             {ExpressionType.Subtract, "-"}
             }
 
-        Friend Shared Function ToSql(ByVal expression As LambdaExpression) As String
-            Return Parse(expression.Body, True).Sql
+        Friend Shared Function ToSql(expression As LambdaExpression, xRef As Dictionary(Of String, String)) As String
+            Return Parse(expression.Body, xRef, True).Sql
         End Function
 
-        Friend Shared Function ToSql(Of T As {IBaseModel, New})(ByVal expression As Expression(Of Func(Of T, Boolean))) As String
-            Return ToSql(CType(expression, LambdaExpression))
+        Friend Shared Function ToSql (Of T As IBaseModel)(ByVal expression As Expression(Of Func(Of T, Boolean)),
+                                                          xRef As Dictionary(Of String, String)) _
+            As String
+            Return ToSql(CType(expression, LambdaExpression), xRef)
         End Function
 
-        Friend Shared Function ToSql(Of T As {IBaseModel, New}, TK As {IBaseModel, New})(ByVal expression As Expression(Of Func(Of T, TK, Boolean))) As String
-            Return ToSql(CType(expression, LambdaExpression))
+        Friend Shared Function ToSql (Of T As IBaseModel, TK As IBaseModel)(
+                                                                            ByVal expression As _
+                                                                               Expression(Of Func(Of T, TK, Boolean)),
+                                                                            xRef As Dictionary(Of String, String)) _
+            As String
+            Return ToSql(CType(expression, LambdaExpression), xRef)
         End Function
 
-        Shared Private Function Parse(ByVal expression As Expression, ByVal Optional isUnary As Boolean = False,
-                               ByVal Optional prefix As String = Nothing, ByVal Optional postfix As String = Nothing,
-                               ByVal Optional boolComparison As Boolean = False) As Clause
+        Shared Private Function Parse(ByVal expression As Expression, xRef As Dictionary(Of String, String),
+                                      ByVal Optional isUnary As Boolean = False,
+                                      ByVal Optional prefix As String = Nothing,
+                                      ByVal Optional postfix As String = Nothing,
+                                      ByVal Optional boolComparison As Boolean = False) As Clause
 
             While True
 
                 If TypeOf expression Is UnaryExpression Then
                     Dim unary = TryCast(expression, UnaryExpression)
-                    Return Clause.Make(NodeStr(unary.NodeType), Parse(unary.Operand, True))
+                    Return Clause.Make(NodeStr(unary.NodeType), Parse(unary.Operand, xRef, True))
                 ElseIf TypeOf expression Is BinaryExpression Then
                     Dim body = TryCast(expression, BinaryExpression)
                     Dim left As Clause
                     If (body.Left.Type = GetType(Boolean))
-                        left = Parse(body.Left, boolComparison := True)
-                    Else 
-                        left = Parse(body.Left)
+                        left = Parse(body.Left, xRef, boolComparison := True)
+                    Else
+                        left = Parse(body.Left, xRef)
                     End If
-                        
+
                     Dim right =
                             If _
-                            (body.Right.Type = GetType(Boolean), Parse(body.Right, boolComparison := True),
-                             Parse(body.Right))
+                            (body.Right.Type = GetType(Boolean), Parse(body.Right, xRef, boolComparison := True),
+                             Parse(body.Right, xRef))
                     Return Clause.Make(left, NodeStr(body.NodeType), right)
                 ElseIf TypeOf expression Is ConstantExpression Then
                     Dim constant = TryCast(expression, ConstantExpression)
@@ -469,29 +478,41 @@ Namespace REPOSITORYNAMESPACE.Base
                     If TypeOf member.Member Is PropertyInfo Then
                         Dim [property] = TryCast(member.Member, PropertyInfo)
                         Dim colName = [property].Name
-                        Dim instance = Activator.CreateInstance([property].DeclaringType)
-                        If TypeOf instance Is IBaseModel Then
-                            Dim model = TryCast(instance, IBaseModel)
-                            If member.Type = GetType(Boolean) Then
 
-                                If isUnary Then
-                                    isUnary = False
-                                    prefix = Nothing
-                                    postfix = Nothing
-                                    Continue While
-                                Else
-                                    Return _
-                                        If _
-                                            (boolComparison, Clause.Make($"[{model.EntityName}].[{colName}]"),
-                                             Clause.Make(Clause.Make($"[{model.EntityName}].[{colName}]"), "=",
-                                                         Clause.Make("1")))
-                                End If
+                        Dim [alias] = ""
+                        If TypeOf member.Expression Is ParameterExpression Then
+                            Dim paramExpr = TryCast(member.Expression, ParameterExpression)
+                            If xRef.ContainsKey(paramExpr.Name) Then [alias] = xRef(paramExpr.Name)
+                        End If
+
+                        If member.Type = GetType(Boolean) Then
+
+                            If isUnary Then
+                                isUnary = False
+                                prefix = Nothing
+                                postfix = Nothing
+                                Continue While
                             Else
-                                Dim value = $"[{model.EntityName}].[{colName}]"
-                                If Not String.IsNullOrEmpty(prefix) Then value = $"'{prefix}'+{value}"
-                                If Not String.IsNullOrEmpty(postfix) Then value = $"{value}+'{postfix}'"
-                                Return Clause.Make(value)
+                                Return _
+                                    If _
+                                        (boolComparison,
+                                         Clause.Make(
+                                             If _
+                                                        (Not String.IsNullOrEmpty([alias]), $"[{[alias]}].[{colName}]",
+                                                         $"[{colName}]")),
+                                         Clause.Make(
+                                             Clause.Make(
+                                                 If _
+                                                            (Not String.IsNullOrEmpty([alias]),
+                                                             $"[{[alias]}].[{colName}]", $"[{colName}]")), "=",
+                                             Clause.Make("1")))
                             End If
+                        Else
+                            Dim value =
+                                    If(Not String.IsNullOrEmpty([alias]), $"[{[alias]}].[{colName}]", $"[{colName}]")
+                            If Not String.IsNullOrEmpty(prefix) Then value = $"'{prefix}'+{value}"
+                            If Not String.IsNullOrEmpty(postfix) Then value = $"{value}+'{postfix}'"
+                            Return Clause.Make(value)
                         End If
                     ElseIf TypeOf member.Member Is FieldInfo Then
                         Dim value = GetValue(member)
@@ -509,18 +530,20 @@ Namespace REPOSITORYNAMESPACE.Base
 
                     If methodCall.Method = GetType(String).GetMethod("Contains", {GetType(String)}) Then
                         Return _
-                            Clause.Make(Parse(methodCall.Object), "LIKE",
-                                        Parse(methodCall.Arguments(0), prefix := "%", postfix := "%"))
+                            Clause.Make(Parse(methodCall.Object, xRef), "LIKE",
+                                        Parse(methodCall.Arguments(0), xRef, prefix := "%", postfix := "%"))
                     End If
 
                     If methodCall.Method = GetType(String).GetMethod("StartsWith", {GetType(String)}) Then
                         Return _
-                            Clause.Make(Parse(methodCall.Object), "LIKE", Parse(methodCall.Arguments(0), postfix := "%"))
+                            Clause.Make(Parse(methodCall.Object, xRef), "LIKE",
+                                        Parse(methodCall.Arguments(0), xRef, postfix := "%"))
                     End If
 
                     If methodCall.Method = GetType(String).GetMethod("EndsWith", {GetType(String)}) Then
                         Return _
-                            Clause.Make(Parse(methodCall.Object), "LIKE", Parse(methodCall.Arguments(0), prefix := "%"))
+                            Clause.Make(Parse(methodCall.Object, xRef), "LIKE",
+                                        Parse(methodCall.Arguments(0), xRef, prefix := "%"))
                     End If
 
                     If methodCall.Method.Name = "Contains" Then
@@ -549,14 +572,17 @@ Namespace REPOSITORYNAMESPACE.Base
 
                         Dim values = sb.ToString()
                         values = values.Substring(0, values.Length - 1)
-                        Return Clause.Make(Parse([property]), "IN", Clause.Make($"({values})"))
+                        Return Clause.Make(Parse([property], xRef), "IN", Clause.Make($"({values})"))
                     End If
-                    
+
                     if (methodCall.Method.Name = "CompareString")
                         If methodCall.Arguments.Count >= 2 Then
                             If TypeOf methodCall.Arguments(2) is ConstantExpression
                                 Dim constantExpression = TryCast(methodCall.Arguments(2), ConstantExpression)
-                                Return Clause.Make(Parse(methodCall.Arguments(0)), If(constantExpression.Value.ToString().ToLower() = "false", "<>", "="), Parse(methodCall.Arguments(1)))
+                                Return _
+                                    Clause.Make(Parse(methodCall.Arguments(0), xRef),
+                                                If(constantExpression.Value.ToString().ToLower() = "false", "<>", "="),
+                                                Parse(methodCall.Arguments(1), xRef))
                             End If
                         End If
                     End If
@@ -599,24 +625,804 @@ Namespace REPOSITORYNAMESPACE.Base
         End Class
     End Class
 
+#region "OnClause"
+
+    Public Interface IOnClause (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New})
+        Function [On](ByVal expr As Expression(Of Func(Of T1, T2, Boolean))) As ICombinedRepository(Of T1, T2)
+    End Interface
+
+    Public Interface IOnClause (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New})
+        Function [On](ByVal expr As Expression(Of Func(Of T1, T2, T3, Boolean))) As ICombinedRepository(Of T1, T2, T3)
+    End Interface
+
+    Public Interface IOnClause _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New})
+
+        Function [On](ByVal expr As Expression(Of Func(Of T1, T2, T3, T4, Boolean))) _
+            As ICombinedRepository(Of T1, T2, T3, T4)
+    End Interface
+
+    Public Interface IOnClause _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New},
+            T5 As {IBaseModel, New})
+
+        Function [On](ByVal expr As Expression(Of Func(Of T1, T2, T3, T4, T5, Boolean))) _
+            As ICombinedRepository(Of T1, T2, T3, T4, T5)
+    End Interface
+
+    Public Interface IOnClause _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New},
+            T5 As {IBaseModel, New}, T6 As {IBaseModel, New})
+
+        Function [On](ByVal expr As Expression(Of Func(Of T1, T2, T3, T4, T5, T6, Boolean))) _
+            As ICombinedRepository(Of T1, T2, T3, T4, T5, T6)
+    End Interface
+
+    Public Interface IOnClause _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New},
+            T5 As {IBaseModel, New}, T6 As {IBaseModel, New}, T7 As {IBaseModel, New})
+
+        Function [On](ByVal expr As Expression(Of Func(Of T1, T2, T3, T4, T5, T6, T7, Boolean))) _
+            As ICombinedRepository(Of T1, T2, T3, T4, T5, T6, T7)
+    End Interface
+
+    Public MustInherit Class BaseOnClause
+        Protected Friend ConnectionString As String
+        Friend ReadOnly Property JoinInfo As JoinInfo
+
+        Protected Sub New()
+            Me.New(New JoinInfo())
+        End Sub
+
+        Protected Sub New(ByVal previousJoinInfo As JoinInfo)
+            JoinInfo = previousJoinInfo
+        End Sub
+
+        Protected Sub AddJoin(ByVal type As Type, ByVal joinType As JoinType)
+            If String.IsNullOrEmpty(type.FullName) Then Throw New Exception("Unsupported Type")
+            Dim lastJoinToTable = JoinInfo.Joins.LastOrDefault(Function(x) x.ModelType = type)
+            Dim [alias] = $"c{JoinInfo.Joins.Count + 1}"
+            JoinInfo.Joins.Add(New Join(type, joinType, [alias]))
+        End Sub
+
+        Protected Sub AddExpression(ByVal type As Type, ByVal expr As LambdaExpression)
+            If String.IsNullOrEmpty(type.FullName) Then Throw New Exception("Unsupported Type")
+            Dim paramXRef = New Dictionary(Of String, String)()
+            Dim i = 0
+
+            For Each parameter In expr.Parameters
+                paramXRef.Add(parameter.Name, $"c{Math.Min(System.Threading.Interlocked.Increment(i), i - 1)}")
+            Next
+
+            JoinInfo.Joins.Last().Expression = expr
+            JoinInfo.Joins.Last().XRef = paramXRef
+        End Sub
+    End Class
+
+    Public Class OnClause (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New})
+        Inherits BaseOnClause
+        Implements IOnClause(Of T1, T2)
+
+        Public Sub New(ByVal connectionString As String, ByVal joinType As JoinType)
+            ConnectionString = connectionString
+            JoinInfo.InitialType = GetType(T1)
+            AddJoin(GetType(T2), joinType)
+        End Sub
+
+        Public Function [On](ByVal expr As Expression(Of Func(Of T1, T2, Boolean))) As ICombinedRepository(Of T1, T2) _
+            Implements IOnClause(Of T1, T2).On
+            AddExpression(GetType(T2), expr)
+            Return New CombinedRepository(Of T1, T2)(Me)
+        End Function
+    End Class
+
+    Public Class OnClause (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New})
+        Inherits BaseOnClause
+        Implements IOnClause(Of T1, T2, T3)
+
+        Public Sub New(ByVal previousJoinInfo As JoinInfo, ByVal joinType As JoinType)
+            MyBase.New(previousJoinInfo)
+            AddJoin(GetType(T3), joinType)
+        End Sub
+
+        Public Function [On](ByVal expr As Expression(Of Func(Of T1, T2, T3, Boolean))) _
+            As ICombinedRepository(Of T1, T2, T3) Implements IOnClause(Of T1, T2, T3).On
+            AddExpression(GetType(T3), expr)
+            Return New CombinedRepository(Of T1, T2, T3)(Me)
+        End Function
+    End Class
+
+    Public Class OnClause _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New})
+        Inherits BaseOnClause
+        Implements IOnClause(Of T1, T2, T3, T4)
+
+        Public Sub New(ByVal previousJoinInfo As JoinInfo, ByVal joinType As JoinType)
+            MyBase.New(previousJoinInfo)
+            AddJoin(GetType(T4), joinType)
+        End Sub
+
+        Public Function [On](ByVal expr As Expression(Of Func(Of T1, T2, T3, T4, Boolean))) _
+            As ICombinedRepository(Of T1, T2, T3, T4) Implements IOnClause(Of T1, T2, T3, T4).On
+            AddExpression(GetType(T4), expr)
+            Return New CombinedRepository(Of T1, T2, T3, T4)(Me)
+        End Function
+    End Class
+
+    Public Class OnClause _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New},
+            T5 As {IBaseModel, New})
+        Inherits BaseOnClause
+        Implements IOnClause(Of T1, T2, T3, T4, T5)
+
+        Public Sub New(ByVal previousJoinInfo As JoinInfo, ByVal joinType As JoinType)
+            MyBase.New(previousJoinInfo)
+            AddJoin(GetType(T5), joinType)
+        End Sub
+
+        Public Function [On](ByVal expr As Expression(Of Func(Of T1, T2, T3, T4, T5, Boolean))) _
+            As ICombinedRepository(Of T1, T2, T3, T4, T5) Implements IOnClause(Of T1, T2, T3, T4, T5).On
+            AddExpression(GetType(T5), expr)
+            Return New CombinedRepository(Of T1, T2, T3, T4, T5)(Me)
+        End Function
+    End Class
+
+    Public Class OnClause _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New},
+            T5 As {IBaseModel, New}, T6 As {IBaseModel, New})
+        Inherits BaseOnClause
+        Implements IOnClause(Of T1, T2, T3, T4, T5, T6)
+
+        Public Sub New(ByVal previousJoinInfo As JoinInfo, ByVal joinType As JoinType)
+            MyBase.New(previousJoinInfo)
+            AddJoin(GetType(T6), joinType)
+        End Sub
+
+        Public Function [On](ByVal expr As Expression(Of Func(Of T1, T2, T3, T4, T5, T6, Boolean))) _
+            As ICombinedRepository(Of T1, T2, T3, T4, T5, T6) Implements IOnClause(Of T1, T2, T3, T4, T5, T6).On
+            AddExpression(GetType(T6), expr)
+            Return New CombinedRepository(Of T1, T2, T3, T4, T5, T6)(Me)
+        End Function
+    End Class
+
+    Public Class OnClause _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New},
+            T5 As {IBaseModel, New}, T6 As {IBaseModel, New}, T7 As {IBaseModel, New})
+        Inherits BaseOnClause
+        Implements IOnClause(Of T1, T2, T3, T4, T5, T6, T7)
+
+        Public Sub New(ByVal previousJoinInfo As JoinInfo, ByVal joinType As JoinType)
+            MyBase.New(previousJoinInfo)
+            AddJoin(GetType(T7), joinType)
+        End Sub
+
+        Public Function [On](ByVal expr As Expression(Of Func(Of T1, T2, T3, T4, T5, T6, T7, Boolean))) _
+            As ICombinedRepository(Of T1, T2, T3, T4, T5, T6, T7) Implements IOnClause(Of T1, T2, T3, T4, T5, T6, T7).On
+            AddExpression(GetType(T7), expr)
+            Return New CombinedRepository(Of T1, T2, T3, T4, T5, T6, T7)(Me)
+        End Function
+    End Class
+
+#End Region
+
+#region "Join Info"
+
+    Public Enum JoinType
+        Inner
+        Left
+        Right
+        Full
+    End Enum
+
+    Public Class Join
+        Public ReadOnly Property ModelType As Type
+        Public ReadOnly Property JoinType As JoinType
+        Public Property Expression As LambdaExpression
+        Public Property [Alias] As String
+        Public Property XRef As Dictionary(Of String, String)
+
+        Public Sub New(ByVal type As Type, ByVal join As JoinType, ByVal [alias] As String)
+            ModelType = type
+            JoinType = join
+            [Alias] = [alias]
+        End Sub
+
+        Public Function JoinString() As String
+            Select Case JoinType
+                Case JoinType.Inner
+                    Return "INNER JOIN "
+                Case JoinType.Left
+                    Return "LEFT OUTER JOIN "
+                Case JoinType.Right
+                    Return "RIGHT OUTER JOIN "
+                Case JoinType.Full
+                    Return "FULL OUTER JOIN "
+                Case Else
+                    Throw New ArgumentOutOfRangeException()
+            End Select
+        End Function
+    End Class
+
+    Public Class JoinInfo
+        Public Property InitialType As Type
+        Public ReadOnly Property Joins As List(Of Join) = New List(Of Join)()
+    End Class
+
+    Public Interface IJoinable (Of T1 As {IBaseModel, New})
+        Function InnerJoin (Of T2 As {IBaseModel, New})() As IOnClause(Of T1, T2)
+        Function LeftJoin (Of T2 As {IBaseModel, New})() As IOnClause(Of T1, T2)
+        Function RightJoin (Of T2 As {IBaseModel, New})() As IOnClause(Of T1, T2)
+        Function FullJoin (Of T2 As {IBaseModel, New})() As IOnClause(Of T1, T2)
+    End Interface
+
+    Public Interface IJoinable (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New})
+        Function InnerJoin (Of T3 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3)
+        Function LeftJoin (Of T3 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3)
+        Function RightJoin (Of T3 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3)
+        Function FullJoin (Of T3 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3)
+    End Interface
+
+    Public Interface IJoinable (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New})
+        Function InnerJoin (Of T4 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4)
+        Function LeftJoin (Of T4 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4)
+        Function RightJoin (Of T4 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4)
+        Function FullJoin (Of T4 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4)
+    End Interface
+
+    Public Interface IJoinable _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New})
+        Function InnerJoin (Of T5 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5)
+        Function LeftJoin (Of T5 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5)
+        Function RightJoin (Of T5 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5)
+        Function FullJoin (Of T5 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5)
+    End Interface
+
+    Public Interface IJoinable _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New},
+            T5 As {IBaseModel, New})
+        Function InnerJoin (Of T6 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6)
+        Function LeftJoin (Of T6 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6)
+        Function RightJoin (Of T6 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6)
+        Function FullJoin (Of T6 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6)
+    End Interface
+
+    Public Interface IJoinable _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New},
+            T5 As {IBaseModel, New}, T6 As {IBaseModel, New})
+        Function InnerJoin (Of T7 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6, T7)
+        Function LeftJoin (Of T7 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6, T7)
+        Function RightJoin (Of T7 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6, T7)
+        Function FullJoin (Of T7 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6, T7)
+    End Interface
+
+#end region
+
+#region "Combined Repository"
+
+    Public Interface ICombinedRepository
+        ReadOnly Property JoinInfo() As JoinInfo
+    End Interface
+
+    Public Interface ICombinedRepository (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New})
+        Inherits IJoinable(Of T1, T2), ICombinedRepository
+        Function Results() As IEnumerable(Of Tuple(Of T1, T2))
+    End Interface
+
+    Public Interface ICombinedRepository (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New})
+        Inherits IJoinable(Of T1, T2, T3), ICombinedRepository
+        Function Results() As IEnumerable(Of Tuple(Of T1, T2, T3))
+    End Interface
+
+
+    Public Interface ICombinedRepository _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New})
+        Inherits IJoinable(Of T1, T2, T3, T4), ICombinedRepository
+        Function Results() As IEnumerable(Of Tuple(Of T1, T2, T3, T4))
+    End Interface
+
+    Public Interface ICombinedRepository _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New},
+            T5 As {IBaseModel, New})
+        Inherits IJoinable(Of T1, T2, T3, T4, T5), ICombinedRepository
+        Function Results() As IEnumerable(Of Tuple(Of T1, T2, T3, T4, T5))
+    End Interface
+
+    Public Interface ICombinedRepository _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New},
+            T5 As {IBaseModel, New}, T6 As {IBaseModel, New})
+        Inherits IJoinable(Of T1, T2, T3, T4, T5, T6), ICombinedRepository
+        Function Results() As IEnumerable(Of Tuple(Of T1, T2, T3, T4, T5, T6))
+    End Interface
+
+    Public Interface ICombinedRepository _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New},
+            T5 As {IBaseModel, New}, T6 As {IBaseModel, New}, T7 As {IBaseModel, New})
+        Inherits ICombinedRepository
+        Function Results() As IEnumerable(Of Tuple(Of T1, T2, T3, T4, T5, T6, T7))
+    End Interface
+
+    Public MustInherit Class CombinedRepositoryBase
+        Inherits RepositoryDataAccess
+        Implements ICombinedRepository
+
+        Protected Const SqlParamSeparator As String = "__"
+        Public ReadOnly Property JoinInfo As JoinInfo Implements ICombinedRepository.JoinInfo
+
+        Protected Sub New(ByVal previousOnClause As BaseOnClause)
+            MyBase.New(previousOnClause.ConnectionString)
+            JoinInfo = previousOnClause.JoinInfo
+        End Sub
+
+        Private Function GenerateQuery() As String
+            Dim sql = $"SELECT "
+            If Not (TypeOf Activator.CreateInstance(JoinInfo.InitialType) Is IBaseModel) Then _
+                Throw New Exception($"Initial Type wasn't an IBaseModel, but was {JoinInfo.InitialType}")
+            Dim iInst = TryCast(Activator.CreateInstance(JoinInfo.InitialType), IBaseModel)
+            Dim prop = JoinInfo.InitialType.GetProperty("Columns", BindingFlags.NonPublic Or BindingFlags.[Static])
+            If prop Is Nothing Then _
+                Throw _
+                    New Exception(
+                        $"internal static Columns property could not be found on {JoinInfo.InitialType.FullName}")
+            If Not (TypeOf prop.GetValue(iInst) Is List(Of ColumnDefinition)) Then _
+                Throw _
+                    New Exception(
+                        $"internal static Columns property is not of type List<ColumnDefinition> on { _
+                                     JoinInfo.InitialType.FullName}")
+            Dim iCols = TryCast(prop.GetValue(iInst), List(Of ColumnDefinition))
+
+            For Each column In iCols
+                sql += $"[c0].[{column.ColumnName}] AS '{iInst.EntityName}{SqlParamSeparator}{column.ColumnName}', "
+            Next
+
+            For Each join In JoinInfo.Joins
+                If Not (TypeOf Activator.CreateInstance(join.ModelType) Is IBaseModel) Then _
+                    Throw New Exception($"Join Type wasn't an IBaseModel, but was {join.ModelType}")
+                Dim tInst = TryCast(Activator.CreateInstance(join.ModelType), IBaseModel)
+                prop = join.ModelType.GetProperty("Columns", BindingFlags.NonPublic Or BindingFlags.[Static])
+                If prop Is Nothing Then _
+                    Throw _
+                        New Exception(
+                            $"internal static Columns property could not be found on {join.ModelType.FullName}")
+                If Not (TypeOf prop.GetValue(tInst) Is List(Of ColumnDefinition)) Then _
+                    Throw _
+                        New Exception(
+                            $"internal static Columns property is not of type List<ColumnDefinition> on { _
+                                         join.ModelType.FullName}")
+                Dim tCols = TryCast(prop.GetValue(tInst), List(Of ColumnDefinition))
+
+                For Each column In tCols
+                    sql +=
+                        $"[{join.[Alias]}].[{column.ColumnName}] AS '{tInst.EntityName}{SqlParamSeparator}{ _
+                            column.ColumnName}', "
+                Next
+            Next
+
+            sql = sql.Substring(0, sql.Length - 2)
+            sql += $" FROM [{iInst.EntityName}] c0 "
+
+            For Each join In JoinInfo.Joins
+                If Not (TypeOf Activator.CreateInstance(join.ModelType) Is IBaseModel) Then _
+                    Throw New Exception($"Join Type wasn't an IBaseModel, but was {join.ModelType}")
+                Dim tInst = TryCast(Activator.CreateInstance(join.ModelType), IBaseModel)
+                Dim expressionSql = ExpressionParser.ToSql(join.Expression, join.XRef)
+                sql += $" {join.JoinString()} [{tInst.EntityName}] {join.[Alias]} ON {expressionSql}"
+            Next
+
+            Return sql
+        End Function
+
+        Protected Function BaseResults() As DataTable
+            Dim query = GenerateQuery()
+            Dim dt As DataTable
+
+            Using cn = New SqlConnection(ConnectionString)
+
+                Using cmd = CreateCommand(cn, query)
+                    If HasInjection(cmd.CommandText) Then Throw New Exception("Sql Injection attempted. Aborted")
+                    cn.Open()
+                    dt = ToDataTable(cmd)
+                    If dt Is Nothing Then Return Nothing
+                    cn.Close()
+                End Using
+            End Using
+
+            Return dt
+        End Function
+    End Class
+
+    Public Class CombinedRepository (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New})
+        Inherits CombinedRepositoryBase
+        Implements ICombinedRepository(Of T1, T2)
+
+        Public Sub New(ByVal previousOnClause As BaseOnClause)
+            MyBase.New(previousOnClause)
+        End Sub
+
+        Public Function InnerJoin (Of T3 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3) _
+            Implements ICombinedRepository(Of T1, T2).InnerJoin
+            Return Join (Of T3)(JoinType.Inner)
+        End Function
+
+        Public Function LeftJoin (Of T3 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3) _
+            Implements ICombinedRepository(Of T1, T2).LeftJoin
+            Return Join (Of T3)(JoinType.Left)
+        End Function
+
+        Public Function RightJoin (Of T3 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3) _
+            Implements ICombinedRepository(Of T1, T2).RightJoin
+            Return Join (Of T3)(JoinType.Right)
+        End Function
+
+        Public Function FullJoin (Of T3 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3) _
+            Implements ICombinedRepository(Of T1, T2).FullJoin
+            Return Join (Of T3)(JoinType.Full)
+        End Function
+
+        Private Function Join (Of T3 As {IBaseModel, New})(ByVal joinType As JoinType) As IOnClause(Of T1, T2, T3)
+            Dim onClause = New OnClause(Of T1, T2, T3)(JoinInfo, joinType) With {
+                    .ConnectionString = ConnectionString
+                    }
+            Return onClause
+        End Function
+
+        Public Iterator Function Results() As IEnumerable(Of Tuple(Of T1, T2)) _
+            Implements ICombinedRepository(Of T1, T2).Results
+            Dim dt = BaseResults()
+
+            For Each row As DataRow In dt.Rows
+                Dim t1Inst = New T1()
+                Dim t2Inst = New T2()
+                Dim tuple = New Tuple(Of T1, T2)(
+                    CType(t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"), T1),
+                    CType(t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"), T2))
+                Yield tuple
+            Next
+        End Function
+    End Class
+
+    Public Class CombinedRepository (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New})
+        Inherits CombinedRepositoryBase
+        Implements ICombinedRepository(Of T1, T2, T3)
+
+        Public Sub New(ByVal previousOnClause As BaseOnClause)
+            MyBase.New(previousOnClause)
+        End Sub
+
+        Public Function InnerJoin (Of T4 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4) _
+            Implements ICombinedRepository(Of T1, T2, T3).InnerJoin
+            Return Join (Of T4)(JoinType.Inner)
+        End Function
+
+        Public Function LeftJoin (Of T4 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4) _
+            Implements ICombinedRepository(Of T1, T2, T3).LeftJoin
+            Return Join (Of T4)(JoinType.Left)
+        End Function
+
+        Public Function RightJoin (Of T4 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4) _
+            Implements ICombinedRepository(Of T1, T2, T3).RightJoin
+            Return Join (Of T4)(JoinType.Right)
+        End Function
+
+        Public Function FullJoin (Of T4 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4) _
+            Implements ICombinedRepository(Of T1, T2, T3).FullJoin
+            Return Join (Of T4)(JoinType.Full)
+        End Function
+
+        Private Function Join (Of T4 As {IBaseModel, New})(ByVal joinType As JoinType) As IOnClause(Of T1, T2, T3, T4)
+            Dim onClause = New OnClause(Of T1, T2, T3, T4)(JoinInfo, joinType) With {
+                    .ConnectionString = ConnectionString
+                    }
+            Return onClause
+        End Function
+
+        Public Iterator Function Results() As IEnumerable(Of Tuple(Of T1, T2, T3)) _
+            Implements ICombinedRepository(Of T1, T2, T3).Results
+            Dim dt = BaseResults()
+
+            For Each row As DataRow In dt.Rows
+                Dim t1Inst = New T1()
+                Dim t2Inst = New T2()
+                Dim t3Inst = New T3()
+                Dim tuple = New Tuple(Of T1, T2, T3)(
+                    CType(t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"), T1),
+                    CType(t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"), T2),
+                    CType(t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"), T3))
+                Yield tuple
+            Next
+        End Function
+    End Class
+
+    Public Class CombinedRepository _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New})
+        Inherits CombinedRepositoryBase
+        Implements ICombinedRepository(Of T1, T2, T3, T4)
+
+        Public Sub New(ByVal previousOnClause As BaseOnClause)
+            MyBase.New(previousOnClause)
+        End Sub
+
+        Public Function InnerJoin (Of T5 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4).InnerJoin
+            Return Join (Of T5)(JoinType.Inner)
+        End Function
+
+        Public Function LeftJoin (Of T5 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4).LeftJoin
+            Return Join (Of T5)(JoinType.Left)
+        End Function
+
+        Public Function RightJoin (Of T5 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4).RightJoin
+            Return Join (Of T5)(JoinType.Right)
+        End Function
+
+        Public Function FullJoin (Of T5 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4).FullJoin
+            Return Join (Of T5)(JoinType.Full)
+        End Function
+
+        Private Function Join (Of T5 As {IBaseModel, New})(ByVal joinType As JoinType) _
+            As IOnClause(Of T1, T2, T3, T4, T5)
+            Dim onClause = New OnClause(Of T1, T2, T3, T4, T5)(JoinInfo, joinType) With {
+                    .ConnectionString = ConnectionString
+                    }
+            Return onClause
+        End Function
+
+        Public Iterator Function Results() As IEnumerable(Of Tuple(Of T1, T2, T3, T4)) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4).Results
+            Dim dt = BaseResults()
+
+            For Each row As DataRow In dt.Rows
+                Dim t1Inst = New T1()
+                Dim t2Inst = New T2()
+                Dim t3Inst = New T3()
+                Dim t4Inst = New T4()
+                Dim tuple = New Tuple(Of T1, T2, T3, T4)(
+                    CType(t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"), T1),
+                    CType(t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"), T2),
+                    CType(t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"), T3),
+                    CType(t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"), T4))
+                Yield tuple
+            Next
+        End Function
+    End Class
+
+    Public Class CombinedRepository _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New},
+            T5 As {IBaseModel, New})
+        Inherits CombinedRepositoryBase
+        Implements ICombinedRepository(Of T1, T2, T3, T4, T5)
+
+        Public Sub New(ByVal previousOnClause As BaseOnClause)
+            MyBase.New(previousOnClause)
+        End Sub
+
+        Public Function InnerJoin (Of T6 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4, T5).InnerJoin
+            Return Join (Of T6)(JoinType.Inner)
+        End Function
+
+        Public Function LeftJoin (Of T6 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4, T5).LeftJoin
+            Return Join (Of T6)(JoinType.Left)
+        End Function
+
+        Public Function RightJoin (Of T6 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4, T5).RightJoin
+            Return Join (Of T6)(JoinType.Right)
+        End Function
+
+        Public Function FullJoin (Of T6 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4, T5).FullJoin
+            Return Join (Of T6)(JoinType.Full)
+        End Function
+
+        Private Function Join (Of T6 As {IBaseModel, New})(ByVal joinType As JoinType) _
+            As IOnClause(Of T1, T2, T3, T4, T5, T6)
+            Dim onClause = New OnClause(Of T1, T2, T3, T4, T5, T6)(JoinInfo, joinType) With {
+                    .ConnectionString = ConnectionString
+                    }
+            Return onClause
+        End Function
+
+        Public Iterator Function Results() As IEnumerable(Of Tuple(Of T1, T2, T3, T4, T5)) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4, T5).Results
+            Dim dt = BaseResults()
+
+            For Each row As DataRow In dt.Rows
+                Dim t1Inst = New T1()
+                Dim t2Inst = New T2()
+                Dim t3Inst = New T3()
+                Dim t4Inst = New T4()
+                Dim t5Inst = New T5()
+                Dim tuple = New Tuple(Of T1, T2, T3, T4, T5)(
+                    CType(t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"), T1),
+                    CType(t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"), T2),
+                    CType(t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"), T3),
+                    CType(t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"), T4),
+                    CType(t5Inst.SetValues(row, $"{t5Inst.EntityName}{SqlParamSeparator}"), T5))
+                Yield tuple
+            Next
+        End Function
+    End Class
+
+    Public Class CombinedRepository _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New},
+            T5 As {IBaseModel, New}, T6 As {IBaseModel, New})
+        Inherits CombinedRepositoryBase
+        Implements ICombinedRepository(Of T1, T2, T3, T4, T5, T6)
+
+        Public Sub New(ByVal previousOnClause As BaseOnClause)
+            MyBase.New(previousOnClause)
+        End Sub
+
+        Public Function InnerJoin (Of T7 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6, T7) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4, T5, T6).InnerJoin
+            Return Join (Of T7)(JoinType.Inner)
+        End Function
+
+        Public Function LeftJoin (Of T7 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6, T7) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4, T5, T6).LeftJoin
+            Return Join (Of T7)(JoinType.Left)
+        End Function
+
+        Public Function RightJoin (Of T7 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6, T7) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4, T5, T6).RightJoin
+            Return Join (Of T7)(JoinType.Right)
+        End Function
+
+        Public Function FullJoin (Of T7 As {IBaseModel, New})() As IOnClause(Of T1, T2, T3, T4, T5, T6, T7) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4, T5, T6).FullJoin
+            Return Join (Of T7)(JoinType.Full)
+        End Function
+
+        Private Function Join (Of T7 As {IBaseModel, New})(ByVal joinType As JoinType) _
+            As IOnClause(Of T1, T2, T3, T4, T5, T6, T7)
+            Dim onClause = New OnClause(Of T1, T2, T3, T4, T5, T6, T7)(JoinInfo, joinType) With {
+                    .ConnectionString = ConnectionString
+                    }
+            Return onClause
+        End Function
+
+        Public Iterator Function Results() As IEnumerable(Of Tuple(Of T1, T2, T3, T4, T5, T6)) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4, T5, T6).Results
+            Dim dt = BaseResults()
+
+            For Each row As DataRow In dt.Rows
+                Dim t1Inst = New T1()
+                Dim t2Inst = New T2()
+                Dim t3Inst = New T3()
+                Dim t4Inst = New T4()
+                Dim t5Inst = New T5()
+                Dim t6Inst = New T6()
+                Dim tuple = New Tuple(Of T1, T2, T3, T4, T5, T6)(
+                    CType(t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"), T1),
+                    CType(t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"), T2),
+                    CType(t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"), T3),
+                    CType(t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"), T4),
+                    CType(t5Inst.SetValues(row, $"{t5Inst.EntityName}{SqlParamSeparator}"), T5),
+                    CType(t6Inst.SetValues(row, $"{t6Inst.EntityName}{SqlParamSeparator}"), T6))
+                Yield tuple
+            Next
+        End Function
+    End Class
+
+    Public Class CombinedRepository _
+        (Of T1 As {IBaseModel, New}, T2 As {IBaseModel, New}, T3 As {IBaseModel, New}, T4 As {IBaseModel, New},
+            T5 As {IBaseModel, New}, T6 As {IBaseModel, New}, T7 As {IBaseModel, New})
+        Inherits CombinedRepositoryBase
+        Implements ICombinedRepository(Of T1, T2, T3, T4, T5, T6, T7)
+
+        Public Sub New(ByVal previousOnClause As BaseOnClause)
+            MyBase.New(previousOnClause)
+        End Sub
+
+        Public Iterator Function Results() As IEnumerable(Of Tuple(Of T1, T2, T3, T4, T5, T6, T7)) _
+            Implements ICombinedRepository(Of T1, T2, T3, T4, T5, T6, T7).Results
+            Dim dt = BaseResults()
+
+            For Each row As DataRow In dt.Rows
+                Dim t1Inst = New T1()
+                Dim t2Inst = New T2()
+                Dim t3Inst = New T3()
+                Dim t4Inst = New T4()
+                Dim t5Inst = New T5()
+                Dim t6Inst = New T6()
+                Dim t7Inst = New T7()
+                Dim tuple = New Tuple(Of T1, T2, T3, T4, T5, T6, T7)(
+                    CType(t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"), T1),
+                    CType(t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"), T2),
+                    CType(t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"), T3),
+                    CType(t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"), T4),
+                    CType(t5Inst.SetValues(row, $"{t5Inst.EntityName}{SqlParamSeparator}"), T5),
+                    CType(t6Inst.SetValues(row, $"{t6Inst.EntityName}{SqlParamSeparator}"), T6),
+                    CType(t7Inst.SetValues(row, $"{t7Inst.EntityName}{SqlParamSeparator}"), T7))
+                Yield tuple
+            Next
+        End Function
+    End Class
+
+
+#end region
+
+    Public MustInherit Class RepositoryDataAccess
+        Protected Logger As Action(Of Exception)
+        Protected ConnectionString As String
+
+        Protected Sub New(ByVal connectionString As String)
+            Logger = Function(exception)
+            End Function
+
+            Me.ConnectionString = connectionString
+        End Sub
+
+        Protected Function CreateCommand(ByVal cn As SqlConnection, ByVal command As String) As SqlCommand
+            Dim cmd = New SqlCommand With {
+                    .Connection = cn,
+                    .CommandType = CommandType.Text,
+                    .CommandText = command
+                    }
+            Return cmd
+        End Function
+
+        Protected Function HasInjection(ByVal query As String) As Boolean
+            Dim isSqlInjection = False
+            Dim sqlCheckList As String() = {"--", ";--", "/*", "*/"}
+            Dim checkString = query.Replace("'", "''")
+
+            For i = 0 To sqlCheckList.Length - 1
+                If (checkString.IndexOf(sqlCheckList(i), StringComparison.OrdinalIgnoreCase) < 0) Then Continue For
+                isSqlInjection = True
+                Exit For
+            Next
+
+            Return isSqlInjection
+        End Function
+
+        Protected Function ToDataTable(ByVal cmd As SqlCommand, ByVal cn As SqlConnection, <Out> ByRef dt As DataTable) _
+            As Boolean
+            Dim isSuccess = True
+            If HasInjection(cmd.CommandText) Then Throw New Exception("Sql Injection attempted. Aborted")
+            cn.Open()
+            dt = ToDataTable(cmd)
+            cn.Close()
+            If dt Is Nothing OrElse dt.Rows.Count = 0 Then isSuccess = False
+            Return isSuccess
+        End Function
+
+        Protected Function ToDataTable(ByVal cmd As SqlCommand) As DataTable
+            Try
+                Dim da = New SqlDataAdapter(cmd)
+                Dim dt = New DataTable()
+                da.Fill(dt)
+                Return dt
+            Catch ex As Exception
+                Logger(ex)
+                Return Nothing
+            End Try
+        End Function
+    End Class
+
 
     Public MustInherit Class BaseRepository (Of T As {IBaseModel, New})
+        Inherits RepositoryDataAccess
         Implements IBaseRepository(Of T)
 
         Protected Logger As Action(Of Exception)
-        Protected ConnectionString As String
         Private ReadOnly _schema As String
         Private ReadOnly _tableName As String
-        Public Property Columns As List(Of ColumnDefinition)
+        Private Property Columns As List(Of ColumnDefinition)
 
         Protected Sub New(connectionString As String, logMethod As Action(Of Exception),
-                          schema As String, table As String, columnCount As Integer)
-            Columns = New List(Of ColumnDefinition)()
+                          schema As String, table As String, columns As List(Of ColumnDefinition))
+
+            MyBase.New(connectionString)
             _schema = schema
             _tableName = table
-            Me.ConnectionString = connectionString
-            Logger = If(logMethod, (Function(exception)
+            Logger = If(logMethod, (Function(exception) 
             End Function))
+            Me.Columns = columns
             Dim sql =
                     $"SELECT COUNT(*)
                             FROM INFORMATION_SCHEMA.COLUMNS
@@ -630,7 +1436,7 @@ Namespace REPOSITORYNAMESPACE.Base
                     Try
                         cn.Open()
                         Dim count = CInt(cmd.ExecuteScalar())
-                        If count <> columnCount Then _
+                        If count <> columns.Count Then _
                             Throw _
                                 New Exception(
                                     "Repository Definition does not match Database. Please re-run the code generator to get a new repository")
@@ -661,19 +1467,10 @@ Namespace REPOSITORYNAMESPACE.Base
 
         Protected MustOverride Function ToItem(row As DataRow) As T
 
-        Protected Function CreateCommand(cn As SqlConnection, command As String) As SqlCommand
-            Dim cmd = New SqlCommand With {
-                    .Connection = cn,
-                    .CommandType = CommandType.Text,
-                    .CommandText = command
-                    }
-            Return cmd
-        End Function
-
         Protected Friend Function WhereQuery() As String
             Return BuildWhereQuery(Columns)
         End Function
-        
+
         Private Function BuildWhereQuery(ByVal columns As IEnumerable(Of ColumnDefinition)) As String
             Dim sb = New StringBuilder()
             sb.AppendLine("SELECT ")
@@ -700,14 +1497,15 @@ Namespace REPOSITORYNAMESPACE.Base
                               valueType As Type) As Where(Of T) Implements IBaseRepository(Of T).Where
             Return New Where(Of T)(Me, col, comparison, val, valueType)
         End Function
-        
+
         Public Function Where(ByVal query As String) As IEnumerable(Of T) Implements IBaseRepository(Of T).Where
             Dim dt = Where(WhereQuery(), query)
-            Return If(dt Is Nothing, New T(-1) {}, ToItems(dt))
+            Return If(dt Is Nothing, New T(- 1) {}, ToItems(dt))
         End Function
-        
+
         Private Function Where(columnPart As String, filterPart As String) As DataTable
-            If HasInjection(columnPart) OrElse HasInjection(filterPart) Then Throw New Exception("Sql Injection attempted. Aborted")
+            If HasInjection(columnPart) OrElse HasInjection(filterPart) Then _
+                Throw New Exception("Sql Injection attempted. Aborted")
 
             Using cn = New SqlConnection(ConnectionString)
 
@@ -720,20 +1518,6 @@ Namespace REPOSITORYNAMESPACE.Base
                     Return dt
                 End Using
             End Using
-        End Function
-
-        Protected Function HasInjection(query As String) As Boolean
-            Dim isSqlInjection = False
-            Dim sqlCheckList As String() = {"--", ";--", "/*", "*/"}
-            Dim checkString = query.Replace("'", "''")
-
-            For i = 0 To sqlCheckList.Length - 1
-                If checkString.IndexOf(sqlCheckList(i), StringComparison.OrdinalIgnoreCase) < 0 Then Continue For
-                isSqlInjection = True
-                Exit For
-            Next
-
-            Return isSqlInjection
         End Function
 
         Protected Function BaseSearch(queries As List(Of QueryItem)) As IEnumerable(Of T)
@@ -1065,6 +1849,26 @@ Namespace REPOSITORYNAMESPACE.Base
             End Try
         End Function
 
+        Public Function InnerJoin (Of T2 As {IBaseModel, New})() As IOnClause(Of T, T2)
+            Dim onClause = New OnClause(Of T, T2)(ConnectionString, JoinType.Inner)
+            Return onClause
+        End Function
+
+        Public Function LeftJoin (Of T2 As {IBaseModel, New})() As IOnClause(Of T, T2)
+            Dim onClause = New OnClause(Of T, T2)(ConnectionString, JoinType.Left)
+            Return onClause
+        End Function
+
+        Public Function RightJoin (Of T2 As {IBaseModel, New})() As IOnClause(Of T, T2)
+            Dim onClause = New OnClause(Of T, T2)(ConnectionString, JoinType.Right)
+            Return onClause
+        End Function
+
+        Public Function FullJoin (Of T2 As {IBaseModel, New})() As IOnClause(Of T, T2)
+            Dim onClause = New OnClause(Of T, T2)(ConnectionString, JoinType.Full)
+            Return onClause
+        End Function
+
         Protected Iterator Function ToItems(table As DataTable) As IEnumerable(Of T)
             For Each row As DataRow In table.Rows
                 Dim item = Nothing
@@ -1077,16 +1881,6 @@ Namespace REPOSITORYNAMESPACE.Base
 
                 Yield item
             Next
-        End Function
-
-        Protected Function ToDataTable(cmd As SqlCommand, cn As SqlConnection, <Out> ByRef dt As DataTable) As Boolean
-            Dim isSuccess = True
-            If HasInjection(cmd.CommandText) Then Throw New Exception("Sql Injection attempted. Aborted")
-            cn.Open()
-            dt = ToDataTable(cmd)
-            cn.Close()
-            If dt Is Nothing OrElse dt.Rows.Count = 0 Then isSuccess = False
-            Return isSuccess
         End Function
 
         Protected Function NoneQuery(cn As SqlConnection, cmd As SqlCommand) As Boolean
@@ -1205,18 +1999,6 @@ Namespace REPOSITORYNAMESPACE.Base
 
         Protected Function GetString(row As DataRow, fieldName As String) As String
             Return If(row.Table.Columns.Contains(fieldName), row.GetText(fieldName), Nothing)
-        End Function
-
-        Private Function ToDataTable(cmd As SqlCommand) As DataTable
-            Try
-                Dim da = New SqlDataAdapter(cmd)
-                Dim dt = New DataTable()
-                da.Fill(dt)
-                Return dt
-            Catch ex As Exception
-                Logger(ex)
-                Return Nothing
-            End Try
         End Function
 
         Protected Sub CreateStagingTable(tempTableName As String,
