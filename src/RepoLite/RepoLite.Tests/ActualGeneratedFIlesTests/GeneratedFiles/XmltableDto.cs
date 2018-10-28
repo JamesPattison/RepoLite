@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Xml;
+using NS.Base;
 using NS.Models.Base;
 
 namespace NS.Models
@@ -32,6 +34,11 @@ namespace NS.Models
 
 			return validationErrors;
 		}
+		internal static List<ColumnDefinition> Columns => new List<ColumnDefinition>
+		{
+			new ColumnDefinition("name", typeof(System.String), "[VARCHAR](12)", SqlDbType.VarChar, false, false, false),
+			new ColumnDefinition("data", typeof(System.Xml.XmlDocument), "[XML]", SqlDbType.Xml, false, false, false),
+		};
 	}
 }
 

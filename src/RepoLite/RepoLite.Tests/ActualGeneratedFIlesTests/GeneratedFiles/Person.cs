@@ -38,13 +38,8 @@ namespace NS
 	{
 		public PersonRepository(string connectionString) : this(connectionString, exception => { }) { }
 		public PersonRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
-			"dbo", "Person", 5)
+			"dbo", "Person", Person.Columns)
 		{
-			Columns.Add(new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, true, true));
-			Columns.Add(new ColumnDefinition("Name", typeof(System.String), "[NVARCHAR](50)", SqlDbType.NVarChar, false, false, false));
-			Columns.Add(new ColumnDefinition("Age", typeof(System.Int32), "[INT]", SqlDbType.Int, false, false, false));
-			Columns.Add(new ColumnDefinition("Nationality", typeof(System.String), "[NVARCHAR](50)", SqlDbType.NVarChar, false, false, false));
-			Columns.Add(new ColumnDefinition("Registered", typeof(System.Boolean), "[BIT]", SqlDbType.Bit, false, false, false));
 		}
 
 		public Person Get(Int32 id)
@@ -84,7 +79,7 @@ namespace NS
 				throw new ValidationException(validationErrors);
 
 			var createdKeys = BaseCreate(item.Id, item.Name, item.Age, item.Nationality, item.Registered);
-			if (createdKeys.Count != Columns.Count(x => x.PrimaryKey))
+			if (createdKeys.Count != Person.Columns.Count(x => x.PrimaryKey))
 				return false;
 
 			item.Id = (Int32)createdKeys[nameof(Person.Id)];
@@ -103,7 +98,7 @@ namespace NS
 				throw new ValidationException(validationErrors);
 
 			var dt = new DataTable();
-			foreach (var mergeColumn in Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
+			foreach (var mergeColumn in Person.Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
 				dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
 
 			foreach (var item in items)

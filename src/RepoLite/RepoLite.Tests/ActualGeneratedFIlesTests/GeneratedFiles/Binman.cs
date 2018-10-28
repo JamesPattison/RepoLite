@@ -25,10 +25,8 @@ namespace NS
 	{
 		public BinManRepository(string connectionString) : this(connectionString, exception => { }) { }
 		public BinManRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
-			"dbo", "BinMan", 2)
+			"dbo", "BinMan", BinMan.Columns)
 		{
-			Columns.Add(new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, false, false));
-			Columns.Add(new ColumnDefinition("Data", typeof(System.Byte[]), "[BINARY](8)", SqlDbType.Binary, false, false, false));
 		}
 		public override bool Create(BinMan item)
 		{
@@ -41,7 +39,7 @@ namespace NS
 				throw new ValidationException(validationErrors);
 
 			var createdKeys = BaseCreate(item.Id, item.Data);
-			if (createdKeys.Count != Columns.Count(x => x.PrimaryKey))
+			if (createdKeys.Count != BinMan.Columns.Count(x => x.PrimaryKey))
 				return false;
 
 			item.ResetDirty();
@@ -59,7 +57,7 @@ namespace NS
 				throw new ValidationException(validationErrors);
 
 			var dt = new DataTable();
-			foreach (var mergeColumn in Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
+			foreach (var mergeColumn in BinMan.Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
 				dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
 
 			foreach (var item in items)

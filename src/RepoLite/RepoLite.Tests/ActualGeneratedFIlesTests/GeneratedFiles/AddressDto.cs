@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Xml;
+using NS.Base;
 using NS.Models.Base;
 
 namespace NS.Models
@@ -98,6 +100,19 @@ namespace NS.Models
 
 			return validationErrors;
 		}
+		internal static List<ColumnDefinition> Columns => new List<ColumnDefinition>
+		{
+			new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, true, true),
+			new ColumnDefinition("AnotherId", typeof(System.String), "[NVARCHAR](10)", SqlDbType.NVarChar, false, true, false),
+			new ColumnDefinition("PersonId", typeof(System.Int32), "[INT]", SqlDbType.Int, false, false, false),
+			new ColumnDefinition("Line1", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, false, false, false),
+			new ColumnDefinition("Line2", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, true, false, false),
+			new ColumnDefinition("Line3", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, true, false, false),
+			new ColumnDefinition("Line4", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, true, false, false),
+			new ColumnDefinition("PostCode", typeof(System.String), "[NVARCHAR](15)", SqlDbType.NVarChar, false, false, false),
+			new ColumnDefinition("PhoneNumber", typeof(System.String), "[NVARCHAR](20)", SqlDbType.NVarChar, true, false, false),
+			new ColumnDefinition("COUNTRY_CODE", typeof(System.String), "[NVARCHAR](2)", SqlDbType.NVarChar, true, false, false),
+		};
 	}
 }
 

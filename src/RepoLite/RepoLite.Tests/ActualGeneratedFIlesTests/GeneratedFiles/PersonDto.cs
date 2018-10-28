@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Xml;
+using NS.Base;
 using NS.Models.Base;
 
 namespace NS.Models
@@ -54,6 +56,14 @@ namespace NS.Models
 
 			return validationErrors;
 		}
+		internal static List<ColumnDefinition> Columns => new List<ColumnDefinition>
+		{
+			new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, true, true),
+			new ColumnDefinition("Name", typeof(System.String), "[NVARCHAR](50)", SqlDbType.NVarChar, false, false, false),
+			new ColumnDefinition("Age", typeof(System.Int32), "[INT]", SqlDbType.Int, false, false, false),
+			new ColumnDefinition("Nationality", typeof(System.String), "[NVARCHAR](50)", SqlDbType.NVarChar, false, false, false),
+			new ColumnDefinition("Registered", typeof(System.Boolean), "[BIT]", SqlDbType.Bit, false, false, false),
+		};
 	}
 }
 

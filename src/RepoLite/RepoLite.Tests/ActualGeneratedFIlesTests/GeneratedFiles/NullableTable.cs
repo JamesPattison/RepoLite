@@ -35,12 +35,8 @@ namespace NS
 	{
 		public NullableTableRepository(string connectionString) : this(connectionString, exception => { }) { }
 		public NullableTableRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
-			"dbo", "NullableTable", 4)
+			"dbo", "NullableTable", NullableTable.Columns)
 		{
-			Columns.Add(new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, true, true));
-			Columns.Add(new ColumnDefinition("Age", typeof(System.Int32), "[INT]", SqlDbType.Int, true, false, false));
-			Columns.Add(new ColumnDefinition("DoB", typeof(System.DateTime), "[DATETIME]", SqlDbType.DateTime, true, false, false));
-			Columns.Add(new ColumnDefinition("lolVal", typeof(System.Guid), "[UNIQUEIDENTIFIER]", SqlDbType.UniqueIdentifier, true, false, false));
 		}
 
 		public NullableTable Get(Int32 id)
@@ -80,7 +76,7 @@ namespace NS
 				throw new ValidationException(validationErrors);
 
 			var createdKeys = BaseCreate(item.Id, item.Age, item.DoB, item.lolVal);
-			if (createdKeys.Count != Columns.Count(x => x.PrimaryKey))
+			if (createdKeys.Count != NullableTable.Columns.Count(x => x.PrimaryKey))
 				return false;
 
 			item.Id = (Int32)createdKeys[nameof(NullableTable.Id)];
@@ -99,7 +95,7 @@ namespace NS
 				throw new ValidationException(validationErrors);
 
 			var dt = new DataTable();
-			foreach (var mergeColumn in Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
+			foreach (var mergeColumn in NullableTable.Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
 				dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
 
 			foreach (var item in items)

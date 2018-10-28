@@ -25,10 +25,8 @@ namespace NS
 	{
 		public xmltableRepository(string connectionString) : this(connectionString, exception => { }) { }
 		public xmltableRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
-			"dbo", "xmltable", 2)
+			"dbo", "xmltable", xmltable.Columns)
 		{
-			Columns.Add(new ColumnDefinition("name", typeof(System.String), "[VARCHAR](12)", SqlDbType.VarChar, false, false, false));
-			Columns.Add(new ColumnDefinition("data", typeof(System.Xml.XmlDocument), "[XML]", SqlDbType.Xml, false, false, false));
 		}
 		public override bool Create(xmltable item)
 		{
@@ -41,7 +39,7 @@ namespace NS
 				throw new ValidationException(validationErrors);
 
 			var createdKeys = BaseCreate(item.name, item.data);
-			if (createdKeys.Count != Columns.Count(x => x.PrimaryKey))
+			if (createdKeys.Count != xmltable.Columns.Count(x => x.PrimaryKey))
 				return false;
 
 			item.ResetDirty();
@@ -59,7 +57,7 @@ namespace NS
 				throw new ValidationException(validationErrors);
 
 			var dt = new DataTable();
-			foreach (var mergeColumn in Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
+			foreach (var mergeColumn in xmltable.Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
 				dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
 
 			foreach (var item in items)

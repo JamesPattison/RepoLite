@@ -28,10 +28,8 @@ namespace NS
 	{
 		public EventRepository(string connectionString) : this(connectionString, exception => { }) { }
 		public EventRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
-			"dbo", "Event", 2)
+			"dbo", "Event", Event.Columns)
 		{
-			Columns.Add(new ColumnDefinition("EventId", typeof(System.String), "[NVARCHAR](20)", SqlDbType.NVarChar, false, true, false));
-			Columns.Add(new ColumnDefinition("EventName", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, false, false, false));
 		}
 
 		public Event Get(String eventid)
@@ -60,7 +58,7 @@ namespace NS
 				throw new ValidationException(validationErrors);
 
 			var createdKeys = BaseCreate(item.EventId, item.EventName);
-			if (createdKeys.Count != Columns.Count(x => x.PrimaryKey))
+			if (createdKeys.Count != Event.Columns.Count(x => x.PrimaryKey))
 				return false;
 
 			item.EventId = (String)createdKeys[nameof(Event.EventId)];
@@ -79,7 +77,7 @@ namespace NS
 				throw new ValidationException(validationErrors);
 
 			var dt = new DataTable();
-			foreach (var mergeColumn in Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
+			foreach (var mergeColumn in Event.Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
 				dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
 
 			foreach (var item in items)

@@ -70,18 +70,8 @@ namespace NS
 	{
 		public AddressRepository(string connectionString) : this(connectionString, exception => { }) { }
 		public AddressRepository(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,
-			"dbo", "Address", 10)
+			"dbo", "Address", Address.Columns)
 		{
-			Columns.Add(new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, true, true));
-			Columns.Add(new ColumnDefinition("AnotherId", typeof(System.String), "[NVARCHAR](10)", SqlDbType.NVarChar, false, true, false));
-			Columns.Add(new ColumnDefinition("PersonId", typeof(System.Int32), "[INT]", SqlDbType.Int, false, false, false));
-			Columns.Add(new ColumnDefinition("Line1", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, false, false, false));
-			Columns.Add(new ColumnDefinition("Line2", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, true, false, false));
-			Columns.Add(new ColumnDefinition("Line3", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, true, false, false));
-			Columns.Add(new ColumnDefinition("Line4", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, true, false, false));
-			Columns.Add(new ColumnDefinition("PostCode", typeof(System.String), "[NVARCHAR](15)", SqlDbType.NVarChar, false, false, false));
-			Columns.Add(new ColumnDefinition("PhoneNumber", typeof(System.String), "[NVARCHAR](20)", SqlDbType.NVarChar, true, false, false));
-			Columns.Add(new ColumnDefinition("COUNTRY_CODE", typeof(System.String), "[NVARCHAR](2)", SqlDbType.NVarChar, true, false, false));
 		}
 
 		public Address Get(Int32 id, String anotherid)
@@ -123,7 +113,7 @@ namespace NS
 
 			var createdKeys = BaseCreate(item.Id, item.AnotherId, item.PersonId, item.Line1, item.Line2, 
 				item.Line3, item.Line4, item.PostCode, item.PhoneNumber, item.COUNTRY_CODE);
-			if (createdKeys.Count != Columns.Count(x => x.PrimaryKey))
+			if (createdKeys.Count != Address.Columns.Count(x => x.PrimaryKey))
 				return false;
 
 			item.Id = (Int32)createdKeys[nameof(Address.Id)];
@@ -143,7 +133,7 @@ namespace NS
 				throw new ValidationException(validationErrors);
 
 			var dt = new DataTable();
-			foreach (var mergeColumn in Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
+			foreach (var mergeColumn in Address.Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
 				dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
 
 			foreach (var item in items)
@@ -201,7 +191,7 @@ namespace NS
 		{
 			var tempTableName = $"staging{DateTime.Now.Ticks}";
 			var dt = new DataTable();
-			foreach (var mergeColumn in Columns.Where(x => x.PrimaryKey))
+			foreach (var mergeColumn in Address.Columns.Where(x => x.PrimaryKey))
 			{
 				dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
 			}
