@@ -1361,7 +1361,5 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
             Assert.IsTrue(actual.Length == expected, $"expected: {expected} but received: {actual.Length}");
         }
 
-
-
     }
 }

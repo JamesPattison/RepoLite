@@ -28,7 +28,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests.Base
             RunSql(@"CREATE TABLE [dbo].[Address](
 	                    [Id] [int] IDENTITY(1,1) NOT NULL,
 	                    [AnotherId] [nvarchar](10) NOT NULL,
-	                    [PersonId] [int] NOT NULL,
+	                    [PersonId] [int] NULL,
 	                    [Line1] [nvarchar](100) NOT NULL,
 	                    [Line2] [nvarchar](100) NULL,
 	                    [Line3] [nvarchar](100) NULL,

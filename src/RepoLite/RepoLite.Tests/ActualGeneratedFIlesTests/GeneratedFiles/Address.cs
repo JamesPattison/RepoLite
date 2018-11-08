@@ -246,7 +246,7 @@ namespace NS
 			{
 				Id = GetInt32(row, "Id"),
 				AnotherId = GetString(row, "AnotherId"),
-				PersonId = GetInt32(row, "PersonId"),
+				PersonId = GetNullableInt32(row, "PersonId"),
 				Line1 = GetString(row, "Line1"),
 				Line2 = GetString(row, "Line2"),
 				Line3 = GetString(row, "Line3"),

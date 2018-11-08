@@ -439,6 +439,7 @@ namespace REPOSITORYNAMESPACE.Base
             {ExpressionType.Add, "+"},
             {ExpressionType.And, "&"},
             {ExpressionType.AndAlso, "AND"},
+            {ExpressionType.Convert, ""},
             {ExpressionType.Divide, "/"},
             {ExpressionType.Equal, "="},
             {ExpressionType.ExclusiveOr, "^"},
@@ -513,6 +514,19 @@ namespace REPOSITORYNAMESPACE.Base
                         {
                             case PropertyInfo property:
                             {
+                                if (property.Name == "Value" &&
+                                    property.DeclaringType != null &&
+                                    Nullable.GetUnderlyingType(property.DeclaringType) != null)
+                                    return Parse(member.Expression, xRef);
+
+                                if (property.Name == "HasValue" &&
+                                    property.DeclaringType != null &&
+                                    Nullable.GetUnderlyingType(property.DeclaringType) != null)
+                                {
+                                    return Clause.Make(Parse(member.Expression, xRef), NodeStr[ExpressionType.NotEqual],
+                                        Clause.Make("''"));
+                                }
+                                                                                        
                                 var colName = property.Name; 
                                 var alias = "";
                                 if (member.Expression is ParameterExpression paramExpr && xRef.ContainsKey(paramExpr.Name))
@@ -649,7 +663,7 @@ namespace REPOSITORYNAMESPACE.Base
             {
                 return new Clause
                 {
-                    Sql = $"({@operator} {operand.Sql})"
+                    Sql = !string.IsNullOrEmpty(@operator) ? $"({@operator} {operand.Sql})" : $"{operand.Sql}"
                 };
             }
 
@@ -2240,12 +2254,12 @@ namespace REPOSITORYNAMESPACE.Base
 
         protected byte? GetNullableByte(DataRow row, string fieldName)
         {
-            return (byte?)row[fieldName];
+            return row[fieldName] as byte?;
         }
 
         protected byte[] GetByteArray(DataRow row, string fieldName)
         {
-            return (byte[])row[fieldName];
+            return row[fieldName] as byte[];
         }
 
         protected DateTimeOffset GetDateTimeOffset(DataRow row, string fieldName)

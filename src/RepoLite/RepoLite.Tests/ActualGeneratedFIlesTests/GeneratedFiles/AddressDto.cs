@@ -12,7 +12,7 @@ namespace NS.Models
 		public override string EntityName => "Address";
 		private Int32 _id;
 		private String _anotherid;
-		private Int32 _personid;
+		private Int32? _personid;
 		private String _line1;
 		private String _line2;
 		private String _line3;
@@ -31,7 +31,7 @@ namespace NS.Models
 			get => _anotherid;
 			set => SetValue(ref _anotherid, value);
 		}
-		public virtual Int32 PersonId
+		public virtual Int32? PersonId
 		{
 			get => _personid;
 			set => SetValue(ref _personid, value);
@@ -75,7 +75,7 @@ namespace NS.Models
 		{
 			_id = row.GetValue<Int32>($"{propertyPrefix}Id") ?? default(Int32); 
 			_anotherid = row.GetText($"{propertyPrefix}AnotherId");
-			_personid = row.GetValue<Int32>($"{propertyPrefix}PersonId") ?? default(Int32); 
+			_personid = row.GetValue<Int32>($"{propertyPrefix}PersonId"); 
 			_line1 = row.GetText($"{propertyPrefix}Line1");
 			_line2 = row.GetText($"{propertyPrefix}Line2");
 			_line3 = row.GetText($"{propertyPrefix}Line3");
@@ -118,7 +118,7 @@ namespace NS.Models
 		{
 			new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, true, true),
 			new ColumnDefinition("AnotherId", typeof(System.String), "[NVARCHAR](10)", SqlDbType.NVarChar, false, true, false),
-			new ColumnDefinition("PersonId", typeof(System.Int32), "[INT]", SqlDbType.Int, false, false, false),
+			new ColumnDefinition("PersonId", typeof(System.Int32), "[INT]", SqlDbType.Int, true, false, false),
 			new ColumnDefinition("Line1", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, false, false, false),
 			new ColumnDefinition("Line2", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, true, false, false),
 			new ColumnDefinition("Line3", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, true, false, false),
