@@ -389,11 +389,12 @@ Namespace REPOSITORYNAMESPACE.Base
     End Class
 
     Friend Class ExpressionParser
-        Shared Private ReadOnly _
+        Private Shared ReadOnly _
             NodeStr As Dictionary(Of ExpressionType, String) = New Dictionary(Of ExpressionType, String) From {
             {ExpressionType.Add, "+"},
             {ExpressionType.[And], "&"},
             {ExpressionType.[AndAlso], "AND"},
+            {ExpressionType.Convert, ""},
             {ExpressionType.Divide, "/"},
             {ExpressionType.Equal, "="},
             {ExpressionType.ExclusiveOr, "^"},
@@ -477,6 +478,18 @@ Namespace REPOSITORYNAMESPACE.Base
 
                     If TypeOf member.Member Is PropertyInfo Then
                         Dim [property] = TryCast(member.Member, PropertyInfo)
+
+                        If [property].Name = "Value" And [property].DeclaringType IsNot Nothing _
+                                                     AndAlso Nullable.GetUnderlyingType([property].DeclaringType) IsNot Nothing Then
+                            Return Parse(member.Expression, xRef)
+                        End If
+
+                        If [property].Name = "HasValue" And [property].DeclaringType IsNot Nothing _
+                                                        AndAlso Nullable.GetUnderlyingType([property].DeclaringType) IsNot Nothing Then
+                            Return Clause.Make(Parse(member.Expression, xRef), NodeStr(ExpressionType.NotEqual), Clause.Make("''"))
+                        End If
+
+
                         Dim colName = [property].Name
 
                         Dim [alias] = ""
@@ -612,7 +625,7 @@ Namespace REPOSITORYNAMESPACE.Base
 
             Public Shared Function Make(ByVal [operator] As String, ByVal operand As Clause) As Clause
                 Return New Clause With {
-                    .Sql = $"({[operator]} {operand.Sql})"
+                    .Sql = If(String.IsNullOrEmpty([operator]), $"({[operator]} {operand.Sql})", $"{operand.Sql}")
                     }
             End Function
 
@@ -1956,15 +1969,15 @@ Namespace REPOSITORYNAMESPACE.Base
         End Function
 
         Protected Function GetByte(row As DataRow, fieldName As String) As Byte
-            Return CByte(row(fieldName))
+            Return row(fieldName)
         End Function
 
-        Protected Function GetNullableByte(row As DataRow, fieldName As String) As Byte?
-            Return CType(row(fieldName), Byte?)
+        Protected Function GetNullableByte(ByVal row As DataRow, ByVal fieldName As String) As Byte?
+            Return row(fieldName)
         End Function
 
-        Protected Function GetByteArray(row As DataRow, fieldName As String) As Byte()
-            Return CType(row(fieldName), Byte())
+        Protected Function GetByteArray(ByVal row As DataRow, ByVal fieldName As String) As Byte()
+            Return TryCast(row(fieldName), Byte())
         End Function
 
         Protected Function GetDateTimeOffset(row As DataRow, fieldName As String) As DateTimeOffset
