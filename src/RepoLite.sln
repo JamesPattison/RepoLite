@@ -15,9 +15,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{E605
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite.Plugins.K3", "RepoLite\Plugins\RepoLite.Plugins.K3\RepoLite.Plugins.K3.csproj", "{23303B8F-4B89-472D-856B-6B0F864F80B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite.Tests", "RepoLite\RepoLite.Tests\RepoLite.Tests.csproj", "{5A365234-CEDD-4E86-9E07-60E84134536D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite.Tests", "RepoLite\Tests\RepoLite.Tests\RepoLite.Tests.csproj", "{5A365234-CEDD-4E86-9E07-60E84134536D}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RepoLite.VB.Tests", "RepoLite.VB.Tests\RepoLite.VB.Tests.vbproj", "{D9400EE3-57B4-45C0-8D44-407DD8D131E8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7D08807B-58FC-4ABC-A37F-8A088AC665D6}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RepoLite.VB.Tests", "RepoLite\Tests\RepoLite.VB.Tests\RepoLite.VB.Tests.vbproj", "{D9400EE3-57B4-45C0-8D44-407DD8D131E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{23303B8F-4B89-472D-856B-6B0F864F80B6} = {E6056978-0C57-492B-BD76-9372A4B38677}
+		{5A365234-CEDD-4E86-9E07-60E84134536D} = {7D08807B-58FC-4ABC-A37F-8A088AC665D6}
+		{D9400EE3-57B4-45C0-8D44-407DD8D131E8} = {7D08807B-58FC-4ABC-A37F-8A088AC665D6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CC6EEDD5-580E-4452-A3DF-1F9945986CB5}
