@@ -27,7 +27,7 @@ namespace MODELNAMESPACE.Base
         public bool PrimaryKey { get; set; }
         public bool Nullable { get; set; }
 
-        internal ColumnDefinition(string columnName) : this(columnName, typeof(string), "NVARCHAR(MAX)", SqlDbType.NVarChar, false, false, false) { }
+        public ColumnDefinition(string columnName) : this(columnName, typeof(string), "NVARCHAR(MAX)", SqlDbType.NVarChar, false, false, false) { }
         public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType) : this(columnName, valueType, sqlDataTypeText, dbType, false, false, false) { }
         public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType, bool nullable) : this(columnName, valueType, sqlDataTypeText, dbType, nullable, false, false) { }
         public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType, bool nullable, bool primaryKey) : this(columnName, valueType, sqlDataTypeText, dbType, nullable, primaryKey, false) { }
