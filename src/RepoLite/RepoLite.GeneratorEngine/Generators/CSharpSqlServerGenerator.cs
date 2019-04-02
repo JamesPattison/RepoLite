@@ -223,7 +223,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             CreateModelValidation(table, sb);
 
-            sb.AppendLine(Tab2, "internal static List<ColumnDefinition> Columns => new List<ColumnDefinition>");
+            sb.AppendLine(Tab2, "public static List<ColumnDefinition> Columns => new List<ColumnDefinition>");
             sb.AppendLine(Tab2, "{");
             foreach (var column in table.Columns)
             {

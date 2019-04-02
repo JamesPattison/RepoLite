@@ -91,32 +91,6 @@ namespace REPOSITORYNAMESPACE.Base
         }
     }
 
-    public class ColumnDefinition
-    {
-        public string ColumnName { get; set; }
-        public Type ValueType { get; set; }
-        public string SqlDataTypeText { get; set; }
-        public SqlDbType SqlDbType { get; set; }
-        public bool Identity { get; set; }
-        public bool PrimaryKey { get; set; }
-        public bool Nullable { get; set; }
-
-        internal ColumnDefinition(string columnName) : this(columnName, typeof(string), "NVARCHAR(MAX)", SqlDbType.NVarChar, false, false, false) { }
-        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType) : this(columnName, valueType, sqlDataTypeText, dbType, false, false, false) { }
-        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType, bool nullable) : this(columnName, valueType, sqlDataTypeText, dbType, nullable, false, false) { }
-        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType, bool nullable, bool primaryKey) : this(columnName, valueType, sqlDataTypeText, dbType, nullable, primaryKey, false) { }
-        public ColumnDefinition(string columnName, Type valueType, string sqlDataTypeText, SqlDbType dbType, bool nullable, bool primaryKey, bool identity)
-        {
-            ColumnName = columnName;
-            ValueType = valueType;
-            SqlDataTypeText = sqlDataTypeText;
-            SqlDbType = dbType;
-            Nullable = nullable;
-            PrimaryKey = primaryKey;
-            Identity = identity;
-        }
-    }
-
     public class QueryItem
     {
         public string DbColumnName { get; set; }
@@ -2176,7 +2150,9 @@ namespace REPOSITORYNAMESPACE.Base
             cn.Close();
             return isSuccess;
         }
-
+        
+        
+        
         protected bool GetBoolean(DataRow row, string fieldName)
         {
             return row.GetValue<bool>(fieldName) ?? false;
@@ -2342,24 +2318,5 @@ namespace REPOSITORYNAMESPACE.Base
         }
 
         #endregion
-    }
-    
-    public static class Ext
-    {
-        public static T? GetValue<T>(this DataRow row, string columnName) where T : struct
-        {
-            if (row.IsNull(columnName) || !row.Table.Columns.Contains(columnName))
-                return null;
-    
-            return row[columnName] as T?;
-        }
-    
-        public static string GetText(this DataRow row, string columnName)
-        {
-            if (row.IsNull(columnName) || !row.Table.Columns.Contains(columnName))
-                return null;
-    
-            return row[columnName] as string;
-        }
     }
 }
