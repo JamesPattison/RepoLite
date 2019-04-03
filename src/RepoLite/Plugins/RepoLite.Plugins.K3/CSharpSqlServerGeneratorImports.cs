@@ -111,6 +111,14 @@ namespace RepoLite.Plugins.K3
             {
                 if (table.HasCompositeKey)
                 {
+                    sb.AppendLine(Tab2, $"public static bool Update(string profile, {table.ClassName} item)");
+                    sb.AppendLine(Tab2, "{");
+                    sb.AppendLine(Tab3, $"Log.Activity(\"Calling Update in {table.ClassName}Repository\");");
+                    sb.AppendLine(Tab3, $"return new {table.ClassName}Repository(Settings.Instance[profile].ConnectionString, exception => Log.Error(exception, \"Update\"))");
+                    sb.AppendLine(Tab4, $".Update(item);");
+                    sb.AppendLine(Tab2, "}");
+                    sb.AppendLine("");
+                    
                     sb.AppendLine(Tab2, $"public static bool Delete(string profile, {pkParamList})");
                     sb.AppendLine(Tab2, "{");
                     sb.AppendLine(Tab3, $"Log.Activity(\"Calling Delete in {table.ClassName}Repository\");");
@@ -324,8 +332,8 @@ namespace RepoLite.Plugins.K3
             if (table.Columns.Count(x => x.PrimaryKey) == 1){
                 sb.AppendLine(Tab2, $"public static bool Update(string profile, {table.ClassName} item)");
                 sb.AppendLine(Tab2, "{");
-                sb.AppendLine(Tab3, $"Log.Activity(\"Calling Delete in {table.ClassName}Repository\");");
-                sb.AppendLine(Tab3, $"return new {table.ClassName}Repository(Settings.Instance[profile].ConnectionString, exception => Log.Error(exception, \"Delete\"))");
+                sb.AppendLine(Tab3, $"Log.Activity(\"Calling Update in {table.ClassName}Repository\");");
+                sb.AppendLine(Tab3, $"return new {table.ClassName}Repository(Settings.Instance[profile].ConnectionString, exception => Log.Error(exception, \"Update\"))");
                 sb.AppendLine(Tab4, $".Update(item);");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
