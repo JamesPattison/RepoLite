@@ -194,6 +194,7 @@ namespace RepoLite.DataAccess.Accessors
                 case 98: return SqlDbType.Variant;
                 case 104: return SqlDbType.Bit;
                 case 106: return SqlDbType.Decimal;
+                case 108: return SqlDbType.Decimal;
                 case 122: return SqlDbType.SmallMoney;
                 case 127: return SqlDbType.BigInt;
                 case 165: return SqlDbType.VarBinary;

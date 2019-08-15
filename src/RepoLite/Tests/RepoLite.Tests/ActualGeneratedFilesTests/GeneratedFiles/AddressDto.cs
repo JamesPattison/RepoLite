@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Xml;
-using NS.Base;
 using NS.Models.Base;
 
 namespace NS.Models

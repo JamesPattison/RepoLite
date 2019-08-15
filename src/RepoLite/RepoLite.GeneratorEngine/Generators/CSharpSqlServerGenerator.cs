@@ -223,7 +223,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             CreateModelValidation(table, sb);
 
-            sb.AppendLine(Tab2, "internal static List<ColumnDefinition> Columns => new List<ColumnDefinition>");
+            sb.AppendLine(Tab2, "public static List<ColumnDefinition> Columns => new List<ColumnDefinition>");
             sb.AppendLine(Tab2, "{");
             foreach (var column in table.Columns)
             {
@@ -261,7 +261,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 {
                     if (!column.IsNullable)
                     {
-                        sb.AppendLine(Tab3, $"if (string.IsNullOrEmpty({column.DbColumnName}))");
+                        sb.AppendLine(Tab3, $"if ({column.DbColumnName} == null)");
                         sb.AppendLine(Tab4,
                             $"validationErrors.Add(new ValidationError(nameof({column.DbColumnName}), \"Value cannot be null\"));");
                     }

@@ -53,6 +53,21 @@ namespace RepoLite.ViewModel.Main
             }
         }
 
+        public ICommand ToggleSelectAll
+        {
+            get
+            {
+                return new RelayCommand(o =>
+                {
+                    var shouldSelect = Math.Abs(Math.Round(Tables.Count(x => x.Selected) / (float) Tables.Count)) < 0.001;
+                    foreach (var table in Tables)
+                    {
+                        table.Selected = shouldSelect;
+                    }
+                }, o => Loaded);
+            }
+        }
+
         public ICommand Generate
         {
             get

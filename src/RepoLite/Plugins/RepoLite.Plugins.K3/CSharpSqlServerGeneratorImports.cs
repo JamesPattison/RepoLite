@@ -111,6 +111,22 @@ namespace RepoLite.Plugins.K3
             {
                 if (table.HasCompositeKey)
                 {
+                    sb.AppendLine(Tab2, $"public static bool Update(string profile, {table.ClassName} item)");
+                    sb.AppendLine(Tab2, "{");
+                    sb.AppendLine(Tab3, $"Log.Activity(\"Calling Update in {table.ClassName}Repository\");");
+                    sb.AppendLine(Tab3, $"return new {table.ClassName}Repository(Settings.Instance[profile].ConnectionString, exception => Log.Error(exception, \"Update\"))");
+                    sb.AppendLine(Tab4, $".Update(item);");
+                    sb.AppendLine(Tab2, "}");
+                    sb.AppendLine("");
+
+                    sb.AppendLine(Tab2, $"public static bool Delete(string profile, {table.ClassName} item)");
+                    sb.AppendLine(Tab2, "{");
+                    sb.AppendLine(Tab3, $"Log.Activity(\"Calling Delete in {table.ClassName}Repository\");");
+                    sb.AppendLine(Tab3, $"return new {table.ClassName}Repository(Settings.Instance[profile].ConnectionString, exception => Log.Error(exception, \"Delete\"))");
+                    sb.AppendLine(Tab4, $".Delete(item);");
+                    sb.AppendLine(Tab2, "}");
+                    sb.AppendLine("");
+
                     sb.AppendLine(Tab2, $"public static bool Delete(string profile, {pkParamList})");
                     sb.AppendLine(Tab2, "{");
                     sb.AppendLine(Tab3, $"Log.Activity(\"Calling Delete in {table.ClassName}Repository\");");
@@ -134,6 +150,15 @@ namespace RepoLite.Plugins.K3
                     sb.AppendLine(Tab4, ".Delete(compositeIds);");
                     sb.AppendLine(Tab2, "}");
                     sb.AppendLine("");
+
+                    sb.AppendLine(Tab2, $"public static bool Merge(string profile, List<{table.ClassName}> items)");
+                    sb.AppendLine(Tab2, "{");
+                    sb.AppendLine(Tab3, $"Log.Activity(\"Calling Merge in {table.ClassName}Repository\");");
+                    sb.AppendLine(Tab3, $"return new {table.ClassName}Repository(Settings.Instance[profile].ConnectionString, exception => Log.Error(exception, \"Merge\"))");
+                    sb.AppendLine(Tab4, ".Merge(items);");
+                    sb.AppendLine(Tab2, "}");
+                    sb.AppendLine("");
+
                 }
                 else if (table.PrimaryKeys.Any())
                 {
@@ -254,6 +279,7 @@ namespace RepoLite.Plugins.K3
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
             }
+
             
             //IBaseRepository<T>
             sb.AppendLine(Tab2, $"public static long RecordCount(string profile)");
@@ -324,8 +350,8 @@ namespace RepoLite.Plugins.K3
             if (table.Columns.Count(x => x.PrimaryKey) == 1){
                 sb.AppendLine(Tab2, $"public static bool Update(string profile, {table.ClassName} item)");
                 sb.AppendLine(Tab2, "{");
-                sb.AppendLine(Tab3, $"Log.Activity(\"Calling Delete in {table.ClassName}Repository\");");
-                sb.AppendLine(Tab3, $"return new {table.ClassName}Repository(Settings.Instance[profile].ConnectionString, exception => Log.Error(exception, \"Delete\"))");
+                sb.AppendLine(Tab3, $"Log.Activity(\"Calling Update in {table.ClassName}Repository\");");
+                sb.AppendLine(Tab3, $"return new {table.ClassName}Repository(Settings.Instance[profile].ConnectionString, exception => Log.Error(exception, \"Update\"))");
                 sb.AppendLine(Tab4, $".Update(item);");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
