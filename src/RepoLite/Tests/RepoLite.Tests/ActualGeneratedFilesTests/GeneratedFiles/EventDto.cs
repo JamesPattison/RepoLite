@@ -44,7 +44,7 @@ namespace NS.Models
 
 			return validationErrors;
 		}
-		internal static List<ColumnDefinition> Columns => new List<ColumnDefinition>
+		public static List<ColumnDefinition> Columns => new List<ColumnDefinition>
 		{
 			new ColumnDefinition("EventId", typeof(System.String), "[NVARCHAR](20)", SqlDbType.NVarChar, false, true, false),
 			new ColumnDefinition("EventName", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, false, false, false),

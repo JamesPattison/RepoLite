@@ -113,7 +113,7 @@ namespace NS.Models
 
 			return validationErrors;
 		}
-		internal static List<ColumnDefinition> Columns => new List<ColumnDefinition>
+		public static List<ColumnDefinition> Columns => new List<ColumnDefinition>
 		{
 			new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, true, true),
 			new ColumnDefinition("AnotherId", typeof(System.String), "[NVARCHAR](10)", SqlDbType.NVarChar, false, true, false),

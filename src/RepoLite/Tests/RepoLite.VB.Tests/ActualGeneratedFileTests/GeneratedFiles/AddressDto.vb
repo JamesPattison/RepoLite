@@ -138,7 +138,7 @@ Namespace NS.Models
             Return validationErrors
         End Function
 
-        Shared Friend ReadOnly Property Columns As List(Of ColumnDefinition)
+        Public Shared ReadOnly Property Columns As List(Of ColumnDefinition)
             Get
                 Return New List(Of ColumnDefinition) From {
                     New ColumnDefinition("Id", GetType(System.Int32), "[INT]", SqlDbType.Int, False, True, True),

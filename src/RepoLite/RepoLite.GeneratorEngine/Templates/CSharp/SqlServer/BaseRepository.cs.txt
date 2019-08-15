@@ -1082,7 +1082,7 @@ namespace REPOSITORYNAMESPACE.Base
             if (!(Activator.CreateInstance(JoinInfo.InitialType) is IBaseModel iInst))
                 throw new Exception($"Initial Type wasn't an IBaseModel, but was {JoinInfo.InitialType}");
 
-            var prop = JoinInfo.InitialType.GetProperty("Columns", BindingFlags.NonPublic | BindingFlags.Static);
+            var prop = JoinInfo.InitialType.GetProperty("Columns", BindingFlags.Static);
             if (prop == null)
                 throw new Exception(
                     $"internal static Columns property could not be found on {JoinInfo.InitialType.FullName}");
@@ -1102,7 +1102,7 @@ namespace REPOSITORYNAMESPACE.Base
                 if (!(Activator.CreateInstance(@join.ModelType) is IBaseModel tInst))
                     throw new Exception($"Join Type wasn't an IBaseModel, but was {@join.ModelType}");
 
-                prop = @join.ModelType.GetProperty("Columns", BindingFlags.NonPublic | BindingFlags.Static);
+                prop = @join.ModelType.GetProperty("Columns", BindingFlags.Static);
                 if (prop == null)
                     throw new Exception(
                         $"internal static Columns property could not be found on {@join.ModelType.FullName}");

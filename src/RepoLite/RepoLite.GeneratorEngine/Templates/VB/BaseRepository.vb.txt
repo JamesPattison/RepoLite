@@ -971,7 +971,7 @@ Namespace REPOSITORYNAMESPACE.Base
             If Not (TypeOf Activator.CreateInstance(JoinInfo.InitialType) Is IBaseModel) Then _
                 Throw New Exception($"Initial Type wasn't an IBaseModel, but was {JoinInfo.InitialType}")
             Dim iInst = TryCast(Activator.CreateInstance(JoinInfo.InitialType), IBaseModel)
-            Dim prop = JoinInfo.InitialType.GetProperty("Columns", BindingFlags.NonPublic Or BindingFlags.[Static])
+            Dim prop = JoinInfo.InitialType.GetProperty("Columns", BindingFlags.[Static])
             If prop Is Nothing Then _
                 Throw _
                     New Exception(
@@ -991,7 +991,7 @@ Namespace REPOSITORYNAMESPACE.Base
                 If Not (TypeOf Activator.CreateInstance(join.ModelType) Is IBaseModel) Then _
                     Throw New Exception($"Join Type wasn't an IBaseModel, but was {join.ModelType}")
                 Dim tInst = TryCast(Activator.CreateInstance(join.ModelType), IBaseModel)
-                prop = join.ModelType.GetProperty("Columns", BindingFlags.NonPublic Or BindingFlags.[Static])
+                prop = join.ModelType.GetProperty("Columns", BindingFlags.[Static])
                 If prop Is Nothing Then _
                     Throw _
                         New Exception(
