@@ -123,8 +123,9 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.Append(Repo_Update(table));
                 sb.Append(Repo_Delete(table));
             }
-            else
-                sb.Append(Repo_NonPkDelete(table));
+
+            //delete by
+            sb.Append(Repo_DeleteBy(table));
 
             //merge
             if (table.PrimaryKeys.Any())
@@ -209,7 +210,7 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab3, $"_{column.FieldName} = (byte[])row[$\"{{propertyPrefix}}{column.PropertyName}\"];");
                 }
                 else if (column.DataType == typeof(XmlDocument))
-                { 
+                {
                     sb.AppendLine(Tab3, $"_{column.FieldName} = new XmlDocument{{InnerXml = row.GetText($\"{{propertyPrefix}}{column.PropertyName}\")}};");
                 }
                 else
@@ -227,7 +228,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab2, "{");
             foreach (var column in table.Columns)
             {
-                var sqlPrecisionColumns = new[] {35, 60, 62, 99, 106, 108, 122, 165, 167, 173, 175, 231, 239};
+                var sqlPrecisionColumns = new[] { 35, 60, 62, 99, 106, 108, 122, 165, 167, 173, 175, 231, 239 };
                 var colLengthVal = sqlPrecisionColumns.Contains(column.SqlDataTypeCode)
                     ? $"({Math.Max(column.MaxLength, column.MaxIntLength)})"
                     : string.Empty;
@@ -403,51 +404,17 @@ namespace RepoLite.GeneratorEngine.Generators
                     $"IEnumerable<{table.ClassName}> Get(params {pk.DataType.Name}[] {pk.FieldName}s);");
 
                 if (table.PrimaryKeys.Count == 1 &&
-                    new[] {typeof(short), typeof(int), typeof(long), typeof(decimal), typeof(double), typeof(float)}
+                    new[] { typeof(short), typeof(int), typeof(long), typeof(decimal), typeof(double), typeof(float) }
                         .Contains(pk.DataType))
                 {
                     sb.AppendLine(Tab2, $"{pk.DataType.Name} GetMaxId();");
                 }
             }
 
-            //update & delete
-            if (table.PrimaryKeys.Any())
+            foreach (var column in table.Columns)
             {
-                //update
-                sb.AppendLine(Tab2, $"bool Update({table.ClassName} item);");
-
-                //delete
-                sb.AppendLine(Tab2, $"bool Delete({table.ClassName} {table.LowerClassName});");
-                if (!table.HasCompositeKey)
-                {
-                    sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{table.ClassName}> items);");
-                }
-
-                else if (table.HasCompositeKey)
-                {
-                    sb.AppendLine(Tab2, $"bool Delete({pkParamList});");
-                    sb.AppendLine(Tab2, $"bool Delete({table.ClassName}Keys compositeId);");
-                    sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{table.ClassName}Keys> compositeIds);");
-                }
-                else if (table.PrimaryKeys.Any())
-                {
-                    sb.AppendLine(Tab2, $"bool Delete({pk.DataType.Name} {pk.FieldName});");
-                    sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{pk.DataType.Name}> {pk.FieldName}s);");
-                }
-            }
-            else
-            {
-                foreach (var column in table.Columns)
-                {
-                    sb.AppendLine(Tab2,
-                        $"bool DeleteBy{column.DbColumnName}({column.DataType.Name} {column.FieldName});");
-                }
-            }
-
-            //merge
-            if (table.PrimaryKeys.Any())
-            {
-                sb.AppendLine(Tab2, $"bool Merge(List<{table.ClassName}> items);");
+                sb.AppendLine(Tab2,
+                    $"bool DeleteBy{column.DbColumnName}({column.DataType.Name} {column.FieldName});");
             }
 
             //search
@@ -609,7 +576,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine("");
 
                 if (table.PrimaryKeys.Count == 1 &&
-                    new[] {typeof(short), typeof(int), typeof(long), typeof(decimal), typeof(double), typeof(float)}
+                    new[] { typeof(short), typeof(int), typeof(long), typeof(decimal), typeof(double), typeof(float) }
                         .Contains(pk.DataType))
                 {
                     //Get Max ID
@@ -880,7 +847,7 @@ namespace RepoLite.GeneratorEngine.Generators
             return sb;
         }
 
-        private string Repo_NonPkDelete(Table table)
+        private string Repo_DeleteBy(Table table)
         {
             var sb = new StringBuilder();
 

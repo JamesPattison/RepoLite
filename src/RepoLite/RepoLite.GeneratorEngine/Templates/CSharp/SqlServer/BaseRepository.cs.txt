@@ -632,8 +632,6 @@ namespace REPOSITORYNAMESPACE.Base
                     default:
                         throw new Exception("Unsupported expression: " + expression.GetType().Name);
                 }
-
-                break;
             }
         }
 
