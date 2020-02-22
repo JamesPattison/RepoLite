@@ -17,8 +17,5 @@
     <Setting Name="RepositoryFileNameFormat" Type="System.String" Scope="User">
       <Value Profile="(Default)">{Name}</Value>
     </Setting>
-    <Setting Name="Plugin" Type="RepoLite.Common.Enums.PluginEnum" Scope="User">
-      <Value Profile="(Default)">None</Value>
-    </Setting>
   </Settings>
 </SettingsFile>

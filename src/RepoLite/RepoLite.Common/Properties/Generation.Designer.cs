@@ -12,7 +12,7 @@ namespace RepoLite.Common.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.5.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.4.0.0")]
     public sealed partial class Generation : global::System.Configuration.ApplicationSettingsBase {
         
         private static Generation defaultInstance = ((Generation)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Generation())));
@@ -80,18 +80,6 @@ namespace RepoLite.Common.Properties {
             }
             set {
                 this["RepositoryFileNameFormat"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("None")]
-        public global::RepoLite.Common.Enums.PluginEnum Plugin {
-            get {
-                return ((global::RepoLite.Common.Enums.PluginEnum)(this["Plugin"]));
-            }
-            set {
-                this["Plugin"] = value;
             }
         }
     }

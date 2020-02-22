@@ -1,7 +1,6 @@
 ﻿using RepoLite.Common;
 using RepoLite.Common.Enums;
 using RepoLite.Common.Extensions;
-using RepoLite.Common.Interfaces;
 using RepoLite.Common.Models;
 using System;
 using System.Collections.Generic;
@@ -17,12 +16,9 @@ namespace RepoLite.GeneratorEngine.Generators
         private const int VARIABLE_BLOCK_SCOPE = 5;
 
         //private Func<string, string, string, string> GetColName = (s, table, name) => $"{(s == name ? $"nameof({table}.{name})" : $"\"{name}\"")}";
-
-        private readonly ICSharpSqlServerGeneratorImports _plugin;
-
+        
         public CSharpSqlServerGenerator()
         {
-            _plugin = PluginHelper.GetPlugin();
         }
 
         public override StringBuilder ModelForTable(Table table)
@@ -57,8 +53,6 @@ namespace RepoLite.GeneratorEngine.Generators
 
             sb.AppendLine($"namespace {AppSettings.Generation.RepositoryGenerationNamespace}");
             sb.AppendLine("{");
-            if (_plugin != null)
-                sb.Append(_plugin.GenerateRepoWrapper(table));
 
             if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
             {

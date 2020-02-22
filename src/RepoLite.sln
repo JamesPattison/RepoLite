@@ -11,10 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite.Common", "RepoLite
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite.DataAccess", "RepoLite\RepoLite.DataAccess\RepoLite.DataAccess.csproj", "{DEA75419-F6A0-4FF0-9925-40CFA3B49E0C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{E6056978-0C57-492B-BD76-9372A4B38677}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite.Plugins.K3", "RepoLite\Plugins\RepoLite.Plugins.K3\RepoLite.Plugins.K3.csproj", "{23303B8F-4B89-472D-856B-6B0F864F80B6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite.Tests", "RepoLite\Tests\RepoLite.Tests\RepoLite.Tests.csproj", "{5A365234-CEDD-4E86-9E07-60E84134536D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7D08807B-58FC-4ABC-A37F-8A088AC665D6}"
@@ -41,10 +37,6 @@ Global
 		{DEA75419-F6A0-4FF0-9925-40CFA3B49E0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DEA75419-F6A0-4FF0-9925-40CFA3B49E0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DEA75419-F6A0-4FF0-9925-40CFA3B49E0C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{23303B8F-4B89-472D-856B-6B0F864F80B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{23303B8F-4B89-472D-856B-6B0F864F80B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{23303B8F-4B89-472D-856B-6B0F864F80B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{23303B8F-4B89-472D-856B-6B0F864F80B6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5A365234-CEDD-4E86-9E07-60E84134536D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5A365234-CEDD-4E86-9E07-60E84134536D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A365234-CEDD-4E86-9E07-60E84134536D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -54,7 +46,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{23303B8F-4B89-472D-856B-6B0F864F80B6} = {E6056978-0C57-492B-BD76-9372A4B38677}
 		{5A365234-CEDD-4E86-9E07-60E84134536D} = {7D08807B-58FC-4ABC-A37F-8A088AC665D6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
