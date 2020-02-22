@@ -54,11 +54,11 @@ namespace NS.Models
 		{
 			var validationErrors = new List<ValidationError>();
 
-			if (string.IsNullOrEmpty(Name))
+			if (Name == null)
 				validationErrors.Add(new ValidationError(nameof(Name), "Value cannot be null"));
 			if (!string.IsNullOrEmpty(Name) && Name.Length > 50)
 				validationErrors.Add(new ValidationError(nameof(Name), "Max length is 50"));
-			if (string.IsNullOrEmpty(Nationality))
+			if (Nationality == null)
 				validationErrors.Add(new ValidationError(nameof(Nationality), "Value cannot be null"));
 			if (!string.IsNullOrEmpty(Nationality) && Nationality.Length > 50)
 				validationErrors.Add(new ValidationError(nameof(Nationality), "Max length is 50"));

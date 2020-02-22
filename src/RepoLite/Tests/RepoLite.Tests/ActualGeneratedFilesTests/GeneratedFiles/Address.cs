@@ -28,6 +28,16 @@ namespace NS
 		Address Get(AddressKeys compositeId);
 		IEnumerable<Address> Get(List<AddressKeys> compositeIds);
 		IEnumerable<Address> Get(params AddressKeys[] compositeIds);
+		bool DeleteById(Int32 id);
+		bool DeleteByAnotherId(String anotherid);
+		bool DeleteByPersonId(Int32 personid);
+		bool DeleteByLine1(String line1);
+		bool DeleteByLine2(String line2);
+		bool DeleteByLine3(String line3);
+		bool DeleteByLine4(String line4);
+		bool DeleteByPostCode(String postcode);
+		bool DeleteByPhoneNumber(String phonenumber);
+		bool DeleteByCOUNTRY_CODE(String country_code);
 		bool Update(Address item);
 		bool Delete(Address address);
 		bool Delete(Int32 id, String anotherid);
@@ -217,6 +227,46 @@ namespace NS
 			}
 		}
 
+		public bool DeleteById(Int32 id)
+		{
+			return BaseDelete(new DeleteColumn("Id", id, SqlDbType.Int));
+		}
+		public bool DeleteByAnotherId(String anotherid)
+		{
+			return BaseDelete(new DeleteColumn("AnotherId", anotherid, SqlDbType.NVarChar));
+		}
+		public bool DeleteByPersonId(Int32 personid)
+		{
+			return BaseDelete(new DeleteColumn("PersonId", personid, SqlDbType.Int));
+		}
+		public bool DeleteByLine1(String line1)
+		{
+			return BaseDelete(new DeleteColumn("Line1", line1, SqlDbType.NVarChar));
+		}
+		public bool DeleteByLine2(String line2)
+		{
+			return BaseDelete(new DeleteColumn("Line2", line2, SqlDbType.NVarChar));
+		}
+		public bool DeleteByLine3(String line3)
+		{
+			return BaseDelete(new DeleteColumn("Line3", line3, SqlDbType.NVarChar));
+		}
+		public bool DeleteByLine4(String line4)
+		{
+			return BaseDelete(new DeleteColumn("Line4", line4, SqlDbType.NVarChar));
+		}
+		public bool DeleteByPostCode(String postcode)
+		{
+			return BaseDelete(new DeleteColumn("PostCode", postcode, SqlDbType.NVarChar));
+		}
+		public bool DeleteByPhoneNumber(String phonenumber)
+		{
+			return BaseDelete(new DeleteColumn("PhoneNumber", phonenumber, SqlDbType.NVarChar));
+		}
+		public bool DeleteByCOUNTRY_CODE(String country_code)
+		{
+			return BaseDelete(new DeleteColumn("COUNTRY_CODE", country_code, SqlDbType.NVarChar));
+		}
 
 		public bool Merge(List<Address> items)
 		{
@@ -246,7 +296,7 @@ namespace NS
 			{
 				Id = GetInt32(row, "Id"),
 				AnotherId = GetString(row, "AnotherId"),
-				PersonId = GetNullableInt32(row, "PersonId"),
+				PersonId = GetInt32(row, "PersonId"),
 				Line1 = GetString(row, "Line1"),
 				Line2 = GetString(row, "Line2"),
 				Line3 = GetString(row, "Line3"),

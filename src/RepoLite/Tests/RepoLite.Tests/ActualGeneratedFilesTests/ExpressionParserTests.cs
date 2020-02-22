@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NS.Base;
 using NS.Models.Base;
 using RepoLite.Tests.ActualGeneratedFIlesTests.Base;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 
 namespace RepoLite.Tests.ActualGeneratedFIlesTests
 {
@@ -234,7 +234,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestExpressionParser_String_In_Val()
         {
             var sql = ExpressionParser.ToSql<ClassA>(
-                classA => new[] {"one", "two", "three"}.Contains(classA.A_StringProperty), _keyMap);
+                classA => new[] { "one", "two", "three" }.Contains(classA.A_StringProperty), _keyMap);
 
             var expected = "([c0].[A_StringProperty] IN ('one','two','three'))";
 
@@ -245,7 +245,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestExpressionParser_String_NotIn_Val()
         {
             var sql = ExpressionParser.ToSql<ClassA>(
-                classA => !new[] {"one", "two", "three"}.Contains(classA.A_StringProperty), _keyMap);
+                classA => !new[] { "one", "two", "three" }.Contains(classA.A_StringProperty), _keyMap);
 
             var expected = "(NOT ([c0].[A_StringProperty] IN ('one','two','three')))";
 
@@ -409,7 +409,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestExpressionParser_Int_In_Val()
         {
-            var sql = ExpressionParser.ToSql<ClassA>(classA => new[] {1, 2, 3}.Contains(classA.A_IntProperty), _keyMap);
+            var sql = ExpressionParser.ToSql<ClassA>(classA => new[] { 1, 2, 3 }.Contains(classA.A_IntProperty), _keyMap);
 
             var expected = "([c0].[A_IntProperty] IN ('1','2','3'))";
 
@@ -419,7 +419,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestExpressionParser_Int_NotIn_Val()
         {
-            var sql = ExpressionParser.ToSql<ClassA>(classA => !new[] {1, 2, 3}.Contains(classA.A_IntProperty),
+            var sql = ExpressionParser.ToSql<ClassA>(classA => !new[] { 1, 2, 3 }.Contains(classA.A_IntProperty),
                 _keyMap);
 
             var expected = "(NOT ([c0].[A_IntProperty] IN ('1','2','3')))";

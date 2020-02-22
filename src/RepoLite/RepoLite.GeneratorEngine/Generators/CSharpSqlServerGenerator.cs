@@ -16,7 +16,7 @@ namespace RepoLite.GeneratorEngine.Generators
         private const int VARIABLE_BLOCK_SCOPE = 5;
 
         //private Func<string, string, string, string> GetColName = (s, table, name) => $"{(s == name ? $"nameof({table}.{name})" : $"\"{name}\"")}";
-        
+
         public CSharpSqlServerGenerator()
         {
         }
@@ -112,7 +112,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.Append(Repo_Create(table));
 
             //update & delete
-            if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.PrimaryKey)
+            if (table.PrimaryKeyConfiguration != PrimaryKeyConfigurationEnum.NoKey)
             {
                 sb.Append(Repo_Update(table));
                 sb.Append(Repo_Delete(table));
@@ -122,7 +122,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.Append(Repo_DeleteBy(table));
 
             //merge
-            if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.PrimaryKey)
+            if (table.PrimaryKeyConfiguration != PrimaryKeyConfigurationEnum.NoKey)
             {
                 sb.Append(Repo_Merge(table));
             }
@@ -409,6 +409,21 @@ namespace RepoLite.GeneratorEngine.Generators
             {
                 sb.AppendLine(Tab2,
                     $"bool DeleteBy{column.DbColumnName}({column.DataType.Name} {column.FieldName});");
+            }
+
+            //update & delete
+            if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
+            {
+                //update
+                sb.AppendLine(Tab2, $"bool Update({table.ClassName} item);");
+
+                //delete
+                sb.AppendLine(Tab2, $"bool Delete({table.ClassName} {table.LowerClassName});");
+                sb.AppendLine(Tab2, $"bool Delete({pkParamList});");
+                sb.AppendLine(Tab2, $"bool Delete({table.ClassName}Keys compositeId);");
+                sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{table.ClassName}Keys> compositeIds);");
+
+                sb.AppendLine(Tab2, $"bool Merge(List<{table.ClassName}> items);");
             }
 
             //search

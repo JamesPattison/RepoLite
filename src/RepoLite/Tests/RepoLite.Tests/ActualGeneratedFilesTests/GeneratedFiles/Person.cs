@@ -15,10 +15,11 @@ namespace NS
 		IEnumerable<Person> Get(List<Int32> ids);
 		IEnumerable<Person> Get(params Int32[] ids);
 		Int32 GetMaxId();
-		bool Update(Person item);
-		bool Delete(Person person);
-		bool Delete(IEnumerable<Person> items);
-		bool Merge(List<Person> items);
+		bool DeleteById(Int32 id);
+		bool DeleteByName(String name);
+		bool DeleteByAge(Int32 age);
+		bool DeleteByNationality(String nationality);
+		bool DeleteByRegistered(Boolean registered);
 		IEnumerable<Person> Search(
 			Int32? id = null,
 			String name = null,
@@ -162,6 +163,26 @@ namespace NS
 			return Delete(ids.Select(x => new Person { Id = x }));
 		}
 
+		public bool DeleteById(Int32 id)
+		{
+			return BaseDelete(new DeleteColumn("Id", id, SqlDbType.Int));
+		}
+		public bool DeleteByName(String name)
+		{
+			return BaseDelete(new DeleteColumn("Name", name, SqlDbType.NVarChar));
+		}
+		public bool DeleteByAge(Int32 age)
+		{
+			return BaseDelete(new DeleteColumn("Age", age, SqlDbType.Int));
+		}
+		public bool DeleteByNationality(String nationality)
+		{
+			return BaseDelete(new DeleteColumn("Nationality", nationality, SqlDbType.NVarChar));
+		}
+		public bool DeleteByRegistered(Boolean registered)
+		{
+			return BaseDelete(new DeleteColumn("Registered", registered, SqlDbType.Bit));
+		}
 
 		public bool Merge(List<Person> items)
 		{

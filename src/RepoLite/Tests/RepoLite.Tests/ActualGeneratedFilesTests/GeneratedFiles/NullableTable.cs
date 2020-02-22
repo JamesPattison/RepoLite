@@ -15,10 +15,10 @@ namespace NS
 		IEnumerable<NullableTable> Get(List<Int32> ids);
 		IEnumerable<NullableTable> Get(params Int32[] ids);
 		Int32 GetMaxId();
-		bool Update(NullableTable item);
-		bool Delete(NullableTable nullabletable);
-		bool Delete(IEnumerable<NullableTable> items);
-		bool Merge(List<NullableTable> items);
+		bool DeleteById(Int32 id);
+		bool DeleteByAge(Int32 age);
+		bool DeleteByDoB(DateTime dob);
+		bool DeleteBylolVal(Guid lolval);
 		IEnumerable<NullableTable> Search(
 			Int32? id = null,
 			Int32? age = null,
@@ -159,6 +159,22 @@ namespace NS
 			return Delete(ids.Select(x => new NullableTable { Id = x }));
 		}
 
+		public bool DeleteById(Int32 id)
+		{
+			return BaseDelete(new DeleteColumn("Id", id, SqlDbType.Int));
+		}
+		public bool DeleteByAge(Int32 age)
+		{
+			return BaseDelete(new DeleteColumn("Age", age, SqlDbType.Int));
+		}
+		public bool DeleteByDoB(DateTime dob)
+		{
+			return BaseDelete(new DeleteColumn("DoB", dob, SqlDbType.DateTime));
+		}
+		public bool DeleteBylolVal(Guid lolval)
+		{
+			return BaseDelete(new DeleteColumn("lolVal", lolval, SqlDbType.UniqueIdentifier));
+		}
 
 		public bool Merge(List<NullableTable> items)
 		{

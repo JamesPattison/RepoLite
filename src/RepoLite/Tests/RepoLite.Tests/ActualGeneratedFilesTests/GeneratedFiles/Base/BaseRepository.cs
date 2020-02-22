@@ -403,7 +403,7 @@ namespace NS.Base
     }
 
     #endregion
-    
+
     #region ExpressionParser
 
     internal static class ExpressionParser
@@ -430,18 +430,18 @@ namespace NS.Base
             {ExpressionType.OrElse, "OR"},
             {ExpressionType.Subtract, "-"}
         };
-        
+
         internal static string ToSql(LambdaExpression expression, Dictionary<string, string> xRef)
         {
             return Parse(expression.Body, xRef, true).Sql;
-        }       
-        
+        }
+
         internal static string ToSql<T>(Expression<Func<T, bool>> expression, Dictionary<string, string> xRef)
             where T : IBaseModel, new()
         {
             return ToSql((LambdaExpression)expression, xRef);
         }
-        
+
         internal static string ToSql<T, TK>(Expression<Func<T, TK, bool>> expression, Dictionary<string, string> xRef)
             where T : IBaseModel, new()
             where TK : IBaseModel, new()
@@ -458,169 +458,195 @@ namespace NS.Base
                     case UnaryExpression unary:
                         return Clause.Make(NodeStr[unary.NodeType], Parse(unary.Operand, xRef, true));
                     case BinaryExpression body:
-                        
-                        var left = body.Left.Type == typeof(bool) ? Parse(body.Left, xRef, boolComparison: true) : Parse(body.Left, xRef);
-                        var right = body.Right.Type == typeof(bool) ? Parse(body.Right, xRef, boolComparison: true) : Parse(body.Right, xRef);
-                        
+                        Clause left;
+                        Clause right;
+
+                        var leftValue = GetValue(body.Left);
+                        if (leftValue != null)
+                        {
+                            if (leftValue is string)
+                            {
+                                leftValue = prefix + (string)leftValue + postfix;
+                            }
+
+                            left = Clause.Make($"'{leftValue}'");
+                        }
+                        else left = body.Left.Type == typeof(bool) ? Parse(body.Left, xRef, boolComparison: true) : Parse(body.Left, xRef);
+
+
+                        var rightValue = GetValue(body.Right);
+                        if (rightValue != null)
+                        {
+                            if (rightValue is string)
+                            {
+                                rightValue = prefix + (string)rightValue + postfix;
+                            }
+
+                            right = Clause.Make($"'{rightValue}'");
+                        }
+                        else right = body.Right.Type == typeof(bool) ? Parse(body.Right, xRef, boolComparison: true) : Parse(body.Right, xRef);
+
                         return Clause.Make(left, NodeStr[body.NodeType], right);
                     case ConstantExpression constant:
-                    {
-                        var value = constant.Value;
-                        switch (value)
                         {
-                            case int _:
-                                return Clause.Make(value.ToString());
-                            case string _:
-                                value = prefix + (string) value + postfix;
-                                break;
-                        }
-
-                        if (value is bool && isUnary)
-                        {
-                            return boolComparison ? Clause.Make($"'{value}'"): Clause.Make(Clause.Make($"'{value}'"), "=", Clause.Make("1"));
-                        }
-
-                        return Clause.Make($"'{value}'");
-                    }
-                    case MemberExpression member:
-                    {
-                        switch (member.Member)
-                        {
-                            case PropertyInfo property:
+                            var value = constant.Value;
+                            switch (value)
                             {
-                                if (property.Name == "Value" &&
-                                    property.DeclaringType != null &&
-                                    Nullable.GetUnderlyingType(property.DeclaringType) != null)
-                                    return Parse(member.Expression, xRef);
+                                case int _:
+                                    return Clause.Make(value.ToString());
+                                case string _:
+                                    value = prefix + (string)value + postfix;
+                                    break;
+                            }
 
-                                if (property.Name == "HasValue" &&
-                                    property.DeclaringType != null &&
-                                    Nullable.GetUnderlyingType(property.DeclaringType) != null)
-                                {
-                                    return Clause.Make(Parse(member.Expression, xRef), NodeStr[ExpressionType.NotEqual],
-                                        Clause.Make("''"));
-                                }
-                                                                                        
-                                var colName = property.Name; 
-                                var alias = "";
-                                if (member.Expression is ParameterExpression paramExpr && xRef.ContainsKey(paramExpr.Name))
-                                {
-                                    alias = xRef[paramExpr.Name];
-                                }
+                            if (value is bool && isUnary)
+                            {
+                                return boolComparison ? Clause.Make($"'{value}'") : Clause.Make(Clause.Make($"'{value}'"), "=", Clause.Make("1"));
+                            }
 
-                                if (member.Type == typeof(bool))
-                                    if (isUnary)
+                            return Clause.Make($"'{value}'");
+                        }
+                    case MemberExpression member:
+                        {
+                            switch (member.Member)
+                            {
+                                case PropertyInfo property:
                                     {
-                                        isUnary = false;
-                                        prefix = null;
-                                        postfix = null;
-                                        continue;
-                                    }
-                                    else
-                                    {
-                                        return boolComparison
-                                            ? Clause.Make(!string.IsNullOrEmpty(alias)
+                                        if (property.Name == "Value" &&
+                                            property.DeclaringType != null &&
+                                            Nullable.GetUnderlyingType(property.DeclaringType) != null)
+                                            return Parse(member.Expression, xRef);
+
+                                        if (property.Name == "HasValue" &&
+                                            property.DeclaringType != null &&
+                                            Nullable.GetUnderlyingType(property.DeclaringType) != null)
+                                        {
+                                            return Clause.Make(Parse(member.Expression, xRef), NodeStr[ExpressionType.NotEqual],
+                                                Clause.Make("''"));
+                                        }
+
+                                        var colName = property.Name;
+                                        var alias = "";
+                                        if (member.Expression is ParameterExpression paramExpr && xRef.ContainsKey(paramExpr.Name))
+                                        {
+                                            alias = xRef[paramExpr.Name];
+                                        }
+
+                                        if (member.Type == typeof(bool))
+                                            if (isUnary)
+                                            {
+                                                isUnary = false;
+                                                prefix = null;
+                                                postfix = null;
+                                                continue;
+                                            }
+                                            else
+                                            {
+                                                return boolComparison
+                                                    ? Clause.Make(!string.IsNullOrEmpty(alias)
+                                                        ? $"[{alias}].[{colName}]"
+                                                        : $"[{colName}]")
+                                                    : Clause.Make(
+                                                        Clause.Make(!string.IsNullOrEmpty(alias)
+                                                            ? $"[{alias}].[{colName}]"
+                                                            : $"[{colName}]"), "=", Clause.Make("1"));
+                                            }
+                                        else
+                                        {
+                                            var value = !string.IsNullOrEmpty(alias)
                                                 ? $"[{alias}].[{colName}]"
-                                                : $"[{colName}]")
-                                            : Clause.Make(
-                                                Clause.Make(!string.IsNullOrEmpty(alias)
-                                                    ? $"[{alias}].[{colName}]"
-                                                    : $"[{colName}]"), "=", Clause.Make("1"));
+                                                : $"[{colName}]";
+                                            if (!string.IsNullOrEmpty(prefix))
+                                                value = $"'{prefix}'+{value}";
+                                            if (!string.IsNullOrEmpty(postfix))
+                                                value = $"{value}+'{postfix}'";
+
+                                            return Clause.Make(value);
+                                        }
                                     }
+                                case FieldInfo _:
+                                    {
+                                        var value = GetValue(member);
+                                        if (value is string)
+                                        {
+                                            value = prefix + (string)value + postfix;
+                                        }
+
+                                        return Clause.Make($"'{value}'");
+                                    }
+                                default:
+                                    throw new Exception($"Expression does not refer to a property or field: {expression}");
+                            }
+                        }
+                    case MethodCallExpression methodCall:
+                        {
+                            // LIKE queries:
+                            if (methodCall.Method == typeof(string).GetMethod("Contains", new[] { typeof(string) }))
+                            {
+                                return Clause.Make(Parse(methodCall.Object, xRef), "LIKE", Parse(methodCall.Arguments[0], xRef, prefix: "%", postfix: "%"));
+                            }
+
+                            if (methodCall.Method == typeof(string).GetMethod("StartsWith", new[] { typeof(string) }))
+                            {
+                                return Clause.Make(Parse(methodCall.Object, xRef), "LIKE", Parse(methodCall.Arguments[0], xRef, postfix: "%"));
+                            }
+
+                            if (methodCall.Method == typeof(string).GetMethod("EndsWith", new[] { typeof(string) }))
+                            {
+                                return Clause.Make(Parse(methodCall.Object, xRef), "LIKE", Parse(methodCall.Arguments[0], xRef, prefix: "%"));
+                            }
+
+                            // IN queries:
+                            if (methodCall.Method.Name == "Contains")
+                            {
+                                Expression collection;
+                                Expression property;
+                                if (methodCall.Method.IsDefined(typeof(ExtensionAttribute)) && methodCall.Arguments.Count == 2)
+                                {
+                                    collection = methodCall.Arguments[0];
+                                    property = methodCall.Arguments[1];
+                                }
+                                else if (!methodCall.Method.IsDefined(typeof(ExtensionAttribute)) && methodCall.Arguments.Count == 1)
+                                {
+                                    collection = methodCall.Object;
+                                    property = methodCall.Arguments[0];
+                                }
                                 else
                                 {
-                                    var value =!string.IsNullOrEmpty(alias)
-                                        ? $"[{alias}].[{colName}]"
-                                        : $"[{colName}]";
-                                    if (!string.IsNullOrEmpty(prefix))
-                                        value = $"'{prefix}'+{value}";
-                                    if (!string.IsNullOrEmpty(postfix))
-                                        value = $"{value}+'{postfix}'";
-
-                                    return Clause.Make(value);
+                                    throw new Exception("Unsupported method call: " + methodCall.Method.Name);
                                 }
-                            }
-                            case FieldInfo _:
-                            {
-                                var value = GetValue(member);
-                                if (value is string)
+
+                                var sb = new StringBuilder();
+                                foreach (var val in (IEnumerable)GetValue(collection))
                                 {
-                                    value = prefix + (string) value + postfix;
+                                    sb.Append($"'{val}',");
                                 }
 
-                                return Clause.Make($"'{value}'");
-                            }
-                            default:
-                                throw new Exception($"Expression does not refer to a property or field: {expression}");
-                        }
-                    }
-                    case MethodCallExpression methodCall:
-                    {
-                        // LIKE queries:
-                        if (methodCall.Method == typeof(string).GetMethod("Contains", new[] {typeof(string)}))
-                        {
-                            return Clause.Make(Parse(methodCall.Object, xRef), "LIKE", Parse(methodCall.Arguments[0], xRef, prefix: "%", postfix: "%"));
-                        }
-
-                        if (methodCall.Method == typeof(string).GetMethod("StartsWith", new[] {typeof(string)}))
-                        {
-                            return Clause.Make(Parse(methodCall.Object, xRef), "LIKE", Parse(methodCall.Arguments[0], xRef, postfix: "%"));
-                        }
-
-                        if (methodCall.Method == typeof(string).GetMethod("EndsWith", new[] {typeof(string)}))
-                        {
-                            return Clause.Make(Parse(methodCall.Object, xRef), "LIKE", Parse(methodCall.Arguments[0], xRef, prefix: "%"));
-                        }
-
-                        // IN queries:
-                        if (methodCall.Method.Name == "Contains")
-                        {
-                            Expression collection;
-                            Expression property;
-                            if (methodCall.Method.IsDefined(typeof(ExtensionAttribute)) && methodCall.Arguments.Count == 2)
-                            {
-                                collection = methodCall.Arguments[0];
-                                property = methodCall.Arguments[1];
-                            }
-                            else if (!methodCall.Method.IsDefined(typeof(ExtensionAttribute)) && methodCall.Arguments.Count == 1)
-                            {
-                                collection = methodCall.Object;
-                                property = methodCall.Arguments[0];
-                            }
-                            else
-                            {
-                                throw new Exception("Unsupported method call: " + methodCall.Method.Name);
+                                var values = sb.ToString();
+                                values = values.Substring(0, values.Length - 1);
+                                return Clause.Make(Parse(property, xRef), "IN", Clause.Make($"({values})"));
                             }
 
-                            var sb = new StringBuilder();
-                            foreach (var val in (IEnumerable) GetValue(collection))
-                            {
-                                sb.Append($"'{val}',");
-                            }
-
-                            var values = sb.ToString();
-                            values = values.Substring(0, values.Length - 1);
-                            return Clause.Make(Parse(property, xRef), "IN", Clause.Make($"({values})"));
+                            throw new Exception("Unsupported method call: " + methodCall.Method.Name);
                         }
-
-                        throw new Exception("Unsupported method call: " + methodCall.Method.Name);
-                    }
                     default:
                         throw new Exception("Unsupported expression: " + expression.GetType().Name);
                 }
-
-                break;
             }
         }
 
         private static object GetValue(Expression member)
         {
-            var objectMember = Expression.Convert(member, typeof(object));
-            var getterLambda = Expression.Lambda<Func<object>>(objectMember);
-            var getter = getterLambda.Compile();
-            return getter();
+            try
+            {
+                var objectMember = Expression.Convert(member, typeof(object));
+                var getterLambda = Expression.Lambda<Func<object>>(objectMember);
+                var getter = getterLambda.Compile();
+                return getter();
+            }
+            catch { return null; }
         }
-        
+
         private class Clause
         {
             public string Sql { get; private set; }
@@ -650,45 +676,45 @@ namespace NS.Base
             }
         }
     }
-    
+
     #endregion
-        
+
     #region OnClause
-    
+
     public interface IOnClause<T1, T2>
-        where T1 : IBaseModel, new() 
+        where T1 : IBaseModel, new()
         where T2 : IBaseModel, new()
     {
         ICombinedRepository<T1, T2> On(Expression<Func<T1, T2, bool>> expr);
     }
-    
+
     public interface IOnClause<T1, T2, T3>
-        where T1 : IBaseModel, new() 
-        where T2 : IBaseModel, new() 
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
         where T3 : IBaseModel, new()
     {
         ICombinedRepository<T1, T2, T3> On(Expression<Func<T1, T2, T3, bool>> expr);
     }
-    
+
     public interface IOnClause<T1, T2, T3, T4>
-        where T1 : IBaseModel, new() 
+        where T1 : IBaseModel, new()
         where T2 : IBaseModel, new()
-        where T3 : IBaseModel, new() 
+        where T3 : IBaseModel, new()
         where T4 : IBaseModel, new()
     {
         ICombinedRepository<T1, T2, T3, T4> On(Expression<Func<T1, T2, T3, T4, bool>> expr);
     }
-    
+
     public interface IOnClause<T1, T2, T3, T4, T5>
         where T1 : IBaseModel, new()
         where T2 : IBaseModel, new()
-        where T3 : IBaseModel, new() 
-        where T4 : IBaseModel, new() 
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
         where T5 : IBaseModel, new()
     {
         ICombinedRepository<T1, T2, T3, T4, T5> On(Expression<Func<T1, T2, T3, T4, T5, bool>> expr);
     }
-    
+
     public interface IOnClause<T1, T2, T3, T4, T5, T6>
         where T1 : IBaseModel, new()
         where T2 : IBaseModel, new()
@@ -699,7 +725,7 @@ namespace NS.Base
     {
         ICombinedRepository<T1, T2, T3, T4, T5, T6> On(Expression<Func<T1, T2, T3, T4, T5, T6, bool>> expr);
     }
-    
+
     public interface IOnClause<T1, T2, T3, T4, T5, T6, T7>
         where T1 : IBaseModel, new()
         where T2 : IBaseModel, new()
@@ -711,7 +737,7 @@ namespace NS.Base
     {
         ICombinedRepository<T1, T2, T3, T4, T5, T6, T7> On(Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> expr);
     }
-    
+
     public abstract class BaseOnClause
     {
         protected internal string ConnectionString;
@@ -731,7 +757,6 @@ namespace NS.Base
             if (string.IsNullOrEmpty(type.FullName))
                 throw new Exception("Unsupported Type");
 
-            var lastJoinToTable = JoinInfo.Joins.LastOrDefault(x => x.ModelType == type);
             var alias = $"c{JoinInfo.Joins.Count + 1}";
             JoinInfo.Joins.Add(new Join(type, joinType, alias));
         }
@@ -747,7 +772,7 @@ namespace NS.Base
             {
                 paramXRef.Add(parameter.Name, $"c{i++}");
             }
-            
+
             JoinInfo.Joins.Last().Expression = expr;
             JoinInfo.Joins.Last().XRef = paramXRef;
         }
@@ -872,11 +897,11 @@ namespace NS.Base
             return new CombinedRepository<T1, T2, T3, T4, T5, T6, T7>(this);
         }
     }
-    
+
     #endregion
-    
+
     #region JoinInfo
-    
+
     public enum JoinType
     {
         Inner,
@@ -928,7 +953,7 @@ namespace NS.Base
         /// </summary>
         public List<Join> Joins { get; } = new List<Join>();
     }
-    
+
     public interface IJoinable<T1>
         where T1 : IBaseModel, new()
     {
@@ -997,79 +1022,86 @@ namespace NS.Base
         IOnClause<T1, T2, T3, T4, T5, T6, T7> RightJoin<T7>() where T7 : IBaseModel, new();
         IOnClause<T1, T2, T3, T4, T5, T6, T7> FullJoin<T7>() where T7 : IBaseModel, new();
     }
-    
+
     #endregion
-    
+
     #region CombinedRepository
-    
+
     public interface ICombinedRepository
     {
         JoinInfo JoinInfo { get; }
     }
-    
+
     public interface ICombinedRepository<T1, T2> : IJoinable<T1, T2>, ICombinedRepository
-        where T1 : IBaseModel, new()  
-        where T2 : IBaseModel, new() 
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
     {
         IEnumerable<Tuple<T1, T2>> Results();
+        IEnumerable<Tuple<T1, T2>> Where(Expression<Func<T1, T2, bool>> clause);
     }
-    
+
     public interface ICombinedRepository<T1, T2, T3> : IJoinable<T1, T2, T3>, ICombinedRepository
-        where T1 : IBaseModel, new() 
-        where T2 : IBaseModel, new() 
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
         where T3 : IBaseModel, new()
     {
         IEnumerable<Tuple<T1, T2, T3>> Results();
+        IEnumerable<Tuple<T1, T2, T3>> Where(Expression<Func<T1, T2, T3, bool>> clause);
     }
-    
-    
+
+
     public interface ICombinedRepository<T1, T2, T3, T4> : IJoinable<T1, T2, T3, T4>, ICombinedRepository
-        where T1 : IBaseModel, new()  
-        where T2 : IBaseModel, new()  
-        where T3 : IBaseModel, new()  
-        where T4 : IBaseModel, new() 
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
     {
         IEnumerable<Tuple<T1, T2, T3, T4>> Results();
+        IEnumerable<Tuple<T1, T2, T3, T4>> Where(Expression<Func<T1, T2, T3, T4, bool>> clause);
     }
-    
+
     public interface ICombinedRepository<T1, T2, T3, T4, T5> : IJoinable<T1, T2, T3, T4, T5>, ICombinedRepository
-        where T1 : IBaseModel, new()  
-        where T2 : IBaseModel, new()  
-        where T3 : IBaseModel, new() 
-        where T4 : IBaseModel, new()  
-        where T5 : IBaseModel, new() 
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+        where T5 : IBaseModel, new()
     {
         IEnumerable<Tuple<T1, T2, T3, T4, T5>> Results();
+        IEnumerable<Tuple<T1, T2, T3, T4, T5>> Where(Expression<Func<T1, T2, T3, T4, T5, bool>> clause);
     }
-    
+
     public interface ICombinedRepository<T1, T2, T3, T4, T5, T6> : IJoinable<T1, T2, T3, T4, T5, T6>, ICombinedRepository
-        where T1 : IBaseModel, new() 
-        where T2 : IBaseModel, new() 
-        where T3 : IBaseModel, new() 
-        where T4 : IBaseModel, new() 
-        where T5 : IBaseModel, new() 
-        where T6 : IBaseModel, new() 
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+        where T5 : IBaseModel, new()
+        where T6 : IBaseModel, new()
     {
         IEnumerable<Tuple<T1, T2, T3, T4, T5, T6>> Results();
+        IEnumerable<Tuple<T1, T2, T3, T4, T5, T6>> Where(Expression<Func<T1, T2, T3, T4, T5, T6, bool>> clause);
     }
-    
+
     public interface ICombinedRepository<T1, T2, T3, T4, T5, T6, T7> : ICombinedRepository
-        where T1 : IBaseModel, new() 
-        where T2 : IBaseModel, new() 
-        where T3 : IBaseModel, new() 
-        where T4 : IBaseModel, new() 
-        where T5 : IBaseModel, new() 
-        where T6 : IBaseModel, new() 
-        where T7 : IBaseModel, new() 
+        where T1 : IBaseModel, new()
+        where T2 : IBaseModel, new()
+        where T3 : IBaseModel, new()
+        where T4 : IBaseModel, new()
+        where T5 : IBaseModel, new()
+        where T6 : IBaseModel, new()
+        where T7 : IBaseModel, new()
     {
         IEnumerable<Tuple<T1, T2, T3, T4, T5, T6, T7>> Results();
+        IEnumerable<Tuple<T1, T2, T3, T4, T5, T6, T7>> Where(Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> clause);
     }
-    
+
     public abstract class CombinedRepositoryBase : RepositoryDataAccess, ICombinedRepository
     {
         protected const string SqlParamSeparator = "__";
-        
+
         public JoinInfo JoinInfo { get; }
+        public string WhereClause { get; set; }
 
         protected CombinedRepositoryBase(BaseOnClause previousOnClause) : base(previousOnClause.ConnectionString)
         {
@@ -1082,7 +1114,7 @@ namespace NS.Base
             if (!(Activator.CreateInstance(JoinInfo.InitialType) is IBaseModel iInst))
                 throw new Exception($"Initial Type wasn't an IBaseModel, but was {JoinInfo.InitialType}");
 
-            var prop = JoinInfo.InitialType.GetProperty("Columns", BindingFlags.Static);
+            var prop = JoinInfo.InitialType.GetProperty("Columns", BindingFlags.Static | BindingFlags.Public);
             if (prop == null)
                 throw new Exception(
                     $"internal static Columns property could not be found on {JoinInfo.InitialType.FullName}");
@@ -1102,7 +1134,7 @@ namespace NS.Base
                 if (!(Activator.CreateInstance(@join.ModelType) is IBaseModel tInst))
                     throw new Exception($"Join Type wasn't an IBaseModel, but was {@join.ModelType}");
 
-                prop = @join.ModelType.GetProperty("Columns", BindingFlags.Static);
+                prop = @join.ModelType.GetProperty("Columns", BindingFlags.Static | BindingFlags.Public);
                 if (prop == null)
                     throw new Exception(
                         $"internal static Columns property could not be found on {@join.ModelType.FullName}");
@@ -1129,6 +1161,11 @@ namespace NS.Base
 
                 var expressionSql = ExpressionParser.ToSql(@join.Expression, @join.XRef);
                 sql += $" {@join.JoinString()} [{tInst.EntityName}] {@join.Alias} ON {expressionSql}";
+            }
+
+            if (!string.IsNullOrWhiteSpace(WhereClause))
+            {
+                sql += $" WHERE {WhereClause}";
             }
 
             return sql;
@@ -1190,22 +1227,36 @@ namespace NS.Base
 
         private IOnClause<T1, T2, T3> Join<T3>(JoinType joinType) where T3 : IBaseModel, new()
         {
-            var onClause = new OnClause<T1, T2, T3>(JoinInfo, joinType) {ConnectionString = ConnectionString};
+            var onClause = new OnClause<T1, T2, T3>(JoinInfo, joinType) { ConnectionString = ConnectionString };
             return onClause;
         }
-        
+
         public IEnumerable<Tuple<T1, T2>> Results()
         {
             var dt = BaseResults();
 
+            return EnumerateDataTable(dt);
+        }
+
+        public IEnumerable<Tuple<T1, T2>> Where(Expression<Func<T1, T2, bool>> clause)
+        {
+            WhereClause = ExpressionParser.ToSql(clause, JoinInfo.Joins.Last().XRef);
+
+            var dt = BaseResults();
+
+            return EnumerateDataTable(dt);
+        }
+
+        private IEnumerable<Tuple<T1, T2>> EnumerateDataTable(DataTable dt)
+        {
             foreach (DataRow row in dt.Rows)
             {
                 var t1Inst = new T1();
                 var t2Inst = new T2();
 
                 var tuple = new Tuple<T1, T2>(
-                    (T1) t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
-                    (T2) t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"));
+                    (T1)t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
+                    (T2)t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"));
 
                 yield return tuple;
             }
@@ -1244,14 +1295,28 @@ namespace NS.Base
 
         private IOnClause<T1, T2, T3, T4> Join<T4>(JoinType joinType) where T4 : IBaseModel, new()
         {
-            var onClause = new OnClause<T1, T2, T3, T4>(JoinInfo, joinType) {ConnectionString = ConnectionString};
+            var onClause = new OnClause<T1, T2, T3, T4>(JoinInfo, joinType) { ConnectionString = ConnectionString };
             return onClause;
         }
-        
+
         public IEnumerable<Tuple<T1, T2, T3>> Results()
         {
             var dt = BaseResults();
 
+            return EnumerateDataTable(dt);
+        }
+
+        public IEnumerable<Tuple<T1, T2, T3>> Where(Expression<Func<T1, T2, T3, bool>> clause)
+        {
+            WhereClause = ExpressionParser.ToSql(clause, JoinInfo.Joins.Last().XRef);
+
+            var dt = BaseResults();
+
+            return EnumerateDataTable(dt);
+        }
+
+        private IEnumerable<Tuple<T1, T2, T3>> EnumerateDataTable(DataTable dt)
+        {
             foreach (DataRow row in dt.Rows)
             {
                 var t1Inst = new T1();
@@ -1259,9 +1324,9 @@ namespace NS.Base
                 var t3Inst = new T3();
 
                 var tuple = new Tuple<T1, T2, T3>(
-                    (T1) t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
-                    (T2) t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
-                    (T3) t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"));
+                    (T1)t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
+                    (T2)t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
+                    (T3)t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"));
 
                 yield return tuple;
             }
@@ -1311,6 +1376,20 @@ namespace NS.Base
         {
             var dt = BaseResults();
 
+            return EnumerateDataTable(dt);
+        }
+
+        public IEnumerable<Tuple<T1, T2, T3, T4>> Where(Expression<Func<T1, T2, T3, T4, bool>> clause)
+        {
+            WhereClause = ExpressionParser.ToSql(clause, JoinInfo.Joins.Last().XRef);
+
+            var dt = BaseResults();
+
+            return EnumerateDataTable(dt);
+        }
+
+        private IEnumerable<Tuple<T1, T2, T3, T4>> EnumerateDataTable(DataTable dt)
+        {
             foreach (DataRow row in dt.Rows)
             {
                 var t1Inst = new T1();
@@ -1319,10 +1398,10 @@ namespace NS.Base
                 var t4Inst = new T4();
 
                 var tuple = new Tuple<T1, T2, T3, T4>(
-                    (T1) t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
-                    (T2) t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
-                    (T3) t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"),
-                    (T4) t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"));
+                    (T1)t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
+                    (T2)t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
+                    (T3)t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"),
+                    (T4)t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"));
 
                 yield return tuple;
             }
@@ -1374,6 +1453,20 @@ namespace NS.Base
         {
             var dt = BaseResults();
 
+            return EnumerateDataTable(dt);
+        }
+
+        public IEnumerable<Tuple<T1, T2, T3, T4, T5>> Where(Expression<Func<T1, T2, T3, T4, T5, bool>> clause)
+        {
+            WhereClause = ExpressionParser.ToSql(clause, JoinInfo.Joins.Last().XRef);
+
+            var dt = BaseResults();
+
+            return EnumerateDataTable(dt);
+        }
+
+        private IEnumerable<Tuple<T1, T2, T3, T4, T5>> EnumerateDataTable(DataTable dt)
+        {
             foreach (DataRow row in dt.Rows)
             {
                 var t1Inst = new T1();
@@ -1383,11 +1476,11 @@ namespace NS.Base
                 var t5Inst = new T5();
 
                 var tuple = new Tuple<T1, T2, T3, T4, T5>(
-                    (T1) t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
-                    (T2) t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
-                    (T3) t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"),
-                    (T4) t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"),
-                    (T5) t5Inst.SetValues(row, $"{t5Inst.EntityName}{SqlParamSeparator}"));
+                    (T1)t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
+                    (T2)t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
+                    (T3)t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"),
+                    (T4)t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"),
+                    (T5)t5Inst.SetValues(row, $"{t5Inst.EntityName}{SqlParamSeparator}"));
 
                 yield return tuple;
             }
@@ -1440,6 +1533,20 @@ namespace NS.Base
         {
             var dt = BaseResults();
 
+            return EnumerateDataTable(dt);
+        }
+
+        public IEnumerable<Tuple<T1, T2, T3, T4, T5, T6>> Where(Expression<Func<T1, T2, T3, T4, T5, T6, bool>> clause)
+        {
+            WhereClause = ExpressionParser.ToSql(clause, JoinInfo.Joins.Last().XRef);
+
+            var dt = BaseResults();
+
+            return EnumerateDataTable(dt);
+        }
+
+        private IEnumerable<Tuple<T1, T2, T3, T4, T5, T6>> EnumerateDataTable(DataTable dt)
+        {
             foreach (DataRow row in dt.Rows)
             {
                 var t1Inst = new T1();
@@ -1450,12 +1557,12 @@ namespace NS.Base
                 var t6Inst = new T6();
 
                 var tuple = new Tuple<T1, T2, T3, T4, T5, T6>(
-                    (T1) t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
-                    (T2) t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
-                    (T3) t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"),
-                    (T4) t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"),
-                    (T5) t5Inst.SetValues(row, $"{t5Inst.EntityName}{SqlParamSeparator}"),
-                    (T6) t6Inst.SetValues(row, $"{t6Inst.EntityName}{SqlParamSeparator}"));
+                    (T1)t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
+                    (T2)t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
+                    (T3)t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"),
+                    (T4)t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"),
+                    (T5)t5Inst.SetValues(row, $"{t5Inst.EntityName}{SqlParamSeparator}"),
+                    (T6)t6Inst.SetValues(row, $"{t6Inst.EntityName}{SqlParamSeparator}"));
 
                 yield return tuple;
             }
@@ -1480,6 +1587,20 @@ namespace NS.Base
         {
             var dt = BaseResults();
 
+            return EnumerateDataTable(dt);
+        }
+
+        public IEnumerable<Tuple<T1, T2, T3, T4, T5, T6, T7>> Where(Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> clause)
+        {
+            WhereClause = ExpressionParser.ToSql(clause, JoinInfo.Joins.Last().XRef);
+
+            var dt = BaseResults();
+
+            return EnumerateDataTable(dt);
+        }
+
+        private IEnumerable<Tuple<T1, T2, T3, T4, T5, T6, T7>> EnumerateDataTable(DataTable dt)
+        {
             foreach (DataRow row in dt.Rows)
             {
                 var t1Inst = new T1();
@@ -1491,21 +1612,21 @@ namespace NS.Base
                 var t7Inst = new T7();
 
                 var tuple = new Tuple<T1, T2, T3, T4, T5, T6, T7>(
-                    (T1) t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
-                    (T2) t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
-                    (T3) t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"),
-                    (T4) t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"),
-                    (T5) t5Inst.SetValues(row, $"{t5Inst.EntityName}{SqlParamSeparator}"),
-                    (T6) t6Inst.SetValues(row, $"{t6Inst.EntityName}{SqlParamSeparator}"),
-                    (T7) t7Inst.SetValues(row, $"{t7Inst.EntityName}{SqlParamSeparator}"));
+                    (T1)t1Inst.SetValues(row, $"{t1Inst.EntityName}{SqlParamSeparator}"),
+                    (T2)t2Inst.SetValues(row, $"{t2Inst.EntityName}{SqlParamSeparator}"),
+                    (T3)t3Inst.SetValues(row, $"{t3Inst.EntityName}{SqlParamSeparator}"),
+                    (T4)t4Inst.SetValues(row, $"{t4Inst.EntityName}{SqlParamSeparator}"),
+                    (T5)t5Inst.SetValues(row, $"{t5Inst.EntityName}{SqlParamSeparator}"),
+                    (T6)t6Inst.SetValues(row, $"{t6Inst.EntityName}{SqlParamSeparator}"),
+                    (T7)t7Inst.SetValues(row, $"{t7Inst.EntityName}{SqlParamSeparator}"));
 
                 yield return tuple;
             }
         }
     }
-    
+
     #endregion
-    
+
     public abstract class RepositoryDataAccess
     {
         protected Action<Exception> Logger;
@@ -1585,7 +1706,7 @@ namespace NS.Base
 
     public abstract partial class BaseRepository<T> : RepositoryDataAccess, IBaseRepository<T>
         where T : IBaseModel, new()
-    {     
+    {
         private readonly string _schema;
         private readonly string _tableName;
         private List<ColumnDefinition> Columns;
@@ -1620,7 +1741,7 @@ namespace NS.Base
 
         public long RecordCount()
         {
-            var query = BuildWhereQuery(new[]{new ColumnDefinition("'x'") });
+            var query = BuildWhereQuery(new[] { new ColumnDefinition("'x'") });
             var dt = Where(query, "1=1");
             return dt == null ? 0 : dt.Rows.Count;
         }
@@ -1792,11 +1913,11 @@ namespace NS.Base
                             continue;
 
                         var parameter = cmd.Parameters.Add(createColumn.ColumnName, createColumn.SqlDbType);
-                                                                   parameter.Value = values[i] != null
-                                                                       ? (values[i].GetType() == typeof(XmlDocument)
-                                                                           ? ((XmlDocument) values[i]).InnerXml
-                                                                           : values[i])
-                                                                       : DBNull.Value;
+                        parameter.Value = values[i] != null
+                            ? (values[i].GetType() == typeof(XmlDocument)
+                                ? ((XmlDocument)values[i]).InnerXml
+                                : values[i])
+                            : DBNull.Value;
                     }
 
                     DataTable dt;
@@ -2059,7 +2180,7 @@ namespace NS.Base
                         CommandType = CommandType.StoredProcedure,
                         CommandText = "dbo.DropTmpTable"
                     };
-                    
+
                     dropCmd.Parameters.AddWithValue("table", tempTableName);
                     dropCmd.ExecuteNonQuery();
                     dropCmd.Dispose();
@@ -2089,7 +2210,7 @@ namespace NS.Base
                 return false;
             }
         }
-        
+
         public IOnClause<T, T2> InnerJoin<T2>() where T2 : IBaseModel, new()
         {
             var onClause = new OnClause<T, T2>(ConnectionString, JoinType.Inner);
@@ -2150,9 +2271,9 @@ namespace NS.Base
             cn.Close();
             return isSuccess;
         }
-        
-        
-        
+
+
+
         protected bool GetBoolean(DataRow row, string fieldName)
         {
             return row.GetValue<bool>(fieldName) ?? false;

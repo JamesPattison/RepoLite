@@ -14,10 +14,8 @@ namespace NS
 		Event Get(String eventid);
 		IEnumerable<Event> Get(List<String> eventids);
 		IEnumerable<Event> Get(params String[] eventids);
-		bool Update(Event item);
-		bool Delete(Event @event);
-		bool Delete(IEnumerable<Event> items);
-		bool Merge(List<Event> items);
+		bool DeleteByEventId(String eventid);
+		bool DeleteByEventName(String eventname);
 		IEnumerable<Event> Search(
 			String eventid = null,
 			String eventname = null);
@@ -141,6 +139,14 @@ namespace NS
 			return Delete(eventids.Select(x => new Event { EventId = x }));
 		}
 
+		public bool DeleteByEventId(String eventid)
+		{
+			return BaseDelete(new DeleteColumn("EventId", eventid, SqlDbType.NVarChar));
+		}
+		public bool DeleteByEventName(String eventname)
+		{
+			return BaseDelete(new DeleteColumn("EventName", eventname, SqlDbType.NVarChar));
+		}
 
 		public bool Merge(List<Event> items)
 		{

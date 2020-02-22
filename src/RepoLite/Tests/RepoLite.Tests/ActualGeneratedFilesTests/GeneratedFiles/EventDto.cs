@@ -33,11 +33,11 @@ namespace NS.Models
 		{
 			var validationErrors = new List<ValidationError>();
 
-			if (string.IsNullOrEmpty(EventId))
+			if (EventId == null)
 				validationErrors.Add(new ValidationError(nameof(EventId), "Value cannot be null"));
 			if (!string.IsNullOrEmpty(EventId) && EventId.Length > 20)
 				validationErrors.Add(new ValidationError(nameof(EventId), "Max length is 20"));
-			if (string.IsNullOrEmpty(EventName))
+			if (EventName == null)
 				validationErrors.Add(new ValidationError(nameof(EventName), "Value cannot be null"));
 			if (!string.IsNullOrEmpty(EventName) && EventName.Length > 100)
 				validationErrors.Add(new ValidationError(nameof(EventName), "Max length is 100"));
