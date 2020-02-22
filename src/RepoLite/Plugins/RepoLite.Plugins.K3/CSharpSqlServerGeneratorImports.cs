@@ -1,10 +1,9 @@
-﻿using RepoLite.Common;
+﻿using RepoLite.Common.Enums;
 using RepoLite.Common.Extensions;
 using RepoLite.Common.Interfaces;
 using RepoLite.Common.Models;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Xml;
 using static RepoLite.Common.Helpers;
 
@@ -20,18 +19,18 @@ namespace RepoLite.Plugins.K3
             sb.AppendLine("");
             sb.AppendLine(Tab1, $"public partial class {table.ClassName}Repository");
             sb.AppendLine(Tab1, "{");
-            
+
             var pk = table.PrimaryKeys.FirstOrDefault();
-            
+
             var pkParamList = table.PrimaryKeys.Aggregate("",
                     (current, column) => current + $"{column.DataType.Name} {column.FieldName}, ")
                 .TrimEnd(' ', ',');
             var pkParamValsList = table.PrimaryKeys.Aggregate("",
                     (current, column) => current + $"{column.FieldName}, ")
                 .TrimEnd(' ', ',');
-            
+
             //get
-            if (table.HasCompositeKey)
+            if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
             {
                 sb.AppendLine(Tab2, $"public static {table.ClassName} Get(string profile, {pkParamList})");
                 sb.AppendLine(Tab2, "{");
@@ -40,7 +39,7 @@ namespace RepoLite.Plugins.K3
                 sb.AppendLine(Tab4, $".Get({pkParamValsList});");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
-                
+
                 sb.AppendLine(Tab2, $"public static {table.ClassName} Get(string profile, {table.ClassName}Keys compositeId)");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3, $"Log.Activity(\"Calling Get in {table.ClassName}Repository\");");
@@ -48,7 +47,7 @@ namespace RepoLite.Plugins.K3
                 sb.AppendLine(Tab4, ".Get(compositeId);");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
-                
+
                 sb.AppendLine(Tab2, $"public static IEnumerable<{table.ClassName}> Get(string profile, List<{table.ClassName}Keys> compositeIds)");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3, $"Log.Activity(\"Calling Get in {table.ClassName}Repository\");");
@@ -56,7 +55,7 @@ namespace RepoLite.Plugins.K3
                 sb.AppendLine(Tab4, ".Get(compositeIds);");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
-                
+
                 sb.AppendLine(Tab2, $"public static IEnumerable<{table.ClassName}> Get(string profile, params {table.ClassName}Keys[] compositeIds)");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3, $"Log.Activity(\"Calling Get in {table.ClassName}Repository\");");
@@ -74,17 +73,17 @@ namespace RepoLite.Plugins.K3
                 sb.AppendLine(Tab4, $".Get({pk.FieldName});");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
-                
-                sb.AppendLine(Tab2,$"public static IEnumerable<{table.ClassName}> Get(string profile, List<{pk.DataType.Name}> {pk.FieldName}s)");
+
+                sb.AppendLine(Tab2, $"public static IEnumerable<{table.ClassName}> Get(string profile, List<{pk.DataType.Name}> {pk.FieldName}s)");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3, $"Log.Activity(\"Calling Get in {table.ClassName}Repository\");");
                 sb.AppendLine(Tab3, $"return new {table.ClassName}Repository(Settings.Instance[profile].ConnectionString, exception => Log.Error(exception, \"Get\"))");
                 sb.AppendLine(Tab4, $".Get({pk.FieldName}s);");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
-                
-                
-                sb.AppendLine(Tab2,$"public static IEnumerable<{table.ClassName}> Get(string profile, params {pk.DataType.Name}[] {pk.FieldName}s)");
+
+
+                sb.AppendLine(Tab2, $"public static IEnumerable<{table.ClassName}> Get(string profile, params {pk.DataType.Name}[] {pk.FieldName}s)");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3, $"Log.Activity(\"Calling Get in {table.ClassName}Repository\");");
                 sb.AppendLine(Tab3, $"return new {table.ClassName}Repository(Settings.Instance[profile].ConnectionString, exception => Log.Error(exception, \"Get\"))");
@@ -93,7 +92,7 @@ namespace RepoLite.Plugins.K3
                 sb.AppendLine("");
 
                 if (table.PrimaryKeys.Count == 1 &&
-                    new[] {typeof(short), typeof(int), typeof(long), typeof(decimal), typeof(double), typeof(float)}
+                    new[] { typeof(short), typeof(int), typeof(long), typeof(decimal), typeof(double), typeof(float) }
                         .Contains(pk.DataType))
                 {
                     sb.AppendLine(Tab2, $"public static {pk.DataType.Name} GetMaxId(string profile)");
@@ -105,11 +104,11 @@ namespace RepoLite.Plugins.K3
                     sb.AppendLine("");
                 }
             }
-            
+
             //update & delete
             if (table.PrimaryKeys.Any())
             {
-                if (table.HasCompositeKey)
+                if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
                 {
                     sb.AppendLine(Tab2, $"public static bool Update(string profile, {table.ClassName} item)");
                     sb.AppendLine(Tab2, "{");
@@ -134,7 +133,7 @@ namespace RepoLite.Plugins.K3
                     sb.AppendLine(Tab4, $".Delete({pkParamValsList});");
                     sb.AppendLine(Tab2, "}");
                     sb.AppendLine("");
-                    
+
                     sb.AppendLine(Tab2, $"public static bool Delete(string profile, {table.ClassName}Keys compositeId)");
                     sb.AppendLine(Tab2, "{");
                     sb.AppendLine(Tab3, $"Log.Activity(\"Calling Delete in {table.ClassName}Repository\");");
@@ -142,7 +141,7 @@ namespace RepoLite.Plugins.K3
                     sb.AppendLine(Tab4, ".Delete(compositeId);");
                     sb.AppendLine(Tab2, "}");
                     sb.AppendLine("");
-                    
+
                     sb.AppendLine(Tab2, $"public static bool Delete(string profile, IEnumerable<{table.ClassName}Keys> compositeIds)");
                     sb.AppendLine(Tab2, "{");
                     sb.AppendLine(Tab3, $"Log.Activity(\"Calling Delete in {table.ClassName}Repository\");");
@@ -169,7 +168,7 @@ namespace RepoLite.Plugins.K3
                     sb.AppendLine(Tab4, $".Delete({pk.FieldName});");
                     sb.AppendLine(Tab2, "}");
                     sb.AppendLine("");
-                    
+
                     sb.AppendLine(Tab2, $"public static bool Delete(string profile, IEnumerable<{pk.DataType.Name}> {pk.FieldName}s)");
                     sb.AppendLine(Tab2, "{");
                     sb.AppendLine(Tab3, $"Log.Activity(\"Calling Delete in {table.ClassName}Repository\");");
@@ -192,7 +191,7 @@ namespace RepoLite.Plugins.K3
                     sb.AppendLine("");
                 }
             }
-            
+
             //search
             sb.AppendLine(Tab2, "[Obsolete(\"This method will not be removed, however it will not be updated. Please use Search or Where instead.\")]");
             sb.AppendLine(Tab2, $"public static IEnumerable<{table.ClassName}> Find(string profile, ");
@@ -228,9 +227,9 @@ namespace RepoLite.Plugins.K3
             sb.AppendLine(Tab4, $".Search({vals});");
             sb.AppendLine(Tab2, "}");
             sb.AppendLine("");
-            
+
             //find
-            if (table.HasCompositeKey)
+            if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
             {
                 foreach (var primaryKey in table.PrimaryKeys)
                 {
@@ -280,7 +279,7 @@ namespace RepoLite.Plugins.K3
                 sb.AppendLine("");
             }
 
-            
+
             //IBaseRepository<T>
             sb.AppendLine(Tab2, $"public static long RecordCount(string profile)");
             sb.AppendLine(Tab2, "{");
@@ -289,7 +288,7 @@ namespace RepoLite.Plugins.K3
             sb.AppendLine(Tab4, ".RecordCount();");
             sb.AppendLine(Tab2, "}");
             sb.AppendLine("");
-            
+
             sb.AppendLine(Tab2, $"public static IEnumerable<{table.ClassName}> GetAll(string profile)");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, $"Log.Activity(\"Calling GetAll in {table.ClassName}Repository\");");
@@ -297,7 +296,7 @@ namespace RepoLite.Plugins.K3
             sb.AppendLine(Tab4, ".GetAll();");
             sb.AppendLine(Tab2, "}");
             sb.AppendLine("");
-            
+
             sb.AppendLine(Tab2, $"public static bool Create(string profile, {table.ClassName} item)");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, $"Log.Activity(\"Calling Create in {table.ClassName}Repository\");");
@@ -305,7 +304,7 @@ namespace RepoLite.Plugins.K3
             sb.AppendLine(Tab4, ".Create(item);");
             sb.AppendLine(Tab2, "}");
             sb.AppendLine("");
-            
+
             sb.AppendLine(Tab2, $"public static bool BulkCreate(string profile, List<{table.ClassName}> items)");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, $"Log.Activity(\"Calling BulkCreate in {table.ClassName}Repository\");");
@@ -321,7 +320,7 @@ namespace RepoLite.Plugins.K3
             sb.AppendLine(Tab4, ".BulkCreate(items);");
             sb.AppendLine(Tab2, "}");
             sb.AppendLine("");
-            
+
             sb.AppendLine(Tab2, $"public static Where<{table.ClassName}> Where(string profile, string col, Comparison comparison, object val)");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, $"Log.Activity(\"Calling Where in {table.ClassName}Repository\");");
@@ -329,7 +328,7 @@ namespace RepoLite.Plugins.K3
             sb.AppendLine(Tab4, ".Where(col, comparison, val);");
             sb.AppendLine(Tab2, "}");
             sb.AppendLine("");
-            
+
             sb.AppendLine(Tab2, $"public static Where<{table.ClassName}> Where(string profile, string col, Comparison comparison, object val, Type valueType)");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, $"Log.Activity(\"Calling Where in {table.ClassName}Repository\");");
@@ -345,9 +344,10 @@ namespace RepoLite.Plugins.K3
             sb.AppendLine(Tab4, ".Where(query);");
             sb.AppendLine(Tab2, "}");
             sb.AppendLine("");
-            
+
             //IPkRepository<T>
-            if (table.Columns.Count(x => x.PrimaryKey) == 1){
+            if (table.Columns.Count(x => x.PrimaryKey) == 1)
+            {
                 sb.AppendLine(Tab2, $"public static bool Update(string profile, {table.ClassName} item)");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3, $"Log.Activity(\"Calling Update in {table.ClassName}Repository\");");
@@ -355,7 +355,7 @@ namespace RepoLite.Plugins.K3
                 sb.AppendLine(Tab4, $".Update(item);");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
-    
+
                 sb.AppendLine(Tab2, $"public static bool Delete(string profile, {table.ClassName} item)");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3, $"Log.Activity(\"Calling Delete in {table.ClassName}Repository\");");
@@ -363,7 +363,7 @@ namespace RepoLite.Plugins.K3
                 sb.AppendLine(Tab4, $".Delete(item);");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
-                
+
                 sb.AppendLine(Tab2, $"public static bool Delete(string profile, IEnumerable<{table.ClassName}> items)");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3, $"Log.Activity(\"Calling Delete in {table.ClassName}Repository\");");
@@ -371,7 +371,7 @@ namespace RepoLite.Plugins.K3
                 sb.AppendLine(Tab4, $".Delete(items);");
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
-                
+
                 sb.AppendLine(Tab2, $"public static bool Merge(string profile, List<{table.ClassName}> items)");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3, $"Log.Activity(\"Calling Merge in {table.ClassName}Repository\");");
@@ -380,7 +380,7 @@ namespace RepoLite.Plugins.K3
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
             }
-            
+
             sb.AppendLine(Tab1, "}");
             return sb;
         }

@@ -52,7 +52,6 @@
     <Compile Include="Generators\BaseParsers\CSharpSqlServerBaseClassParser.cs" />
     <Compile Include="Generators\BaseParsers\Base\IParser.cs" />
     <Compile Include="Generators\CSharpSqlServerGenerator.cs" />
-    <Compile Include="Generators\VBSqlServerGenerator.cs" />
     <Compile Include="IGenerator.cs" />
     <Compile Include="Models\TableToGenerate.cs" />
     <Compile Include="PluginHelper.cs" />
@@ -63,8 +62,6 @@
     <Content Include="Templates\CSharp\SqlServer\BaseRepository.cs.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Templates\VB\BaseModel.vb.txt" />
-    <Content Include="Templates\VB\BaseRepository.vb.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Plugins\RepoLite.Plugins.K3\RepoLite.Plugins.K3.csproj">
