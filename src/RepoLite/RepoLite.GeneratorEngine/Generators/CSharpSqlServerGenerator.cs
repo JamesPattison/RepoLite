@@ -118,7 +118,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.Append(Repo_Create(table));
 
             //update & delete
-            if (table.PrimaryKeys.Any())
+            if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.PrimaryKey)
             {
                 sb.Append(Repo_Update(table));
                 sb.Append(Repo_Delete(table));
@@ -128,7 +128,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.Append(Repo_DeleteBy(table));
 
             //merge
-            if (table.PrimaryKeys.Any())
+            if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.PrimaryKey)
             {
                 sb.Append(Repo_Merge(table));
             }
@@ -395,7 +395,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2,
                     $"IEnumerable<{table.ClassName}> Get(params {table.ClassName}Keys[] compositeIds);");
             }
-            else if (table.PrimaryKeys.Any())
+            else if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.PrimaryKey)
             {
                 sb.AppendLine(Tab2, $"{table.ClassName} Get({pk.DataType.Name} {pk.FieldName});");
                 sb.AppendLine(Tab2,
@@ -548,7 +548,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
                 sb.AppendLine("");
             }
-            else if (table.PrimaryKeys.Any())
+            else if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.PrimaryKey)
             {
                 var pk = table.PrimaryKeys.First();
 
@@ -822,7 +822,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
             }
-            else if (table.PrimaryKeys.Any())
+            else if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.PrimaryKey)
             {
                 var pk = table.PrimaryKeys.First();
 
