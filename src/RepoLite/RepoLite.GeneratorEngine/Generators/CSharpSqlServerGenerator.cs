@@ -1,4 +1,5 @@
 ﻿using RepoLite.Common;
+using RepoLite.Common.Enums;
 using RepoLite.Common.Extensions;
 using RepoLite.Common.Interfaces;
 using RepoLite.Common.Models;
@@ -6,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Xml;
 using static RepoLite.Common.Helpers;
 
@@ -60,7 +60,7 @@ namespace RepoLite.GeneratorEngine.Generators
             if (_plugin != null)
                 sb.Append(_plugin.GenerateRepoWrapper(table));
 
-            if (table.HasCompositeKey)
+            if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
             {
                 //build up object to use for composite searching
 
@@ -385,7 +385,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 .TrimEnd(' ', ',');
 
             //get
-            if (table.HasCompositeKey)
+            if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
             {
                 sb.AppendLine(Tab2, $"{table.ClassName} Get({pkParamList});");
                 sb.AppendLine(Tab2,
@@ -429,7 +429,7 @@ namespace RepoLite.GeneratorEngine.Generators
             }
 
             //find
-            if (table.HasCompositeKey)
+            if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
             {
                 foreach (var primaryKey in table.PrimaryKeys)
                 {
@@ -460,7 +460,7 @@ namespace RepoLite.GeneratorEngine.Generators
         private StringBuilder Repo_Get(Table table)
         {
             var sb = new StringBuilder();
-            if (table.HasCompositeKey)
+            if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
             {
                 var pkParamList = table.PrimaryKeys.Aggregate("",
                         (current, column) => current + $"{column.DataType.Name} {column.FieldName}, ")
@@ -716,7 +716,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab3, "return BaseDelete(deleteColumn);");
             sb.AppendLine(Tab2, "}");
 
-            if (!table.HasCompositeKey)
+            if (table.PrimaryKeyConfiguration != PrimaryKeyConfigurationEnum.CompositeKey)
             {
                 sb.AppendLine(Tab2, $"public bool Delete(IEnumerable<{table.ClassName}> items)");
                 sb.AppendLine(Tab2, "{");
@@ -731,7 +731,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, "}");
             }
 
-            if (table.HasCompositeKey)
+            if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
             {
                 var pkParamList = table.PrimaryKeys.Aggregate("",
                         (current, column) => current + $"{column.DataType.Name} {column.FieldName}, ")
@@ -988,7 +988,7 @@ namespace RepoLite.GeneratorEngine.Generators
         {
             var sb = new StringBuilder();
 
-            if (table.HasCompositeKey)
+            if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
             {
                 sb.AppendLine("");
                 //Find methods on PK'S are available as there's a composite primary key

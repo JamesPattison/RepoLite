@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RepoLite.Common.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,7 +13,7 @@ namespace RepoLite.Common.Models
         //public string SequenceName;
         //public bool Ignore;
         public string DbTableName { get; set; }
-        
+
         public string LowerClassName
         {
             get
@@ -44,9 +45,22 @@ namespace RepoLite.Common.Models
 
         public Column this[string columnName] => GetColumn(columnName);
 
-        public bool HasCompositeKey
+        public PrimaryKeyConfigurationEnum PrimaryKeyConfiguration
         {
-            get { return Columns.Count(x => x.PrimaryKey) > 1; }
+            get
+            {
+                var keyCount = Columns.Count(x => x.PrimaryKey);
+
+                switch (keyCount)
+                {
+                    case 0:
+                        return PrimaryKeyConfigurationEnum.NoKey;
+                    case 1:
+                        return PrimaryKeyConfigurationEnum.PrimaryKey;
+                    default:
+                        return PrimaryKeyConfigurationEnum.CompositeKey;
+                }
+            }
         }
 
         public List<Column> PrimaryKeys

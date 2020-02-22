@@ -91,11 +91,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RepoLite.Common\RepoLite.Common.csproj">
+    <ProjectReference Include="..\..\RepoLite.Common\RepoLite.Common.csproj">
       <Project>{4e4b8334-a677-4686-858f-782642c051f2}</Project>
       <Name>RepoLite.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RepoLite.GeneratorEngine\RepoLite.GeneratorEngine.csproj">
+    <ProjectReference Include="..\..\RepoLite.GeneratorEngine\RepoLite.GeneratorEngine.csproj">
       <Project>{9cf0994e-5d80-4a33-be5a-3e3601450f1e}</Project>
       <Name>RepoLite.GeneratorEngine</Name>
     </ProjectReference>

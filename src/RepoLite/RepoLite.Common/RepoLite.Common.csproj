@@ -53,6 +53,7 @@
     <Compile Include="Enums\DataSourceEnum.cs" />
     <Compile Include="Enums\GenerationLanguage.cs" />
     <Compile Include="Enums\PluginEnum.cs" />
+    <Compile Include="Enums\PrimaryKeyConfigurationEnum.cs" />
     <Compile Include="Enums\TargetFramework.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\StringBuilderExtensions.cs" />
