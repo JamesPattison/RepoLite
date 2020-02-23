@@ -328,7 +328,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
             var sql = ExpressionParser.ToSql<ClassA, ClassB>(
                 (classA, classB) => (classA.A_IntProperty % classB.B_IntProperty) == 1, _keyMap);
 
-            var expected = "(([c0].[A_IntProperty] % [c1].[B_IntProperty]) = 1)";
+            var expected = "(([c0].[A_IntProperty] % [c1].[B_IntProperty]) = '1')";
 
             Assert.IsTrue(sql == expected, $"expected: {expected} but received: {sql}");
         }
@@ -351,7 +351,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         {
             var sql = ExpressionParser.ToSql<ClassA>(classA => classA.A_IntProperty == 3, _keyMap);
 
-            var expected = "([c0].[A_IntProperty] = 3)";
+            var expected = "([c0].[A_IntProperty] = '3')";
 
             Assert.IsTrue(sql == expected, $"expected: {expected} but received: {sql}");
         }
@@ -361,7 +361,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         {
             var sql = ExpressionParser.ToSql<ClassA>(classA => classA.A_IntProperty != 4, _keyMap);
 
-            var expected = "([c0].[A_IntProperty] <> 4)";
+            var expected = "([c0].[A_IntProperty] <> '4')";
 
             Assert.IsTrue(sql == expected, $"expected: {expected} but received: {sql}");
         }
@@ -371,7 +371,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         {
             var sql = ExpressionParser.ToSql<ClassA>(classA => classA.A_IntProperty < 5, _keyMap);
 
-            var expected = "([c0].[A_IntProperty] < 5)";
+            var expected = "([c0].[A_IntProperty] < '5')";
 
             Assert.IsTrue(sql == expected, $"expected: {expected} but received: {sql}");
         }
@@ -381,7 +381,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         {
             var sql = ExpressionParser.ToSql<ClassA>(classA => classA.A_IntProperty <= 5, _keyMap);
 
-            var expected = "([c0].[A_IntProperty] <= 5)";
+            var expected = "([c0].[A_IntProperty] <= '5')";
 
             Assert.IsTrue(sql == expected, $"expected: {expected} but received: {sql}");
         }
@@ -391,7 +391,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         {
             var sql = ExpressionParser.ToSql<ClassA>(classA => classA.A_IntProperty > 10, _keyMap);
 
-            var expected = "([c0].[A_IntProperty] > 10)";
+            var expected = "([c0].[A_IntProperty] > '10')";
 
             Assert.IsTrue(sql == expected, $"expected: {expected} but received: {sql}");
         }
@@ -401,7 +401,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         {
             var sql = ExpressionParser.ToSql<ClassA>(classA => classA.A_IntProperty >= 10, _keyMap);
 
-            var expected = "([c0].[A_IntProperty] >= 10)";
+            var expected = "([c0].[A_IntProperty] >= '10')";
 
             Assert.IsTrue(sql == expected, $"expected: {expected} but received: {sql}");
         }
