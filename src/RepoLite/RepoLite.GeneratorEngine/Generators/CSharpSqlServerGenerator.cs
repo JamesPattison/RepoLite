@@ -905,6 +905,36 @@ namespace RepoLite.GeneratorEngine.Generators
 
             sb.AppendLine(Tab3, "return BaseMerge(mergeTable);");
             sb.AppendLine(Tab2, "}");
+            sb.AppendLine();
+
+
+            sb.AppendLine(Tab2, "public bool Merge(string csvPath)");
+            sb.AppendLine(Tab2, "{");
+            sb.AppendLine(Tab3, $"var mergeTable = new List<{table.ClassName}>();");
+            sb.AppendLine(Tab3, "using (var sr = new StreamReader(csvPath))");
+            sb.AppendLine(Tab3, "{");
+            sb.AppendLine(Tab4, "var line = sr.ReadLine();");
+            sb.AppendLine(Tab4, "if (line == null) return false;");
+            sb.AppendLine();
+            sb.AppendLine(Tab4, "var firstItem = line.Split(',')[0];");
+            sb.AppendLine(Tab4, $"if (firstItem == \"{table.Columns.First().PropertyName}\")");
+            sb.AppendLine(Tab4, "{");
+            sb.AppendLine(Tab5, "//CSV has headers");
+            sb.AppendLine(Tab5, "//Run to the next line");
+            sb.AppendLine(Tab5, "line = sr.ReadLine();");
+            sb.AppendLine(Tab5, "if (line == null) return true;");
+            sb.AppendLine(Tab4, "}");
+            sb.AppendLine();
+            sb.AppendLine(Tab4, "do");
+            sb.AppendLine(Tab4, "{");
+            sb.AppendLine(Tab5, "var blocks = line.Split(',');");
+            sb.AppendLine(Tab5, $"mergeTable.Add(new {table.ClassName}(blocks));");
+            sb.AppendLine(Tab4, "} while ((line = sr.ReadLine()) != null);");
+            sb.AppendLine();
+            sb.AppendLine(Tab4, "");
+            sb.AppendLine(Tab3, "return Merge(mergeTable);");
+            sb.AppendLine(Tab2, "}");
+
 
             return sb;
         }
