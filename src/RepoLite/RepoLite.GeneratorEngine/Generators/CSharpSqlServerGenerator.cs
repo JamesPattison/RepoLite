@@ -183,6 +183,42 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, "}");
             }
 
+            //constructors
+            sb.AppendLine(Tab2, $"public {table.ClassName}() {{ }}");
+
+            sb.AppendLine(Tab2, $"public {table.ClassName}(");
+            foreach (var column in table.Columns)
+            {
+                sb.Append(Tab3,
+                        $"{column.DataType.Name} {column.FieldName}");
+                sb.AppendLine(column == table.Columns.Last() ? ")" : ",");
+            }
+            sb.AppendLine(Tab2, "{");
+            foreach (var column in table.Columns)
+            {
+                sb.AppendLine(Tab3, $"_{column.FieldName} = {column.FieldName};");
+            }
+            sb.AppendLine(Tab2, "}");
+
+            sb.AppendLine(Tab2, $"public {table.ClassName}(params object[] csvValues)");
+            sb.AppendLine(Tab2, "{");
+            sb.AppendLine(Tab3, $"if (csvValues.Length < {table.Columns.Count}-1) throw new Exception(\"Could not parse Csv\");");
+            for (int i = 0; i < table.Columns.Count; i++)
+            {
+                var column = table.Columns[i];
+                if (column.DataType == typeof(string))
+                {
+                    sb.AppendLine(Tab3, $"_{column.FieldName} = csvValues[{i}].ToString();");
+                }
+                else
+                {
+                    sb.AppendLine(Tab3, $"{column.DataType.Name}.TryParse(csvValues[{i}].ToString(), out _{column.FieldName});");
+                }                
+            }
+            sb.AppendLine(Tab2, "}");
+
+            //methods
+
             sb.AppendLine(Tab2, "public override IBaseModel SetValues(DataRow row, string propertyPrefix)");
             sb.AppendLine(Tab2, "{");
             foreach (var column in table.Columns)
