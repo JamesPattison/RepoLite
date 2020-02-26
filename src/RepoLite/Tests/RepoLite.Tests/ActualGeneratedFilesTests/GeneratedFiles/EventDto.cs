@@ -7,21 +7,35 @@ using NS.Models.Base;
 
 namespace NS.Models
 {
-	public partial class Event : BaseModel
+	public sealed partial class Event : BaseModel
 	{
 		public override string EntityName => "Event";
 		private String _eventid;
 		private String _eventname;
 
-		public virtual String EventId
+		public String EventId
 		{
 			get => _eventid;
 			set => SetValue(ref _eventid, value);
 		}
-		public virtual String EventName
+		public String EventName
 		{
 			get => _eventname;
 			set => SetValue(ref _eventname, value);
+		}
+		public Event() { }
+		public Event(
+			String eventid,
+			String eventname)
+		{
+			_eventid = eventid;
+			_eventname = eventname;
+		}
+		public Event(params object[] csvValues)
+		{
+			if (csvValues.Length != 2) throw new Exception("Could not parse Csv");
+			EventId = Cast<String>(csvValues[0]);
+			EventName = Cast<String>(csvValues[1]);
 		}
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{

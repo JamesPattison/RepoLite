@@ -7,12 +7,12 @@ using NS.Models.Base;
 
 namespace NS.Models
 {
-	public partial class Address : BaseModel
+	public sealed partial class Address : BaseModel
 	{
 		public override string EntityName => "Address";
 		private Int32 _id;
 		private String _anotherid;
-		private Int32 _personid;
+		private Int32? _personid;
 		private String _line1;
 		private String _line2;
 		private String _line3;
@@ -21,61 +21,99 @@ namespace NS.Models
 		private String _phonenumber;
 		private String _country_code;
 
-		public virtual Int32 Id
+		public Int32 Id
 		{
 			get => _id;
 			set => SetValue(ref _id, value);
 		}
-		public virtual String AnotherId
+		public String AnotherId
 		{
 			get => _anotherid;
 			set => SetValue(ref _anotherid, value);
 		}
-		public virtual Int32 PersonId
+		public Int32? PersonId
 		{
 			get => _personid;
 			set => SetValue(ref _personid, value);
 		}
-		public virtual String Line1
+		public String Line1
 		{
 			get => _line1;
 			set => SetValue(ref _line1, value);
 		}
-		public virtual String Line2
+		public String Line2
 		{
 			get => _line2;
 			set => SetValue(ref _line2, value);
 		}
-		public virtual String Line3
+		public String Line3
 		{
 			get => _line3;
 			set => SetValue(ref _line3, value);
 		}
-		public virtual String Line4
+		public String Line4
 		{
 			get => _line4;
 			set => SetValue(ref _line4, value);
 		}
-		public virtual String PostCode
+		public String PostCode
 		{
 			get => _postcode;
 			set => SetValue(ref _postcode, value);
 		}
-		public virtual String PhoneNumber
+		public String PhoneNumber
 		{
 			get => _phonenumber;
 			set => SetValue(ref _phonenumber, value);
 		}
-		public virtual String COUNTRY_CODE
+		public String COUNTRY_CODE
 		{
 			get => _country_code;
 			set => SetValue(ref _country_code, value);
+		}
+		public Address() { }
+		public Address(
+			Int32 id,
+			String anotherid,
+			Int32 personid,
+			String line1,
+			String line2,
+			String line3,
+			String line4,
+			String postcode,
+			String phonenumber,
+			String country_code)
+		{
+			_id = id;
+			_anotherid = anotherid;
+			_personid = personid;
+			_line1 = line1;
+			_line2 = line2;
+			_line3 = line3;
+			_line4 = line4;
+			_postcode = postcode;
+			_phonenumber = phonenumber;
+			_country_code = country_code;
+		}
+		public Address(params object[] csvValues)
+		{
+			if (csvValues.Length != 10) throw new Exception("Could not parse Csv");
+			Id = Cast<Int32>(csvValues[0]);
+			AnotherId = Cast<String>(csvValues[1]);
+			PersonId = Cast<Int32>(csvValues[2]);
+			Line1 = Cast<String>(csvValues[3]);
+			Line2 = Cast<String>(csvValues[4]);
+			Line3 = Cast<String>(csvValues[5]);
+			Line4 = Cast<String>(csvValues[6]);
+			PostCode = Cast<String>(csvValues[7]);
+			PhoneNumber = Cast<String>(csvValues[8]);
+			COUNTRY_CODE = Cast<String>(csvValues[9]);
 		}
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{
 			_id = row.GetValue<Int32>($"{propertyPrefix}Id") ?? default(Int32); 
 			_anotherid = row.GetText($"{propertyPrefix}AnotherId");
-			_personid = row.GetValue<Int32>($"{propertyPrefix}PersonId") ?? default(Int32); 
+			_personid = row.GetValue<Int32>($"{propertyPrefix}PersonId"); 
 			_line1 = row.GetText($"{propertyPrefix}Line1");
 			_line2 = row.GetText($"{propertyPrefix}Line2");
 			_line3 = row.GetText($"{propertyPrefix}Line3");
@@ -118,7 +156,7 @@ namespace NS.Models
 		{
 			new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, true, true),
 			new ColumnDefinition("AnotherId", typeof(System.String), "[NVARCHAR](10)", SqlDbType.NVarChar, false, true, false),
-			new ColumnDefinition("PersonId", typeof(System.Int32), "[INT]", SqlDbType.Int, false, false, false),
+			new ColumnDefinition("PersonId", typeof(System.Int32), "[INT]", SqlDbType.Int, true, false, false),
 			new ColumnDefinition("Line1", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, false, false, false),
 			new ColumnDefinition("Line2", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, true, false, false),
 			new ColumnDefinition("Line3", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, true, false, false),

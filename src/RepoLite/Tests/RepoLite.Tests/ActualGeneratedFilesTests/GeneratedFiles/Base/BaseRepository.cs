@@ -34,6 +34,7 @@ namespace NS.Base
         bool Delete(T item);
         bool Delete(IEnumerable<T> items);
         bool Merge(List<T> items);
+        bool Merge(string csvPath);
     }
 
     #region Enums

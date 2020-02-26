@@ -65,12 +65,24 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         }
 
         [TestMethod]
-        public void TestAddress_FindByAge()
+        public void TestNullable_FindByAge()
         {
             var actual = _repository.FindByAge(31).ToArray();
 
             var expected = 1;
             Assert.IsTrue(actual.Length == expected, $"expected: {expected} but received: {actual.Length}");
+        }
+
+        [TestMethod]
+        public void TestCsvImport()
+        {
+            var csvPath =
+                @"ActualGeneratedFilesTests\Csvs\NullableTable.csv";
+            Assert.IsTrue(_repository.Merge(csvPath));
+
+            var items = _repository.GetAll();
+
+            Assert.IsTrue(items.All(x => x.DoB.HasValue && x.DoB.Value.Date == new DateTime(2020, 02, 26)));
         }
     }
 }

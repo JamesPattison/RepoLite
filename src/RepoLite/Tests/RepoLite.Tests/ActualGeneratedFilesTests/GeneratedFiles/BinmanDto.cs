@@ -7,21 +7,35 @@ using NS.Models.Base;
 
 namespace NS.Models
 {
-	public partial class BinMan : BaseModel
+	public sealed partial class BinMan : BaseModel
 	{
 		public override string EntityName => "BinMan";
 		private Int32 _id;
 		private Byte[] _data;
 
-		public virtual Int32 Id
+		public Int32 Id
 		{
 			get => _id;
 			set => SetValue(ref _id, value);
 		}
-		public virtual Byte[] Data
+		public Byte[] Data
 		{
 			get => _data;
 			set => SetValue(ref _data, value);
+		}
+		public BinMan() { }
+		public BinMan(
+			Int32 id,
+			Byte[] data)
+		{
+			_id = id;
+			_data = data;
+		}
+		public BinMan(params object[] csvValues)
+		{
+			if (csvValues.Length != 2) throw new Exception("Could not parse Csv");
+			Id = Cast<Int32>(csvValues[0]);
+			Data = Cast<Byte[]>(csvValues[1]);
 		}
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{

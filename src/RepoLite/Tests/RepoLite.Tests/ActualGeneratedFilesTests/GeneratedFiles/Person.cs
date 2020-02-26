@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Xml;
 
@@ -199,6 +200,34 @@ namespace NS
 				});
 			}
 			return BaseMerge(mergeTable);
+		}
+
+		public bool Merge(string csvPath)
+		{
+			var mergeTable = new List<Person>();
+			using (var sr = new StreamReader(csvPath))
+			{
+				var line = sr.ReadLine();
+				if (line == null) return false;
+
+				var firstItem = line.Split(',')[0];
+				if (firstItem == "Id")
+				{
+					//CSV has headers
+					//Run to the next line
+					line = sr.ReadLine();
+					if (line == null) return true;
+				}
+
+				do
+				{
+					var blocks = line.Split(',');
+					mergeTable.Add(new Person(blocks));
+				} while ((line = sr.ReadLine()) != null);
+
+				
+				return Merge(mergeTable);
+			}
 		}
 
 		protected override Person ToItem(DataRow row)

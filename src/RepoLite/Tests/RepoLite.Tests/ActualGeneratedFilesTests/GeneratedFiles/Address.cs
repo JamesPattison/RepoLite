@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Xml;
 
@@ -44,6 +45,7 @@ namespace NS
 		bool Delete(AddressKeys compositeId);
 		bool Delete(IEnumerable<AddressKeys> compositeIds);
 		bool Merge(List<Address> items);
+		bool Merge(string csvPath);
 		IEnumerable<Address> Search(
 			Int32? id = null,
 			String anotherid = null,
@@ -290,13 +292,41 @@ namespace NS
 			return BaseMerge(mergeTable);
 		}
 
+		public bool Merge(string csvPath)
+		{
+			var mergeTable = new List<Address>();
+			using (var sr = new StreamReader(csvPath))
+			{
+				var line = sr.ReadLine();
+				if (line == null) return false;
+
+				var firstItem = line.Split(',')[0];
+				if (firstItem == "Id")
+				{
+					//CSV has headers
+					//Run to the next line
+					line = sr.ReadLine();
+					if (line == null) return true;
+				}
+
+				do
+				{
+					var blocks = line.Split(',');
+					mergeTable.Add(new Address(blocks));
+				} while ((line = sr.ReadLine()) != null);
+
+				
+				return Merge(mergeTable);
+			}
+		}
+
 		protected override Address ToItem(DataRow row)
 		{
 			 var item = new Address
 			{
 				Id = GetInt32(row, "Id"),
 				AnotherId = GetString(row, "AnotherId"),
-				PersonId = GetInt32(row, "PersonId"),
+				PersonId = GetNullableInt32(row, "PersonId"),
 				Line1 = GetString(row, "Line1"),
 				Line2 = GetString(row, "Line2"),
 				Line3 = GetString(row, "Line3"),

@@ -47,6 +47,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine("using System.Data;");
             sb.AppendLine("using System.Data.SqlClient;");
+            sb.AppendLine("using System.IO;");
             sb.AppendLine("using System.Linq;");
             sb.AppendLine("using System.Xml;");
             sb.Append(Environment.NewLine);
@@ -155,7 +156,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine($"namespace {AppSettings.Generation.ModelGenerationNamespace}");
             sb.AppendLine("{");
 
-            sb.AppendLine(Tab1, $"public partial class {table.ClassName} : BaseModel");
+            sb.AppendLine(Tab1, $"public sealed partial class {table.ClassName} : BaseModel");
             sb.AppendLine(Tab1, "{");
 
             sb.AppendLine(Tab2, $"public override string EntityName => \"{table.DbTableName}\";");
@@ -173,7 +174,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 //Property
                 var fieldName = $"_{column.FieldName}";
                 sb.AppendLine(Tab2,
-                    $"public virtual {column.DataType.Name}{(IsCSharpNullable(column.DataType.Name) && column.IsNullable ? "?" : "")} {column.DbColumnName}");
+                    $"public {column.DataType.Name}{(IsCSharpNullable(column.DataType.Name) && column.IsNullable ? "?" : "")} {column.DbColumnName}");
                 sb.AppendLine(Tab2, "{");
 
                 sb.AppendLine(Tab3, $"get => {fieldName};");
@@ -202,18 +203,13 @@ namespace RepoLite.GeneratorEngine.Generators
 
             sb.AppendLine(Tab2, $"public {table.ClassName}(params object[] csvValues)");
             sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, $"if (csvValues.Length < {table.Columns.Count}-1) throw new Exception(\"Could not parse Csv\");");
+            sb.AppendLine(Tab3, $"if (csvValues.Length != {table.Columns.Count}) throw new Exception(\"Could not parse Csv\");");
             for (int i = 0; i < table.Columns.Count; i++)
             {
                 var column = table.Columns[i];
-                if (column.DataType == typeof(string))
-                {
-                    sb.AppendLine(Tab3, $"_{column.FieldName} = csvValues[{i}].ToString();");
-                }
-                else
-                {
-                    sb.AppendLine(Tab3, $"{column.DataType.Name}.TryParse(csvValues[{i}].ToString(), out _{column.FieldName});");
-                }                
+
+                sb.AppendLine(Tab3,
+                    $"{column.PropertyName} = Cast<{column.DataType.Name}>(csvValues[{i}]);");
             }
             sb.AppendLine(Tab2, "}");
 
@@ -460,6 +456,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{table.ClassName}Keys> compositeIds);");
 
                 sb.AppendLine(Tab2, $"bool Merge(List<{table.ClassName}> items);");
+                sb.AppendLine(Tab2, "bool Merge(string csvPath);");
             }
 
             //search
@@ -968,7 +965,8 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab4, "} while ((line = sr.ReadLine()) != null);");
             sb.AppendLine();
             sb.AppendLine(Tab4, "");
-            sb.AppendLine(Tab3, "return Merge(mergeTable);");
+            sb.AppendLine(Tab4, "return Merge(mergeTable);");
+            sb.AppendLine(Tab3, "}");
             sb.AppendLine(Tab2, "}");
 
 

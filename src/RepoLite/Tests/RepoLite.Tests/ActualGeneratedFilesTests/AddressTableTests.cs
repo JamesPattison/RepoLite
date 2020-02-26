@@ -1361,5 +1361,16 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
             Assert.IsTrue(actual.Length == expected, $"expected: {expected} but received: {actual.Length}");
         }
 
+        [TestMethod]
+        public void TestCsvImport()
+        {
+            Assert.IsTrue(_repository.GetAll().Count() == 10);
+
+            var csvPath =
+                @"ActualGeneratedFilesTests\Csvs\Address.csv";
+            Assert.IsTrue(_repository.Merge(csvPath));
+
+            Assert.IsTrue(_repository.GetAll().Count() == 11);
+        }
     }
 }

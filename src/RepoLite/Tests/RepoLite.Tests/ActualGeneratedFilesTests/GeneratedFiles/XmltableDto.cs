@@ -7,21 +7,35 @@ using NS.Models.Base;
 
 namespace NS.Models
 {
-	public partial class xmltable : BaseModel
+	public sealed partial class xmltable : BaseModel
 	{
 		public override string EntityName => "xmltable";
 		private String _name;
 		private XmlDocument _data;
 
-		public virtual String name
+		public String name
 		{
 			get => _name;
 			set => SetValue(ref _name, value);
 		}
-		public virtual XmlDocument data
+		public XmlDocument data
 		{
 			get => _data;
 			set => SetValue(ref _data, value);
+		}
+		public xmltable() { }
+		public xmltable(
+			String name,
+			XmlDocument data)
+		{
+			_name = name;
+			_data = data;
+		}
+		public xmltable(params object[] csvValues)
+		{
+			if (csvValues.Length != 2) throw new Exception("Could not parse Csv");
+			name = Cast<String>(csvValues[0]);
+			data = Cast<XmlDocument>(csvValues[1]);
 		}
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{

@@ -7,7 +7,7 @@ using NS.Models.Base;
 
 namespace NS.Models
 {
-	public partial class NullableTable : BaseModel
+	public sealed partial class NullableTable : BaseModel
 	{
 		public override string EntityName => "NullableTable";
 		private Int32 _id;
@@ -15,25 +15,45 @@ namespace NS.Models
 		private DateTime? _dob;
 		private Guid? _lolval;
 
-		public virtual Int32 Id
+		public Int32 Id
 		{
 			get => _id;
 			set => SetValue(ref _id, value);
 		}
-		public virtual Int32? Age
+		public Int32? Age
 		{
 			get => _age;
 			set => SetValue(ref _age, value);
 		}
-		public virtual DateTime? DoB
+		public DateTime? DoB
 		{
 			get => _dob;
 			set => SetValue(ref _dob, value);
 		}
-		public virtual Guid? lolVal
+		public Guid? lolVal
 		{
 			get => _lolval;
 			set => SetValue(ref _lolval, value);
+		}
+		public NullableTable() { }
+		public NullableTable(
+			Int32 id,
+			Int32 age,
+			DateTime dob,
+			Guid lolval)
+		{
+			_id = id;
+			_age = age;
+			_dob = dob;
+			_lolval = lolval;
+		}
+		public NullableTable(params object[] csvValues)
+		{
+			if (csvValues.Length != 4) throw new Exception("Could not parse Csv");
+			Id = Cast<Int32>(csvValues[0]);
+			Age = Cast<Int32>(csvValues[1]);
+			DoB = Cast<DateTime>(csvValues[2]);
+			lolVal = Cast<Guid>(csvValues[3]);
 		}
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{

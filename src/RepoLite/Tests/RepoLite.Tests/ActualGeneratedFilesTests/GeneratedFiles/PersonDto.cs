@@ -7,7 +7,7 @@ using NS.Models.Base;
 
 namespace NS.Models
 {
-	public partial class Person : BaseModel
+	public sealed partial class Person : BaseModel
 	{
 		public override string EntityName => "Person";
 		private Int32 _id;
@@ -16,30 +16,53 @@ namespace NS.Models
 		private String _nationality;
 		private Boolean _registered;
 
-		public virtual Int32 Id
+		public Int32 Id
 		{
 			get => _id;
 			set => SetValue(ref _id, value);
 		}
-		public virtual String Name
+		public String Name
 		{
 			get => _name;
 			set => SetValue(ref _name, value);
 		}
-		public virtual Int32 Age
+		public Int32 Age
 		{
 			get => _age;
 			set => SetValue(ref _age, value);
 		}
-		public virtual String Nationality
+		public String Nationality
 		{
 			get => _nationality;
 			set => SetValue(ref _nationality, value);
 		}
-		public virtual Boolean Registered
+		public Boolean Registered
 		{
 			get => _registered;
 			set => SetValue(ref _registered, value);
+		}
+		public Person() { }
+		public Person(
+			Int32 id,
+			String name,
+			Int32 age,
+			String nationality,
+			Boolean registered)
+		{
+			_id = id;
+			_name = name;
+			_age = age;
+			_nationality = nationality;
+			_registered = registered;
+		}
+		public Person(params object[] csvValues)
+		{
+			if (csvValues.Length != 5) throw new Exception("Could not parse Csv");
+			Id = Cast<Int32>(csvValues[0]);
+			Name = Cast<String>(csvValues[1]);
+			Age = Cast<Int32>(csvValues[2]);
+			Nationality = Cast<String>(csvValues[3]);
+			Registered = Cast<Boolean>(csvValues[4]);
 		}
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{
