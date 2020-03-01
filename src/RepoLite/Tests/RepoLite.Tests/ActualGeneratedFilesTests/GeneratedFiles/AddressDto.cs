@@ -95,20 +95,6 @@ namespace NS.Models
 			_phonenumber = phonenumber;
 			_country_code = country_code;
 		}
-		public Address(params object[] csvValues)
-		{
-			if (csvValues.Length != 10) throw new Exception("Could not parse Csv");
-			Id = Cast<Int32>(csvValues[0]);
-			AnotherId = Cast<String>(csvValues[1]);
-			PersonId = Cast<Int32>(csvValues[2]);
-			Line1 = Cast<String>(csvValues[3]);
-			Line2 = Cast<String>(csvValues[4]);
-			Line3 = Cast<String>(csvValues[5]);
-			Line4 = Cast<String>(csvValues[6]);
-			PostCode = Cast<String>(csvValues[7]);
-			PhoneNumber = Cast<String>(csvValues[8]);
-			COUNTRY_CODE = Cast<String>(csvValues[9]);
-		}
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{
 			_id = row.GetValue<Int32>($"{propertyPrefix}Id") ?? default(Int32); 

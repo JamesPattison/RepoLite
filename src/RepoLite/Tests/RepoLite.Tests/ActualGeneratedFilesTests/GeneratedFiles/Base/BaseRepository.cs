@@ -2401,6 +2401,24 @@ namespace NS.Base
         protected string GetString(DataRow row, string fieldName)
         {
             return row.Table.Columns.Contains(fieldName) ? row.GetText(fieldName) : default(string);
+        }		
+
+        protected TType Cast<TType>(object value)
+        {
+            if (value is TType tVal)
+            {
+                return tVal;
+            }
+            try
+            {
+                if (typeof(TType) == typeof(Boolean) && (value.ToString() == "1" || value.ToString() == "0")) 
+                    return (TType)Convert.ChangeType(value.ToString() == "1", typeof(TType));
+                return (TType)Convert.ChangeType(value, typeof(TType));
+            }
+            catch (InvalidCastException)
+            {
+                return default(TType);
+            }
         }
 
         #region [Private]

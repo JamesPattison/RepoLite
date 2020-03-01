@@ -31,12 +31,6 @@ namespace NS.Models
 			_id = id;
 			_data = data;
 		}
-		public BinMan(params object[] csvValues)
-		{
-			if (csvValues.Length != 2) throw new Exception("Could not parse Csv");
-			Id = Cast<Int32>(csvValues[0]);
-			Data = Cast<Byte[]>(csvValues[1]);
-		}
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{
 			_id = row.GetValue<Int32>($"{propertyPrefix}Id") ?? default(Int32); 

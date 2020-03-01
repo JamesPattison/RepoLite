@@ -11,13 +11,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="247" d:DesignWidth="360"
              d:DataContext="{d:DesignInstance settings:AllSettingsViewModel}">
-    <UserControl.Resources>
-        <ObjectDataProvider x:Key="pluginEnum" MethodName="GetValues" ObjectType="{x:Type System:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="StyleAlias:PluginEnum"/>
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-    </UserControl.Resources>
     <Grid>
         <ScrollViewer>
             <StackPanel MinWidth="200">
@@ -76,12 +69,6 @@
                         <Label Style="{StaticResource LeftLabel}" Content="Repository FileName Format" Target="{Binding ElementName=RepositoryFileNameFormat}"
                                ToolTip="The format for Repository filenames. Available variables: {Schema}, {Name}"/>
                         <TextBox x:Name="RepositoryFileNameFormat" Text="{Binding Path=GenerationSettings.RepositoryFileNameFormat}"/>
-                    </StackPanel>
-                    <StackPanel>
-                        <Label Style="{StaticResource LeftLabel}" Content="Plugin" Target="{Binding ElementName=Plugin}"
-                               ToolTip="The plugin to use during generation"/>
-                        <ComboBox x:Name="Plugin" ItemsSource="{Binding Source={StaticResource pluginEnum}}"
-                                  SelectedItem="{Binding Path=GenerationSettings.Plugin}"/>
                     </StackPanel>
                 </StackPanel>
             </StackPanel>

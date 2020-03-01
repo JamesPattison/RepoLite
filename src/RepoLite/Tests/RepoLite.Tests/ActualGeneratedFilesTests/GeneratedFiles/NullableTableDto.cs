@@ -47,14 +47,6 @@ namespace NS.Models
 			_dob = dob;
 			_lolval = lolval;
 		}
-		public NullableTable(params object[] csvValues)
-		{
-			if (csvValues.Length != 4) throw new Exception("Could not parse Csv");
-			Id = Cast<Int32>(csvValues[0]);
-			Age = Cast<Int32>(csvValues[1]);
-			DoB = Cast<DateTime>(csvValues[2]);
-			lolVal = Cast<Guid>(csvValues[3]);
-		}
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{
 			_id = row.GetValue<Int32>($"{propertyPrefix}Id") ?? default(Int32); 

@@ -31,12 +31,6 @@ namespace NS.Models
 			_eventid = eventid;
 			_eventname = eventname;
 		}
-		public Event(params object[] csvValues)
-		{
-			if (csvValues.Length != 2) throw new Exception("Could not parse Csv");
-			EventId = Cast<String>(csvValues[0]);
-			EventName = Cast<String>(csvValues[1]);
-		}
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{
 			_eventid = row.GetText($"{propertyPrefix}EventId");

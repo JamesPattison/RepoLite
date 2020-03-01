@@ -31,12 +31,6 @@ namespace NS.Models
 			_name = name;
 			_data = data;
 		}
-		public xmltable(params object[] csvValues)
-		{
-			if (csvValues.Length != 2) throw new Exception("Could not parse Csv");
-			name = Cast<String>(csvValues[0]);
-			data = Cast<XmlDocument>(csvValues[1]);
-		}
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{
 			_name = row.GetText($"{propertyPrefix}name");

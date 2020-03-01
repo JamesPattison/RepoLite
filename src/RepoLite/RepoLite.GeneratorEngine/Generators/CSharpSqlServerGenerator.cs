@@ -200,19 +200,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab3, $"_{column.FieldName} = {column.FieldName};");
             }
             sb.AppendLine(Tab2, "}");
-
-            sb.AppendLine(Tab2, $"public {table.ClassName}(params object[] csvValues)");
-            sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, $"if (csvValues.Length != {table.Columns.Count}) throw new Exception(\"Could not parse Csv\");");
-            for (int i = 0; i < table.Columns.Count; i++)
-            {
-                var column = table.Columns[i];
-
-                sb.AppendLine(Tab3,
-                    $"{column.PropertyName} = Cast<{column.DataType.Name}>(csvValues[{i}]);");
-            }
-            sb.AppendLine(Tab2, "}");
-
+            
             //methods
 
             sb.AppendLine(Tab2, "public override IBaseModel SetValues(DataRow row, string propertyPrefix)");
@@ -940,10 +928,9 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab2, "}");
             sb.AppendLine();
 
-
             sb.AppendLine(Tab2, "public bool Merge(string csvPath)");
             sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, $"var mergeTable = new List<{table.ClassName}>();");
+            sb.AppendLine(Tab3, "var mergeTable = new List<object[]>();");
             sb.AppendLine(Tab3, "using (var sr = new StreamReader(csvPath))");
             sb.AppendLine(Tab3, "{");
             sb.AppendLine(Tab4, "var line = sr.ReadLine();");
@@ -961,11 +948,29 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab4, "do");
             sb.AppendLine(Tab4, "{");
             sb.AppendLine(Tab5, "var blocks = line.Split(',');");
-            sb.AppendLine(Tab5, $"mergeTable.Add(new {table.ClassName}(blocks));");
+
+
+            sb.AppendLine(Tab5, "mergeTable.Add(new object[]");
+            sb.AppendLine(Tab5, "{");
+            for (int i = 0; i < table.Columns.Count; i++)
+            {
+                var column = table.Columns[i];
+
+                if (column.PrimaryKey)
+                {
+                    sb.AppendLine(Tab6, $"Cast<{column.DataType.Name}>(blocks[{i}]),");
+                }
+                else
+                {
+                    sb.AppendLine(Tab6, $"Cast<{column.DataType.Name}>(blocks[{i}]), true,");
+                }
+            }
+
+            sb.AppendLine(Tab5, "});");
             sb.AppendLine(Tab4, "} while ((line = sr.ReadLine()) != null);");
             sb.AppendLine();
             sb.AppendLine(Tab4, "");
-            sb.AppendLine(Tab4, "return Merge(mergeTable);");
+            sb.AppendLine(Tab4, "return BaseMerge(mergeTable);");
             sb.AppendLine(Tab3, "}");
             sb.AppendLine(Tab2, "}");
 
