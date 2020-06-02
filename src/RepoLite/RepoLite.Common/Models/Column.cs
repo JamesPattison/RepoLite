@@ -87,14 +87,25 @@ namespace RepoLite.Common.Models
         /// </summary>
         public Type DataType { get; set; }
 
-        public string FieldName => PropertyName.ToLower();
+        public string FieldName
+        {
+            get
+            {
+                var name = PropertyName.ToLower();
+                if (Helpers.ReservedWord(name))
+                    name = "_" + name;
+
+                return name;
+            }
+        }
+
         public string PropertyName
         {
             get
             {
                 var name = DbColumnName;
                 if (Helpers.ReservedWord(name))
-                    name = "@" + name;
+                    name = "_" + name;
 
                 return name;
             }

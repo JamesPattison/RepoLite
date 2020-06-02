@@ -1677,6 +1677,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
             if (inheritedTable != null)
             {
+                var pk = inheritedTable.PrimaryKeys.First();
                 var inheritedTableInheritedDependency =
                     inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
                 var inheritedTableAlsoInherits = inheritedTableInheritedDependency != null;
@@ -1704,7 +1705,7 @@ namespace RepoLite.GeneratorEngine.Generators
                     if (inheritedColumn.DataType != typeof(XmlDocument))
                     {
                         sb.AppendLine(Tab3,
-                            $"return Get(_{repository}.FindBy{inheritedColumn.PropertyName}(comparison, {inheritedColumn.FieldName}).Select(x => x.ItemId).ToList());");
+                            $"return Get(_{repository}.FindBy{inheritedColumn.PropertyName}(comparison, {inheritedColumn.FieldName}).Select(x => x.{pk.PropertyName}).ToList());");
                     }
 
                     sb.AppendLine(Tab2, "}");
