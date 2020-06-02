@@ -137,7 +137,7 @@ namespace RepoLite.GeneratorEngine.Generators
             //merge
             if (table.PrimaryKeyConfiguration != PrimaryKeyConfigurationEnum.NoKey)
             {
-                sb.Append(Repo_Merge(table));
+                sb.Append(Repo_Merge(table, otherTables, inheritedDependency));
             }
 
             //toItem
@@ -1331,39 +1331,72 @@ namespace RepoLite.GeneratorEngine.Generators
             }
         }
 
-        private StringBuilder Repo_Merge(Table table)
+        private StringBuilder Repo_Merge(Table table, List<Table> otherTables, Column inheritedDependency)
         {
+            var inherits = inheritedDependency != null;
             var sb = new StringBuilder();
 
             sb.AppendLine("");
             sb.AppendLine(Tab2, $"public bool Merge(List<{table.ClassName}> items)");
             sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, "var mergeTable = new List<object[]>();");
 
-            sb.AppendLine(Tab3, "foreach (var item in items)");
-            sb.AppendLine(Tab3, "{");
-            sb.AppendLine(Tab4, "mergeTable.Add(new object[]");
-            sb.AppendLine(Tab4, "{");
+            if (inherits)
+            {
+                var inheritedTable =
+                    otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
+                sb.AppendLine(Tab3,
+                    $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Merge(items.Cast<{inheritedTable.ClassName}>().ToList()))");
+
+                sb.AppendLine(Tab3, "{");
+            }
+            sb.AppendLine(inherits ? Tab4 : Tab3, "var mergeTable = new List<object[]>();");
+
+            sb.AppendLine(inherits ? Tab4 : Tab3, "foreach (var item in items)");
+            sb.AppendLine(inherits ? Tab4 : Tab3, "{");
+            sb.AppendLine(inherits ? Tab5 : Tab4, "mergeTable.Add(new object[]");
+            sb.AppendLine(inherits ? Tab5 : Tab4, "{");
 
             foreach (var column in table.Columns)
             {
                 if (column.PrimaryKey)
-                    sb.Append(Tab5, $"item.{column.PropertyName}");
+                    sb.Append(inherits ? Tab6 : Tab5, $"item.{column.PropertyName}");
                 else
                 {
-                    sb.Append(Tab5,
+                    sb.Append(inherits ? Tab6 : Tab5,
                         $"item.{column.PropertyName}, item.DirtyColumns.Contains({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")})");
                 }
 
                 sb.AppendLine(column != table.Columns.Last() ? "," : "");
             }
 
-            sb.AppendLine(Tab4, "});");
-            sb.AppendLine(Tab3, "}");
+            sb.AppendLine(inherits ? Tab5 : Tab4, "});");
+            sb.AppendLine(inherits ? Tab4 : Tab3, "}");
+            sb.AppendLine(inherits ? Tab4 : Tab3, "return BaseMerge(mergeTable);");
 
-            sb.AppendLine(Tab3, "return BaseMerge(mergeTable);");
+            if (inherits)
+            {
+                sb.AppendLine(Tab3, "}");
+                sb.AppendLine(Tab3, "return false;");
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
             sb.AppendLine(Tab2, "}");
-            sb.AppendLine();
 
             sb.AppendLine(Tab2, "public bool Merge(string csvPath)");
             sb.AppendLine(Tab2, "{");
