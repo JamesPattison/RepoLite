@@ -261,6 +261,7 @@ namespace RepoLite.GeneratorEngine.Generators
             foreach (var column in table.Columns)
             {
                 if (inheritedDependency != null && column.DbColumnName == inheritedDependency.DbColumnName) continue;
+
                 //Property
                 var fieldName = $"_{column.FieldName}";
                 sb.AppendLine(Tab2,
@@ -272,6 +273,15 @@ namespace RepoLite.GeneratorEngine.Generators
 
 
                 sb.AppendLine(Tab2, "}");
+
+                if (column.ForeignKey)
+                {
+                    sb.AppendLine(Tab2, "/// <summary>");
+                    sb.AppendLine(Tab2, "/// Nothing is done with this, it's merely there to hold data IF you wish to populate it");
+                    sb.AppendLine(Tab2, "/// </summary>");
+                    sb.AppendLine(Tab2,
+                        $"public {column.ForeignKeyTargetTable.ToModelName()} {column.DbColumnName.TrimEnd('d', 'I')} {{ get; set; }}");
+                }
             }
 
             //constructors
