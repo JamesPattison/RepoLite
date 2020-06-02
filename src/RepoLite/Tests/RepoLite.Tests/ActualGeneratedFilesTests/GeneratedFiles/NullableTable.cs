@@ -195,7 +195,7 @@ namespace NS
 
 		public bool Merge(string csvPath)
 		{
-			var mergeTable = new List<NullableTable>();
+			var mergeTable = new List<object[]>();
 			using (var sr = new StreamReader(csvPath))
 			{
 				var line = sr.ReadLine();
@@ -213,11 +213,17 @@ namespace NS
 				do
 				{
 					var blocks = line.Split(',');
-					mergeTable.Add(new NullableTable(blocks));
+					mergeTable.Add(new object[]
+					{
+						Cast<Int32>(blocks[0]),
+						Cast<Int32>(blocks[1]), true,
+						Cast<DateTime>(blocks[2]), true,
+						Cast<Guid>(blocks[3]), true,
+					});
 				} while ((line = sr.ReadLine()) != null);
 
 				
-				return Merge(mergeTable);
+				return BaseMerge(mergeTable);
 			}
 		}
 

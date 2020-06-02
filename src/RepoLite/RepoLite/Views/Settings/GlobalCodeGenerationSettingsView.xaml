@@ -8,16 +8,8 @@
              xmlns:mui="http://firstfloorsoftware.com/ModernUI"
              xmlns:System="clr-namespace:System;assembly=mscorlib"
              xmlns:StyleAlias="clr-namespace:RepoLite.Common.Enums;assembly=RepoLite.Common"
-             mc:Ignorable="d" 
-             d:DesignHeight="247" d:DesignWidth="360"
-             d:DataContext="{d:DesignInstance settings:AllSettingsViewModel}">
-    <UserControl.Resources>
-        <ObjectDataProvider x:Key="pluginEnum" MethodName="GetValues" ObjectType="{x:Type System:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="StyleAlias:PluginEnum"/>
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-    </UserControl.Resources>
+             mc:Ignorable="d" d:DesignWidth="360"
+             d:DataContext="{d:DesignInstance settings:AllSettingsViewModel}" Height="271">
     <Grid>
         <ScrollViewer>
             <StackPanel MinWidth="200">
@@ -78,10 +70,19 @@
                         <TextBox x:Name="RepositoryFileNameFormat" Text="{Binding Path=GenerationSettings.RepositoryFileNameFormat}"/>
                     </StackPanel>
                     <StackPanel>
-                        <Label Style="{StaticResource LeftLabel}" Content="Plugin" Target="{Binding ElementName=Plugin}"
-                               ToolTip="The plugin to use during generation"/>
-                        <ComboBox x:Name="Plugin" ItemsSource="{Binding Source={StaticResource pluginEnum}}"
-                                  SelectedItem="{Binding Path=GenerationSettings.Plugin}"/>
+                        <Label Style="{StaticResource LeftLabel}" Content="Model Class Name Format" Target="{Binding ElementName=ModelClassNameFormat}"
+                               ToolTip="The format for Model Class names. Available variables: {Name}"/>
+                        <TextBox x:Name="ModelClassNameFormat" Text="{Binding Path=GenerationSettings.ModelClassNameFormat}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Style="{StaticResource LeftLabel}" Content="Repository Class Name Format" Target="{Binding ElementName=RepositoryClassNameFormat}"
+                               ToolTip="The format for Repository Class names. Available variables: {Name}"/>
+                        <TextBox x:Name="RepositoryClassNameFormat" Text="{Binding Path=GenerationSettings.RepositoryClassNameFormat}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Style="{StaticResource LeftLabel}" Content="Generate Sealed Objects" Target="{Binding ElementName=GenerateSealedObjects}"
+                               ToolTip="Determines whether or not to add the sealed modifier to the classes"/>
+                        <CheckBox x:Name="GenerateSealedObjects" IsChecked="{Binding Path=GenerationSettings.GenerateSealedObjects}"/>
                     </StackPanel>
                 </StackPanel>
             </StackPanel>

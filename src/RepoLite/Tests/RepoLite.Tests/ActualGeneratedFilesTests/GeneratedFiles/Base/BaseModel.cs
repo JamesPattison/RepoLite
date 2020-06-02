@@ -83,24 +83,6 @@ namespace NS.Models.Base
             }
             return decimalPlaces;
         }
-
-        protected T Cast<T>(object value)
-        {
-            if (value is T tVal)
-            {
-                return tVal;
-            }
-            try
-            {
-                if (typeof(T) == typeof(Boolean) && (value.ToString() == "1" || value.ToString() == "0")) 
-                    return (T)Convert.ChangeType(value.ToString() == "1", typeof(T));
-                return (T)Convert.ChangeType(value, typeof(T));
-            }
-            catch (InvalidCastException)
-            {
-                return default(T);
-            }
-        }
     }
     
     public static class Ext

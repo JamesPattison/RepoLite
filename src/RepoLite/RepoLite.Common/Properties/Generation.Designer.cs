@@ -8,78 +8,142 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RepoLite.Common.Properties {
-    
-    
+namespace RepoLite.Common.Properties
+{
+
+
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.4.0.0")]
-    public sealed partial class Generation : global::System.Configuration.ApplicationSettingsBase {
-        
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.5.0.0")]
+    public sealed partial class Generation : global::System.Configuration.ApplicationSettingsBase
+    {
+
         private static Generation defaultInstance = ((Generation)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Generation())));
-        
-        public static Generation Default {
-            get {
+
+        public static Generation Default
+        {
+            get
+            {
                 return defaultInstance;
             }
         }
-        
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("NS.Models")]
-        public string ModelGenerationNamespace {
-            get {
+        public string ModelGenerationNamespace
+        {
+            get
+            {
                 return ((string)(this["ModelGenerationNamespace"]));
             }
-            set {
+            set
+            {
                 this["ModelGenerationNamespace"] = value;
             }
         }
-        
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("NS")]
-        public string RepositoryGenerationNamespace {
-            get {
+        public string RepositoryGenerationNamespace
+        {
+            get
+            {
                 return ((string)(this["RepositoryGenerationNamespace"]));
             }
-            set {
+            set
+            {
                 this["RepositoryGenerationNamespace"] = value;
             }
         }
-        
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("C:\\Temp")]
-        public string OutputDirectory {
-            get {
+        public string OutputDirectory
+        {
+            get
+            {
                 return ((string)(this["OutputDirectory"]));
             }
-            set {
+            set
+            {
                 this["OutputDirectory"] = value;
             }
         }
-        
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("m.{Name}")]
-        public string ModelFileNameFormat {
-            get {
+        public string ModelFileNameFormat
+        {
+            get
+            {
                 return ((string)(this["ModelFileNameFormat"]));
             }
-            set {
+            set
+            {
                 this["ModelFileNameFormat"] = value;
             }
         }
-        
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("{Name}")]
-        public string RepositoryFileNameFormat {
-            get {
+        public string RepositoryFileNameFormat
+        {
+            get
+            {
                 return ((string)(this["RepositoryFileNameFormat"]));
             }
-            set {
+            set
+            {
                 this["RepositoryFileNameFormat"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("{Name}Dto")]
+        public string ModelClassNameFormat
+        {
+            get
+            {
+                return ((string)(this["ModelClassNameFormat"]));
+            }
+            set
+            {
+                this["ModelClassNameFormat"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("{Name}Repository")]
+        public string RepositoryClassNameFormat
+        {
+            get
+            {
+                return ((string)(this["RepositoryClassNameFormat"]));
+            }
+            set
+            {
+                this["RepositoryClassNameFormat"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("true")]
+        public bool GenerateSealedObjects
+        {
+            get
+            {
+                return ((bool)(this["GenerateSealedObjects"]));
+            }
+            set
+            {
+                this["GenerateSealedObjects"] = value;
             }
         }
     }

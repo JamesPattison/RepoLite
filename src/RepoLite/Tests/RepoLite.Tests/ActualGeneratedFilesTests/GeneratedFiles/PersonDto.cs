@@ -55,15 +55,6 @@ namespace NS.Models
 			_nationality = nationality;
 			_registered = registered;
 		}
-		public Person(params object[] csvValues)
-		{
-			if (csvValues.Length != 5) throw new Exception("Could not parse Csv");
-			Id = Cast<Int32>(csvValues[0]);
-			Name = Cast<String>(csvValues[1]);
-			Age = Cast<Int32>(csvValues[2]);
-			Nationality = Cast<String>(csvValues[3]);
-			Registered = Cast<Boolean>(csvValues[4]);
-		}
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{
 			_id = row.GetValue<Int32>($"{propertyPrefix}Id") ?? default(Int32); 

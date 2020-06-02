@@ -1,4 +1,5 @@
 ﻿using RepoLite.Common.Enums;
+using RepoLite.Common.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,29 +15,11 @@ namespace RepoLite.Common.Models
         //public bool Ignore;
         public string DbTableName { get; set; }
 
-        public string LowerClassName
-        {
-            get
-            {
-                var name = DbTableName.ToLower();
-                if (Helpers.ReservedWord(name))
-                    name = "@" + name;
+        public string LowerClassName => ClassName.ToLower();
 
-                return name;
-            }
-        }
+        public string ClassName => DbTableName.ToModelName();
 
-        public string ClassName
-        {
-            get
-            {
-                var name = DbTableName;
-                if (Helpers.ReservedWord(name))
-                    name = "@" + name;
-
-                return name;
-            }
-        }
+        public string RepositoryName => DbTableName.ToRepositoryName();
 
         public Column GetColumn(string columnName)
         {
@@ -68,9 +51,39 @@ namespace RepoLite.Common.Models
             get { return Columns.Where(x => x.PrimaryKey).ToList(); }
         }
 
+        public List<Column> ForeignKeys
+        {
+            get { return Columns.Where(x => x.ForeignKey).ToList(); }
+        }
+
         public List<Column> NonPrimaryKeys
         {
             get { return Columns.Where(x => !x.PrimaryKey).ToList(); }
+        }
+
+        //Returns a list of table that inherit this table
+        public List<Table> GetInheritingTables(List<Table> otherTables)
+        {
+            var inheritingTables = new List<Table>();
+            foreach (var otherTable in otherTables)
+            {
+                var inheritedDependency =
+                    otherTable.ForeignKeys.FirstOrDefault(x => otherTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                if (inheritedDependency != null && inheritedDependency.ForeignKeyTargetTable == DbTableName)
+                    inheritingTables.Add(otherTable);
+            }
+
+            return inheritingTables;
+        }
+
+        public Table Inherits(List<Table> otherTables)
+        {
+            var inheritedDependency =
+                ForeignKeys.FirstOrDefault(x => PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+
+            if (inheritedDependency != null)
+                return otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
+            return null;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using MODELNAMESPACE.Base;
+﻿using MODELNAMESPACE;
+using MODELNAMESPACE.Base;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -395,11 +396,6 @@ namespace REPOSITORYNAMESPACE.Base
             _activeGroups--;
             _query.Append(")");
             return this;
-        }
-
-        public string QueryString()
-        {
-            return _repository.WhereQuery() + " WHERE " + _query;
         }
     }
 
@@ -1708,14 +1704,14 @@ namespace REPOSITORYNAMESPACE.Base
     public abstract partial class BaseRepository<T> : RepositoryDataAccess, IBaseRepository<T>
         where T : IBaseModel, new()
     {
-        private readonly string _schema;
-        private readonly string _tableName;
+        protected readonly string Schema;
+        protected readonly string TableName;
         private List<ColumnDefinition> Columns;
 
         protected BaseRepository(string connectionString, Action<Exception> logMethod, string schema, string table, List<ColumnDefinition> columns) : base(connectionString)
         {
-            _schema = schema;
-            _tableName = table;
+            Schema = schema;
+            TableName = table;
             Logger = logMethod ?? (exception => { });
             Columns = columns;
 
@@ -1742,8 +1738,8 @@ namespace REPOSITORYNAMESPACE.Base
 
         public long RecordCount()
         {
-            var query = BuildWhereQuery(new[] { new ColumnDefinition("'x'") });
-            var dt = Where(query, "1=1");
+            var query = BuildSelectQuery(new[] { new ColumnDefinition("'x'") });
+            var dt = Execute(query, "1=1");
             return dt == null ? 0 : dt.Rows.Count;
         }
 
@@ -1757,12 +1753,12 @@ namespace REPOSITORYNAMESPACE.Base
         public abstract bool BulkCreate(params T[] items);
         protected abstract T ToItem(DataRow row);
 
-        protected internal string WhereQuery()
+        protected internal string BuildSelectQuery()
         {
-            return BuildWhereQuery(Columns);
+            return BuildSelectQuery(Columns);
         }
 
-        private string BuildWhereQuery(IEnumerable<ColumnDefinition> columns)
+        private string BuildSelectQuery(IEnumerable<ColumnDefinition> columns)
         {
             var sb = new StringBuilder();
             sb.AppendLine("SELECT ");
@@ -1778,7 +1774,7 @@ namespace REPOSITORYNAMESPACE.Base
                 }
             }
 
-            sb.Append($" FROM [{_schema}].[{_tableName}]");
+            sb.Append($" FROM [{Schema}].[{TableName}]");
 
             return sb.ToString();
         }
@@ -1795,19 +1791,26 @@ namespace REPOSITORYNAMESPACE.Base
 
         public IEnumerable<T> Where(string query)
         {
-            var dt = Where(WhereQuery(), query);
+            var dt = Execute(BuildSelectQuery(), query);
             return dt == null ? new T[0] : ToItems(dt);
         }
 
-        private DataTable Where(string columnPart, string filterPart)
+        private DataTable Execute(string columnPart, string filterPart)
         {
             if (HasInjection(columnPart) || HasInjection(filterPart))
+                throw new Exception("Sql Injection attempted. Aborted");
+
+            return Execute($"{columnPart} WHERE {filterPart}");
+        }
+        private DataTable Execute(string query)
+        {
+            if (HasInjection(query))
                 throw new Exception("Sql Injection attempted. Aborted");
 
             //Get
             using (var cn = new SqlConnection(ConnectionString))
             {
-                using (var cmd = CreateCommand(cn, $"{columnPart} WHERE {filterPart}"))
+                using (var cmd = CreateCommand(cn, query))
                 {
                     if (HasInjection(cmd.CommandText))
                         throw new Exception("Sql Injection attempted. Aborted");
@@ -1862,7 +1865,7 @@ namespace REPOSITORYNAMESPACE.Base
                     }
                     sb.AppendLine(")");
                 }
-                sb.AppendLine($"INSERT [{_schema}].[{_tableName}] (");
+                sb.AppendLine($"INSERT [{Schema}].[{TableName}] (");
 
                 var toCreate = Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity).ToList();
                 foreach (var createColumn in toCreate)
@@ -1979,7 +1982,7 @@ namespace REPOSITORYNAMESPACE.Base
 
         protected bool BulkInsert(DataTable dt)
         {
-            return BulkInsert(dt, $"[{_schema}].[{_tableName}]");
+            return BulkInsert(dt, $"[{Schema}].[{TableName}]");
         }
 
         protected bool BaseUpdate(List<string> dirtyColumns, params object[] values)
@@ -1987,7 +1990,7 @@ namespace REPOSITORYNAMESPACE.Base
             bool isSuccess;
 
             var sb = new StringBuilder();
-            sb.AppendLine($"UPDATE [{_schema}].[{_tableName}] SET");
+            sb.AppendLine($"UPDATE [{Schema}].[{TableName}] SET");
 
             var nonpkCols = Columns.Where(x => !x.PrimaryKey).ToArray();
             foreach (var col in nonpkCols.Where(x => dirtyColumns.Contains(x.ColumnName)))
@@ -2047,7 +2050,7 @@ namespace REPOSITORYNAMESPACE.Base
             using (var cn = new SqlConnection(ConnectionString))
             {
                 var sb = new StringBuilder();
-                sb.Append($"DELETE [{_schema}].[{_tableName}] WHERE ");
+                sb.Append($"DELETE [{Schema}].[{TableName}] WHERE ");
                 sb.Append($"[{ deleteColumn.ColumnName}] = @{deleteColumn.ColumnName}");
 
                 var sql = sb.ToString();
@@ -2077,7 +2080,7 @@ namespace REPOSITORYNAMESPACE.Base
             {
                 var sb = new StringBuilder();
 
-                sb.Append($"DELETE [{_schema}].[{_tableName}] WHERE [{columnName}] IN (");
+                sb.Append($"DELETE [{Schema}].[{TableName}] WHERE [{columnName}] IN (");
 
                 foreach (var dataValue in dataValues)
                 {
@@ -2103,12 +2106,17 @@ namespace REPOSITORYNAMESPACE.Base
 
         protected bool BaseMerge(List<object[]> mergeData)
         {
+            return BaseMerge(mergeData, Columns, Schema, TableName);
+        }
+
+        protected bool BaseMerge(List<object[]> mergeData, List<ColumnDefinition> columns, string schema, string tableName)
+        {
             var tempTableName = "staging" + DateTime.Now.Ticks;
 
             try
             {
                 var dt = new DataTable();
-                foreach (var mergeColumn in Columns)
+                foreach (var mergeColumn in columns)
                 {
                     dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
                     if (!mergeColumn.PrimaryKey)
@@ -2120,17 +2128,17 @@ namespace REPOSITORYNAMESPACE.Base
                     dt.Rows.Add(data);
                 }
 
-                CreateStagingTable(tempTableName);
+                CreateStagingTable(tempTableName, columns);
                 BulkInsert(dt, tempTableName);
 
                 using (var cn = new SqlConnection(ConnectionString))
                 {
                     var mergeSql = new StringBuilder();
-                    mergeSql.AppendLine($"MERGE INTO [{_schema}].[{_tableName}] AS [Target]");
+                    mergeSql.AppendLine($"MERGE INTO [{schema}].[{tableName}] AS [Target]");
                     mergeSql.AppendLine($"USING {tempTableName} AS Source");
                     mergeSql.AppendLine("ON");
 
-                    var pks = Columns.Where(x => x.PrimaryKey).ToArray();
+                    var pks = columns.Where(x => x.PrimaryKey).ToArray();
 
                     foreach (var pk in pks)
                     {
@@ -2142,7 +2150,7 @@ namespace REPOSITORYNAMESPACE.Base
 
                     mergeSql.AppendLine("WHEN MATCHED THEN UPDATE SET");
 
-                    var nonpks = Columns.Where(x => !x.PrimaryKey).ToArray();
+                    var nonpks = columns.Where(x => !x.PrimaryKey).ToArray();
 
                     foreach (var mergeColumn in nonpks)
                     {
@@ -2154,9 +2162,9 @@ namespace REPOSITORYNAMESPACE.Base
 
                     mergeSql.AppendLine("WHEN NOT MATCHED THEN INSERT (");
 
-                    mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[{x.ColumnName}]").ToArray()) + ")");
+                    mergeSql.AppendLine(string.Join(",", columns.Where(x => !x.Identity).Select(x => $"[{x.ColumnName}]").ToArray()) + ")");
                     mergeSql.AppendLine("VALUES (");
-                    mergeSql.AppendLine(string.Join(",", Columns.Where(x => !x.Identity).Select(x => $"[Source].[{x.ColumnName}]").ToArray()) + ");");
+                    mergeSql.AppendLine(string.Join(",", columns.Where(x => !x.Identity).Select(x => $"[Source].[{x.ColumnName}]").ToArray()) + ");");
                     mergeSql.AppendLine("IF OBJECT_ID('dbo.DropTmpTable') IS NULL EXEC ('CREATE PROCEDURE dbo.DropTmpTable @table NVARCHAR(250) AS DECLARE @sql NVARCHAR(300) = N''DROP TABLE '' + @table; EXECUTE sp_executesql @sql')");
 
                     var sql = mergeSql.ToString();
@@ -2403,13 +2411,36 @@ namespace REPOSITORYNAMESPACE.Base
             return row.Table.Columns.Contains(fieldName) ? row.GetText(fieldName) : default(string);
         }
 
+        protected TType Cast<TType>(object value)
+        {
+            if (value is TType tVal)
+            {
+                return tVal;
+            }
+            try
+            {
+                if (typeof(TType) == typeof(Boolean) && (value.ToString() == "1" || value.ToString() == "0"))
+                    return (TType)Convert.ChangeType(value.ToString() == "1", typeof(TType));
+                return (TType)Convert.ChangeType(value, typeof(TType));
+            }
+            catch (InvalidCastException)
+            {
+                return default(TType);
+            }
+        }
+
+        protected IEnumerable<T> ExecuteSql(string sql)
+        {
+            return ToItems(Execute(sql));
+        }
+
         #region [Private]
 
-        protected void CreateStagingTable(string tempTableName, bool onlyPrimaryKeys = false)
+        protected void CreateStagingTable(string tempTableName, List<ColumnDefinition> columns, bool onlyPrimaryKeys = false)
         {
             var stagingSqlBuilder = new StringBuilder();
             stagingSqlBuilder.AppendLine(@"CREATE TABLE " + tempTableName + " (");
-            foreach (var mergeColumn in Columns.Where(x => onlyPrimaryKeys && x.PrimaryKey || !onlyPrimaryKeys))
+            foreach (var mergeColumn in columns.Where(x => onlyPrimaryKeys && x.PrimaryKey || !onlyPrimaryKeys))
             {
                 stagingSqlBuilder.Append($"[{mergeColumn.ColumnName}] {mergeColumn.SqlDataTypeText} NULL");
 
@@ -2418,7 +2449,7 @@ namespace REPOSITORYNAMESPACE.Base
                     stagingSqlBuilder.AppendLine(",");
                     stagingSqlBuilder.Append($"[{mergeColumn.ColumnName}Changed] [BIT] NOT NULL");
                 }
-                stagingSqlBuilder.AppendLine(mergeColumn != Columns[Columns.Count - 1] ? "," : ")");
+                stagingSqlBuilder.AppendLine(mergeColumn != columns[columns.Count - 1] ? "," : ")");
             }
 
             var stagingSql = stagingSqlBuilder.ToString();

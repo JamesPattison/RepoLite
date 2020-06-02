@@ -30,7 +30,7 @@ namespace RepoLite.DataAccess.Accessors
                             TABLE_TYPE = 'BASE TABLE'
                         AND
                             (@schema IS NULL OR TABLE_SCHEMA = @schema)",
-                    new {schema});
+                    new { schema });
 
                 var toReturn = tables.Select(table => table.GetTableAndSchema()).ToList();
                 return toReturn;
@@ -67,7 +67,10 @@ namespace RepoLite.DataAccess.Accessors
 		                            WHEN COLUMN_DEFAULT LIKE '(%' AND COLUMN_DEFAULT LIKE '%)' THEN SUBSTRING(COLUMN_DEFAULT,2,len(COLUMN_DEFAULT)-2)
 		                            ELSE COLUMN_DEFAULT 
 	                            END,'''','') AS DefaultValue,
-	                            CASE WHEN x.COLUMN_NAME = c.COLUMN_NAME THEN 1 ELSE 0 END AS PrimaryKey,
+	                            CASE WHEN x.COLUMN_NAME = c.COLUMN_NAME AND CONSTRAINT_TYPE = 'PRIMARY KEY' THEN 1 ELSE 0 END AS PrimaryKey,
+	                            CASE WHEN x.COLUMN_NAME = c.COLUMN_NAME AND CONSTRAINT_TYPE = 'FOREIGN KEY' THEN 1 ELSE 0 END AS ForeignKey,
+								OBJECT_NAME(x.referenced_object_id) AS ForeignKeyTargetTable,
+								COL_NAME(x.referenced_object_id, x.referenced_column_id) AS ForeignKeyTargetColumn,
 								ISNULL(CHARACTER_MAXIMUM_LENGTH,0) AS [MaxLength],
 								ISNULL(NUMERIC_PRECISION, 0) - ISNULL(NUMERIC_SCALE, 0) AS MaxIntLength,
 								ISNULL(NUMERIC_SCALE, 0) AS MaxDecimalLength
@@ -81,7 +84,10 @@ namespace RepoLite.DataAccess.Accessors
 									(SELECT 
 										ccu.TABLE_SCHEMA,
 										ccu.TABLE_NAME,
-										ccu.COLUMN_NAME
+										ccu.COLUMN_NAME,
+										tc.CONSTRAINT_TYPE,
+										fk.referenced_object_id,
+										fkc.referenced_column_id
 									FROM 
 										INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ccu
 									INNER JOIN 
@@ -90,7 +96,14 @@ namespace RepoLite.DataAccess.Accessors
 											ccu.CONSTRAINT_NAME = tc.CONSTRAINT_NAME
 											AND ccu.TABLE_SCHEMA = tc.TABLE_SCHEMA
 											AND ccu.TABLE_NAME = tc.TABLE_NAME
-											AND tc.CONSTRAINT_TYPE = 'PRIMARY KEY') x
+									LEFT JOIN
+										sys.foreign_keys fk
+										ON
+											tc.CONSTRAINT_NAME = fk.name
+									LEFT JOIN
+										sys.foreign_key_columns fkc
+										ON
+											fk.object_id = fkc.constraint_object_id) x
 										ON
 											x.TABLE_SCHEMA = c.TABLE_SCHEMA
 											AND	x.TABLE_NAME = c.TABLE_NAME

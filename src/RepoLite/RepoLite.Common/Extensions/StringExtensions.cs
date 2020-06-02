@@ -1,6 +1,7 @@
 ﻿using RepoLite.Common.Models;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace RepoLite.Common.Extensions
 {
@@ -52,6 +53,47 @@ namespace RepoLite.Common.Extensions
                 schema = "dbo";
             var table = split[1];
             return new TableAndSchema(schema, table);
+        }
+
+        public static string LowerFirst(this string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return input;
+
+            var str = input[0].ToString().ToLower();
+            if (input.Length > 1)
+                str += input.Substring(1);
+
+            return str;
+        }
+
+        public static string ToModelName(this string input)
+        {
+            var name = Regex.Replace(
+                AppSettings.Generation.ModelClassNameFormat,
+                Regex.Escape("{Name}"),
+                input,
+                RegexOptions.IgnoreCase
+            );
+
+            if (Helpers.ReservedWord(name))
+                name = "@" + name;
+
+            return name;
+        }
+
+        public static string ToRepositoryName(this string input)
+        {
+            var name = Regex.Replace(
+                AppSettings.Generation.RepositoryClassNameFormat,
+                Regex.Escape("{Name}"),
+                input,
+                RegexOptions.IgnoreCase
+            );
+
+            if (Helpers.ReservedWord(name))
+                name = "@" + name;
+
+            return name;
         }
     }
 }

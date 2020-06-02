@@ -11,8 +11,8 @@ namespace RepoLite.GeneratorEngine
 {
     public abstract class CodeGenerator : IGenerator
     {
-        public abstract StringBuilder ModelForTable(Table table);
-        public abstract StringBuilder RepositoryForTable(Table table);
+        public abstract StringBuilder ModelForTable(Table table, List<Table> otherTables);
+        public abstract StringBuilder RepositoryForTable(Table table, List<Table> otherTables);
 
         protected bool AreWordsSimilar(string first, string second)
         {

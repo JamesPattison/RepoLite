@@ -16,7 +16,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows.Input;
 
 namespace RepoLite.ViewModel.Main
@@ -59,7 +58,7 @@ namespace RepoLite.ViewModel.Main
             {
                 return new RelayCommand(o =>
                 {
-                    var shouldSelect = Math.Abs(Math.Round(Tables.Count(x => x.Selected) / (float) Tables.Count)) < 0.001;
+                    var shouldSelect = Math.Abs(Math.Round(Tables.Count(x => x.Selected) / (float)Tables.Count)) < 0.001;
                     foreach (var table in Tables)
                     {
                         table.Selected = shouldSelect;
@@ -98,13 +97,13 @@ namespace RepoLite.ViewModel.Main
                         {
                             if (true)
                             {
-                                var model = generator.ModelForTable(x).ToString();
+                                var model = generator.ModelForTable(x, tableDefinitions).ToString();
 
                                 createModelViewModel.CreateModel(x, outputDirectory, generator, model);
                             }
 
                             LogMessage($"Processing Table {x.Schema}.{x.ClassName}");
-                            var repository = generator.RepositoryForTable(x).ToString();
+                            var repository = generator.RepositoryForTable(x, tableDefinitions).ToString();
 
                             CreateRepo(x, outputDirectory, generator, repository);
                         });
@@ -180,19 +179,7 @@ namespace RepoLite.ViewModel.Main
 
         internal void CreateRepo(Table table, string outputDirectory, IGenerator generator, string repositoryName)
         {
-            var result = Regex.Replace(
-                AppSettings.Generation.RepositoryFileNameFormat,
-                Regex.Escape("{Name}"),
-                table.ClassName.Replace("$", "$$"),
-                RegexOptions.IgnoreCase
-            );
-
-            result = Regex.Replace(
-                result,
-                Regex.Escape("{Schema}"),
-                table.Schema.Replace("$", "$$"),
-                RegexOptions.IgnoreCase
-            );
+            var result = table.RepositoryName;
 
             string fileName;
 

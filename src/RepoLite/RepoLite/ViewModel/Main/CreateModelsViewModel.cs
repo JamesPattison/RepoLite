@@ -16,7 +16,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows.Input;
 
 namespace RepoLite.ViewModel.Main
@@ -59,7 +58,7 @@ namespace RepoLite.ViewModel.Main
             {
                 return new RelayCommand(o =>
                 {
-                    var shouldSelect = Math.Abs(Math.Round(Tables.Count(x => x.Selected) / (float) Tables.Count)) < 0.001;
+                    var shouldSelect = Math.Abs(Math.Round(Tables.Count(x => x.Selected) / (float)Tables.Count)) < 0.001;
                     foreach (var table in Tables)
                     {
                         table.Selected = shouldSelect;
@@ -92,7 +91,7 @@ namespace RepoLite.ViewModel.Main
                         tableDefinitions.ForEach(x =>
                         {
                             LogMessage($"Processing Table {x.Schema}.{x.ClassName}");
-                            var model = generator.ModelForTable(x).ToString();
+                            var model = generator.ModelForTable(x, tableDefinitions).ToString();
 
                             CreateModel(x, outputDirectory, generator, model);
                         });
@@ -168,19 +167,7 @@ namespace RepoLite.ViewModel.Main
 
         internal void CreateModel(Table table, string outputDirectory, IGenerator generator, string modelName)
         {
-            var result = Regex.Replace(
-                AppSettings.Generation.ModelFileNameFormat,
-                Regex.Escape("{Name}"),
-                table.ClassName.Replace("$", "$$"),
-                RegexOptions.IgnoreCase
-            );
-
-            result = Regex.Replace(
-                result,
-                Regex.Escape("{Schema}"),
-                table.Schema.Replace("$", "$$"),
-                RegexOptions.IgnoreCase
-            );
+            var result = table.ClassName;
 
             string fileName;
 

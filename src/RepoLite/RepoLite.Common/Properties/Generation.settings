@@ -17,5 +17,14 @@
     <Setting Name="RepositoryFileNameFormat" Type="System.String" Scope="User">
       <Value Profile="(Default)">{Name}</Value>
     </Setting>
+    <Setting Name="ModelClassNameFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">{Name}Dto</Value>
+    </Setting>
+    <Setting Name="RepositoryClassNameFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">{Name}Repository</Value>
+    </Setting>
+    <Setting Name="GenerateSealedObjects" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">true</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
