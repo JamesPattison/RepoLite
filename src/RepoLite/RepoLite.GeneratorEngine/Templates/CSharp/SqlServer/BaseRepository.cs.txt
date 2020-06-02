@@ -26,12 +26,14 @@ namespace REPOSITORYNAMESPACE.Base
         Where<T> Where(string col, Comparison comparison, object val);
         Where<T> Where(string col, Comparison comparison, object val, Type valueType);
         IEnumerable<T> Where(string query);
+        T ToItem(DataRow row);
+        TK ToItem<TK>(DataRow row) where TK : T, new();
     }
 
     public interface IPkRepository<T> : IBaseRepository<T>
         where T : IBaseModel, new()
     {
-        bool Update(T item);
+        bool Update(T item, bool clearDirty = true);
         bool Delete(T item);
         bool Delete(IEnumerable<T> items);
         bool Merge(List<T> items);
@@ -129,14 +131,16 @@ namespace REPOSITORYNAMESPACE.Base
         private readonly StringBuilder _query = new StringBuilder();
         private readonly BaseRepository<T> _repository;
         private int _activeGroups;
+        private List<TableDefinition> _tables;
 
-        public Where(BaseRepository<T> baseRepository, string col, Comparison comparison, object val) : this(
-            baseRepository, col, comparison, val, val.GetType())
+        public Where(BaseRepository<T> baseRepository, List<TableDefinition> tables, string col, Comparison comparison, object val) : this(
+            baseRepository, tables, col, comparison, val, val.GetType())
         { }
 
-        public Where(BaseRepository<T> baseRepository, string col, Comparison comparison, object val, Type valueType)
+        public Where(BaseRepository<T> baseRepository, List<TableDefinition> tables, string col, Comparison comparison, object val, Type valueType)
         {
             _repository = baseRepository;
+            _tables = tables;
 
             _query.Append(MakeClause(col, comparison, val, ClauseType.Initial, valueType));
         }
@@ -149,6 +153,8 @@ namespace REPOSITORYNAMESPACE.Base
         private string MakeClause(string col, Comparison comparison, object val, ClauseType clauseType, Type valueType)
         {
             var query = new StringBuilder();
+
+            var tableIndex = _tables.IndexOf(_tables.Find(x => x.Columns.Any(y => y.ColumnName == col)));
 
             switch (comparison)
             {
@@ -177,18 +183,18 @@ namespace REPOSITORYNAMESPACE.Base
             {
                 case ClauseType.Initial:
                     query.Append(valueType == typeof(XmlDocument)
-                        ? $"CONVERT(NVARCHAR(MAX), [{col}])"
-                        : $"[{col}]");
+                        ? $"CONVERT(NVARCHAR(MAX), a_{tableIndex}.[{col}])"
+                        : $"a_{tableIndex}.[{col}]");
                     break;
                 case ClauseType.And:
                     query.Append(valueType == typeof(XmlDocument)
-                        ? $" AND CONVERT(NVARCHAR(MAX), [{col}])"
-                        : $" AND [{col}]");
+                        ? $" AND CONVERT(NVARCHAR(MAX), a_{tableIndex}.[{col}])"
+                        : $" AND a_{tableIndex}.[{col}]");
                     break;
                 case ClauseType.Or:
                     query.Append(valueType == typeof(XmlDocument)
-                        ? $" OR CONVERT(NVARCHAR(MAX), [{col}])"
-                        : $" OR [{col}]");
+                        ? $" OR CONVERT(NVARCHAR(MAX), a_{tableIndex}.[{col}])"
+                        : $" OR a_{tableIndex}.[{col}]");
                     break;
             }
 
@@ -305,7 +311,7 @@ namespace REPOSITORYNAMESPACE.Base
         public IEnumerable<T> Results()
         {
             if (_activeGroups > 0) throw new Exception("Please close all Query Groups before calling Results()");
-            return _repository.Where(_query.ToString());
+            return _repository.Where(_tables, _query.ToString());
         }
 
         public Where<T> And(string col, Comparison comparison)
@@ -1738,64 +1744,108 @@ namespace REPOSITORYNAMESPACE.Base
 
         public long RecordCount()
         {
-            var query = BuildSelectQuery(new[] { new ColumnDefinition("'x'") });
+            var query = BuildSelectQuery(new List<TableDefinition> { new TableDefinition(null, Schema, TableName, new[] { new ColumnDefinition("'x'") }) });
             var dt = Execute(query, "1=1");
             return dt == null ? 0 : dt.Rows.Count;
         }
 
-        public IEnumerable<T> GetAll()
+        public virtual IEnumerable<T> GetAll()
         {
-            return Where("1=1");
+            return Where(new List<TableDefinition> { new TableDefinition(null, Schema, TableName, Columns) }, "1=1");
         }
 
         public abstract bool Create(T item);
         public abstract bool BulkCreate(List<T> items);
         public abstract bool BulkCreate(params T[] items);
-        protected abstract T ToItem(DataRow row);
+        public abstract T ToItem(DataRow row);
+        public abstract TK ToItem<TK>(DataRow row) where TK : T, new();
 
-        protected internal string BuildSelectQuery()
-        {
-            return BuildSelectQuery(Columns);
-        }
-
-        private string BuildSelectQuery(IEnumerable<ColumnDefinition> columns)
+        private string BuildSelectQuery(List<TableDefinition> tables)
         {
             var sb = new StringBuilder();
             sb.AppendLine("SELECT ");
 
-            var columnArray = columns.ToArray();
-            if (columnArray.Any())
+            if (tables.Count == 1)
             {
-                foreach (var column in columnArray)
+                var columns = tables[0].Columns;
+                var columnArray = columns.ToArray();
+                if (columnArray.Any())
                 {
-                    sb.Append(column.ColumnName);
-                    if (column != columnArray.Last())
-                        sb.Append(", ");
+                    foreach (var column in columnArray)
+                    {
+                        sb.Append($"{(column.ColumnName == "'x'" ? "" : "a_0.")}{column.ColumnName}");
+                        if (column != columnArray.Last())
+                            sb.Append(", ");
+                    }
+                }
+
+                sb.Append($" FROM [{Schema}].[{TableName}] a_0");
+            }
+            else
+            {
+                for (var i = 0; i < tables.Count; i++)
+                {
+                    var table = tables[i];
+
+                    var columns = tables[i].Columns;
+                    var columnArray = columns.ToArray();
+                    if (columnArray.Any())
+                    {
+                        foreach (var column in columnArray)
+                        {
+                            sb.Append($"a_{i}.{column.ColumnName}");
+                            sb.Append(", ");
+                        }
+                    }
+                }
+
+                sb.Length -= 2;
+
+                sb.Append($" FROM [{Schema}].[{TableName}] a_0");
+
+                if (tables.Count > 1)
+                {
+                    for (var i = 1; i < tables.Count; i++)
+                    {
+                        var table = tables[i];
+
+                        sb.Append($" LEFT JOIN [{table.Schema}].[{table.TableName}] a_{i}");
+                        sb.Append($" ON a_{i - 1}.{table.PrimaryKey} = a_{i}.{table.PrimaryKey}");
+                    }
                 }
             }
-
-            sb.Append($" FROM [{Schema}].[{TableName}]");
 
             return sb.ToString();
         }
 
-        public Where<T> Where(string col, Comparison comparison, object val)
+        public virtual Where<T> Where(string col, Comparison comparison, object val)
         {
-            return Where(col, comparison, val, val.GetType());
+            return Where(new List<TableDefinition> { new TableDefinition(null, Schema, TableName, Columns) }, col, comparison, val, val.GetType());
         }
 
-        public Where<T> Where(string col, Comparison comparison, object val, Type valueType)
+        public virtual Where<T> Where(string col, Comparison comparison, object val, Type valueType)
         {
-            return new Where<T>(this, col, comparison, val, valueType);
+            return Where(new List<TableDefinition> { new TableDefinition(null, Schema, TableName, Columns) }, col, comparison, val, valueType);
         }
 
-        public IEnumerable<T> Where(string query)
+        public virtual IEnumerable<T> Where(string query)
         {
-            var dt = Execute(BuildSelectQuery(), query);
+            return Where(new List<TableDefinition> { new TableDefinition(null, Schema, TableName, Columns) }, query);
+        }
+
+        protected Where<T> Where(List<TableDefinition> tables, string col, Comparison comparison, object val,
+            Type valueType)
+        {
+            return new Where<T>(this, tables, col, comparison, val, valueType);
+        }
+
+        protected internal virtual IEnumerable<T> Where(List<TableDefinition> tables, string query)
+        {
+            var dt = Execute(BuildSelectQuery(tables), query);
             return dt == null ? new T[0] : ToItems(dt);
         }
 
-        private DataTable Execute(string columnPart, string filterPart)
+        protected DataTable Execute(string columnPart, string filterPart)
         {
             if (HasInjection(columnPart) || HasInjection(filterPart))
                 throw new Exception("Sql Injection attempted. Aborted");

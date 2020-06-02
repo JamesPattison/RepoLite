@@ -119,13 +119,25 @@ namespace RepoLite.DataAccess.Accessors
                         table = $"{table.Schema}.{table.DbTableName}".ToLower()
                     }).ToList();
 
+                var toReturn = new List<Column>();
+
                 foreach (var column in columns)
                 {
-                    column.DataType = GetDataType(column.SqlDataTypeCode);
-                    column.DbType = GetDbType(column.SqlDataTypeCode);
+                    var preExisting = toReturn.FirstOrDefault(x => x.DbColumnName == column.DbColumnName);
+                    if (preExisting != null)
+                    {
+                        preExisting.ForeignKey |= column.ForeignKey;
+                        preExisting.PrimaryKey |= column.PrimaryKey;
+                    }
+                    else
+                    {
+                        column.DataType = GetDataType(column.SqlDataTypeCode);
+                        column.DbType = GetDbType(column.SqlDataTypeCode);
+                        toReturn.Add(column);
+                    }
                 }
 
-                return columns;
+                return toReturn;
             }
         }
 

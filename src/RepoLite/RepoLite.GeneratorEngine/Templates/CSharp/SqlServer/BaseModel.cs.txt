@@ -43,6 +43,21 @@ namespace MODELNAMESPACE.Base
         }
     }
     
+    public class TableDefinition
+    {
+        public string PrimaryKey { get; set; }
+        public string Schema { get; set; }
+        public string TableName { get; set; }
+        public IEnumerable<ColumnDefinition> Columns { get; set; }
+        public TableDefinition(string primaryKey, string schema, string tableName, IEnumerable<ColumnDefinition> columns)
+        {
+            PrimaryKey = primaryKey;
+            Schema = schema;
+            TableName = tableName;
+            Columns = columns;
+        }
+    }
+    
     public partial interface IBaseModel
     {
         string EntityName { get; }
