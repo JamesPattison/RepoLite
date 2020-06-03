@@ -79,23 +79,19 @@ namespace RepoLite.ViewModel.Main
                     var tableDefinitions = dataSource.LoadTables(tables.Select(x => new TableAndSchema(x.Schema, x.Table)).ToList());
 
                     var generator = CodeGenerator.GetGenerator();
-                    var outputDirectory = AppSettings.Generation.OutputDirectory.TrimEnd('/').TrimEnd('\\');
-
-                    if (!Directory.Exists(outputDirectory))
-                        Directory.CreateDirectory(outputDirectory);
 
                     DoWork(() =>
                     {
-                        CreateBaseModel(outputDirectory, generator);
+                        CreateBaseModel(generator);
 
                         tableDefinitions.ForEach(x =>
                         {
                             LogMessage($"Processing Table {x.Schema}.{x.ClassName}");
                             var model = generator.ModelForTable(x, tableDefinitions).ToString();
 
-                            CreateModel(x, outputDirectory, generator, model);
+                            CreateModel(x, generator, model);
                         });
-                    }, () => Process.Start(outputDirectory));
+                    }, () => Process.Start(AppSettings.Generation.OutputDirectory));
                 });
             }
         }
@@ -165,8 +161,10 @@ namespace RepoLite.ViewModel.Main
             }
         }
 
-        internal void CreateModel(Table table, string outputDirectory, IGenerator generator, string modelName)
+        internal void CreateModel(Table table, IGenerator generator, string modelName)
         {
+            var outputDirectory = $"{AppSettings.Generation.OutputDirectory}/Models";
+
             var result = table.ClassName;
 
             string fileName;
@@ -188,8 +186,10 @@ namespace RepoLite.ViewModel.Main
             LogMessage($"Done {table.Schema}.{table.ClassName}!");
         }
 
-        internal void CreateBaseModel(string outputDirectory, IGenerator generator)
+        internal void CreateBaseModel(IGenerator generator)
         {
+            var outputDirectory = $"{AppSettings.Generation.OutputDirectory}/Models";
+
             if (!Directory.Exists($"{outputDirectory}/Base"))
                 Directory.CreateDirectory($"{outputDirectory}/Base");
 

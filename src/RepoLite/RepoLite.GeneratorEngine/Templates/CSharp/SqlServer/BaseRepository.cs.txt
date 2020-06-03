@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.Caching;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml;
@@ -28,6 +29,7 @@ namespace REPOSITORYNAMESPACE.Base
         IEnumerable<T> Where(string query);
         T ToItem(DataRow row);
         TK ToItem<TK>(DataRow row) where TK : T, new();
+        void EnableCache(int cacheDurationInSeconds);
     }
 
     public interface IPkRepository<T> : IBaseRepository<T>
@@ -1707,19 +1709,75 @@ namespace REPOSITORYNAMESPACE.Base
         }
     }
 
+    internal static class CacheHelper
+    {
+        private static int _cacheDuration;
+
+        public static void Initialize(int cacheDuration)
+        {
+            _cacheDuration = cacheDuration;
+        }
+
+        public static void SaveToCache<TC>(string cacheKey, TC savedItem)
+            where TC : BaseModel
+        {
+            RemoveFromCache(cacheKey);
+            MemoryCache.Default.Add(cacheKey, savedItem, DateTimeOffset.Now.AddSeconds(_cacheDuration));
+
+        }
+
+        public static TC GetFromCache<TC>(string cacheKey)
+            where TC : BaseModel
+        {
+            if (IsInCache(cacheKey))
+            {
+                var cacheItem = MemoryCache.Default[cacheKey] as TC;
+                if (cacheItem == null)
+                    return null;
+
+                RemoveFromCache(cacheKey);
+                return null;
+            }
+
+            return null;
+        }
+
+        public static void RemoveFromCache(string cacheKey)
+        {
+            if (IsInCache(cacheKey))
+            {
+                MemoryCache.Default.Remove(cacheKey);
+            }
+        }
+
+        public static bool IsInCache(string cacheKey)
+        {
+            return MemoryCache.Default[cacheKey] != null;
+        }
+    }
+
     public abstract partial class BaseRepository<T> : RepositoryDataAccess, IBaseRepository<T>
         where T : IBaseModel, new()
     {
-        protected readonly string Schema;
-        protected readonly string TableName;
+
         private List<ColumnDefinition> Columns;
 
-        protected BaseRepository(string connectionString, Action<Exception> logMethod, string schema, string table, List<ColumnDefinition> columns) : base(connectionString)
+        protected readonly string Schema;
+        protected readonly string TableName;
+        protected bool CacheEnabled;
+        protected int CacheDuration;
+
+        protected BaseRepository(string connectionString, Action<Exception> logMethod, string schema, string table, List<ColumnDefinition> columns, bool enableCache, int cacheDurationInSeconds) : base(connectionString)
         {
             Schema = schema;
             TableName = table;
             Logger = logMethod ?? (exception => { });
             Columns = columns;
+
+            if (enableCache)
+            {
+                EnableCache(cacheDurationInSeconds);
+            }
 
             var sql = $@"SELECT COUNT(*)
                             FROM INFORMATION_SCHEMA.COLUMNS
@@ -1759,6 +1817,13 @@ namespace REPOSITORYNAMESPACE.Base
         public abstract bool BulkCreate(params T[] items);
         public abstract T ToItem(DataRow row);
         public abstract TK ToItem<TK>(DataRow row) where TK : T, new();
+
+        public void EnableCache(int cacheDurationInSeconds)
+        {
+            CacheEnabled = true;
+            CacheDuration = cacheDurationInSeconds;
+            CacheHelper.Initialize(cacheDurationInSeconds);
+        }
 
         private string BuildSelectQuery(List<TableDefinition> tables)
         {
@@ -1985,7 +2050,7 @@ namespace REPOSITORYNAMESPACE.Base
                         for (var i = 0; i < dt.Columns.Count; i++)
                         {
                             var dataColumn = dt.Columns[i];
-                            returnIds.Add(dataColumn.ColumnName, dt.Rows[0][i]);
+                            returnIds.Add(dataColumn.ColumnName, dt.Rows[i][0]);
                         }
                     }
                 }
@@ -2092,7 +2157,7 @@ namespace REPOSITORYNAMESPACE.Base
             return isSuccess;
         }
 
-        protected bool BaseDelete(DeleteColumn deleteColumn)
+        protected bool BaseDelete(DeleteColumn deleteColumn, out IEnumerable<T> items)
         {
             bool isSuccess;
 
@@ -2100,8 +2165,9 @@ namespace REPOSITORYNAMESPACE.Base
             using (var cn = new SqlConnection(ConnectionString))
             {
                 var sb = new StringBuilder();
-                sb.Append($"DELETE [{Schema}].[{TableName}] WHERE ");
-                sb.Append($"[{ deleteColumn.ColumnName}] = @{deleteColumn.ColumnName}");
+                sb.Append($"DELETE [{Schema}].[{TableName}] ");
+                sb.Append("OUTPUT DELETED.* ");
+                sb.Append($"WHERE [{ deleteColumn.ColumnName}] = @{deleteColumn.ColumnName}");
 
                 var sql = sb.ToString();
                 if (HasInjection(sql))
@@ -2113,7 +2179,15 @@ namespace REPOSITORYNAMESPACE.Base
                     parameter.Value = deleteColumn.Data;
 
                     //Execute
-                    isSuccess = NoneQuery(cn, cmd);
+                    DataTable dt;
+                    isSuccess = ToDataTable(cmd, cn, out dt);
+
+                    items = null;
+                    if (!isSuccess) return false;
+
+                    items = ToItems(dt);
+                    return true;
+
                 }
             }
 

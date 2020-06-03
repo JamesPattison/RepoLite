@@ -79,18 +79,18 @@ namespace RepoLite.ViewModel.Main
                     var tableDefinitions = dataSource.LoadTables(tables.Select(x => new TableAndSchema(x.Schema, x.Table)).ToList());
 
                     var generator = CodeGenerator.GetGenerator();
-                    var outputDirectory = AppSettings.Generation.OutputDirectory.TrimEnd('/').TrimEnd('\\');
+                    //var outputDirectory = AppSettings.Generation.OutputDirectory.TrimEnd('/').TrimEnd('\\');
 
-                    if (!Directory.Exists(outputDirectory))
-                        Directory.CreateDirectory(outputDirectory);
+                    //if (!Directory.Exists(outputDirectory))
+                    //    Directory.CreateDirectory(outputDirectory);
 
                     DoWork(() =>
                     {
                         var createModelViewModel = new CreateModelsViewModel();
-                        CreateBaseRepository(outputDirectory, generator);
+                        CreateBaseRepository(generator);
                         if (true)
                         {
-                            createModelViewModel.CreateBaseModel(outputDirectory, generator);
+                            createModelViewModel.CreateBaseModel(generator);
                         }
 
                         tableDefinitions.ForEach(x =>
@@ -99,15 +99,15 @@ namespace RepoLite.ViewModel.Main
                             {
                                 var model = generator.ModelForTable(x, tableDefinitions).ToString();
 
-                                createModelViewModel.CreateModel(x, outputDirectory, generator, model);
+                                createModelViewModel.CreateModel(x, generator, model);
                             }
 
                             LogMessage($"Processing Table {x.Schema}.{x.ClassName}");
                             var repository = generator.RepositoryForTable(x, tableDefinitions).ToString();
 
-                            CreateRepo(x, outputDirectory, generator, repository);
+                            CreateRepo(x, generator, repository);
                         });
-                    }, () => Process.Start(outputDirectory));
+                    }, () => Process.Start(AppSettings.Generation.OutputDirectory));
                 });
             }
         }
@@ -177,8 +177,13 @@ namespace RepoLite.ViewModel.Main
             }
         }
 
-        internal void CreateRepo(Table table, string outputDirectory, IGenerator generator, string repositoryName)
+        internal void CreateRepo(Table table, IGenerator generator, string repositoryName)
         {
+            var outputDirectory = $"{AppSettings.Generation.OutputDirectory}/Repositories";
+
+            if (!Directory.Exists(outputDirectory))
+                Directory.CreateDirectory(outputDirectory);
+
             var result = table.RepositoryName;
 
             string fileName;
@@ -192,16 +197,15 @@ namespace RepoLite.ViewModel.Main
                     //"If you've added a new language to the enum, the generator needs creating and hooking up here"
                     throw new ArgumentOutOfRangeException();
             }
-
-            if (!Directory.Exists(AppSettings.Generation.OutputDirectory))
-                Directory.CreateDirectory(AppSettings.Generation.OutputDirectory);
             LogMessage($"Creating Repository File for {table.Schema}.{table.ClassName} in {outputDirectory}/");
             File.WriteAllText(fileName, repositoryName);
             LogMessage($"Done {table.Schema}.{table.ClassName}!");
         }
 
-        internal void CreateBaseRepository(string outputDirectory, IGenerator generator)
+        internal void CreateBaseRepository(IGenerator generator)
         {
+            var outputDirectory = $"{AppSettings.Generation.OutputDirectory}/Repositories";
+
             if (!Directory.Exists($"{outputDirectory}/Base"))
                 Directory.CreateDirectory($"{outputDirectory}/Base");
 
