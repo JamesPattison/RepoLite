@@ -27,8 +27,8 @@ namespace REPOSITORYNAMESPACE.Base
         Where<T> Where(string col, Comparison comparison, object val);
         Where<T> Where(string col, Comparison comparison, object val, Type valueType);
         IEnumerable<T> Where(string query);
-        T ToItem(DataRow row);
-        TK ToItem<TK>(DataRow row) where TK : T, new();
+        T ToItem(DataRow row, bool skipBase);
+        TK ToItem<TK>(DataRow row, bool skipBase) where TK : T, new();
         void EnableCache(int cacheDurationInSeconds);
     }
 
@@ -1687,7 +1687,7 @@ namespace REPOSITORYNAMESPACE.Base
             dt = ToDataTable(cmd);
             cn.Close();
 
-            if (dt == null || dt.Rows.Count == 0)
+            if (dt == null)
                 isSuccess = false;
             return isSuccess;
         }
@@ -1729,17 +1729,9 @@ namespace REPOSITORYNAMESPACE.Base
         public static TC GetFromCache<TC>(string cacheKey)
             where TC : BaseModel
         {
-            if (IsInCache(cacheKey))
-            {
-                var cacheItem = MemoryCache.Default[cacheKey] as TC;
-                if (cacheItem == null)
-                    return null;
+            var cacheItem = MemoryCache.Default[cacheKey] as TC;
 
-                RemoveFromCache(cacheKey);
-                return null;
-            }
-
-            return null;
+            return cacheItem;
         }
 
         public static void RemoveFromCache(string cacheKey)
@@ -1815,8 +1807,8 @@ namespace REPOSITORYNAMESPACE.Base
         public abstract bool Create(T item);
         public abstract bool BulkCreate(List<T> items);
         public abstract bool BulkCreate(params T[] items);
-        public abstract T ToItem(DataRow row);
-        public abstract TK ToItem<TK>(DataRow row) where TK : T, new();
+        public abstract T ToItem(DataRow row, bool skipBase);
+        public abstract TK ToItem<TK>(DataRow row, bool skipBase) where TK : T, new();
 
         public void EnableCache(int cacheDurationInSeconds)
         {
@@ -1907,7 +1899,7 @@ namespace REPOSITORYNAMESPACE.Base
         protected internal virtual IEnumerable<T> Where(List<TableDefinition> tables, string query)
         {
             var dt = Execute(BuildSelectQuery(tables), query);
-            return dt == null ? new T[0] : ToItems(dt);
+            return dt == null ? new T[0] : ToItems(dt, false);
         }
 
         protected DataTable Execute(string columnPart, string filterPart)
@@ -2185,7 +2177,7 @@ namespace REPOSITORYNAMESPACE.Base
                     items = null;
                     if (!isSuccess) return false;
 
-                    items = ToItems(dt);
+                    items = ToItems(dt, true);
                     return true;
 
                 }
@@ -2368,14 +2360,14 @@ namespace REPOSITORYNAMESPACE.Base
             return onClause;
         }
 
-        protected IEnumerable<T> ToItems(DataTable table)
+        protected IEnumerable<T> ToItems(DataTable table, bool skipBase)
         {
             foreach (DataRow row in table.Rows)
             {
                 var item = default(T);
                 try
                 {
-                    item = ToItem(row);
+                    item = ToItem(row, skipBase);
                 }
                 catch (Exception ex)
                 {
@@ -2555,7 +2547,7 @@ namespace REPOSITORYNAMESPACE.Base
 
         protected IEnumerable<T> ExecuteSql(string sql)
         {
-            return ToItems(Execute(sql));
+            return ToItems(Execute(sql), false);
         }
 
         #region [Private]

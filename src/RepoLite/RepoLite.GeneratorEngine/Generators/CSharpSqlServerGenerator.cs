@@ -111,12 +111,11 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab2,
                 $"public {table.RepositoryName}(string connectionString, bool useCache, int cacheDurationInSeconds) : this(connectionString, exception => {{ }}, useCache, cacheDurationInSeconds) {{ }}");
             sb.AppendLine(Tab2,
-                $"public {table.RepositoryName}(string connectionString, Action<Exception> logMethod, bool useCache, int cacheDurationInSeconds) : base(connectionString, logMethod,");
-            sb.AppendLine(Tab3, $"{table.ClassName}.Schema, {table.ClassName}.TableName, {table.ClassName}.Columns, useCache, cacheDurationInSeconds) {{ }}");
-
+                $"public {table.RepositoryName}(string connectionString, Action<Exception> logMethod) : this(connectionString, logMethod, false, 0) {{ }}");
             sb.AppendLine(Tab2,
-                $"public {table.RepositoryName}(string connectionString, Action<Exception> logMethod) : base(connectionString, logMethod,");
-            sb.AppendLine(Tab3, $"{table.ClassName}.Schema, {table.ClassName}.TableName, {table.ClassName}.Columns, false, 0)");
+                $"public {table.RepositoryName}(string connectionString, Action<Exception> logMethod, bool useCache, int cacheDurationInSeconds) : base(connectionString, logMethod,");
+            sb.AppendLine(Tab3, $"{table.ClassName}.Schema, {table.ClassName}.TableName, {table.ClassName}.Columns, useCache, cacheDurationInSeconds)");
+
             //}
             sb.AppendLine(Tab2, "{");
             if (inherits)
@@ -927,9 +926,11 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab2, "{");
 
                     {
-                        sb.AppendLine(Tab3, $"if (CacheEnabled && IsInCache({pk.FieldName}))");
+                        sb.AppendLine(Tab3, $"if (CacheEnabled)");
                         sb.AppendLine(Tab3, "{");
-                        sb.AppendLine(Tab4, $"return GetFromCache({pk.FieldName});");
+                        sb.AppendLine(Tab4, $"var fromCache = GetFromCache({pk.FieldName});");
+                        sb.AppendLine(Tab4, $"if (fromCache != null)");
+                        sb.AppendLine(Tab5, $"return fromCache;");
                         sb.AppendLine(Tab3, "}");
 
 
@@ -1733,12 +1734,12 @@ namespace RepoLite.GeneratorEngine.Generators
             var sb = new StringBuilder();
 
             sb.AppendLine("");
-            sb.AppendLine(Tab2, $"public override {table.ClassName} ToItem(DataRow row)");
+            sb.AppendLine(Tab2, $"public override {table.ClassName} ToItem(DataRow row, bool skipBase)");
             sb.AppendLine(Tab2, "{");
 
             if (inherits)
             {
-                sb.AppendLine(Tab3, $"var item = _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.ToItem<{table.ClassName}>(row);");
+                sb.AppendLine(Tab3, $"var item = skipBase ? new {table.ClassName}() : _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.ToItem<{table.ClassName}>(row, false);");
 
                 foreach (var column in table.Columns)
                 {
@@ -1766,13 +1767,13 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab2, "}");
 
             sb.AppendLine("");
-            sb.AppendLine(Tab2, "public override TK ToItem<TK>(DataRow row)");
+            sb.AppendLine(Tab2, "public override TK ToItem<TK>(DataRow row, bool skipBase)");
             sb.AppendLine(Tab2, "{");
 
 
             if (inherits)
             {
-                sb.AppendLine(Tab3, $"var item = _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.ToItem<TK>(row);");
+                sb.AppendLine(Tab3, $"var item = skipBase ? new {table.ClassName}() : _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.ToItem<TK>(row, false);");
 
                 foreach (var column in table.Columns)
                 {
@@ -1796,7 +1797,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             sb.AppendLine("");
             sb.AppendLine(Tab3, "item.ResetDirty();");
-            sb.AppendLine(Tab3, "return item;");
+            sb.AppendLine(Tab3, "return item as TK;");
             sb.AppendLine(Tab2, "}");
 
             return sb;
