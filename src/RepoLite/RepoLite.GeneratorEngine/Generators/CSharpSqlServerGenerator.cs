@@ -106,8 +106,12 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, $"private I{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName()} _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()};\n");
             }
 
+
+
+            sb.AppendLine(Tab2, "partial void InitializeExtension();");
+
             sb.AppendLine(Tab2,
-                $"public {table.RepositoryName}(string connectionString) : this(connectionString, exception => {{ }}) {{ }}");
+                    $"public {table.RepositoryName}(string connectionString) : this(connectionString, exception => {{ }}) {{ }}");
             sb.AppendLine(Tab2,
                 $"public {table.RepositoryName}(string connectionString, bool useCache, int cacheDurationInSeconds) : this(connectionString, exception => {{ }}, useCache, cacheDurationInSeconds) {{ }}");
             sb.AppendLine(Tab2,
@@ -122,6 +126,8 @@ namespace RepoLite.GeneratorEngine.Generators
             {
                 sb.AppendLine(Tab3, $"_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()} = new {inheritedDependency.ForeignKeyTargetTable.ToRepositoryName()}(connectionString, logMethod);");
             }
+
+            sb.AppendLine(Tab3, "InitializeExtension();");
             sb.AppendLine(Tab2, "}");
 
             sb.Append(Repo_Get(table, otherTables, inherits));
