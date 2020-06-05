@@ -1,5 +1,4 @@
 ﻿using Microsoft.CSharp;
-using System;
 
 namespace RepoLite.Common
 {
@@ -17,7 +16,8 @@ namespace RepoLite.Common
 
         public static bool IsCSharpNullable(string type)
         {
-            return type != "Byte[]" && type != "Object" && type != "String" && type != "XmlDocument";
+            return type != "byte[]" && type != "object" && type != "string" && type != "XmlDocument" &&
+                   type != "Byte[]" && type != "Object" && type != "String";
         }
 
         public static bool ReservedWord(string value)

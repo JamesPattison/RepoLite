@@ -131,7 +131,9 @@ namespace RepoLite.DataAccess.Accessors
                     }
                     else
                     {
-                        column.DataType = GetDataType(column.SqlDataTypeCode);
+                        var dt = GetDataType(column.SqlDataTypeCode);
+                        column.DataTypeString = dt.Item1;
+                        column.DataType = dt.Item2;
                         column.DbType = GetDbType(column.SqlDataTypeCode);
                         toReturn.Add(column);
                     }
@@ -142,49 +144,49 @@ namespace RepoLite.DataAccess.Accessors
         }
 
         //todo move this into a c# layer
-        private Type GetDataType(int sqlType)
+        private Tuple<string, Type> GetDataType(int sqlType)
         {
             switch (sqlType)
             {
                 case 104: //BIT
-                    return typeof(bool);
+                    return new Tuple<string, Type>("bool", typeof(bool));
                 case 48: //TINYINT
-                    return typeof(byte);
+                    return new Tuple<string, Type>("byte", typeof(byte));
                 case 34: //IMAGE
                 case 165: //VARBINARY
                 case 173: //BINARY
                 case 189: //TIMESTAMP -- hmm
-                    return typeof(byte[]);
+                    return new Tuple<string, Type>("byte[]", typeof(byte[]));
                 case 40: //DATE
                 case 42: //DATETIME2
                 case 58: //SMALLDATETIME
                 case 61: //DATETIME
-                    return typeof(DateTime);
+                    return new Tuple<string, Type>("DateTime", typeof(DateTime));
                 case 43: //DATETIMEOFFSET
-                    return typeof(DateTimeOffset);
+                    return new Tuple<string, Type>("DateTimeOffset", typeof(DateTimeOffset));
                 case 59: //REAL
                 case 60: //MONEY
                 case 62: //FLOAT
                 case 106: //DECIMAL
                 case 108: //NUMERIC
                 case 122: //SMALLMONEY
-                    return typeof(decimal);
+                    return new Tuple<string, Type>("decimal", typeof(decimal));
                 case 36: //UNIQUEIDENTIFIER
-                    return typeof(Guid);
+                    return new Tuple<string, Type>("Guid", typeof(Guid));
                 case 52: //SMALLINT
-                    return typeof(short);
+                    return new Tuple<string, Type>("short", typeof(short));
                 case 56: //INT
-                    return typeof(int);
+                    return new Tuple<string, Type>("int", typeof(int));
                 case 127: //BIGINT
-                    return typeof(long);
+                    return new Tuple<string, Type>("long", typeof(long));
                 case 98: //SQL_VARIANT
-                    return typeof(object);
+                    return new Tuple<string, Type>("object", typeof(object));
                 case 41: //TIME
-                    return typeof(TimeSpan);
+                    return new Tuple<string, Type>("TimeSpan", typeof(TimeSpan));
                 //case 240:   //GEOGRAPHY          //Not supporting
                 //    return typeof(SqlGeography);
                 case 241: //XML
-                    return typeof(XmlDocument);
+                    return new Tuple<string, Type>("XmlDocument", typeof(XmlDocument));
                 case 35: //TEXT
                 case 99: //NTEXT
                 case 167: //VARCHAR
@@ -192,7 +194,7 @@ namespace RepoLite.DataAccess.Accessors
                 case 231: //NVARCHAR
                 case 239: //NCHAR
                 default:
-                    return typeof(string);
+                    return new Tuple<string, Type>("string", typeof(string));
             }
         }
 

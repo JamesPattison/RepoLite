@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace RepoLite.Common.Models
 {
-    [DebuggerDisplay("{DbColumnName} ({DataType})")]
+    [DebuggerDisplay("{DbColumnName} ({DataTypeString})")]
     public class Column
     {
         /// <summary>
@@ -81,6 +81,11 @@ namespace RepoLite.Common.Models
         /// Mapped using SqlDataTypeCode
         /// </summary>
         public SqlDbType DbType { get; set; }
+
+        /// <summary>
+        /// Mapped using SqlDataTypeCode
+        /// </summary>
+        public string DataTypeString { get; set; }
 
         /// <summary>
         /// Mapped using SqlDataTypeCode
