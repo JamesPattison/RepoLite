@@ -1073,7 +1073,7 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab3, "using (var cn = new SqlConnection(ConnectionString))");
                     sb.AppendLine(Tab3, "{");
                     sb.AppendLine(Tab4,
-                        $"using (var cmd = CreateCommand(cn, \"SELECT MAX({pk.DbColumnName}) FROM {table.DbTableName}\"))");
+                        $"using (var cmd = CreateCommand(cn, \"SELECT ISNULL(MAX({pk.DbColumnName}), 0) FROM {table.DbTableName}\"))");
                     sb.AppendLine(Tab4, "{");
                     sb.AppendLine(Tab5, "cn.Open();");
                     sb.AppendLine(Tab5, $"return ({pk.DataTypeString})cmd.ExecuteScalar();");
