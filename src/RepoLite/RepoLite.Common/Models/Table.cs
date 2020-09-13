@@ -1,5 +1,4 @@
 ﻿using RepoLite.Common.Enums;
-using RepoLite.Common.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +13,6 @@ namespace RepoLite.Common.Models
         //public string SequenceName;
         //public bool Ignore;
         public string DbTableName { get; set; }
-
-        public string LowerClassName => ClassName.ToLower();
-
-        public string ClassName => DbTableName.ToModelName();
-
-        public string RepositoryName => DbTableName.ToRepositoryName();
 
         public Column GetColumn(string columnName)
         {

@@ -1,6 +1,8 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Options;
 using RepoLite.Common.Extensions;
 using RepoLite.Common.Models;
+using RepoLite.Common.Settings;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,8 +12,15 @@ using System.Xml;
 
 namespace RepoLite.DataAccess.Accessors
 {
-    public class SQLServerAccess : DataSource<SqlConnection>
+    public class SQLServerAccess : DataSource
     {
+        private readonly SystemSettings _systemSettings;
+
+        public SQLServerAccess(
+            IOptions<SystemSettings> systemSettings)
+        {
+            _systemSettings = systemSettings.Value;
+        }
         public override List<TableAndSchema> GetTables()
         {
             return GetTables(null);
@@ -19,7 +28,7 @@ namespace RepoLite.DataAccess.Accessors
 
         public override List<TableAndSchema> GetTables(string schema)
         {
-            using (var conn = Connection)
+            using (var conn = new SqlConnection(_systemSettings.ConnectionString))
             {
                 var tables = conn.Query<string>(@"
                     SELECT 
@@ -49,7 +58,7 @@ namespace RepoLite.DataAccess.Accessors
 
         public override List<Column> LoadTableColumns(Table table)
         {
-            using (var cn = Connection)
+            using (var cn = new SqlConnection(_systemSettings.ConnectionString))
             {
                 var columns = cn.Query<Column>(@"
                             SELECT

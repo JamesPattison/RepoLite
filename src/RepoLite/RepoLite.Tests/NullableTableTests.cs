@@ -77,7 +77,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestCsvImport()
         {
             var csvPath =
-                @"ActualGeneratedFilesTests\Csvs\NullableTable.csv";
+                @"Csvs\NullableTable.csv";
             Assert.IsTrue(_repository.Merge(csvPath));
 
             var items = _repository.GetAll();

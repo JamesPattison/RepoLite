@@ -1,4 +1,4 @@
-﻿using RepoLite.Annotations;
+﻿using JetBrains.Annotations;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 

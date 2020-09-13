@@ -1,6 +1,6 @@
 ﻿using RepoLite.Commands;
-using RepoLite.Common;
 using RepoLite.Common.Enums;
+using RepoLite.Common.Settings;
 using RepoLite.ViewModel.Base;
 using RepoLite.Views.Settings;
 using System;
@@ -13,13 +13,18 @@ namespace RepoLite.ViewModel.Settings
 {
     public class AllSettingsViewModel : ViewModelBase
     {
-        public Common.Properties.Generation GenerationSettings { get; set; }
-        public Common.Properties.System SystemSettings { get; set; }
+        private readonly IWritableOptions<GenerationSettings> _generationSettings;
+        private readonly IWritableOptions<SystemSettings> _systemSettings;
 
-        public AllSettingsViewModel()
+        public GenerationSettings GenerationSettings => _generationSettings.Value;
+        public SystemSettings SystemSettings => _systemSettings.Value;
+
+        public AllSettingsViewModel(
+            IWritableOptions<GenerationSettings> generationSettings,
+            IWritableOptions<SystemSettings> systemSettings)
         {
-            GenerationSettings = AppSettings.Generation;
-            SystemSettings = AppSettings.System;
+            _generationSettings = generationSettings;
+            _systemSettings = systemSettings;
         }
 
         private bool _connectionTestEnabled = true;
@@ -106,8 +111,24 @@ namespace RepoLite.ViewModel.Settings
             {
                 return new RelayCommand(o =>
                 {
-                    GenerationSettings.Save();
-                    SystemSettings.Save();
+                    _generationSettings.Update(opt =>
+                    {
+                        opt.ModelGenerationNamespace = GenerationSettings.ModelGenerationNamespace;
+                        opt.RepositoryGenerationNamespace = GenerationSettings.RepositoryGenerationNamespace;
+                        opt.OutputDirectory = GenerationSettings.OutputDirectory;
+                        opt.ModelFileNameFormat = GenerationSettings.ModelFileNameFormat;
+                        opt.RepositoryFileNameFormat = GenerationSettings.RepositoryFileNameFormat;
+                        opt.ModelClassNameFormat = GenerationSettings.ModelClassNameFormat;
+                        opt.RepositoryClassNameFormat = GenerationSettings.RepositoryClassNameFormat;
+                        opt.GenerateSealedObjects = GenerationSettings.GenerateSealedObjects;
+
+                    });
+
+                    _systemSettings.Update(opt =>
+                    {
+                        opt.ConnectionString = SystemSettings.ConnectionString;
+                    });
+
                     var wnd = o as Global;
                     NavigationCommands.BrowseBack.Execute(null, wnd);
                 });

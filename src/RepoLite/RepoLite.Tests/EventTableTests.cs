@@ -21,7 +21,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         public void TestCsvImport()
         {
             var csvPath =
-                @"ActualGeneratedFilesTests\Csvs\Event.csv";
+                @"Csvs\Event.csv";
             Assert.IsTrue(_repository.Merge(csvPath));
 
             var item = _repository.Get("EVT_01");

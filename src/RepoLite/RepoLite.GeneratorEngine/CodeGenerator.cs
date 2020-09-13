@@ -1,9 +1,5 @@
 ﻿using FuzzyString;
-using RepoLite.Common;
-using RepoLite.Common.Enums;
 using RepoLite.Common.Models;
-using RepoLite.GeneratorEngine.Generators;
-using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -28,26 +24,26 @@ namespace RepoLite.GeneratorEngine
             return first.ApproximatelyEquals(second, options, FuzzyStringComparisonTolerance.Normal);
         }
 
-        public static IGenerator GetGenerator()
-        {
-            IGenerator generator = null;
-            switch (AppSettings.System.GenerationLanguage)
-            {
-                case GenerationLanguage.CSharp:
-                    switch (AppSettings.System.DataSource)
-                    {
-                        case DataSourceEnum.SQLServer:
-                            generator = new CSharpSqlServerGenerator();
-                            break;
-                    }
-                    break;
-            }
+        //public static IGenerator GetGenerator(GenerationLanguage generationLanguage, DataSourceEnum dataSource)
+        //{
+        //    IGenerator generator = null;
+        //    switch (generationLanguage)
+        //    {
+        //        case GenerationLanguage.CSharp:
+        //            switch (dataSource)
+        //            {
+        //                case DataSourceEnum.SQLServer:
+        //                    generator = new CSharpSqlServerGenerator();
+        //                    break;
+        //            }
+        //            break;
+        //    }
 
-            if (generator == null)
-                throw new Exception("Generator/DataSource combo not supported yet");
+        //    if (generator == null)
+        //        throw new Exception("Generator/DataSource combo not supported yet");
 
-            return generator;
-        }
+        //    return generator;
+        //}
 
         public abstract string FileExtension();
     }

@@ -1,7 +1,8 @@
-﻿using RepoLite.Common;
+﻿using Microsoft.Extensions.Options;
 using RepoLite.Common.Enums;
 using RepoLite.Common.Extensions;
 using RepoLite.Common.Models;
+using RepoLite.Common.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +14,15 @@ namespace RepoLite.GeneratorEngine.Generators
 {
     public class CSharpSqlServerGenerator : CodeGenerator
     {
+        private readonly IOptions<GenerationSettings> _generationSettings;
         private const int VARIABLE_BLOCK_SCOPE = 5;
 
         //private Func<string, string, string, string> GetColName = (s, table, name) => $"{(s == name ? $"nameof({table}.{name})" : $"\"{name}\"")}";
 
-        public CSharpSqlServerGenerator()
+        public CSharpSqlServerGenerator(
+            IOptions<GenerationSettings> generationSettings)
         {
+            _generationSettings = generationSettings;
         }
 
         public override StringBuilder ModelForTable(Table table, List<Table> otherTables)
@@ -29,7 +33,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine("using System.Data;");
             sb.AppendLine("using System.Xml;");
-            sb.AppendLine($"using {AppSettings.Generation.ModelGenerationNamespace}.Base;");
+            sb.AppendLine($"using {_generationSettings.Value.ModelGenerationNamespace}.Base;");
 
             sb.Append(Environment.NewLine);
             sb.AppendLine(CreateModel(table, otherTables).ToString());
@@ -40,9 +44,9 @@ namespace RepoLite.GeneratorEngine.Generators
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"using {AppSettings.Generation.RepositoryGenerationNamespace}.Base;");
-            sb.AppendLine($"using {AppSettings.Generation.ModelGenerationNamespace};");
-            sb.AppendLine($"using {AppSettings.Generation.ModelGenerationNamespace}.Base;");
+            sb.AppendLine($"using {_generationSettings.Value.RepositoryGenerationNamespace}.Base;");
+            sb.AppendLine($"using {_generationSettings.Value.ModelGenerationNamespace};");
+            sb.AppendLine($"using {_generationSettings.Value.ModelGenerationNamespace}.Base;");
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine("using System.Data;");
@@ -52,14 +56,14 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("using System.Xml;");
             sb.Append(Environment.NewLine);
 
-            sb.AppendLine($"namespace {AppSettings.Generation.RepositoryGenerationNamespace}");
+            sb.AppendLine($"namespace {_generationSettings.Value.RepositoryGenerationNamespace}");
             sb.AppendLine("{");
 
             if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
             {
                 //build up object to use for composite searching
 
-                sb.AppendLine(Tab1, $"public class {table.ClassName}Keys");
+                sb.AppendLine(Tab1, $"public class {ModelName(table.DbTableName)}Keys");
                 sb.AppendLine(Tab1, "{");
 
 
@@ -69,9 +73,9 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab2, $"public {column.DataTypeString} {column.DbColumnName} {{ get; set; }}");
                 }
 
-                sb.AppendLine(Tab2, $"public {table.ClassName}Keys() {{}}");
+                sb.AppendLine(Tab2, $"public {ModelName(table.DbTableName)}Keys() {{}}");
 
-                sb.AppendLine(Tab2, $"public {table.ClassName}Keys(");
+                sb.AppendLine(Tab2, $"public {ModelName(table.DbTableName)}Keys(");
                 foreach (var column in table.PrimaryKeys)
                 {
                     sb.Append(Tab3, $"{column.DataTypeString} {column.FieldName}");
@@ -97,34 +101,32 @@ namespace RepoLite.GeneratorEngine.Generators
                 table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
             var inherits = inheritedDependency != null;
 
-            sb.AppendLine(Tab1, $"public {(AppSettings.Generation.GenerateSealedObjects ? "sealed " : "")}partial class {table.RepositoryName} : BaseRepository<{table.ClassName}>, I{table.RepositoryName}");
+            sb.AppendLine(Tab1, $"public {(_generationSettings.Value.GenerateSealedObjects ? "sealed " : "")}partial class {RepositoryName(table.DbTableName)} : BaseRepository<{ModelName(table.DbTableName)}>, I{RepositoryName(table.DbTableName)}");
 
             sb.AppendLine(Tab1, "{");
 
             if (inherits)
             {
-                sb.AppendLine(Tab2, $"private I{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName()} _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()};\n");
+                sb.AppendLine(Tab2, $"private I{RepositoryName(inheritedDependency.ForeignKeyTargetTable)} _{RepositoryName(inheritedDependency.ForeignKeyTargetTable).LowerFirst()};\n");
             }
-
-
 
             sb.AppendLine(Tab2, "partial void InitializeExtension();");
 
             sb.AppendLine(Tab2,
-                    $"public {table.RepositoryName}(string connectionString) : this(connectionString, exception => {{ }}) {{ }}");
+                    $"public {RepositoryName(table.DbTableName)}(string connectionString) : this(connectionString, exception => {{ }}) {{ }}");
             sb.AppendLine(Tab2,
-                $"public {table.RepositoryName}(string connectionString, bool useCache, int cacheDurationInSeconds) : this(connectionString, exception => {{ }}, useCache, cacheDurationInSeconds) {{ }}");
+                $"public {RepositoryName(table.DbTableName)}(string connectionString, bool useCache, int cacheDurationInSeconds) : this(connectionString, exception => {{ }}, useCache, cacheDurationInSeconds) {{ }}");
             sb.AppendLine(Tab2,
-                $"public {table.RepositoryName}(string connectionString, Action<Exception> logMethod) : this(connectionString, logMethod, false, 0) {{ }}");
+                $"public {RepositoryName(table.DbTableName)}(string connectionString, Action<Exception> logMethod) : this(connectionString, logMethod, false, 0) {{ }}");
             sb.AppendLine(Tab2,
-                $"public {table.RepositoryName}(string connectionString, Action<Exception> logMethod, bool useCache, int cacheDurationInSeconds) : base(connectionString, logMethod,");
-            sb.AppendLine(Tab3, $"{table.ClassName}.Schema, {table.ClassName}.TableName, {table.ClassName}.Columns, useCache, cacheDurationInSeconds)");
+                $"public {RepositoryName(table.DbTableName)}(string connectionString, Action<Exception> logMethod, bool useCache, int cacheDurationInSeconds) : base(connectionString, logMethod,");
+            sb.AppendLine(Tab3, $"{ModelName(table.DbTableName)}.Schema, {ModelName(table.DbTableName)}.TableName, {ModelName(table.DbTableName)}.Columns, useCache, cacheDurationInSeconds)");
 
             //}
             sb.AppendLine(Tab2, "{");
             if (inherits)
             {
-                sb.AppendLine(Tab3, $"_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()} = new {inheritedDependency.ForeignKeyTargetTable.ToRepositoryName()}(connectionString, logMethod);");
+                sb.AppendLine(Tab3, $"_{RepositoryName(inheritedDependency.ForeignKeyTargetTable).LowerFirst()} = new {RepositoryName(inheritedDependency.ForeignKeyTargetTable)}(connectionString, logMethod);");
             }
 
             sb.AppendLine(Tab3, "InitializeExtension();");
@@ -175,27 +177,35 @@ namespace RepoLite.GeneratorEngine.Generators
         private string Repo_Caching(Table table)
         {
             var sb = new StringBuilder();
-            var pk = table.PrimaryKeys.First();
+            if (table.PrimaryKeys.Any())
+            {
+                var pk = table.PrimaryKeys.First();
 
-            sb.AppendLine(Tab2, $"private void SaveToCache({table.ClassName} {table.LowerClassName})");
-            sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, $"CacheHelper.SaveToCache({table.ClassName}.CacheKey({table.LowerClassName}.{pk.PropertyName}), {table.LowerClassName});");
-            sb.AppendLine(Tab2, "}");
+                sb.AppendLine(Tab2,
+                    $"private void SaveToCache({ModelName(table.DbTableName)} {ModelName(table.DbTableName).ToLower()})");
+                sb.AppendLine(Tab2, "{");
+                sb.AppendLine(Tab3,
+                    $"CacheHelper.SaveToCache({ModelName(table.DbTableName)}.CacheKey({ModelName(table.DbTableName).ToLower()}.{pk.PropertyName}), {ModelName(table.DbTableName).ToLower()});");
+                sb.AppendLine(Tab2, "}");
 
-            sb.AppendLine(Tab2, $"private {table.ClassName} GetFromCache(int {pk.FieldName})");
-            sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, $"return CacheHelper.GetFromCache<{table.ClassName}>({table.ClassName}.CacheKey({pk.FieldName}));");
-            sb.AppendLine(Tab2, "}");
+                sb.AppendLine(Tab2, $"private {ModelName(table.DbTableName)} GetFromCache({pk.DataType} {pk.FieldName})");
+                sb.AppendLine(Tab2, "{");
+                sb.AppendLine(Tab3,
+                    $"return CacheHelper.GetFromCache<{ModelName(table.DbTableName)}>({ModelName(table.DbTableName)}.CacheKey({pk.FieldName}));");
+                sb.AppendLine(Tab2, "}");
 
-            sb.AppendLine(Tab2, $"private void RemoveFromCache(int {pk.FieldName})");
-            sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, $"CacheHelper.RemoveFromCache({table.ClassName}.CacheKey({pk.FieldName}));");
-            sb.AppendLine(Tab2, "}");
+                sb.AppendLine(Tab2, $"private void RemoveFromCache({pk.DataType} {pk.FieldName})");
+                sb.AppendLine(Tab2, "{");
+                sb.AppendLine(Tab3,
+                    $"CacheHelper.RemoveFromCache({ModelName(table.DbTableName)}.CacheKey({pk.FieldName}));");
+                sb.AppendLine(Tab2, "}");
 
-            sb.AppendLine(Tab2, $"private bool IsInCache(int {pk.FieldName})");
-            sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, $"return CacheHelper.IsInCache({table.ClassName}.CacheKey({pk.FieldName}));");
-            sb.AppendLine(Tab2, "}");
+                sb.AppendLine(Tab2, $"private bool IsInCache({pk.DataType} {pk.FieldName})");
+                sb.AppendLine(Tab2, "{");
+                sb.AppendLine(Tab3,
+                    $"return CacheHelper.IsInCache({ModelName(table.DbTableName)}.CacheKey({pk.FieldName}));");
+                sb.AppendLine(Tab2, "}");
+            }
 
             return sb.ToString();
         }
@@ -204,37 +214,37 @@ namespace RepoLite.GeneratorEngine.Generators
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine(Tab2, $"public override Where<{table.ClassName}> Where(string col, Comparison comparison, object val, Type valueType)");
+            sb.AppendLine(Tab2, $"public override Where<{ModelName(table.DbTableName)}> Where(string col, Comparison comparison, object val, Type valueType)");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, "var tables = new List<TableDefinition>");
             sb.AppendLine(Tab3, "{");
             foreach (var definition in GetTableDefinitions(table, otherTables))
             {
-                sb.AppendLine(Tab4, $"new TableDefinition(\"{definition.PrimaryKeys[0].DbColumnName}\", {definition.ClassName}.Schema, {definition.ClassName}.TableName, {definition.ClassName}.Columns),");
+                sb.AppendLine(Tab4, $"new TableDefinition(\"{definition.PrimaryKeys[0].DbColumnName}\", {ModelName(definition.DbTableName)}.Schema, {ModelName(definition.DbTableName)}.TableName, {ModelName(definition.DbTableName)}.Columns),");
             }
             sb.AppendLine(Tab3, "};");
             sb.AppendLine(Tab3, "return base.Where(tables, col, comparison, val, valueType);");
             sb.AppendLine(Tab2, "}");
 
-            sb.AppendLine(Tab2, $"public override Where<{table.ClassName}> Where(string col, Comparison comparison, object val)");
+            sb.AppendLine(Tab2, $"public override Where<{ModelName(table.DbTableName)}> Where(string col, Comparison comparison, object val)");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, "var tables = new List<TableDefinition>");
             sb.AppendLine(Tab3, "{");
             foreach (var definition in GetTableDefinitions(table, otherTables))
             {
-                sb.AppendLine(Tab4, $"new TableDefinition(\"{definition.PrimaryKeys[0].DbColumnName}\", {definition.ClassName}.Schema, {definition.ClassName}.TableName, {definition.ClassName}.Columns),");
+                sb.AppendLine(Tab4, $"new TableDefinition(\"{definition.PrimaryKeys[0].DbColumnName}\", {ModelName(definition.DbTableName)}.Schema, {ModelName(definition.DbTableName)}.TableName, {ModelName(definition.DbTableName)}.Columns),");
             }
             sb.AppendLine(Tab3, "};");
             sb.AppendLine(Tab3, "return base.Where(tables, col, comparison, val, val.GetType());");
             sb.AppendLine(Tab2, "}");
 
-            sb.AppendLine(Tab2, $"public override IEnumerable<{table.ClassName}> Where(string query)");
+            sb.AppendLine(Tab2, $"public override IEnumerable<{ModelName(table.DbTableName)}> Where(string query)");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, "var tables = new List<TableDefinition>");
             sb.AppendLine(Tab3, "{");
             foreach (var definition in GetTableDefinitions(table, otherTables))
             {
-                sb.AppendLine(Tab4, $"new TableDefinition(\"{definition.PrimaryKeys[0].DbColumnName}\", {definition.ClassName}.Schema, {definition.ClassName}.TableName, {definition.ClassName}.Columns),");
+                sb.AppendLine(Tab4, $"new TableDefinition(\"{definition.PrimaryKeys[0].DbColumnName}\", {ModelName(definition.DbTableName)}.Schema, {ModelName(definition.DbTableName)}.TableName, {ModelName(definition.DbTableName)}.Columns),");
             }
             sb.AppendLine(Tab3, "};");
             sb.AppendLine(Tab3, "return base.Where(tables, query);");
@@ -265,13 +275,23 @@ namespace RepoLite.GeneratorEngine.Generators
             return "cs";
         }
 
+        private string RepositoryName(string repository)
+        {
+            return repository.ToRepositoryName(_generationSettings.Value.RepositoryClassNameFormat);
+        }
+
+        private string ModelName(string model)
+        {
+            return model.ToModelName(_generationSettings.Value.ModelClassNameFormat);
+        }
+
         #region Helpers Methods
 
         private StringBuilder CreateModel(Table table, List<Table> otherTables)
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"namespace {AppSettings.Generation.ModelGenerationNamespace}");
+            sb.AppendLine($"namespace {_generationSettings.Value.ModelGenerationNamespace}");
             sb.AppendLine("{");
 
             var inheritedDependency =
@@ -280,17 +300,17 @@ namespace RepoLite.GeneratorEngine.Generators
             if (inheritedDependency != null)
             {
                 //This table inherits from another table, inherit that table instead
-                sb.AppendLine(Tab1, $"public {(AppSettings.Generation.GenerateSealedObjects ? "sealed " : "")}partial class {table.ClassName} : {inheritedDependency.ForeignKeyTargetTable.ToModelName()}");
+                sb.AppendLine(Tab1, $"public {(_generationSettings.Value.GenerateSealedObjects ? "sealed " : "")}partial class {ModelName(table.DbTableName)} : {ModelName(inheritedDependency.ForeignKeyTargetTable)}");
             }
             else
             {
-                sb.AppendLine(Tab1, $"public {(AppSettings.Generation.GenerateSealedObjects ? "sealed " : "")}partial class {table.ClassName} : BaseModel");
+                sb.AppendLine(Tab1, $"public {(_generationSettings.Value.GenerateSealedObjects ? "sealed " : "")}partial class {ModelName(table.DbTableName)} : BaseModel");
             }
 
             sb.AppendLine(Tab1, "{");
 
             sb.AppendLine(Tab2, $"public override string EntityName => \"{table.DbTableName}\";");
-            sb.AppendLine(Tab2, $"public static string CacheKey(int id) => $\"{table.DbTableName}_{{id}}\";");
+            sb.AppendLine(Tab2, $"public static string CacheKey(object identifier) => $\"{table.DbTableName}_{{identifier}}\";");
 
             foreach (var column in table.Columns)
             {
@@ -322,14 +342,14 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab2, "/// Nothing is done with this, it's merely there to hold data IF you wish to populate it");
                     sb.AppendLine(Tab2, "/// </summary>");
                     sb.AppendLine(Tab2,
-                        $"public {column.ForeignKeyTargetTable.ToModelName()} {column.DbColumnName.TrimEnd('d', 'I')} {{ get; set; }}");
+                        $"public {ModelName(column.ForeignKeyTargetTable)} {column.DbColumnName.TrimEnd('d', 'I')} {{ get; set; }}");
                 }
             }
 
             //constructors
-            sb.AppendLine(Tab2, $"public {table.ClassName}() {{ }}");
+            sb.AppendLine(Tab2, $"public {ModelName(table.DbTableName)}() {{ }}");
 
-            sb.AppendLine(Tab2, $"public {table.ClassName}(");
+            sb.AppendLine(Tab2, $"public {ModelName(table.DbTableName)}(");
             foreach (var column in table.Columns)
             {
                 if (inheritedDependency != null && column.DbColumnName == inheritedDependency.DbColumnName) continue;
@@ -411,7 +431,7 @@ namespace RepoLite.GeneratorEngine.Generators
                     ? $"({Math.Max(column.MaxLength, column.MaxIntLength)})"
                     : string.Empty;
                 sb.AppendLine(Tab3,
-                    $"new ColumnDefinition({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}, " +
+                    $"new ColumnDefinition({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}, " +
                     $"typeof({column.DataTypeString}), " +
                     $"\"[{column.SqlDataType}]{colLengthVal}\", " +
                     $"SqlDbType.{column.DbType}, " +
@@ -612,8 +632,8 @@ namespace RepoLite.GeneratorEngine.Generators
 
             sb.AppendLine(Tab1,
                 table.Columns.Count(x => x.PrimaryKey) == 1
-                    ? $"public partial interface I{table.RepositoryName} : IPkRepository<{table.ClassName}>"
-                    : $"public partial interface I{table.RepositoryName} : IBaseRepository<{table.ClassName}>");
+                    ? $"public partial interface I{RepositoryName(table.DbTableName)} : IPkRepository<{ModelName(table.DbTableName)}>"
+                    : $"public partial interface I{RepositoryName(table.DbTableName)} : IBaseRepository<{ModelName(table.DbTableName)}>");
 
             sb.AppendLine(Tab1, "{");
 
@@ -626,21 +646,21 @@ namespace RepoLite.GeneratorEngine.Generators
             //get
             if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
             {
-                sb.AppendLine(Tab2, $"{table.ClassName} Get({pkParamList});");
+                sb.AppendLine(Tab2, $"{ModelName(table.DbTableName)} Get({pkParamList});");
                 sb.AppendLine(Tab2,
-                    $"{table.ClassName} Get({table.ClassName}Keys compositeId);");
+                    $"{ModelName(table.DbTableName)} Get({ModelName(table.DbTableName)}Keys compositeId);");
                 sb.AppendLine(Tab2,
-                    $"IEnumerable<{table.ClassName}> Get(List<{table.ClassName}Keys> compositeIds);");
+                    $"IEnumerable<{ModelName(table.DbTableName)}> Get(List<{ModelName(table.DbTableName)}Keys> compositeIds);");
                 sb.AppendLine(Tab2,
-                    $"IEnumerable<{table.ClassName}> Get(params {table.ClassName}Keys[] compositeIds);");
+                    $"IEnumerable<{ModelName(table.DbTableName)}> Get(params {ModelName(table.DbTableName)}Keys[] compositeIds);");
             }
             else if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.PrimaryKey)
             {
-                sb.AppendLine(Tab2, $"{table.ClassName} Get({pk.DataTypeString} {pk.FieldName});");
+                sb.AppendLine(Tab2, $"{ModelName(table.DbTableName)} Get({pk.DataTypeString} {pk.FieldName});");
                 sb.AppendLine(Tab2,
-                    $"IEnumerable<{table.ClassName}> Get(List<{pk.DataTypeString}> {pk.FieldName}s);");
+                    $"IEnumerable<{ModelName(table.DbTableName)}> Get(List<{pk.DataTypeString}> {pk.FieldName}s);");
                 sb.AppendLine(Tab2,
-                    $"IEnumerable<{table.ClassName}> Get(params {pk.DataTypeString}[] {pk.FieldName}s);");
+                    $"IEnumerable<{ModelName(table.DbTableName)}> Get(params {pk.DataTypeString}[] {pk.FieldName}s);");
 
                 if (table.PrimaryKeys.Count == 1 &&
                     new[] { typeof(short), typeof(int), typeof(long), typeof(decimal), typeof(double), typeof(float) }
@@ -673,20 +693,20 @@ namespace RepoLite.GeneratorEngine.Generators
             if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
             {
                 //update
-                sb.AppendLine(Tab2, $"bool Update({table.ClassName} item);");
+                sb.AppendLine(Tab2, $"bool Update({ModelName(table.DbTableName)} item, bool clearDirty = true);");
 
                 //delete
-                sb.AppendLine(Tab2, $"bool Delete({table.ClassName} {table.LowerClassName});");
+                sb.AppendLine(Tab2, $"bool Delete({ModelName(table.DbTableName)} {ModelName(table.DbTableName).ToLower()});");
                 sb.AppendLine(Tab2, $"bool Delete({pkParamList});");
-                sb.AppendLine(Tab2, $"bool Delete({table.ClassName}Keys compositeId);");
-                sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{table.ClassName}Keys> compositeIds);");
+                sb.AppendLine(Tab2, $"bool Delete({ModelName(table.DbTableName)}Keys compositeId);");
+                sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{ModelName(table.DbTableName)}Keys> compositeIds);");
 
-                sb.AppendLine(Tab2, $"bool Merge(List<{table.ClassName}> items);");
+                sb.AppendLine(Tab2, $"bool Merge(List<{ModelName(table.DbTableName)}> items);");
                 sb.AppendLine(Tab2, "bool Merge(string csvPath);");
             }
 
             //search
-            sb.AppendLine(Tab2, $"IEnumerable<{table.ClassName}> Search(");
+            sb.AppendLine(Tab2, $"IEnumerable<{ModelName(table.DbTableName)}> Search(");
             foreach (var column in table.Columns)
             {
                 if (column.PrimaryKey || (inheritedDependency != null && column.DbColumnName == inheritedDependency.DbColumnName)) continue;
@@ -712,9 +732,9 @@ namespace RepoLite.GeneratorEngine.Generators
                 foreach (var primaryKey in table.PrimaryKeys)
                 {
                     sb.AppendLine(Tab2,
-                        $"IEnumerable<{table.ClassName}> FindBy{primaryKey.PropertyName}({primaryKey.DataTypeString} {primaryKey.FieldName});");
+                        $"IEnumerable<{ModelName(table.DbTableName)}> FindBy{primaryKey.PropertyName}({primaryKey.DataTypeString} {primaryKey.FieldName});");
                     sb.AppendLine(Tab2,
-                        $"IEnumerable<{table.ClassName}> FindBy{primaryKey.PropertyName}(FindComparison comparison, {primaryKey.DataTypeString} {primaryKey.FieldName});");
+                        $"IEnumerable<{ModelName(table.DbTableName)}> FindBy{primaryKey.PropertyName}(FindComparison comparison, {primaryKey.DataTypeString} {primaryKey.FieldName});");
                 }
             }
 
@@ -724,19 +744,19 @@ namespace RepoLite.GeneratorEngine.Generators
 
                 sb.AppendLine(Tab2,
                     nonPrimaryKey.DataType != typeof(XmlDocument)
-                        ? $"IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}({nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName});"
-                        : $"IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(String {nonPrimaryKey.FieldName});");
+                        ? $"IEnumerable<{ModelName(table.DbTableName)}> FindBy{nonPrimaryKey.PropertyName}({nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName});"
+                        : $"IEnumerable<{ModelName(table.DbTableName)}> FindBy{nonPrimaryKey.PropertyName}(String {nonPrimaryKey.FieldName});");
 
                 sb.AppendLine(Tab2,
                     nonPrimaryKey.DataType != typeof(XmlDocument)
-                        ? $"IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, {nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName});"
-                        : $"IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, String {nonPrimaryKey.FieldName});");
+                        ? $"IEnumerable<{ModelName(table.DbTableName)}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, {nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName});"
+                        : $"IEnumerable<{ModelName(table.DbTableName)}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, String {nonPrimaryKey.FieldName});");
             }
 
             if (inherits)
             {
                 //DeleteBy for base Tables
-                AppendFindByForInherited(table.ClassName, otherTables, inheritedDependency, sb);
+                AppendFindByForInherited(ModelName(table.DbTableName), otherTables, inheritedDependency, sb);
             }
 
             sb.AppendLine(Tab1, "}");
@@ -840,13 +860,13 @@ namespace RepoLite.GeneratorEngine.Generators
                     .TrimEnd(' ', ',');
 
                 sb.AppendLine("");
-                sb.AppendLine(Tab2, $"public {table.ClassName} Get({pkParamList})");
+                sb.AppendLine(Tab2, $"public {ModelName(table.DbTableName)} Get({pkParamList})");
                 sb.AppendLine(Tab2, "{");
                 sb.Append(Tab3, "return Where(");
                 foreach (var pk in table.PrimaryKeys)
                 {
                     sb.Append(
-                        $"{(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({table.ClassName}.{pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.Equals, {pk.FieldName}");
+                        $"{(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.Equals, {pk.FieldName}");
                     if (pk != table.PrimaryKeys.Last())
                     {
                         sb.Append(").And(");
@@ -858,13 +878,13 @@ namespace RepoLite.GeneratorEngine.Generators
 
                 sb.AppendLine("");
                 sb.AppendLine(Tab2,
-                    $"public {table.ClassName} Get({table.ClassName}Keys compositeId)");
+                    $"public {ModelName(table.DbTableName)} Get({ModelName(table.DbTableName)}Keys compositeId)");
                 sb.AppendLine(Tab2, "{");
                 sb.Append(Tab3, "return Where(");
                 foreach (var pk in table.PrimaryKeys)
                 {
                     sb.Append(
-                        $"{(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({table.ClassName}.{pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.Equals, compositeId.{pk.PropertyName}");
+                        $"{(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.Equals, compositeId.{pk.PropertyName}");
                     if (pk != table.PrimaryKeys.Last())
                     {
                         sb.Append(").And(");
@@ -876,21 +896,21 @@ namespace RepoLite.GeneratorEngine.Generators
 
                 sb.AppendLine("");
                 sb.AppendLine(Tab2,
-                    $"public IEnumerable<{table.ClassName}> Get(List<{table.ClassName}Keys> compositeIds)");
+                    $"public IEnumerable<{ModelName(table.DbTableName)}> Get(List<{ModelName(table.DbTableName)}Keys> compositeIds)");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3, "return Get(compositeIds.ToArray());");
                 sb.AppendLine(Tab2, "}");
 
                 sb.AppendLine("");
                 sb.AppendLine(Tab2,
-                    $"public IEnumerable<{table.ClassName}> Get(params {table.ClassName}Keys[] compositeIds)");
+                    $"public IEnumerable<{ModelName(table.DbTableName)}> Get(params {ModelName(table.DbTableName)}Keys[] compositeIds)");
                 sb.AppendLine(Tab2, "{");
 
                 sb.Append(Tab3, "var result = Where(");
                 foreach (var pk in table.PrimaryKeys)
                 {
                     sb.Append(
-                        $"{(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({table.ClassName}.{pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.In, compositeIds.Select(x => x.{pk.PropertyName}).ToList()");
+                        $"{(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.In, compositeIds.Select(x => x.{pk.PropertyName}).ToList()");
                     if (pk != table.PrimaryKeys.Last())
                     {
                         sb.Append(").Or(");
@@ -899,7 +919,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
                 sb.AppendLine(").Results().ToArray();");
 
-                sb.AppendLine(Tab3, $"var filteredResults = new List<{table.ClassName}>();");
+                sb.AppendLine(Tab3, $"var filteredResults = new List<{ModelName(table.DbTableName)}>();");
                 sb.AppendLine("");
 
                 sb.AppendLine(Tab3, "foreach (var compositeKey in compositeIds)");
@@ -928,7 +948,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 if (inherits)
                 {
                     sb.AppendLine("");
-                    sb.AppendLine(Tab2, $"public {table.ClassName} Get({pk.DataTypeString} {pk.FieldName})");
+                    sb.AppendLine(Tab2, $"public {ModelName(table.DbTableName)} Get({pk.DataTypeString} {pk.FieldName})");
                     sb.AppendLine(Tab2, "{");
 
                     {
@@ -963,10 +983,13 @@ namespace RepoLite.GeneratorEngine.Generators
                         sb.AppendLine(Tab3, "var item = ExecuteSql(query).FirstOrDefault(); ");
 
 
-                        sb.AppendLine(Tab3, "if (CacheEnabled)");
-                        sb.AppendLine(Tab3, "{");
-                        sb.AppendLine(Tab4, "SaveToCache(item);");
-                        sb.AppendLine(Tab3, "}");
+                        if (table.PrimaryKeys.Any())
+                        {
+                            sb.AppendLine(Tab3, "if (CacheEnabled)");
+                            sb.AppendLine(Tab3, "{");
+                            sb.AppendLine(Tab4, "SaveToCache(item);");
+                            sb.AppendLine(Tab3, "}");
+                        }
 
                         sb.AppendLine(Tab3, "return item;");
                     }
@@ -974,10 +997,10 @@ namespace RepoLite.GeneratorEngine.Generators
 
                     sb.AppendLine("");
                     sb.AppendLine(Tab2,
-                        $"public IEnumerable<{table.ClassName}> Get(List<{pk.DataTypeString}> {pk.FieldName}s)");
+                        $"public IEnumerable<{ModelName(table.DbTableName)}> Get(List<{pk.DataTypeString}> {pk.FieldName}s)");
                     sb.AppendLine(Tab2, "{");
                     {
-                        sb.AppendLine(Tab3, $"var toReturn = new List<{table.ClassName}>();");
+                        sb.AppendLine(Tab3, $"var toReturn = new List<{ModelName(table.DbTableName)}>();");
                         sb.AppendLine(Tab3, $"if (!{pk.FieldName}s.Any()) return toReturn;");
                         sb.AppendLine(Tab3, "if (CacheEnabled)");
                         sb.AppendLine(Tab3, "{");
@@ -1015,13 +1038,17 @@ namespace RepoLite.GeneratorEngine.Generators
 
 
                         sb.AppendLine(Tab3, "var items = ExecuteSql(query).ToArray();");
-                        sb.AppendLine(Tab3, "if (CacheEnabled)");
-                        sb.AppendLine(Tab3, "{");
-                        sb.AppendLine(Tab4, "foreach (var item in items)");
-                        sb.AppendLine(Tab4, "{");
-                        sb.AppendLine(Tab5, "SaveToCache(item);");
-                        sb.AppendLine(Tab4, "}");
-                        sb.AppendLine(Tab3, "}");
+                        if (table.PrimaryKeys.Any())
+                        {
+                            sb.AppendLine(Tab3, "if (CacheEnabled)");
+                            sb.AppendLine(Tab3, "{");
+                            sb.AppendLine(Tab4, "foreach (var item in items)");
+                            sb.AppendLine(Tab4, "{");
+                            sb.AppendLine(Tab5, "SaveToCache(item);");
+                            sb.AppendLine(Tab4, "}");
+                            sb.AppendLine(Tab3, "}");
+                        }
+
                         sb.AppendLine(Tab3, "toReturn.AddRange(items);");
                         sb.AppendLine(Tab3, "return toReturn;");
                     }
@@ -1029,7 +1056,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
                     sb.AppendLine("");
                     sb.AppendLine(Tab2,
-                        $"public IEnumerable<{table.ClassName}> Get(params {pk.DataTypeString}[] {pk.FieldName}s)");
+                        $"public IEnumerable<{ModelName(table.DbTableName)}> Get(params {pk.DataTypeString}[] {pk.FieldName}s)");
                     sb.AppendLine(Tab2, "{");
 
                     sb.AppendLine(Tab3, $"return Get({pk.FieldName}s.ToList());");
@@ -1039,25 +1066,25 @@ namespace RepoLite.GeneratorEngine.Generators
                 else
                 {
                     sb.AppendLine("");
-                    sb.AppendLine(Tab2, $"public {table.ClassName} Get({pk.DataTypeString} {pk.FieldName})");
+                    sb.AppendLine(Tab2, $"public {ModelName(table.DbTableName)} Get({pk.DataTypeString} {pk.FieldName})");
                     sb.AppendLine(Tab2, "{");
                     sb.AppendLine(Tab3,
-                        $"return Where({(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({table.ClassName}.{pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.Equals, {pk.FieldName}).Results().FirstOrDefault();");
+                        $"return Where({(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.Equals, {pk.FieldName}).Results().FirstOrDefault();");
                     sb.AppendLine(Tab2, "}");
 
                     sb.AppendLine("");
                     sb.AppendLine(Tab2,
-                        $"public IEnumerable<{table.ClassName}> Get(List<{pk.DataTypeString}> {pk.FieldName}s)");
+                        $"public IEnumerable<{ModelName(table.DbTableName)}> Get(List<{pk.DataTypeString}> {pk.FieldName}s)");
                     sb.AppendLine(Tab2, "{");
                     sb.AppendLine(Tab3, $"return Get({pk.FieldName}s.ToArray());");
                     sb.AppendLine(Tab2, "}");
 
                     sb.AppendLine("");
                     sb.AppendLine(Tab2,
-                        $"public IEnumerable<{table.ClassName}> Get(params {pk.DataTypeString}[] {pk.FieldName}s)");
+                        $"public IEnumerable<{ModelName(table.DbTableName)}> Get(params {pk.DataTypeString}[] {pk.FieldName}s)");
                     sb.AppendLine(Tab2, "{");
                     sb.AppendLine(Tab3,
-                        $"return Where({(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({table.ClassName}.{pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.In, {pk.FieldName}s).Results();");
+                        $"return Where({(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.In, {pk.FieldName}s).Results();");
                     sb.AppendLine(Tab2, "}");
                     sb.AppendLine("");
                 }
@@ -1087,7 +1114,7 @@ namespace RepoLite.GeneratorEngine.Generators
             {
                 var pk = table.PrimaryKeys.First();
 
-                sb.AppendLine(Tab2, $"public override IEnumerable<{table.ClassName}> GetAll()");
+                sb.AppendLine(Tab2, $"public override IEnumerable<{ModelName(table.DbTableName)}> GetAll()");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3, "var query = $@\"SELECT * FROM ");
                 sb.AppendLine(Tab8, $"[{table.DbTableName}] {table.DbTableName.ToLower()[0]}");
@@ -1122,7 +1149,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             var sb = new StringBuilder();
 
-            sb.AppendLine(Tab2, $"public override bool Create({table.ClassName} item)");
+            sb.AppendLine(Tab2, $"public override bool Create({ModelName(table.DbTableName)} item)");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, "//Validation");
             sb.AppendLine(Tab3, "if (item == null)");
@@ -1135,7 +1162,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             if (inherits)
             {
-                sb.AppendLine(Tab3, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Create(item))");
+                sb.AppendLine(Tab3, $"if (_{RepositoryName(inheritedDependency.ForeignKeyTargetTable).LowerFirst()}.Create(item))");
                 sb.AppendLine(Tab3, "{");
             }
 
@@ -1143,21 +1170,25 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.Append(PrintBlockScopedVariables(table.Columns));
             sb.AppendLine(");");
 
-            sb.AppendLine(inherits ? Tab4 : Tab3, $"if (createdKeys.Count != {table.ClassName}.Columns.Count(x => x.PrimaryKey))");
+            sb.AppendLine(inherits ? Tab4 : Tab3, $"if (createdKeys.Count != {ModelName(table.DbTableName)}.Columns.Count(x => x.PrimaryKey))");
             sb.AppendLine(inherits ? Tab5 : Tab4, "return false;");
             sb.AppendLine("");
             foreach (var pk in table.PrimaryKeys)
             {
                 sb.AppendLine(inherits ? Tab4 : Tab3,
-                    $"item.{pk.PropertyName} = ({pk.DataTypeString})createdKeys[nameof({table.ClassName}.{pk.PropertyName})];");
+                    $"item.{pk.PropertyName} = ({pk.DataTypeString})createdKeys[nameof({ModelName(table.DbTableName)}.{pk.PropertyName})];");
             }
 
             sb.AppendLine(inherits ? Tab4 : Tab3, "item.ResetDirty();");
             sb.AppendLine("");
-            sb.AppendLine(Tab4, "if (CacheEnabled)");
-            sb.AppendLine(Tab4, "{");
-            sb.AppendLine(Tab5, "SaveToCache(item);");
-            sb.AppendLine(Tab4, "}");
+            if (table.PrimaryKeys.Any())
+            {
+                sb.AppendLine(Tab4, "if (CacheEnabled)");
+                sb.AppendLine(Tab4, "{");
+                sb.AppendLine(Tab5, "SaveToCache(item);");
+                sb.AppendLine(Tab4, "}");
+            }
+
             sb.AppendLine(inherits ? Tab4 : Tab3, "return true;");
 
             if (inherits)
@@ -1169,7 +1200,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
 
             sb.AppendLine("");
-            sb.AppendLine(Tab2, $"public override bool BulkCreate(params {table.ClassName}[] items)");
+            sb.AppendLine(Tab2, $"public override bool BulkCreate(params {ModelName(table.DbTableName)}[] items)");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, "if (!items.Any())");
             sb.AppendLine(Tab4, "return false;");
@@ -1180,12 +1211,12 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("");
             if (inherits)
             {
-                sb.AppendLine(Tab3, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.BulkCreate(items))");
+                sb.AppendLine(Tab3, $"if (_{RepositoryName(inheritedDependency.ForeignKeyTargetTable).LowerFirst()}.BulkCreate(items))");
                 sb.AppendLine(Tab3, "{");
             }
             sb.AppendLine(inherits ? Tab4 : Tab3, "var dt = new DataTable();");
             sb.AppendLine(inherits ? Tab4 : Tab3,
-                $"foreach (var mergeColumn in {table.ClassName}.Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))");
+                $"foreach (var mergeColumn in {ModelName(table.DbTableName)}.Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))");
             sb.AppendLine(inherits ? Tab5 : Tab4, "dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);");
             sb.AppendLine("");
             sb.AppendLine(inherits ? Tab4 : Tab3, "foreach (var item in items)");
@@ -1201,13 +1232,17 @@ namespace RepoLite.GeneratorEngine.Generators
 
             sb.AppendLine(inherits ? Tab4 : Tab3, "if (BulkInsert(dt))");
             sb.AppendLine(inherits ? Tab4 : Tab3, "{");
-            sb.AppendLine(inherits ? Tab5 : Tab4, "if (CacheEnabled)");
-            sb.AppendLine(inherits ? Tab5 : Tab4, "{");
-            sb.AppendLine(inherits ? Tab6 : Tab5, "foreach (var item in items)");
-            sb.AppendLine(inherits ? Tab6 : Tab5, "{");
-            sb.AppendLine(inherits ? Tab7 : Tab6, "SaveToCache(item);");
-            sb.AppendLine(inherits ? Tab6 : Tab5, "}");
-            sb.AppendLine(inherits ? Tab5 : Tab4, "}");
+            if (table.PrimaryKeys.Any())
+            {
+                sb.AppendLine(inherits ? Tab5 : Tab4, "if (CacheEnabled)");
+                sb.AppendLine(inherits ? Tab5 : Tab4, "{");
+                sb.AppendLine(inherits ? Tab6 : Tab5, "foreach (var item in items)");
+                sb.AppendLine(inherits ? Tab6 : Tab5, "{");
+                sb.AppendLine(inherits ? Tab7 : Tab6, "SaveToCache(item);");
+                sb.AppendLine(inherits ? Tab6 : Tab5, "}");
+                sb.AppendLine(inherits ? Tab5 : Tab4, "}");
+            }
+
             sb.AppendLine(inherits ? Tab5 : Tab4, "return true;");
             sb.AppendLine(inherits ? Tab4 : Tab3, "}");
             sb.AppendLine(inherits ? Tab4 : Tab3, "return false;");
@@ -1218,7 +1253,7 @@ namespace RepoLite.GeneratorEngine.Generators
             }
             sb.AppendLine(Tab2, "}");
 
-            sb.AppendLine(Tab2, $"public override bool BulkCreate(List<{table.ClassName}> items)");
+            sb.AppendLine(Tab2, $"public override bool BulkCreate(List<{ModelName(table.DbTableName)}> items)");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, "return BulkCreate(items.ToArray());");
             sb.AppendLine(Tab2, "}");
@@ -1235,7 +1270,7 @@ namespace RepoLite.GeneratorEngine.Generators
             var sb = new StringBuilder();
 
             sb.AppendLine("");
-            sb.AppendLine(Tab2, $"public bool Update({table.ClassName} item, bool clearDirty = true)");
+            sb.AppendLine(Tab2, $"public bool Update({ModelName(table.DbTableName)} item, bool clearDirty = true)");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, "if (item == null)");
             sb.AppendLine(Tab4, "return false;");
@@ -1254,7 +1289,7 @@ namespace RepoLite.GeneratorEngine.Generators
             if (inherits)
             {
                 sb.AppendLine(Tab3,
-                    $"var success = _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Update(item, false);");
+                    $"var success = _{RepositoryName(inheritedDependency.ForeignKeyTargetTable).LowerFirst()}.Update(item, false);");
                 sb.AppendLine(Tab3, "success &= BaseUpdate(item.DirtyColumns, ");
             }
             else
@@ -1271,10 +1306,14 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab3, "if (success && clearDirty)");
             sb.AppendLine(Tab4, "item.ResetDirty();");
 
-            sb.AppendLine(Tab3, "if (success && CacheEnabled)");
-            sb.AppendLine(Tab3, "{");
-            sb.AppendLine(Tab4, "SaveToCache(item);");
-            sb.AppendLine(Tab3, "}");
+            if (table.PrimaryKeys.Any())
+            {
+                sb.AppendLine(Tab3, "if (success && CacheEnabled)");
+                sb.AppendLine(Tab3, "{");
+                sb.AppendLine(Tab4, "SaveToCache(item);");
+                sb.AppendLine(Tab3, "}");
+            }
+
             sb.AppendLine("");
             sb.AppendLine(Tab3, "return success;");
             sb.AppendLine(Tab2, "}");
@@ -1289,25 +1328,25 @@ namespace RepoLite.GeneratorEngine.Generators
 
             var sb = new StringBuilder();
 
-            sb.AppendLine(Tab2, $"public bool Delete({table.ClassName} {table.LowerClassName})");
+            sb.AppendLine(Tab2, $"public bool Delete({ModelName(table.DbTableName)} {ModelName(table.DbTableName).ToLower()})");
             sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, $"if ({table.LowerClassName} == null)");
+            sb.AppendLine(Tab3, $"if ({ModelName(table.DbTableName).ToLower()} == null)");
             sb.AppendLine(Tab4, "return false;");
             sb.AppendLine("");
             var tpk = table.PrimaryKeys[0];
             sb.AppendLine(Tab3,
-                $"var deleteColumn = new DeleteColumn(\"{tpk.DbColumnName}\", {table.LowerClassName}.{tpk.DbColumnName}, SqlDbType.{tpk.DbType});");
+                $"var deleteColumn = new DeleteColumn(\"{tpk.DbColumnName}\", {ModelName(table.DbTableName).ToLower()}.{tpk.DbColumnName}, SqlDbType.{tpk.DbType});");
             sb.AppendLine("");
             if (inherits)
             {
                 sb.AppendLine(Tab3, "if (BaseDelete(deleteColumn, out var items))");
                 sb.AppendLine(Tab3, "{");
-                sb.AppendLine(Tab4, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Delete({table.LowerClassName}))");
+                sb.AppendLine(Tab4, $"if (_{RepositoryName(inheritedDependency.ForeignKeyTargetTable).LowerFirst()}.Delete({ModelName(table.DbTableName).ToLower()}))");
                 sb.AppendLine(Tab4, "{");
 
                 sb.AppendLine(Tab5, "if (CacheEnabled)");
                 sb.AppendLine(Tab5, "{");
-                sb.AppendLine(Tab6, $"RemoveFromCache({table.LowerClassName}.{tpk.DbColumnName});");
+                sb.AppendLine(Tab6, $"RemoveFromCache({ModelName(table.DbTableName).ToLower()}.{tpk.DbColumnName});");
                 sb.AppendLine(Tab5, "}");
                 sb.AppendLine(Tab5, "return true;");
                 sb.AppendLine(Tab4, "}");
@@ -1323,7 +1362,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             if (table.PrimaryKeyConfiguration != PrimaryKeyConfigurationEnum.CompositeKey)
             {
-                sb.AppendLine(Tab2, $"public bool Delete(IEnumerable<{table.ClassName}> items)");
+                sb.AppendLine(Tab2, $"public bool Delete(IEnumerable<{ModelName(table.DbTableName)}> items)");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3, "if (!items.Any()) return true;");
                 sb.AppendLine(Tab3, "var deleteValues = new List<object>();");
@@ -1337,7 +1376,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 {
                     sb.AppendLine(Tab3, $"if (BaseDelete(\"{table.PrimaryKeys[0].DbColumnName}\", deleteValues))");
                     sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Delete(items))");
+                    sb.AppendLine(Tab4, $"if (_{RepositoryName(inheritedDependency.ForeignKeyTargetTable).LowerFirst()}.Delete(items))");
 
 
                     sb.AppendLine(Tab4, "{");
@@ -1374,7 +1413,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine("");
                 sb.AppendLine(Tab2, $"public bool Delete({pkParamList})");
                 sb.AppendLine(Tab2, "{");
-                sb.Append(Tab3, $"return Delete(new {table.ClassName} {{ ");
+                sb.Append(Tab3, $"return Delete(new {ModelName(table.DbTableName)} {{ ");
                 foreach (var pk in table.PrimaryKeys)
                 {
                     sb.Append($"{pk.PropertyName} = {pk.FieldName}");
@@ -1386,9 +1425,9 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
 
-                sb.AppendLine(Tab2, $"public bool Delete({table.ClassName}Keys compositeId)");
+                sb.AppendLine(Tab2, $"public bool Delete({ModelName(table.DbTableName)}Keys compositeId)");
                 sb.AppendLine(Tab2, "{");
-                sb.Append(Tab3, $"return Delete(new {table.ClassName} {{ ");
+                sb.Append(Tab3, $"return Delete(new {ModelName(table.DbTableName)} {{ ");
                 foreach (var pk in table.PrimaryKeys)
                 {
                     sb.Append($"{pk.PropertyName} = compositeId.{pk.PropertyName}");
@@ -1401,12 +1440,12 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine("");
 
                 sb.AppendLine(Tab2,
-                    $"public bool Delete(IEnumerable<{table.ClassName}Keys> compositeIds)");
+                    $"public bool Delete(IEnumerable<{ModelName(table.DbTableName)}Keys> compositeIds)");
                 sb.AppendLine(Tab2, "{");
 
                 sb.AppendLine(Tab3, "var tempTableName = $\"staging{DateTime.Now.Ticks}\";");
                 sb.AppendLine(Tab3, "var dt = new DataTable();");
-                sb.AppendLine(Tab3, $"foreach (var mergeColumn in {table.ClassName}.Columns.Where(x => x.PrimaryKey))");
+                sb.AppendLine(Tab3, $"foreach (var mergeColumn in {ModelName(table.DbTableName)}.Columns.Where(x => x.PrimaryKey))");
                 sb.AppendLine(Tab3, "{");
                 sb.AppendLine(Tab4, "dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);");
                 sb.AppendLine(Tab3, "}");
@@ -1424,7 +1463,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(");");
                 sb.AppendLine(Tab3, "}");
 
-                sb.AppendLine(Tab3, "CreateStagingTable(tempTableName, true);");
+                sb.AppendLine(Tab3, $"CreateStagingTable(tempTableName, {ModelName(table.DbTableName)}.Columns, true);");
                 sb.AppendLine(Tab3, "BulkInsert(dt, tempTableName);");
 
                 sb.AppendLine(Tab3, "using (var cn = new SqlConnection(ConnectionString))");
@@ -1466,9 +1505,9 @@ namespace RepoLite.GeneratorEngine.Generators
                 if (inherits)
                 {
 
-                    sb.AppendLine(Tab3, $"if (Delete(new {table.ClassName} {{ {pk.PropertyName} = {pk.FieldName} }}))");
+                    sb.AppendLine(Tab3, $"if (Delete(new {ModelName(table.DbTableName)} {{ {pk.PropertyName} = {pk.FieldName} }}))");
                     sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Delete({pk.FieldName}))");
+                    sb.AppendLine(Tab4, $"if (_{RepositoryName(inheritedDependency.ForeignKeyTargetTable).LowerFirst()}.Delete({pk.FieldName}))");
                     sb.AppendLine(Tab4, "{");
 
 
@@ -1486,7 +1525,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 }
                 else
                 {
-                    sb.AppendLine(Tab3, $"return Delete(new {table.ClassName} {{ {pk.PropertyName} = {pk.FieldName} }});");
+                    sb.AppendLine(Tab3, $"return Delete(new {ModelName(table.DbTableName)} {{ {pk.PropertyName} = {pk.FieldName} }});");
                 }
                 sb.AppendLine(Tab2, "}");
                 sb.AppendLine("");
@@ -1504,7 +1543,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
                     sb.AppendLine(Tab3, $"if (BaseDelete(\"{table.PrimaryKeys[0].DbColumnName}\", deleteValues))");
                     sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Delete({pk.FieldName}s))");
+                    sb.AppendLine(Tab4, $"if (_{RepositoryName(inheritedDependency.ForeignKeyTargetTable).LowerFirst()}.Delete({pk.FieldName}s))");
 
                     sb.AppendLine(Tab4, "{");
                     sb.AppendLine(Tab5, $"if (CacheEnabled)");
@@ -1538,24 +1577,31 @@ namespace RepoLite.GeneratorEngine.Generators
                 table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
             var sb = new StringBuilder();
 
-            var pk = table.PrimaryKeys.First();
             foreach (var column in table.Columns)
             {
-                if (column.PrimaryKey || inheritedDependency != null && column.DbColumnName == inheritedDependency.DbColumnName) continue;
+                if (column.PrimaryKey || inheritedDependency != null &&
+                    column.DbColumnName == inheritedDependency.DbColumnName) continue;
 
                 sb.AppendLine(Tab2,
                     $"public bool DeleteBy{column.DbColumnName}({column.DataTypeString} {column.FieldName})");
                 sb.AppendLine(Tab2, "{");
 
-                sb.AppendLine(Tab3, $"if (BaseDelete(new DeleteColumn(\"{column.DbColumnName}\", {column.FieldName}, SqlDbType.{column.DbType}), out var items))");
+                sb.AppendLine(Tab3,
+                    $"if (BaseDelete(new DeleteColumn(\"{column.DbColumnName}\", {column.FieldName}, SqlDbType.{column.DbType}), out var items))");
                 sb.AppendLine(Tab3, "{");
-                sb.AppendLine(Tab4, "if (CacheEnabled)");
-                sb.AppendLine(Tab4, "{");
-                sb.AppendLine(Tab5, "foreach (var item in items)");
-                sb.AppendLine(Tab5, "{");
-                sb.AppendLine(Tab6, $"RemoveFromCache(item.{pk.DbColumnName});");
-                sb.AppendLine(Tab5, "}");
-                sb.AppendLine(Tab4, "}");
+
+                if (table.PrimaryKeys.Any())
+                {
+                    var pk = table.PrimaryKeys.First();
+                    sb.AppendLine(Tab4, "if (CacheEnabled)");
+                    sb.AppendLine(Tab4, "{");
+                    sb.AppendLine(Tab5, "foreach (var item in items)");
+                    sb.AppendLine(Tab5, "{");
+                    sb.AppendLine(Tab6, $"RemoveFromCache(item.{pk.DbColumnName});");
+                    sb.AppendLine(Tab5, "}");
+                    sb.AppendLine(Tab4, "}");
+                }
+
                 sb.AppendLine(Tab4, $"return true;");
                 sb.AppendLine(Tab3, "}");
 
@@ -1567,7 +1613,9 @@ namespace RepoLite.GeneratorEngine.Generators
             if (inherits)
             {
                 //DeleteBy for base Tables
-                AppendDeleteByImplementationForInherited(inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst(), otherTables, inheritedDependency, sb);
+                AppendDeleteByImplementationForInherited(
+                    RepositoryName(inheritedDependency.ForeignKeyTargetTable).LowerFirst(), otherTables,
+                    inheritedDependency, sb);
             }
 
             return sb.ToString();
@@ -1623,7 +1671,7 @@ namespace RepoLite.GeneratorEngine.Generators
             var sb = new StringBuilder();
 
             sb.AppendLine("");
-            sb.AppendLine(Tab2, $"public bool Merge(List<{table.ClassName}> items)");
+            sb.AppendLine(Tab2, $"public bool Merge(List<{ModelName(table.DbTableName)}> items)");
             sb.AppendLine(Tab2, "{");
 
             if (inherits)
@@ -1631,7 +1679,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 var inheritedTable =
                     otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
                 sb.AppendLine(Tab3,
-                    $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Merge(items.Cast<{inheritedTable.ClassName}>().ToList()))");
+                    $"if (_{RepositoryName(inheritedDependency.ForeignKeyTargetTable).LowerFirst()}.Merge(items.Cast<{ModelName(inheritedTable.DbTableName)}>().ToList()))");
 
                 sb.AppendLine(Tab3, "{");
             }
@@ -1649,7 +1697,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 else
                 {
                     sb.Append(inherits ? Tab6 : Tab5,
-                        $"item.{column.PropertyName}, item.DirtyColumns.Contains({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")})");
+                        $"item.{column.PropertyName}, item.DirtyColumns.Contains({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")})");
                 }
 
                 sb.AppendLine(column != table.Columns.Last() ? "," : "");
@@ -1740,28 +1788,28 @@ namespace RepoLite.GeneratorEngine.Generators
             var sb = new StringBuilder();
 
             sb.AppendLine("");
-            sb.AppendLine(Tab2, $"public override {table.ClassName} ToItem(DataRow row, bool skipBase)");
+            sb.AppendLine(Tab2, $"public override {ModelName(table.DbTableName)} ToItem(DataRow row, bool skipBase)");
             sb.AppendLine(Tab2, "{");
 
             if (inherits)
             {
-                sb.AppendLine(Tab3, $"var item = skipBase ? new {table.ClassName}() : _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.ToItem<{table.ClassName}>(row, false);");
+                sb.AppendLine(Tab3, $"var item = skipBase ? new {ModelName(table.DbTableName)}() : _{RepositoryName(inheritedDependency.ForeignKeyTargetTable).LowerFirst()}.ToItem<{ModelName(table.DbTableName)}>(row, false);");
 
                 foreach (var column in table.Columns)
                 {
                     sb.AppendLine(Tab3,
-                        $"item.{column.PropertyName} = Get{(IsCSharpNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, {(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")});");
+                        $"item.{column.PropertyName} = Get{(IsCSharpNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, {(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")});");
                 }
             }
             else
             {
-                sb.AppendLine(Tab3, $"var item = new {table.ClassName}");
+                sb.AppendLine(Tab3, $"var item = new {ModelName(table.DbTableName)}");
                 sb.AppendLine(Tab3, "{");
 
                 foreach (var column in table.Columns)
                 {
                     sb.AppendLine(Tab4,
-                        $"{column.PropertyName} = Get{(IsCSharpNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, {(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}),");
+                        $"{column.PropertyName} = Get{(IsCSharpNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, {(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}),");
                 }
 
                 sb.AppendLine(Tab3, "};");
@@ -1779,12 +1827,12 @@ namespace RepoLite.GeneratorEngine.Generators
 
             if (inherits)
             {
-                sb.AppendLine(Tab3, $"var item = skipBase ? new {table.ClassName}() : _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.ToItem<TK>(row, false);");
+                sb.AppendLine(Tab3, $"var item = skipBase ? new {ModelName(table.DbTableName)}() : _{RepositoryName(inheritedDependency.ForeignKeyTargetTable).LowerFirst()}.ToItem<TK>(row, false);");
 
                 foreach (var column in table.Columns)
                 {
                     sb.AppendLine(Tab3,
-                        $"item.{column.PropertyName} = Get{(IsCSharpNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, {(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")});");
+                        $"item.{column.PropertyName} = Get{(IsCSharpNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, {(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")});");
                 }
             }
             else
@@ -1795,7 +1843,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 foreach (var column in table.Columns)
                 {
                     sb.AppendLine(Tab4,
-                        $"{column.PropertyName} = Get{(IsCSharpNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, {(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}),");
+                        $"{column.PropertyName} = Get{(IsCSharpNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "")}{(column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name)}(row, {(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}),");
                 }
 
                 sb.AppendLine(Tab3, "};");
@@ -1815,7 +1863,7 @@ namespace RepoLite.GeneratorEngine.Generators
             var sb = new StringBuilder();
 
             sb.AppendLine("");
-            sb.AppendLine(Tab2, $"public IEnumerable<{table.ClassName}> Search(");
+            sb.AppendLine(Tab2, $"public IEnumerable<{ModelName(table.DbTableName)}> Search(");
 
             foreach (var column in table.Columns)
             {
@@ -1863,12 +1911,12 @@ namespace RepoLite.GeneratorEngine.Generators
                 if (column.DataType != typeof(XmlDocument))
                 {
                     sb.AppendLine(Tab4,
-                        $"queries.Add(new QueryItem({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}, {column.FieldName}));");
+                        $"queries.Add(new QueryItem({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}, {column.FieldName}));");
                 }
                 else
                 {
                     sb.AppendLine(Tab4,
-                        $"queries.Add(new QueryItem({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}, {column.FieldName}, typeof(XmlDocument)));");
+                        $"queries.Add(new QueryItem({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}, {column.FieldName}, typeof(XmlDocument)));");
                 }
             }
 
@@ -1919,12 +1967,12 @@ namespace RepoLite.GeneratorEngine.Generators
                     if (inheritedColumn.DataType != typeof(XmlDocument))
                     {
                         sb.AppendLine(Tab4,
-                            $"queries.Add(new QueryItem({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({table.ClassName}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, {inheritedColumn.FieldName}));");
+                            $"queries.Add(new QueryItem({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, {inheritedColumn.FieldName}));");
                     }
                     else
                     {
                         sb.AppendLine(Tab4,
-                            $"queries.Add(new QueryItem({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({table.ClassName}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, {inheritedColumn.FieldName}, typeof(XmlDocument)));");
+                            $"queries.Add(new QueryItem({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, {inheritedColumn.FieldName}, typeof(XmlDocument)));");
                     }
                 }
 
@@ -1949,24 +1997,31 @@ namespace RepoLite.GeneratorEngine.Generators
                 {
                     sb.AppendLine("");
                     sb.AppendLine(Tab2,
-                        $"public IEnumerable<{table.ClassName}> FindBy{primaryKey.DbColumnName}({primaryKey.DataTypeString} {primaryKey.FieldName})");
+                        $"public IEnumerable<{ModelName(table.DbTableName)}> FindBy{primaryKey.DbColumnName}({primaryKey.DataTypeString} {primaryKey.FieldName})");
                     sb.AppendLine(Tab2, "{");
                     sb.AppendLine(Tab3,
                         $"var items = FindBy{primaryKey.PropertyName}(FindComparison.Equals, {primaryKey.FieldName});");
-                    sb.AppendLine(Tab3, $"foreach (var item in items)");
-                    sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, $"SaveToCache(item);");
-                    sb.AppendLine(Tab3, "}");
+                    if (table.PrimaryKeys.Any())
+                    {
+                        sb.AppendLine(Tab3, "if (CacheEnabled)");
+                        sb.AppendLine(Tab3, "{");
+                        sb.AppendLine(Tab4, $"foreach (var item in items)");
+                        sb.AppendLine(Tab4, "{");
+                        sb.AppendLine(Tab5, $"SaveToCache(item);");
+                        sb.AppendLine(Tab4, "}");
+                        sb.AppendLine(Tab3, "}");
+                    }
+
                     sb.AppendLine(Tab3, $"return items;");
                     sb.AppendLine(Tab2, "}");
 
                     sb.AppendLine("");
                     sb.AppendLine(Tab2,
-                        $"public IEnumerable<{table.ClassName}> FindBy{primaryKey.DbColumnName}(FindComparison comparison, {primaryKey.DataTypeString} {primaryKey.FieldName})");
+                        $"public IEnumerable<{ModelName(table.DbTableName)}> FindBy{primaryKey.DbColumnName}(FindComparison comparison, {primaryKey.DataTypeString} {primaryKey.FieldName})");
                     sb.AppendLine(Tab2, "{");
 
                     sb.AppendLine(Tab3,
-                        $"return Where({(primaryKey.PropertyName == nameof(primaryKey.PropertyName) ? $"nameof({table.ClassName}.{primaryKey.PropertyName})" : $"\"{primaryKey.PropertyName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {primaryKey.FieldName}).Results();");
+                        $"return Where({(primaryKey.PropertyName == nameof(primaryKey.PropertyName) ? $"nameof({ModelName(table.DbTableName)}.{primaryKey.PropertyName})" : $"\"{primaryKey.PropertyName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {primaryKey.FieldName}).Results();");
                     sb.AppendLine(Tab2, "}");
                 }
             }
@@ -1977,8 +2032,8 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine("");
                 sb.AppendLine(Tab2,
                     nonPrimaryKey.DataType != typeof(XmlDocument)
-                        ? $"public IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}({nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName})"
-                        : $"public IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(String {nonPrimaryKey.FieldName})");
+                        ? $"public IEnumerable<{ModelName(table.DbTableName)}> FindBy{nonPrimaryKey.PropertyName}({nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName})"
+                        : $"public IEnumerable<{ModelName(table.DbTableName)}> FindBy{nonPrimaryKey.PropertyName}(String {nonPrimaryKey.FieldName})");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3,
                     $"return FindBy{nonPrimaryKey.PropertyName}(FindComparison.Equals, {nonPrimaryKey.FieldName});");
@@ -1987,23 +2042,30 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine("");
                 sb.AppendLine(Tab2,
                     nonPrimaryKey.DataType != typeof(XmlDocument)
-                        ? $"public IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, {nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName})"
-                        : $"public IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, String {nonPrimaryKey.FieldName})");
+                        ? $"public IEnumerable<{ModelName(table.DbTableName)}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, {nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName})"
+                        : $"public IEnumerable<{ModelName(table.DbTableName)}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, String {nonPrimaryKey.FieldName})");
                 sb.AppendLine(Tab2, "{");
                 if (nonPrimaryKey.DataType != typeof(XmlDocument))
                 {
                     sb.AppendLine(Tab3,
-                        $"var items = Where({(nonPrimaryKey.DbColumnName == nameof(nonPrimaryKey.DbColumnName) ? $"nameof({table.ClassName}.{nonPrimaryKey.DbColumnName})" : $"\"{nonPrimaryKey.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {nonPrimaryKey.FieldName}).Results();");
-                    sb.AppendLine(Tab3, $"foreach (var item in items)");
-                    sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, $"SaveToCache(item);");
-                    sb.AppendLine(Tab3, "}");
+                        $"var items = Where({(nonPrimaryKey.DbColumnName == nameof(nonPrimaryKey.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{nonPrimaryKey.DbColumnName})" : $"\"{nonPrimaryKey.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {nonPrimaryKey.FieldName}).Results();");
+                    if (table.PrimaryKeys.Any())
+                    {
+                        sb.AppendLine(Tab3, "if (CacheEnabled)");
+                        sb.AppendLine(Tab3, "{");
+                        sb.AppendLine(Tab4, $"foreach (var item in items)");
+                        sb.AppendLine(Tab4, "{");
+                        sb.AppendLine(Tab5, $"SaveToCache(item);");
+                        sb.AppendLine(Tab4, "}");
+                        sb.AppendLine(Tab3, "}");
+                    }
+
                     sb.AppendLine(Tab3, $"return items;");
                 }
                 else
                 {
                     sb.AppendLine(Tab3,
-                        $"return Where({(nonPrimaryKey.DbColumnName == nameof(nonPrimaryKey.DbColumnName) ? $"nameof({table.ClassName}.{nonPrimaryKey.DbColumnName})" : $"\"{nonPrimaryKey.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {nonPrimaryKey.FieldName}, typeof(XmlDocument)).Results();");
+                        $"return Where({(nonPrimaryKey.DbColumnName == nameof(nonPrimaryKey.DbColumnName) ? $"nameof({ModelName(table.DbTableName)}.{nonPrimaryKey.DbColumnName})" : $"\"{nonPrimaryKey.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {nonPrimaryKey.FieldName}, typeof(XmlDocument)).Results();");
                 }
 
                 sb.AppendLine(Tab2, "}");
@@ -2011,7 +2073,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             if (inherited)
             {
-                AppendFindByImplementationForInherited(inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst(), table.ClassName, otherTables, inheritedDependency, sb);
+                AppendFindByImplementationForInherited(RepositoryName(inheritedDependency.ForeignKeyTargetTable).LowerFirst(), ModelName(table.DbTableName), otherTables, inheritedDependency, sb);
             }
 
             return sb;
@@ -2051,10 +2113,17 @@ namespace RepoLite.GeneratorEngine.Generators
                     {
                         sb.AppendLine(Tab3,
                             $"var items = Where({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({className}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {inheritedColumn.FieldName}).Results();");
-                        sb.AppendLine(Tab3, $"foreach (var item in items)");
-                        sb.AppendLine(Tab3, "{");
-                        sb.AppendLine(Tab4, $"SaveToCache(item);");
-                        sb.AppendLine(Tab3, "}");
+                        if (inheritedTable.PrimaryKeys.Any())
+                        {
+                            sb.AppendLine(Tab3, "if (CacheEnabled)");
+                            sb.AppendLine(Tab3, "{");
+                            sb.AppendLine(Tab4, $"foreach (var item in items)");
+                            sb.AppendLine(Tab4, "{");
+                            sb.AppendLine(Tab5, $"SaveToCache(item);");
+                            sb.AppendLine(Tab4, "}");
+                            sb.AppendLine(Tab3, "}");
+                        }
+
                         sb.AppendLine(Tab3, $"return items;");
                     }
                     else

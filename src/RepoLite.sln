@@ -1,21 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.29709.97
+VisualStudioVersion = 16.0.30128.74
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite", "RepoLite\RepoLite\RepoLite.csproj", "{1C5542D9-BF11-49C0-AC18-308D24114593}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RepoLite", "RepoLite\RepoLite\RepoLite.csproj", "{6B66394E-36C0-4BD8-BD1D-7001C681D36E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite.GeneratorEngine", "RepoLite\RepoLite.GeneratorEngine\RepoLite.GeneratorEngine.csproj", "{9CF0994E-5D80-4A33-BE5A-3E3601450F1E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RepoLite.Common", "RepoLite\RepoLite.Common\RepoLite.Common.csproj", "{A2A60ECA-C03B-496B-9670-BDC18FA8F4D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite.Common", "RepoLite\RepoLite.Common\RepoLite.Common.csproj", "{4E4B8334-A677-4686-858F-782642C051F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RepoLite.DataAccess", "RepoLite\RepoLite.DataAccess\RepoLite.DataAccess.csproj", "{4E1E6A0F-C815-4CEE-AB10-E5054E721B14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite.DataAccess", "RepoLite\RepoLite.DataAccess\RepoLite.DataAccess.csproj", "{DEA75419-F6A0-4FF0-9925-40CFA3B49E0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RepoLite.GeneratorEngine", "RepoLite\RepoLite.GeneratorEngine\RepoLite.GeneratorEngine.csproj", "{4E0A28DC-9246-436C-B1B9-A290CA5DC55F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite.Tests", "RepoLite\Tests\RepoLite.Tests\RepoLite.Tests.csproj", "{5A365234-CEDD-4E86-9E07-60E84134536D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RepoLite.Generator.DotNet", "RepoLite\RepoLite.Generator.DotNet\RepoLite.Generator.DotNet.csproj", "{DF323A69-80A5-4BEC-BC43-CD6EB474FF7E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7D08807B-58FC-4ABC-A37F-8A088AC665D6}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7A1B0F7A-BA81-4977-838A-FC9EEDB1C0FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite.Generator.DotNet", "RepoLite\RepoLite.Generator.DotNet\RepoLite.Generator.DotNet.csproj", "{F4875898-D9B7-4508-900B-5852BACE2386}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite.Tests", "RepoLite\RepoLite.Tests\RepoLite.Tests.csproj", "{B2259418-BA05-4840-9AFA-F92437EBF302}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,38 +23,38 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1C5542D9-BF11-49C0-AC18-308D24114593}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1C5542D9-BF11-49C0-AC18-308D24114593}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1C5542D9-BF11-49C0-AC18-308D24114593}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1C5542D9-BF11-49C0-AC18-308D24114593}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9CF0994E-5D80-4A33-BE5A-3E3601450F1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9CF0994E-5D80-4A33-BE5A-3E3601450F1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9CF0994E-5D80-4A33-BE5A-3E3601450F1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9CF0994E-5D80-4A33-BE5A-3E3601450F1E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4E4B8334-A677-4686-858F-782642C051F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4E4B8334-A677-4686-858F-782642C051F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4E4B8334-A677-4686-858F-782642C051F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4E4B8334-A677-4686-858F-782642C051F2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DEA75419-F6A0-4FF0-9925-40CFA3B49E0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DEA75419-F6A0-4FF0-9925-40CFA3B49E0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DEA75419-F6A0-4FF0-9925-40CFA3B49E0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DEA75419-F6A0-4FF0-9925-40CFA3B49E0C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5A365234-CEDD-4E86-9E07-60E84134536D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5A365234-CEDD-4E86-9E07-60E84134536D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5A365234-CEDD-4E86-9E07-60E84134536D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5A365234-CEDD-4E86-9E07-60E84134536D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F4875898-D9B7-4508-900B-5852BACE2386}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F4875898-D9B7-4508-900B-5852BACE2386}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F4875898-D9B7-4508-900B-5852BACE2386}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F4875898-D9B7-4508-900B-5852BACE2386}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B66394E-36C0-4BD8-BD1D-7001C681D36E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B66394E-36C0-4BD8-BD1D-7001C681D36E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B66394E-36C0-4BD8-BD1D-7001C681D36E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B66394E-36C0-4BD8-BD1D-7001C681D36E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2A60ECA-C03B-496B-9670-BDC18FA8F4D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2A60ECA-C03B-496B-9670-BDC18FA8F4D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2A60ECA-C03B-496B-9670-BDC18FA8F4D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2A60ECA-C03B-496B-9670-BDC18FA8F4D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E1E6A0F-C815-4CEE-AB10-E5054E721B14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E1E6A0F-C815-4CEE-AB10-E5054E721B14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E1E6A0F-C815-4CEE-AB10-E5054E721B14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E1E6A0F-C815-4CEE-AB10-E5054E721B14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E0A28DC-9246-436C-B1B9-A290CA5DC55F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E0A28DC-9246-436C-B1B9-A290CA5DC55F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E0A28DC-9246-436C-B1B9-A290CA5DC55F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E0A28DC-9246-436C-B1B9-A290CA5DC55F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF323A69-80A5-4BEC-BC43-CD6EB474FF7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF323A69-80A5-4BEC-BC43-CD6EB474FF7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF323A69-80A5-4BEC-BC43-CD6EB474FF7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF323A69-80A5-4BEC-BC43-CD6EB474FF7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2259418-BA05-4840-9AFA-F92437EBF302}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2259418-BA05-4840-9AFA-F92437EBF302}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2259418-BA05-4840-9AFA-F92437EBF302}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2259418-BA05-4840-9AFA-F92437EBF302}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{5A365234-CEDD-4E86-9E07-60E84134536D} = {7D08807B-58FC-4ABC-A37F-8A088AC665D6}
+		{B2259418-BA05-4840-9AFA-F92437EBF302} = {7A1B0F7A-BA81-4977-838A-FC9EEDB1C0FD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {CC6EEDD5-580E-4452-A3DF-1F9945986CB5}
+		SolutionGuid = {8D040588-85D9-4864-BC92-2667F371497F}
 	EndGlobalSection
 EndGlobal

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace RepoLite.DataAccess
 {
+    public delegate IDataSource DataSourceResolver();
     public interface IDataSource
     {
         List<TableAndSchema> GetTables();
@@ -11,7 +12,7 @@ namespace RepoLite.DataAccess
 
         List<string> GetProcedures();
         List<Procedure> LoadProcedures(List<string> procedures);
-        
+
         List<Column> LoadTableColumns(Table table);
     }
 }

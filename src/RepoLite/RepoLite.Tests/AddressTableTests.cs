@@ -1367,7 +1367,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
             Assert.IsTrue(_repository.GetAll().Count() == 10);
 
             var csvPath =
-                @"ActualGeneratedFilesTests\Csvs\Address.csv";
+                @"Csvs\Address.csv";
             Assert.IsTrue(_repository.Merge(csvPath));
 
             Assert.IsTrue(_repository.GetAll().Count() == 11);

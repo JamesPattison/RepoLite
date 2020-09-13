@@ -1,4 +1,4 @@
-﻿namespace RepoLiteCore.Common
+﻿namespace RepoLite.Common
 {
     public class C1 : IMyInterface
     {

@@ -4,6 +4,7 @@ using System.Text;
 
 namespace RepoLite.GeneratorEngine
 {
+    public delegate IGenerator GeneratorResolver();
     public interface IGenerator
     {
         /// <summary>
