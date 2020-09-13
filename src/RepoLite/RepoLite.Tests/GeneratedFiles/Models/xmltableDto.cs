@@ -2,18 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Xml;
-using NS.Base;
 using NS.Models.Base;
 
 namespace NS.Models
 {
-	public sealed partial class xmltable : BaseModel
+	public sealed partial class xmltableDto : BaseModel
 	{
 		public override string EntityName => "xmltable";
-		private String _name;
-		private XmlDocument _data;
+		public static string CacheKey(object identifier) => $"xmltable_{identifier}";
+		protected string _name;
+		protected XmlDocument _data;
 
-		public String name
+		public string name
 		{
 			get => _name;
 			set => SetValue(ref _name, value);
@@ -23,9 +23,9 @@ namespace NS.Models
 			get => _data;
 			set => SetValue(ref _data, value);
 		}
-		public xmltable() { }
-		public xmltable(
-			String name,
+		public xmltableDto() { }
+		public xmltableDto(
+			string name,
 			XmlDocument data)
 		{
 			_name = name;
@@ -48,10 +48,12 @@ namespace NS.Models
 
 			return validationErrors;
 		}
+		public static string Schema = "dbo";
+		public static string TableName = "xmltable";
 		public static List<ColumnDefinition> Columns => new List<ColumnDefinition>
 		{
-			new ColumnDefinition("name", typeof(System.String), "[VARCHAR](12)", SqlDbType.VarChar, false, false, false),
-			new ColumnDefinition("data", typeof(System.Xml.XmlDocument), "[XML]", SqlDbType.Xml, false, false, false),
+			new ColumnDefinition("name", typeof(string), "[VARCHAR](12)", SqlDbType.VarChar, false, false, false),
+			new ColumnDefinition("data", typeof(XmlDocument), "[XML]", SqlDbType.Xml, false, false, false),
 		};
 	}
 }

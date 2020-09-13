@@ -2,25 +2,25 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Xml;
-using NS.Base;
 using NS.Models.Base;
 
 namespace NS.Models
 {
-	public sealed partial class NullableTable : BaseModel
+	public sealed partial class NullableTableDto : BaseModel
 	{
 		public override string EntityName => "NullableTable";
-		private Int32 _id;
-		private Int32? _age;
-		private DateTime? _dob;
-		private Guid? _lolval;
+		public static string CacheKey(object identifier) => $"NullableTable_{identifier}";
+		protected int _id;
+		protected int? _age;
+		protected DateTime? _dob;
+		protected Guid? _lolval;
 
-		public Int32 Id
+		public int Id
 		{
 			get => _id;
 			set => SetValue(ref _id, value);
 		}
-		public Int32? Age
+		public int? Age
 		{
 			get => _age;
 			set => SetValue(ref _age, value);
@@ -35,10 +35,10 @@ namespace NS.Models
 			get => _lolval;
 			set => SetValue(ref _lolval, value);
 		}
-		public NullableTable() { }
-		public NullableTable(
-			Int32 id,
-			Int32 age,
+		public NullableTableDto() { }
+		public NullableTableDto(
+			int id,
+			int age,
 			DateTime dob,
 			Guid lolval)
 		{
@@ -49,8 +49,8 @@ namespace NS.Models
 		}
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{
-			_id = row.GetValue<Int32>($"{propertyPrefix}Id") ?? default(Int32); 
-			_age = row.GetValue<Int32>($"{propertyPrefix}Age"); 
+			_id = row.GetValue<int>($"{propertyPrefix}Id") ?? default(int); 
+			_age = row.GetValue<int>($"{propertyPrefix}Age"); 
 			_dob = row.GetValue<DateTime>($"{propertyPrefix}DoB"); 
 			_lolval = row.GetValue<Guid>($"{propertyPrefix}lolVal"); 
 			return this;
@@ -66,12 +66,14 @@ namespace NS.Models
 
 			return validationErrors;
 		}
+		public static string Schema = "dbo";
+		public static string TableName = "NullableTable";
 		public static List<ColumnDefinition> Columns => new List<ColumnDefinition>
 		{
-			new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, true, true),
-			new ColumnDefinition("Age", typeof(System.Int32), "[INT]", SqlDbType.Int, true, false, false),
-			new ColumnDefinition("DoB", typeof(System.DateTime), "[DATETIME]", SqlDbType.DateTime, true, false, false),
-			new ColumnDefinition("lolVal", typeof(System.Guid), "[UNIQUEIDENTIFIER]", SqlDbType.UniqueIdentifier, true, false, false),
+			new ColumnDefinition("Id", typeof(int), "[INT]", SqlDbType.Int, false, true, true),
+			new ColumnDefinition("Age", typeof(int), "[INT]", SqlDbType.Int, true, false, false),
+			new ColumnDefinition("DoB", typeof(DateTime), "[DATETIME]", SqlDbType.DateTime, true, false, false),
+			new ColumnDefinition("lolVal", typeof(Guid), "[UNIQUEIDENTIFIER]", SqlDbType.UniqueIdentifier, true, false, false),
 		};
 	}
 }

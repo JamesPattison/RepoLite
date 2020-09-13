@@ -2039,10 +2039,10 @@ namespace REPOSITORYNAMESPACE.Base
 
                     if (dt.Rows.Count > 0)
                     {
-                        for (var i = 0; i < dt.Columns.Count; i++)
+                        var row = dt.Rows[0];
+                        foreach (var primaryKey in Columns.Where(x => x.PrimaryKey))
                         {
-                            var dataColumn = dt.Columns[i];
-                            returnIds.Add(dataColumn.ColumnName, dt.Rows[i][0]);
+                            returnIds.Add(primaryKey.ColumnName, row[primaryKey.ColumnName]);
                         }
                     }
                 }

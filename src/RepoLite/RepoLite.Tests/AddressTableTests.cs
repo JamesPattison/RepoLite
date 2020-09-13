@@ -14,13 +14,13 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
     {
         private IAddressRepository _repository;
 
-        private Address GetFromDb(int addressNumber)
+        private AddressDto GetFromDb(int addressNumber)
         {
             var address = _repository.GetAll().ToArray()[addressNumber - 1];
-            return address ?? new Address();
+            return address ?? new AddressDto();
         }
 
-        private void IsAddress(Address retrieved, int addressId)
+        private void IsAddress(AddressDto retrieved, int addressId)
         {
             if (retrieved == null)
                 throw new ArgumentNullException(nameof(retrieved));
@@ -75,70 +75,70 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestGetAddr1()
         {
-            var retrieved = _repository.Get(new AddressKeys(1, "77"));
+            var retrieved = _repository.Get(new AddressDtoKeys(1, "77"));
             IsAddress(retrieved, 1);
         }
 
         [TestMethod]
         public void TestGetAddr2()
         {
-            var retrieved = _repository.Get(new AddressKeys(2, "3"));
+            var retrieved = _repository.Get(new AddressDtoKeys(2, "3"));
             IsAddress(retrieved, 2);
         }
 
         [TestMethod]
         public void TestGetAddr3()
         {
-            var retrieved = _repository.Get(new AddressKeys(3, "14"));
+            var retrieved = _repository.Get(new AddressDtoKeys(3, "14"));
             IsAddress(retrieved, 3);
         }
 
         [TestMethod]
         public void TestGetAddr4()
         {
-            var retrieved = _repository.Get(new AddressKeys(4, "2"));
+            var retrieved = _repository.Get(new AddressDtoKeys(4, "2"));
             IsAddress(retrieved, 4);
         }
 
         [TestMethod]
         public void TestGetAddr5()
         {
-            var retrieved = _repository.Get(new AddressKeys(5, "97"));
+            var retrieved = _repository.Get(new AddressDtoKeys(5, "97"));
             IsAddress(retrieved, 5);
         }
 
         [TestMethod]
         public void TestGetAddr6()
         {
-            var retrieved = _repository.Get(new AddressKeys(6, "54"));
+            var retrieved = _repository.Get(new AddressDtoKeys(6, "54"));
             IsAddress(retrieved, 6);
         }
 
         [TestMethod]
         public void TestGetAddr7()
         {
-            var retrieved = _repository.Get(new AddressKeys(7, "1"));
+            var retrieved = _repository.Get(new AddressDtoKeys(7, "1"));
             IsAddress(retrieved, 7);
         }
 
         [TestMethod]
         public void TestGetAddr8()
         {
-            var retrieved = _repository.Get(new AddressKeys(8, "12"));
+            var retrieved = _repository.Get(new AddressDtoKeys(8, "12"));
             IsAddress(retrieved, 8);
         }
 
         [TestMethod]
         public void TestGetAddr9()
         {
-            var retrieved = _repository.Get(new AddressKeys(9, "47"));
+            var retrieved = _repository.Get(new AddressDtoKeys(9, "47"));
             IsAddress(retrieved, 9);
         }
 
         [TestMethod]
         public void TestGetAddr10()
         {
-            var retrieved = _repository.Get(new AddressKeys(10, "47"));
+            var retrieved = _repository.Get(new AddressDtoKeys(10, "47"));
             IsAddress(retrieved, 10);
         }
 
@@ -148,7 +148,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
             var address0 = GetFromDb(1);
             var address1 = GetFromDb(1);
 
-            var retrieved = _repository.Get(new AddressKeys(address0.Id, address0.AnotherId), new AddressKeys(address1.Id, address1.AnotherId)).ToArray();
+            var retrieved = _repository.Get(new AddressDtoKeys(address0.Id, address0.AnotherId), new AddressDtoKeys(address1.Id, address1.AnotherId)).ToArray();
 
             Assert.IsTrue(retrieved.Length == 2);
 
@@ -183,7 +183,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestAddress_Create()
         {
-            var address = new Address
+            var address = new AddressDto
             {
                 AnotherId = "Another ID",
                 PersonId = 1,
@@ -407,7 +407,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestAddress_CreatePerson_ThenAddresses()
         {
-            var person = new Person
+            var person = new PersonDto
             {
                 Name = "New Person",
                 Nationality = "Irish"
@@ -418,14 +418,14 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
 
             Assert.IsTrue(actual == expected, $"Create Person: expected: {expected}, but received: {actual}");
 
-            var address1 = new Address
+            var address1 = new AddressDto
             {
                 AnotherId = "Another ID",
                 PersonId = person.Id,
                 Line1 = "Line 1",
                 PostCode = "Post Code"
             };
-            var address2 = new Address
+            var address2 = new AddressDto
             {
                 AnotherId = "Another 2",
                 PersonId = person.Id,
@@ -433,7 +433,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
                 PostCode = "Post Code 2"
             };
 
-            actual = _repository.BulkCreate(new List<Address> { address1, address2 });
+            actual = _repository.BulkCreate(new List<AddressDto> { address1, address2 });
 
             Assert.IsTrue(actual == expected, $"Create addresses: expected: {expected}, but received: {actual}");
 
@@ -444,7 +444,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestAddress_CreatePerson_ThenAddresses_ByParams()
         {
-            var person = new Person
+            var person = new PersonDto
             {
                 Name = "New Person",
                 Nationality = "Irish"
@@ -455,14 +455,14 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
 
             Assert.IsTrue(actual == expected, $"Create Person: expected: {expected}, but received: {actual}");
 
-            var address1 = new Address
+            var address1 = new AddressDto
             {
                 AnotherId = "Another ID",
                 PersonId = person.Id,
                 Line1 = "Line 1",
                 PostCode = "Post Code"
             };
-            var address2 = new Address
+            var address2 = new AddressDto
             {
                 AnotherId = "Another 2",
                 PersonId = person.Id,
@@ -484,7 +484,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
             var address = GetFromDb(1);
 
             var expected = true;
-            var actual = _repository.Delete(new AddressKeys(address.Id, address.AnotherId));
+            var actual = _repository.Delete(new AddressDtoKeys(address.Id, address.AnotherId));
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
 
@@ -498,7 +498,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
             var address = GetFromDb(1);
 
             var expected = true;
-            var actual = _repository.Delete(new AddressKeys(address.Id, address.AnotherId));
+            var actual = _repository.Delete(new AddressDtoKeys(address.Id, address.AnotherId));
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
 
@@ -540,7 +540,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
             var address = GetFromDb(1);
 
             var expected = true;
-            var actual = _repository.Delete(new AddressKeys(address.Id, address.AnotherId));
+            var actual = _repository.Delete(new AddressDtoKeys(address.Id, address.AnotherId));
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
 
@@ -554,37 +554,12 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
             var address = GetFromDb(1);
 
             var expected = true;
-            var actual = _repository.Delete(new AddressKeys(address.Id, address.AnotherId));
+            var actual = _repository.Delete(new AddressDtoKeys(address.Id, address.AnotherId));
 
             Assert.IsTrue(actual == expected, $"expected: {expected}, but received: {actual}");
 
             var all = _repository.GetAll().ToArray();
             Assert.IsTrue(all.Length == 9, $"expected: 9 but received: {all.Length}");
-        }
-
-        [TestMethod]
-        public void TestAddress_Search_ById()
-        {
-            var actual = _repository.Search(id: 0);
-
-            foreach (var addr in actual)
-            {
-                IsAddress(addr, addr.Id);
-            }
-        }
-
-        [TestMethod]
-        public void TestAddress_Search_ByAnotherId()
-        {
-            var actual = _repository.Search(anotherid: "47").ToArray();
-
-            foreach (var addr in actual)
-            {
-                IsAddress(addr, addr.Id);
-            }
-
-            var expected = 2;
-            Assert.IsTrue(actual.Length == expected, $"expected: {expected} but received: {actual.Length}");
         }
 
         [TestMethod]
@@ -1262,11 +1237,11 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestAddress_Merge()
         {
-            var addresses = new List<Address>();
+            var addresses = new List<AddressDto>();
             //Merge 20 addresses into the 10 existing
             for (var i = 0; i < 20; i++)
             {
-                var address = new Address { Id = i + 1 };
+                var address = new AddressDto { Id = i + 1 };
                 if (i < 10)
                 {
                     address.AnotherId = Data.Addresses[i].AnotherId;
@@ -1316,7 +1291,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestAddress_Where_1()
         {
-            var actual = _repository.Where(nameof(Address.Line1), Comparison.Like, "Co").Results().ToArray();
+            var actual = _repository.Where(nameof(AddressDto.Line1), Comparison.Like, "Co").Results().ToArray();
 
             var expected = 2;
             Assert.IsTrue(actual.Length == expected, $"expected: {expected} but received: {actual.Length}");
@@ -1325,7 +1300,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestAddress_Where_2()
         {
-            var actual = _repository.Where(nameof(Address.PersonId), Comparison.GreaterThanOrEquals, 4).And(nameof(Address.Id), Comparison.LessThan, 4).Results().ToArray();
+            var actual = _repository.Where(nameof(AddressDto.PersonId), Comparison.GreaterThanOrEquals, 4).And(nameof(AddressDto.Id), Comparison.LessThan, 4).Results().ToArray();
 
             var expected = 2;
             Assert.IsTrue(actual.Length == expected, $"expected: {expected} but received: {actual.Length}");
@@ -1334,7 +1309,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestAddress_Where_3()
         {
-            var actual = _repository.Where(nameof(Address.PersonId), Comparison.GreaterThanOrEquals, 4).Or(nameof(Address.Id), Comparison.LessThan, 4).Results().ToArray();
+            var actual = _repository.Where(nameof(AddressDto.PersonId), Comparison.GreaterThanOrEquals, 4).Or(nameof(AddressDto.Id), Comparison.LessThan, 4).Results().ToArray();
 
             var expected = 9;
             Assert.IsTrue(actual.Length == expected, $"expected: {expected} but received: {actual.Length}");
@@ -1343,9 +1318,9 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestAddress_Where_4()
         {
-            var actual = _repository.Where(nameof(Address.Line4), Comparison.Equals, "Monaco")
-                .OrBeginGroup(nameof(Address.AnotherId), Comparison.Like, "47")
-                .And(nameof(Address.PersonId), Comparison.LessThan, 7)
+            var actual = _repository.Where(nameof(AddressDto.Line4), Comparison.Equals, "Monaco")
+                .OrBeginGroup(nameof(AddressDto.AnotherId), Comparison.Like, "47")
+                .And(nameof(AddressDto.PersonId), Comparison.LessThan, 7)
                 .EndGroup().Results().ToArray();
 
             var expected = 3;

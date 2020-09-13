@@ -12,10 +12,10 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
     {
         private INullableTableRepository _repository;
 
-        private NullableTable GetFromDb(int nullableId)
+        private NullableTableDto GetFromDb(int nullableId)
         {
             var nullable = _repository.GetAll().ToArray()[nullableId - 1];
-            return nullable ?? new NullableTable();
+            return nullable ?? new NullableTableDto();
         }
 
         [TestInitialize]
@@ -36,7 +36,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestNullable_Create()
         {
-            var nullable = new NullableTable();
+            var nullable = new NullableTableDto();
 
             var expected = true;
             var actual = _repository.Create(nullable);
@@ -49,7 +49,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestNullable_Create_NotNull()
         {
-            var nullable = new NullableTable
+            var nullable = new NullableTableDto
             {
                 Age = 1,
                 DoB = DateTime.Now,

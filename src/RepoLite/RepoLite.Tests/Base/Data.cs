@@ -133,18 +133,18 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests.Base
             }
         }
 
-        public static List<Address> Addresses => new List<Address>
+        public static List<AddressDto> Addresses => new List<AddressDto>
         {
-            new Address{Id = 1, AnotherId = "77",PersonId = 4,Line1 = "01515 Considine Lodge",Line2 = "New Marjorie",Line3 = "Borders",Line4 = "United States Minor Outlying Islands",PostCode = "45200-5387",PhoneNumber = "01002 832512",COUNTRY_CODE = "FR"},
-            new Address{Id = 2, AnotherId = "3",PersonId = 4,Line1 = "91643 Cormier Bridge",Line2 = "Parisiantown",Line3 = "Bedfordshire",Line4 = "Bahamas",PostCode = "01763-4987",PhoneNumber = "01728 542265",COUNTRY_CODE = "LC"},
-            new Address{Id = 3, AnotherId = "14",PersonId = 3,Line1 = "12043 Roob Inlet",Line2 = "North Shaniya",Line3 = "Bedfordshire",Line4 = "Monaco",PostCode = "10326-2100",PhoneNumber = "01605 696163",COUNTRY_CODE = "AE"},
-            new Address{Id = 4, AnotherId = "2",PersonId = 9,Line1 = "1113 Feil Lock",Line2 = "Port Thad",Line3 = "Cambridgeshire",Line4 = "Albania",PostCode = "37396",PhoneNumber = "01671 734615",COUNTRY_CODE = "LK"},
-            new Address{Id = 5, AnotherId = "97",PersonId = 1,Line1 = "8989 Raynor Lake",Line2 = "New Lavernamouth",Line3 = "Avon",Line4 = "Norfolk Island",PostCode = "25632-5757",PhoneNumber = "01805 968151",COUNTRY_CODE = "TW"},
-            new Address{Id = 6, AnotherId = "54",PersonId = 7,Line1 = "5516 Reilly Shoal",Line2 = "North Johnny",Line3 = "Bedfordshire",Line4 = "Uruguay",PostCode = "05472-9584",PhoneNumber = "01833 406229",COUNTRY_CODE = "MY"},
-            new Address{Id = 7, AnotherId = "1",PersonId = 8,Line1 = "264 Yasmin Mountains",Line2 = "West Talia",Line3 = "Berkshire",Line4 = "Monaco",PostCode = "56468-6584",PhoneNumber = "01101 018567",COUNTRY_CODE = "MF"},
-            new Address{Id = 8, AnotherId = "12",PersonId = 7,Line1 = "94940 Eudora Drive",Line2 = "North Merle",Line3 = "Borders",Line4 = "Kiribati",PostCode = "34763-0932",PhoneNumber = "01568 719948",COUNTRY_CODE = "CN"},
-            new Address{Id = 9, AnotherId = "47",PersonId = 7,Line1 = "9331 Zieme Skyway",Line2 = "Gwendolynland",Line3 = "Cambridgeshire",Line4 = "Kazakhstan",PostCode = "43015",PhoneNumber = "01351 315683",COUNTRY_CODE = "FJ"},
-            new Address{Id = 10, AnotherId = "47",PersonId = 6,Line1 = "52137 Hills Walk",Line2 = "Lake Nattown",Line3 = "Avon",Line4 = "Nigeria",PostCode = "80392-8348",PhoneNumber = "01235 987526",COUNTRY_CODE = "DJ"}
+            new AddressDto{Id = 1, AnotherId = "77",PersonId = 4,Line1 = "01515 Considine Lodge",Line2 = "New Marjorie",Line3 = "Borders",Line4 = "United States Minor Outlying Islands",PostCode = "45200-5387",PhoneNumber = "01002 832512",COUNTRY_CODE = "FR"},
+            new AddressDto{Id = 2, AnotherId = "3",PersonId = 4,Line1 = "91643 Cormier Bridge",Line2 = "Parisiantown",Line3 = "Bedfordshire",Line4 = "Bahamas",PostCode = "01763-4987",PhoneNumber = "01728 542265",COUNTRY_CODE = "LC"},
+            new AddressDto{Id = 3, AnotherId = "14",PersonId = 3,Line1 = "12043 Roob Inlet",Line2 = "North Shaniya",Line3 = "Bedfordshire",Line4 = "Monaco",PostCode = "10326-2100",PhoneNumber = "01605 696163",COUNTRY_CODE = "AE"},
+            new AddressDto{Id = 4, AnotherId = "2",PersonId = 9,Line1 = "1113 Feil Lock",Line2 = "Port Thad",Line3 = "Cambridgeshire",Line4 = "Albania",PostCode = "37396",PhoneNumber = "01671 734615",COUNTRY_CODE = "LK"},
+            new AddressDto{Id = 5, AnotherId = "97",PersonId = 1,Line1 = "8989 Raynor Lake",Line2 = "New Lavernamouth",Line3 = "Avon",Line4 = "Norfolk Island",PostCode = "25632-5757",PhoneNumber = "01805 968151",COUNTRY_CODE = "TW"},
+            new AddressDto{Id = 6, AnotherId = "54",PersonId = 7,Line1 = "5516 Reilly Shoal",Line2 = "North Johnny",Line3 = "Bedfordshire",Line4 = "Uruguay",PostCode = "05472-9584",PhoneNumber = "01833 406229",COUNTRY_CODE = "MY"},
+            new AddressDto{Id = 7, AnotherId = "1",PersonId = 8,Line1 = "264 Yasmin Mountains",Line2 = "West Talia",Line3 = "Berkshire",Line4 = "Monaco",PostCode = "56468-6584",PhoneNumber = "01101 018567",COUNTRY_CODE = "MF"},
+            new AddressDto{Id = 8, AnotherId = "12",PersonId = 7,Line1 = "94940 Eudora Drive",Line2 = "North Merle",Line3 = "Borders",Line4 = "Kiribati",PostCode = "34763-0932",PhoneNumber = "01568 719948",COUNTRY_CODE = "CN"},
+            new AddressDto{Id = 9, AnotherId = "47",PersonId = 7,Line1 = "9331 Zieme Skyway",Line2 = "Gwendolynland",Line3 = "Cambridgeshire",Line4 = "Kazakhstan",PostCode = "43015",PhoneNumber = "01351 315683",COUNTRY_CODE = "FJ"},
+            new AddressDto{Id = 10, AnotherId = "47",PersonId = 6,Line1 = "52137 Hills Walk",Line2 = "Lake Nattown",Line3 = "Avon",Line4 = "Nigeria",PostCode = "80392-8348",PhoneNumber = "01235 987526",COUNTRY_CODE = "DJ"}
         };
     }
 }

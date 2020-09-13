@@ -17,7 +17,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
             Data.DropAndCreateDatabase();
             _repository = new BinManRepository(ConnectionString);
             
-            var binMan = new BinMan
+            var binMan = new BinManDto
             {
                 Id = 1,
                 Data = new byte[]
@@ -31,7 +31,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestCreateBinMan()
         {
-            var binMan = new BinMan
+            var binMan = new BinManDto
             {
                 Id = 123,
                 Data = new byte[]

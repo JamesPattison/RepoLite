@@ -2,52 +2,52 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Xml;
-using NS.Base;
 using NS.Models.Base;
 
 namespace NS.Models
 {
-	public sealed partial class Person : BaseModel
+	public sealed partial class PersonDto : BaseModel
 	{
 		public override string EntityName => "Person";
-		private Int32 _id;
-		private String _name;
-		private Int32 _age;
-		private String _nationality;
-		private Boolean _registered;
+		public static string CacheKey(object identifier) => $"Person_{identifier}";
+		protected int _id;
+		protected string _name;
+		protected int _age;
+		protected string _nationality;
+		protected bool _registered;
 
-		public Int32 Id
+		public int Id
 		{
 			get => _id;
 			set => SetValue(ref _id, value);
 		}
-		public String Name
+		public string Name
 		{
 			get => _name;
 			set => SetValue(ref _name, value);
 		}
-		public Int32 Age
+		public int Age
 		{
 			get => _age;
 			set => SetValue(ref _age, value);
 		}
-		public String Nationality
+		public string Nationality
 		{
 			get => _nationality;
 			set => SetValue(ref _nationality, value);
 		}
-		public Boolean Registered
+		public bool Registered
 		{
 			get => _registered;
 			set => SetValue(ref _registered, value);
 		}
-		public Person() { }
-		public Person(
-			Int32 id,
-			String name,
-			Int32 age,
-			String nationality,
-			Boolean registered)
+		public PersonDto() { }
+		public PersonDto(
+			int id,
+			string name,
+			int age,
+			string nationality,
+			bool registered)
 		{
 			_id = id;
 			_name = name;
@@ -57,11 +57,11 @@ namespace NS.Models
 		}
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{
-			_id = row.GetValue<Int32>($"{propertyPrefix}Id") ?? default(Int32); 
+			_id = row.GetValue<int>($"{propertyPrefix}Id") ?? default(int); 
 			_name = row.GetText($"{propertyPrefix}Name");
-			_age = row.GetValue<Int32>($"{propertyPrefix}Age") ?? default(Int32); 
+			_age = row.GetValue<int>($"{propertyPrefix}Age") ?? default(int); 
 			_nationality = row.GetText($"{propertyPrefix}Nationality");
-			_registered = row.GetValue<Boolean>($"{propertyPrefix}Registered") ?? default(Boolean); 
+			_registered = row.GetValue<bool>($"{propertyPrefix}Registered") ?? default(bool); 
 			return this;
 		}
 		public override List<ValidationError> Validate()
@@ -79,13 +79,15 @@ namespace NS.Models
 
 			return validationErrors;
 		}
+		public static string Schema = "dbo";
+		public static string TableName = "Person";
 		public static List<ColumnDefinition> Columns => new List<ColumnDefinition>
 		{
-			new ColumnDefinition("Id", typeof(System.Int32), "[INT]", SqlDbType.Int, false, true, true),
-			new ColumnDefinition("Name", typeof(System.String), "[NVARCHAR](50)", SqlDbType.NVarChar, false, false, false),
-			new ColumnDefinition("Age", typeof(System.Int32), "[INT]", SqlDbType.Int, false, false, false),
-			new ColumnDefinition("Nationality", typeof(System.String), "[NVARCHAR](50)", SqlDbType.NVarChar, false, false, false),
-			new ColumnDefinition("Registered", typeof(System.Boolean), "[BIT]", SqlDbType.Bit, false, false, false),
+			new ColumnDefinition("Id", typeof(int), "[INT]", SqlDbType.Int, false, true, true),
+			new ColumnDefinition("Name", typeof(string), "[NVARCHAR](50)", SqlDbType.NVarChar, false, false, false),
+			new ColumnDefinition("Age", typeof(int), "[INT]", SqlDbType.Int, false, false, false),
+			new ColumnDefinition("Nationality", typeof(string), "[NVARCHAR](50)", SqlDbType.NVarChar, false, false, false),
+			new ColumnDefinition("Registered", typeof(bool), "[BIT]", SqlDbType.Bit, false, false, false),
 		};
 	}
 }

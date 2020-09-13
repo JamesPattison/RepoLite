@@ -2,31 +2,31 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Xml;
-using NS.Base;
 using NS.Models.Base;
 
 namespace NS.Models
 {
-	public sealed partial class Event : BaseModel
+	public sealed partial class EventDto : BaseModel
 	{
 		public override string EntityName => "Event";
-		private String _eventid;
-		private String _eventname;
+		public static string CacheKey(object identifier) => $"Event_{identifier}";
+		protected string _eventid;
+		protected string _eventname;
 
-		public String EventId
+		public string EventId
 		{
 			get => _eventid;
 			set => SetValue(ref _eventid, value);
 		}
-		public String EventName
+		public string EventName
 		{
 			get => _eventname;
 			set => SetValue(ref _eventname, value);
 		}
-		public Event() { }
-		public Event(
-			String eventid,
-			String eventname)
+		public EventDto() { }
+		public EventDto(
+			string eventid,
+			string eventname)
 		{
 			_eventid = eventid;
 			_eventname = eventname;
@@ -52,10 +52,12 @@ namespace NS.Models
 
 			return validationErrors;
 		}
+		public static string Schema = "dbo";
+		public static string TableName = "Event";
 		public static List<ColumnDefinition> Columns => new List<ColumnDefinition>
 		{
-			new ColumnDefinition("EventId", typeof(System.String), "[NVARCHAR](20)", SqlDbType.NVarChar, false, true, false),
-			new ColumnDefinition("EventName", typeof(System.String), "[NVARCHAR](100)", SqlDbType.NVarChar, false, false, false),
+			new ColumnDefinition("EventId", typeof(string), "[NVARCHAR](20)", SqlDbType.NVarChar, false, true, false),
+			new ColumnDefinition("EventName", typeof(string), "[NVARCHAR](100)", SqlDbType.NVarChar, false, false, false),
 		};
 	}
 }

@@ -261,7 +261,7 @@ namespace RepoLite.Tests.ActualGeneratedFIlesTests
         [TestMethod]
         public void TestCreate()
         {
-            var data = new xmltable
+            var data = new xmltableDto
             {
                 name = "Inserted",
                 data = new XmlDocument { InnerXml = "<xml>Xml</xml>" }
