@@ -13,10 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Templates\CSharp\SqlServer\BaseModel.cs.txt">
+    <None Update="CSharp\SqlServer\BaseModel.cs.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Templates\CSharp\SqlServer\BaseRepository.cs.txt">
+    <None Update="CSharp\SqlServer\BaseRepository.cs.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

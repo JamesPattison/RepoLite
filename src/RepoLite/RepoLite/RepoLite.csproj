@@ -18,7 +18,8 @@
   <ItemGroup>
     <ProjectReference Include="..\RepoLite.Common\RepoLite.Common.csproj" />
     <ProjectReference Include="..\RepoLite.DataAccess\RepoLite.DataAccess.csproj" />
-    <ProjectReference Include="..\RepoLite.GeneratorEngine\RepoLite.GeneratorEngine.csproj" />
+    <ProjectReference Include="..\RepoLite.Generator.DotNet\RepoLite.Generator.DotNet.csproj" />
+    <ProjectReference Include="..\RepoLite.GeneratorEngine\RepoLite.Generator.Templates.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,13 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RepoLite.Common", "RepoLite
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RepoLite.DataAccess", "RepoLite\RepoLite.DataAccess\RepoLite.DataAccess.csproj", "{4E1E6A0F-C815-4CEE-AB10-E5054E721B14}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RepoLite.GeneratorEngine", "RepoLite\RepoLite.GeneratorEngine\RepoLite.GeneratorEngine.csproj", "{4E0A28DC-9246-436C-B1B9-A290CA5DC55F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RepoLite.Generator.DotNet", "RepoLite\RepoLite.Generator.DotNet\RepoLite.Generator.DotNet.csproj", "{DF323A69-80A5-4BEC-BC43-CD6EB474FF7E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7A1B0F7A-BA81-4977-838A-FC9EEDB1C0FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoLite.Tests", "RepoLite\RepoLite.Tests\RepoLite.Tests.csproj", "{B2259418-BA05-4840-9AFA-F92437EBF302}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RepoLite.Tests", "RepoLite\RepoLite.Tests\RepoLite.Tests.csproj", "{B2259418-BA05-4840-9AFA-F92437EBF302}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +33,6 @@ Global
 		{4E1E6A0F-C815-4CEE-AB10-E5054E721B14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E1E6A0F-C815-4CEE-AB10-E5054E721B14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E1E6A0F-C815-4CEE-AB10-E5054E721B14}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4E0A28DC-9246-436C-B1B9-A290CA5DC55F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4E0A28DC-9246-436C-B1B9-A290CA5DC55F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4E0A28DC-9246-436C-B1B9-A290CA5DC55F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4E0A28DC-9246-436C-B1B9-A290CA5DC55F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DF323A69-80A5-4BEC-BC43-CD6EB474FF7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DF323A69-80A5-4BEC-BC43-CD6EB474FF7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF323A69-80A5-4BEC-BC43-CD6EB474FF7E}.Release|Any CPU.ActiveCfg = Release|Any CPU

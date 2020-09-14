@@ -8,4 +8,13 @@
     <ProjectReference Include="..\RepoLite.Common\RepoLite.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Templates\SqlServer\BaseModel.cs.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Templates\SqlServer\BaseRepository.cs.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
