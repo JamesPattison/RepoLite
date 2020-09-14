@@ -6,10 +6,11 @@ using RepoLite.Common.Enums;
 using RepoLite.Common.Extensions;
 using RepoLite.Common.Settings;
 using RepoLite.DataAccess;
+using RepoLite.DataAccess.Accessors;
 using RepoLite.GeneratorEngine;
 using RepoLite.GeneratorEngine.Generators;
-using RepoLite.GeneratorEngine.Generators.BaseParsers;
-using RepoLite.GeneratorEngine.Generators.BaseParsers.Base;
+using RepoLite.GeneratorEngine.TemplateParsers;
+using RepoLite.GeneratorEngine.TemplateParsers.Base;
 using RepoLite.ViewModel;
 using RepoLite.ViewModel.Main;
 using RepoLite.ViewModel.Settings;
@@ -17,7 +18,6 @@ using RepoLite.Views;
 using System;
 using System.IO;
 using System.Windows;
-using RepoLite.DataAccess.Accessors;
 
 namespace RepoLite
 {
@@ -67,7 +67,7 @@ namespace RepoLite
 
 
 
-            services.AddTransient<ParserResolver>(provider => () =>
+            services.AddTransient<TemplateParserResolver>(provider => () =>
             {
                 var generationOptions = provider.GetService<IOptions<GenerationSettings>>();
                 var systemSettings = provider.GetService<IOptions<SystemSettings>>();
@@ -75,7 +75,7 @@ namespace RepoLite
                 if (systemSettings.Value.GenerationLanguage == GenerationLanguage.CSharp)
                     return systemSettings.Value.DataSource switch
                     {
-                        DataSourceEnum.SQLServer => new CSharpSqlServerBaseClassParser(generationOptions),
+                        DataSourceEnum.SQLServer => new CSharpSqlServersTemplateParser(generationOptions),
                         _ => throw new ArgumentOutOfRangeException()
                     };
 

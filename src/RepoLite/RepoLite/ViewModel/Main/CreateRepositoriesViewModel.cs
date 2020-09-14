@@ -7,7 +7,6 @@ using RepoLite.Common.Models;
 using RepoLite.Common.Settings;
 using RepoLite.DataAccess;
 using RepoLite.GeneratorEngine;
-using RepoLite.GeneratorEngine.Generators.BaseParsers.Base;
 using RepoLite.GeneratorEngine.Models;
 using RepoLite.ViewModel.Base;
 using RepoLite.Views;
@@ -18,6 +17,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
+using RepoLite.GeneratorEngine.TemplateParsers.Base;
 
 namespace RepoLite.ViewModel.Main
 {
@@ -25,7 +25,7 @@ namespace RepoLite.ViewModel.Main
     {
         private IDataSource _dataSource;
         private IGenerator _generator;
-        private IParser _parser;
+        private ITemplateParser _templateParser;
         private readonly GenerationSettings _generationSettings;
         private readonly SystemSettings _systemSettings;
         private readonly CreateModelsViewModel _createModelsViewModel;
@@ -38,14 +38,14 @@ namespace RepoLite.ViewModel.Main
         public CreateRepositoriesViewModel(
             DataSourceResolver dataSourceResolver,
             GeneratorResolver generatorResolver,
-            ParserResolver parserResolver,
+            TemplateParserResolver templateParserResolver,
             IOptions<SystemSettings> systemSettings,
             IOptions<GenerationSettings> generationSettings,
             CreateModelsViewModel createModelsViewModel)
         {
             _dataSource = dataSourceResolver();
             _generator = generatorResolver();
-            _parser = parserResolver();
+            _templateParser = templateParserResolver();
             _systemSettings = systemSettings.Value;
             _generationSettings = generationSettings.Value;
             _createModelsViewModel = createModelsViewModel;
@@ -230,7 +230,7 @@ namespace RepoLite.ViewModel.Main
                 Directory.CreateDirectory($"{outputDirectory}/Base");
 
             //Write base repository
-            var baseRepo = _parser.BuildBaseRepository();
+            var baseRepo = _templateParser.BuildBaseRepository();
             LogMessage($"Creating Base Repository file in {outputDirectory}/Base/");
             File.WriteAllText($"{outputDirectory}/Base/BaseRepository.{generator.FileExtension()}", baseRepo);
             LogMessage("Created Base Repository file.");

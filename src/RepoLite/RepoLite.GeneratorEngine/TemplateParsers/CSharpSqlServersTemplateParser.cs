@@ -1,15 +1,15 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System.IO;
+using Microsoft.Extensions.Options;
 using RepoLite.Common.Settings;
-using RepoLite.GeneratorEngine.Generators.BaseParsers.Base;
-using System.IO;
+using RepoLite.GeneratorEngine.TemplateParsers.Base;
 
-namespace RepoLite.GeneratorEngine.Generators.BaseParsers
+namespace RepoLite.GeneratorEngine.TemplateParsers
 {
-    public class CSharpSqlServerBaseClassParser : IParser
+    public class CSharpSqlServersTemplateParser : ITemplateParser
     {
         private readonly IOptions<GenerationSettings> _generationSettings;
 
-        public CSharpSqlServerBaseClassParser(IOptions<GenerationSettings> generationSettings)
+        public CSharpSqlServersTemplateParser(IOptions<GenerationSettings> generationSettings)
         {
             _generationSettings = generationSettings;
         }

@@ -4,4 +4,9 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\RepoLite.Common\RepoLite.Common.csproj" />
+    <ProjectReference Include="..\RepoLite.GeneratorEngine\RepoLite.GeneratorEngine.csproj" />
+  </ItemGroup>
+
 </Project>
