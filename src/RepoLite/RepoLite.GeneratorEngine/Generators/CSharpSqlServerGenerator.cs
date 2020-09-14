@@ -8,11 +8,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using RepoLite.Common.Interfaces;
 using static RepoLite.Common.Helpers;
 
 namespace RepoLite.GeneratorEngine.Generators
 {
-    public class CSharpSqlServerGenerator : CodeGenerator
+    public class CSharpSqlServerGenerator : IGenerator
     {
         private readonly IOptions<GenerationSettings> _generationSettings;
         private const int VARIABLE_BLOCK_SCOPE = 5;
@@ -25,7 +26,7 @@ namespace RepoLite.GeneratorEngine.Generators
             _generationSettings = generationSettings;
         }
 
-        public override StringBuilder ModelForTable(Table table, List<Table> otherTables)
+        public StringBuilder ModelForTable(Table table, List<Table> otherTables)
         {
             var sb = new StringBuilder();
 
@@ -40,7 +41,7 @@ namespace RepoLite.GeneratorEngine.Generators
             return sb;
         }
 
-        public override StringBuilder RepositoryForTable(Table table, List<Table> otherTables)
+        public StringBuilder RepositoryForTable(Table table, List<Table> otherTables)
         {
             var sb = new StringBuilder();
 
@@ -270,7 +271,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
         }
 
-        public override string FileExtension()
+        public string FileExtension()
         {
             return "cs";
         }

@@ -3,10 +3,9 @@ using Newtonsoft.Json;
 using RepoLite.Commands;
 using RepoLite.Common.Enums;
 using RepoLite.Common.Extensions;
+using RepoLite.Common.Interfaces;
 using RepoLite.Common.Models;
 using RepoLite.Common.Settings;
-using RepoLite.DataAccess;
-using RepoLite.GeneratorEngine;
 using RepoLite.GeneratorEngine.Models;
 using RepoLite.ViewModel.Base;
 using RepoLite.Views;
@@ -17,7 +16,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
-using RepoLite.GeneratorEngine.TemplateParsers.Base;
 
 namespace RepoLite.ViewModel.Main
 {

@@ -1,7 +1,7 @@
 ﻿using RepoLite.Common.Models;
 using System.Collections.Generic;
 
-namespace RepoLite.DataAccess
+namespace RepoLite.Common.Interfaces
 {
     public delegate IDataSource DataSourceResolver();
     public interface IDataSource

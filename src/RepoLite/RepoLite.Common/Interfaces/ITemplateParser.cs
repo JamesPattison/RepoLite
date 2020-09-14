@@ -1,4 +1,4 @@
-﻿namespace RepoLite.GeneratorEngine.TemplateParsers.Base
+﻿namespace RepoLite.Common.Interfaces
 {
     public delegate ITemplateParser TemplateParserResolver();
     public interface ITemplateParser

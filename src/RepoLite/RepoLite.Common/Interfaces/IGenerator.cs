@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace RepoLite.GeneratorEngine
+namespace RepoLite.Common.Interfaces
 {
     public delegate IGenerator GeneratorResolver();
     public interface IGenerator

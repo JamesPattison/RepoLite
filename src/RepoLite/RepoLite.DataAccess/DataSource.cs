@@ -1,4 +1,5 @@
-﻿using RepoLite.Common.Models;
+﻿using RepoLite.Common.Interfaces;
+using RepoLite.Common.Models;
 using System.Collections.Generic;
 
 namespace RepoLite.DataAccess

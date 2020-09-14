@@ -1,7 +1,7 @@
-﻿using System.IO;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using RepoLite.Common.Interfaces;
 using RepoLite.Common.Settings;
-using RepoLite.GeneratorEngine.TemplateParsers.Base;
+using System.IO;
 
 namespace RepoLite.GeneratorEngine.TemplateParsers
 {
