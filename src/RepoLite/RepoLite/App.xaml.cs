@@ -1,13 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using RepoLite.Common;
 using RepoLite.Common.Enums;
 using RepoLite.Common.Extensions;
 using RepoLite.Common.Interfaces;
 using RepoLite.Common.Settings;
 using RepoLite.DataAccess.Accessors;
-using RepoLite.GeneratorEngine.Generators;
+using RepoLite.Generator.DotNet;
 using RepoLite.GeneratorEngine.TemplateParsers;
 using RepoLite.ViewModel;
 using RepoLite.ViewModel.Main;
@@ -105,21 +104,6 @@ namespace RepoLite
                     _ => throw new ArgumentOutOfRangeException()
                 };
 
-            });
-
-
-
-
-            services.AddTransient<C1>();
-            services.AddTransient<C2>();
-            services.AddTransient<MyInterfaceResolver>(serviceProvider => (int myVal) =>
-            {
-                return myVal switch
-                {
-                    1 => serviceProvider.GetService<C1>(),
-                    2 => serviceProvider.GetService<C2>(),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
             });
         }
     }

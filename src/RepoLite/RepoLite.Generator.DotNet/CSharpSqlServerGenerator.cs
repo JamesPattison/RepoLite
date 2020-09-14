@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using RepoLite.Common.Enums;
 using RepoLite.Common.Extensions;
+using RepoLite.Common.Interfaces;
 using RepoLite.Common.Models;
 using RepoLite.Common.Settings;
 using System;
@@ -8,10 +9,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using RepoLite.Common.Interfaces;
 using static RepoLite.Common.Helpers;
 
-namespace RepoLite.GeneratorEngine.Generators
+namespace RepoLite.Generator.DotNet
 {
     public class CSharpSqlServerGenerator : IGenerator
     {
@@ -317,7 +317,7 @@ namespace RepoLite.GeneratorEngine.Generators
             {
                 if (inheritedDependency != null && column.DbColumnName == inheritedDependency.DbColumnName) continue;
                 //Field
-                sb.AppendLine(Tab2, $"protected {column.DataTypeString}{(IsCSharpNullable(column.DataTypeString) && column.IsNullable ? "?" : "")} _{column.FieldName};");
+                sb.AppendLine(Tab2, $"{(_generationSettings.Value.GenerateSealedObjects ? "private" : "protected")} {column.DataTypeString}{(IsCSharpNullable(column.DataTypeString) && column.IsNullable ? "?" : "")} _{column.FieldName};");
             }
 
             sb.Append(Environment.NewLine);
