@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using RepoLite.Generator.DotNet.Generators.Base;
 using static RepoLite.Common.Helpers;
 
 namespace RepoLite.Generator.DotNet
@@ -16,6 +17,7 @@ namespace RepoLite.Generator.DotNet
     public class CSharpSqlServerGenerator : IGenerator
     {
         private readonly IOptions<GenerationSettings> _generationSettings;
+        private GeneratorFactory _generatorFactory;
         private const int VARIABLE_BLOCK_SCOPE = 5;
 
         //private Func<string, string, string, string> GetColName = (s, table, name) => $"{(s == name ? $"nameof({table}.{name})" : $"\"{name}\"")}";
@@ -24,10 +26,12 @@ namespace RepoLite.Generator.DotNet
             IOptions<GenerationSettings> generationSettings)
         {
             _generationSettings = generationSettings;
+            _generatorFactory = new GeneratorFactory(generationSettings);
         }
 
         public StringBuilder ModelForTable(Table table, List<Table> otherTables)
         {
+            var generatorForTable = _generatorFactory.Get(table, otherTables);
             var sb = new StringBuilder();
 
             sb.AppendLine("using System;");

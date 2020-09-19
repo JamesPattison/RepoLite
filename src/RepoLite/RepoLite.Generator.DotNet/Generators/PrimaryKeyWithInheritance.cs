@@ -7,11 +7,14 @@ using RepoLite.Generator.DotNet.Generators.Base;
 
 namespace RepoLite.Generator.DotNet.Generators
 {
-    internal sealed class CompoundKey : BaseGenerator
+    internal sealed class PrimaryKeyWithInheritance : BaseInheritedGenerator
     {
-        public CompoundKey(
+        private readonly Table _inheritedTable;
+
+        public PrimaryKeyWithInheritance(
             IOptions<GenerationSettings> generationSettings,
-            Table table) : base(generationSettings, table)
+            Table table,
+            Table inheritedTable) : base(generationSettings, table, inheritedTable)
         {
         }
     }
