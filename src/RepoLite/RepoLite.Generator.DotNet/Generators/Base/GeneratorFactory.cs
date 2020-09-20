@@ -18,7 +18,7 @@ namespace RepoLite.Generator.DotNet.Generators.Base
             _generationSettings = generationSettings;
         }
         
-        public IGenerator Get(Table table, List<Table> otherTables)
+        public IGenerator Get(Table table, IEnumerable<Table> otherTables)
         {
             var inheritedDependency =
                 table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
@@ -30,13 +30,13 @@ namespace RepoLite.Generator.DotNet.Generators.Base
             return table.PrimaryKeyConfiguration switch
             {
                 PrimaryKeyConfigurationEnum.NoKey when inheritedTable == null => new NoKey(_generationSettings, table),
-                PrimaryKeyConfigurationEnum.NoKey => new NoKeyWithInheritance(_generationSettings, table, inheritedTable),
+                PrimaryKeyConfigurationEnum.NoKey => new NoKeyWithInheritance(_generationSettings, table, otherTables),
                 
                 PrimaryKeyConfigurationEnum.PrimaryKey when inheritedTable == null => new PrimaryKey(_generationSettings, table),
-                PrimaryKeyConfigurationEnum.PrimaryKey => new PrimaryKeyWithInheritance(_generationSettings, table, inheritedTable),
+                PrimaryKeyConfigurationEnum.PrimaryKey => new PrimaryKeyWithInheritance(_generationSettings, table, otherTables),
                 
                 PrimaryKeyConfigurationEnum.CompositeKey when inheritedTable == null => new CompoundKey(_generationSettings, table),
-                PrimaryKeyConfigurationEnum.CompositeKey => new CompoundKeyWithInheritance(_generationSettings, table, inheritedTable),
+                PrimaryKeyConfigurationEnum.CompositeKey => new CompoundKeyWithInheritance(_generationSettings, table, otherTables),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }

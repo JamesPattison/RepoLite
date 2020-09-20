@@ -10,6 +10,22 @@ namespace RepoLite.Generator.DotNet.Generators.Base
 {
     internal abstract class BaseGenerator : IGenerator
     {
+        public static string Tab1 = "\t";
+        public static string Tab2 = "\t\t";
+        public static string Tab3 = "\t\t\t";
+        public static string Tab4 = "\t\t\t\t";
+        public static string Tab5 = "\t\t\t\t\t";
+        public static string Tab6 = "\t\t\t\t\t\t";
+        public static string Tab7 = "\t\t\t\t\t\t\t";
+        public static string Tab8 = "\t\t\t\t\t\t\t\t";
+        public static string Tab9 = "\t\t\t\t\t\t\t\t\t";
+
+        public static bool IsCSharpNullable(string type)
+        {
+            return type != "byte[]" && type != "object" && type != "string" && type != "XmlDocument" &&
+                   type != "Byte[]" && type != "Object" && type != "String";
+        }
+        
         protected readonly Table _table;
         private readonly GenerationSettings _generationSettings;
 
@@ -56,8 +72,8 @@ namespace RepoLite.Generator.DotNet.Generators.Base
         }
         
         #region Abstracts
-        
-        
+
+        public abstract void Interface(StringBuilder sb);
         
         #endregion
         
