@@ -32,6 +32,7 @@ namespace RepoLite.Generator.DotNet
         public StringBuilder ModelForTable(Table table, List<Table> otherTables)
         {
             var generatorForTable = _generatorFactory.Get(table, otherTables);
+            //return generatorForTable.ModelForTable(table, otherTables);
             var sb = new StringBuilder();
 
             sb.AppendLine("using System;");
@@ -47,6 +48,8 @@ namespace RepoLite.Generator.DotNet
 
         public StringBuilder RepositoryForTable(Table table, List<Table> otherTables)
         {
+            var generatorForTable = _generatorFactory.Get(table, otherTables);
+            return generatorForTable.RepositoryForTable(table, otherTables);
             var sb = new StringBuilder();
 
             sb.AppendLine($"using {_generationSettings.Value.RepositoryGenerationNamespace}.Base;");

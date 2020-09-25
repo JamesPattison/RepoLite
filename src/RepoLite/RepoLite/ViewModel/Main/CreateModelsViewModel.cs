@@ -61,8 +61,9 @@ namespace RepoLite.ViewModel.Main
                     var tableDefinitions = _dataSource.GetTables();
                     foreach (var table in tableDefinitions.OrderBy(x => x.Schema).ThenBy(x => x.Table).ToList())
                     {
-                        Tables.Add(new TableToGenerate { Schema = table.Schema, Table = table.Table });
+                        Tables.Add(new TableToGenerate {Schema = table.Schema, Table = table.Table});
                     }
+
                     OnPropertyChanged(nameof(Tables));
                     Loaded = true;
                 });
@@ -75,7 +76,8 @@ namespace RepoLite.ViewModel.Main
             {
                 return new RelayCommand(o =>
                 {
-                    var shouldSelect = Math.Abs(Math.Round(Tables.Count(x => x.Selected) / (float)Tables.Count)) < 0.001;
+                    var shouldSelect = Math.Abs(Math.Round(Tables.Count(x => x.Selected) / (float) Tables.Count)) <
+                                       0.001;
                     foreach (var table in Tables)
                     {
                         table.Selected = shouldSelect;
@@ -92,7 +94,8 @@ namespace RepoLite.ViewModel.Main
                 {
                     var tables = Tables.Where(x => x.Selected);
 
-                    var tableDefinitions = _dataSource.LoadTables(tables.Select(x => new TableAndSchema(x.Schema, x.Table)).ToList());
+                    var tableDefinitions =
+                        _dataSource.LoadTables(tables.Select(x => new TableAndSchema(x.Schema, x.Table)).ToList());
 
                     DoWork(() =>
                     {
@@ -100,12 +103,18 @@ namespace RepoLite.ViewModel.Main
 
                         tableDefinitions.ForEach(x =>
                         {
-                            LogMessage($"Processing Table {x.Schema}.{x.DbTableName.ToModelName(_generationSettings.ModelClassNameFormat)}");
+                            LogMessage(
+                                $"Processing Table {x.Schema}.{x.DbTableName.ToModelName(_generationSettings.ModelClassNameFormat)}");
                             var model = _generator.ModelForTable(x, tableDefinitions).ToString();
 
                             CreateModel(x, _generator, model);
                         });
-                    }, () => Process.Start(_generationSettings.OutputDirectory));
+                    }, () => Process.Start(new ProcessStartInfo
+                    {
+                        FileName = _generationSettings.OutputDirectory,
+                        UseShellExecute = true,
+                        Verb = "open"
+                    }));
                 });
             }
         }
@@ -195,9 +204,11 @@ namespace RepoLite.ViewModel.Main
 
             if (!Directory.Exists(_generationSettings.OutputDirectory))
                 Directory.CreateDirectory(_generationSettings.OutputDirectory);
-            LogMessage($"Creating Model File for {table.Schema}.{table.DbTableName.ToModelName(_generationSettings.ModelClassNameFormat)} in {outputDirectory}/");
+            LogMessage(
+                $"Creating Model File for {table.Schema}.{table.DbTableName.ToModelName(_generationSettings.ModelClassNameFormat)} in {outputDirectory}/");
             File.WriteAllText(fileName, modelName);
-            LogMessage($"Done {table.Schema}.{table.DbTableName.ToModelName(_generationSettings.ModelClassNameFormat)}!");
+            LogMessage(
+                $"Done {table.Schema}.{table.DbTableName.ToModelName(_generationSettings.ModelClassNameFormat)}!");
         }
 
         internal void CreateBaseModel(IGenerator generator)

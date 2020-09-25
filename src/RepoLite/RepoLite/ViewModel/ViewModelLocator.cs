@@ -12,7 +12,13 @@ namespace RepoLite.ViewModel
 
         public CreateRepositoriesViewModel CreateRepositoriesViewModel => App.ServiceProvider.GetRequiredService<CreateRepositoriesViewModel>();
 
-        public AllSettingsViewModel AllSettingsViewModel => App.ServiceProvider.GetRequiredService<AllSettingsViewModel>();
+        public AllSettingsViewModel AllSettingsViewModel
+        {
+            get
+            {
+                return App.ServiceProvider.GetRequiredService<AllSettingsViewModel>();
+            }
+        }
 
         public static void Cleanup()
         {

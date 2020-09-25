@@ -66,7 +66,7 @@ namespace RepoLite.Generator.DotNet.Generators.Base
             var sb = new StringBuilder();
 
             AppendImports(sb);
-
+            Interface(sb);
 
             return sb;
         }

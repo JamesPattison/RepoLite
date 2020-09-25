@@ -43,7 +43,16 @@ namespace RepoLite.Generator.DotNet.Generators
             if (inherits)
             {
                 //DeleteBy for base Tables
-                AppendDeleteByForInherited(_otherTables, _inheritedDependency, sb);
+                DoShitRecursively(sb, _inheritedDependency, (dependency, table) =>
+                {
+                    foreach (var inheritedColumn in table.Columns)
+                    {
+                        if (inheritedColumn.PrimaryKey || dependency != null && inheritedColumn.DbColumnName == dependency.DbColumnName) continue;
+
+                        sb.AppendLine(Tab2,
+                            $"bool DeleteBy{inheritedColumn.DbColumnName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName});");
+                    }
+                });
             }
 
             //search
@@ -62,7 +71,20 @@ namespace RepoLite.Generator.DotNet.Generators
 
             if (inherits)
             {
-                AppendSearchByForInherited(_otherTables, _inheritedDependency, sb);
+                DoShitRecursively(sb, _inheritedDependency, (dependency, table) =>
+                {
+                    foreach (var inheritedColumn in table.Columns)
+                    {
+                        if (inheritedColumn.PrimaryKey || (dependency != null && inheritedColumn.DbColumnName == dependency.DbColumnName)) continue;
+
+                        sb.Append(Tab3,
+                            inheritedColumn.DataType != typeof(XmlDocument)
+                                ? $"{inheritedColumn.DataTypeString}{(IsCSharpNullable(inheritedColumn.DataTypeString) ? "?" : string.Empty)} {inheritedColumn.FieldName} = null"
+                                : $"String {inheritedColumn.FieldName} = null");
+                        if (inheritedColumn != table.Columns.Last())
+                            sb.AppendLine(",");
+                    }
+                });
             }
 
             sb.AppendLine(");");
@@ -85,7 +107,23 @@ namespace RepoLite.Generator.DotNet.Generators
             if (inherits)
             {
                 //DeleteBy for base Tables
-                AppendFindByForInherited(ModelName(_table.DbTableName), _otherTables, _inheritedDependency, sb);
+                DoShitRecursively(sb, _inheritedDependency, (dependency, table) =>
+                {
+                    foreach (var inheritedColumn in table.Columns)
+                    {
+                        if (inheritedColumn.PrimaryKey || (dependency != null && inheritedColumn.DbColumnName == dependency.DbColumnName)) continue;
+
+                        sb.AppendLine(Tab2,
+                            inheritedColumn.DataType != typeof(XmlDocument)
+                                ? $"IEnumerable<{ModelName(_table.DbTableName)}> FindBy{inheritedColumn.PropertyName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName});"
+                                : $"IEnumerable<{ModelName(_table.DbTableName)}> FindBy{inheritedColumn.PropertyName}(String {inheritedColumn.FieldName});");
+
+                        sb.AppendLine(Tab2,
+                            inheritedColumn.DataType != typeof(XmlDocument)
+                                ? $"IEnumerable<{ModelName(_table.DbTableName)}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, {inheritedColumn.DataTypeString} {inheritedColumn.FieldName});"
+                                : $"IEnumerable<{ModelName(_table.DbTableName)}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, String {inheritedColumn.FieldName});");
+                    }
+                });
             }
 
             sb.AppendLine(Tab1, "}");

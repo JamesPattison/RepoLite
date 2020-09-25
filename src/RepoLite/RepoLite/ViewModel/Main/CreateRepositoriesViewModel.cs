@@ -125,7 +125,12 @@ namespace RepoLite.ViewModel.Main
 
                             CreateRepo(x, _generator, repository);
                         });
-                    }, () => Process.Start(_generationSettings.OutputDirectory));
+                    }, () => Process.Start(new ProcessStartInfo
+                    {
+                        FileName = _generationSettings.OutputDirectory,
+                        UseShellExecute = true,
+                        Verb = "open"
+                    }));
                 });
             }
         }
