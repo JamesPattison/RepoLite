@@ -463,35 +463,11 @@ namespace REPOSITORYNAMESPACE.Base
                     case UnaryExpression unary:
                         return Clause.Make(NodeStr[unary.NodeType], Parse(unary.Operand, xRef, true));
                     case BinaryExpression body:
-                        Clause left;
-                        Clause right;
+                        var leftValue = Parse(body.Left, xRef);
 
-                        var leftValue = Parse(body.Left, xRef) ?? GetValue(body.Left);
-                        if (leftValue != null)
-                        {
-                            if (leftValue is string)
-                            {
-                                leftValue = prefix + (string)leftValue + postfix;
-                            }
+                        var rightValue = Parse(body.Right, xRef);
 
-                            left = Clause.Make($"'{leftValue}'");
-                        }
-                        else left = body.Left.Type == typeof(bool) ? Parse(body.Left, xRef, boolComparison: true) : Parse(body.Left, xRef);
-
-
-                        var rightValue =  Parse(body.Right, xRef) ?? GetValue(body.Right);
-                        if (rightValue != null)
-                        {
-                            if (rightValue is string)
-                            {
-                                rightValue = prefix + (string)rightValue + postfix;
-                            }
-
-                            right = Clause.Make($"'{rightValue}'");
-                        }
-                        else right = body.Right.Type == typeof(bool) ? Parse(body.Right, xRef, boolComparison: true) : Parse(body.Right, xRef);
-
-                        return Clause.Make(left, NodeStr[body.NodeType], right);
+                        return Clause.Make(leftValue, NodeStr[body.NodeType], rightValue);
                     case ConstantExpression constant:
                         {
                             var value = constant.Value;
