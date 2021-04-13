@@ -182,17 +182,17 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab3, $"CacheHelper.SaveToCache({table.ClassName}.CacheKey({table.LowerClassName}.{pk.PropertyName}), {table.LowerClassName});");
             sb.AppendLine(Tab2, "}");
 
-            sb.AppendLine(Tab2, $"private {table.ClassName} GetFromCache(int {pk.FieldName})");
+            sb.AppendLine(Tab2, $"private {table.ClassName} GetFromCache({pk.DataTypeString} {pk.FieldName})");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, $"return CacheHelper.GetFromCache<{table.ClassName}>({table.ClassName}.CacheKey({pk.FieldName}));");
             sb.AppendLine(Tab2, "}");
 
-            sb.AppendLine(Tab2, $"private void RemoveFromCache(int {pk.FieldName})");
+            sb.AppendLine(Tab2, $"private void RemoveFromCache({pk.DataTypeString} {pk.FieldName})");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, $"CacheHelper.RemoveFromCache({table.ClassName}.CacheKey({pk.FieldName}));");
             sb.AppendLine(Tab2, "}");
 
-            sb.AppendLine(Tab2, $"private bool IsInCache(int {pk.FieldName})");
+            sb.AppendLine(Tab2, $"private bool IsInCache({pk.DataTypeString} {pk.FieldName})");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, $"return CacheHelper.IsInCache({table.ClassName}.CacheKey({pk.FieldName}));");
             sb.AppendLine(Tab2, "}");
@@ -290,7 +290,11 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab1, "{");
 
             sb.AppendLine(Tab2, $"public override string EntityName => \"{table.DbTableName}\";");
-            sb.AppendLine(Tab2, $"public static string CacheKey(int id) => $\"{table.DbTableName}_{{id}}\";");
+            if (table.PrimaryKeyConfiguration != PrimaryKeyConfigurationEnum.NoKey)
+            {
+                sb.AppendLine(Tab2,
+                    $"public static string CacheKey({table.PrimaryKeys[0].DataTypeString} id) => $\"{table.DbTableName}_{{id}}\";");
+            }
 
             foreach (var column in table.Columns)
             {

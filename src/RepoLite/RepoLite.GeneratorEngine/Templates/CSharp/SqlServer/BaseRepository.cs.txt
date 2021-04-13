@@ -466,7 +466,7 @@ namespace REPOSITORYNAMESPACE.Base
                         Clause left;
                         Clause right;
 
-                        var leftValue = GetValue(body.Left);
+                        var leftValue = Parse(body.Left, xRef) ?? GetValue(body.Left);
                         if (leftValue != null)
                         {
                             if (leftValue is string)
@@ -479,7 +479,7 @@ namespace REPOSITORYNAMESPACE.Base
                         else left = body.Left.Type == typeof(bool) ? Parse(body.Left, xRef, boolComparison: true) : Parse(body.Left, xRef);
 
 
-                        var rightValue = GetValue(body.Right);
+                        var rightValue =  Parse(body.Right, xRef) ?? GetValue(body.Right);
                         if (rightValue != null)
                         {
                             if (rightValue is string)
