@@ -1641,7 +1641,19 @@ namespace RepoLite.GeneratorEngine.Generators
             }
             sb.AppendLine(inherits ? Tab4 : Tab3, "var mergeTable = new List<object[]>();");
 
-            sb.AppendLine(inherits ? Tab4 : Tab3, "foreach (var item in items)");
+            if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.NoKey)
+            {
+                sb.AppendLine(inherits ? Tab4 : Tab3, "foreach (var item in items)");
+            }
+            else if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
+            {
+                sb.AppendLine(inherits ? Tab4 : Tab3, $"foreach (var item in items.GroupBy(x => new {{{ string.Join(",", table.PrimaryKeys.Select(x => $"x.{x.PropertyName}")) }}}).Select(x => x.Last()))");
+            }
+            else if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.PrimaryKey)
+            {
+                sb.AppendLine(inherits ? Tab4 : Tab3, $"foreach (var item in items.GroupBy(x => x.{table.PrimaryKeys[0].PropertyName}).Select(x => x.Last()))");
+            }
+
             sb.AppendLine(inherits ? Tab4 : Tab3, "{");
             sb.AppendLine(inherits ? Tab5 : Tab4, "mergeTable.Add(new object[]");
             sb.AppendLine(inherits ? Tab5 : Tab4, "{");
