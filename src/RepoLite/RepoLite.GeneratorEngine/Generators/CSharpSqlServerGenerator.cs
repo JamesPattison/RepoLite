@@ -409,7 +409,11 @@ namespace RepoLite.GeneratorEngine.Generators
             {
                 sb.AppendLine(Tab3, $"DirtyColumns.Add(\"{column.DbColumnName}\");");
             }
-
+            if (inherits)
+            {
+                SetChildrenDirty(otherTables, inheritedDependency, sb);
+            }
+            
             sb.AppendLine(Tab2, "}");
 
             CreateModelValidation(table, sb, inherits);
@@ -439,6 +443,31 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("}");
 
             return sb;
+        }
+
+        private void SetChildrenDirty(List<Table> otherTables, Column inheritedDependency, StringBuilder sb)
+        {
+            var inheritedTable =
+                otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
+            if (inheritedTable != null)
+            {
+                var inheritedTableInheritedDependency =
+                    inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                var inheritedTableAlsoInherits = inheritedTableInheritedDependency != null;
+
+                foreach (var inheritedColumn in inheritedTable.Columns)
+                {
+                    if (inheritedTableInheritedDependency != null &&
+                        inheritedColumn.DbColumnName == inheritedTableInheritedDependency.DbColumnName) continue;
+
+                    sb.AppendLine(Tab3, $"DirtyColumns.Add(\"{inheritedColumn.DbColumnName}\");");
+                }
+
+                if (inheritedTableAlsoInherits)
+                {
+                    BuildConstructorInheritedColumns(otherTables, inheritedTableInheritedDependency, sb);
+                }
+            }
         }
 
         private static void BuildConstructorInheritedColumns(List<Table> otherTables, Column inheritedDependency, StringBuilder sb)
