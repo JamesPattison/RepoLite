@@ -402,6 +402,16 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab3, "return this;");
             sb.AppendLine(Tab2, "}");
 
+            sb.AppendLine(Tab2, "public void SetDirty()");
+            sb.AppendLine(Tab2, "{");
+            sb.AppendLine(Tab3, "DirtyColumns.Clear();");
+            foreach (var column in table.Columns)
+            {
+                sb.AppendLine(Tab3, $"DirtyColumns.Add(\"{column.DbColumnName}\");");
+            }
+
+            sb.AppendLine(Tab2, "}");
+
             CreateModelValidation(table, sb, inherits);
 
             sb.AppendLine(Tab2, $"public static string Schema = \"{table.Schema}\";");

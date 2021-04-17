@@ -16,7 +16,7 @@ namespace NS.Models.Base
             Error = error;
         }
     }
-    
+
     public class ColumnDefinition
     {
         public string ColumnName { get; set; }
@@ -42,7 +42,7 @@ namespace NS.Models.Base
             Identity = identity;
         }
     }
-    
+
     public partial interface IBaseModel
     {
         string EntityName { get; }
@@ -84,22 +84,22 @@ namespace NS.Models.Base
             return decimalPlaces;
         }
     }
-    
+
     public static class Ext
     {
         public static T? GetValue<T>(this DataRow row, string columnName) where T : struct
         {
             if (row.IsNull(columnName) || !row.Table.Columns.Contains(columnName))
                 return null;
-    
+
             return row[columnName] as T?;
         }
-    
+
         public static string GetText(this DataRow row, string columnName)
         {
             if (row.IsNull(columnName) || !row.Table.Columns.Contains(columnName))
                 return null;
-    
+
             return row[columnName] as string;
         }
     }
