@@ -402,20 +402,6 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab3, "return this;");
             sb.AppendLine(Tab2, "}");
 
-            sb.AppendLine(Tab2, "public void SetDirty()");
-            sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, "DirtyColumns.Clear();");
-            foreach (var column in table.Columns)
-            {
-                sb.AppendLine(Tab3, $"DirtyColumns.Add(\"{column.DbColumnName}\");");
-            }
-            if (inherits)
-            {
-                SetChildrenDirty(otherTables, inheritedDependency, sb);
-            }
-            
-            sb.AppendLine(Tab2, "}");
-
             CreateModelValidation(table, sb, inherits);
 
             sb.AppendLine(Tab2, $"public static string Schema = \"{table.Schema}\";");
@@ -445,31 +431,6 @@ namespace RepoLite.GeneratorEngine.Generators
             return sb;
         }
 
-        private void SetChildrenDirty(List<Table> otherTables, Column inheritedDependency, StringBuilder sb)
-        {
-            var inheritedTable =
-                otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
-            if (inheritedTable != null)
-            {
-                var inheritedTableInheritedDependency =
-                    inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
-                var inheritedTableAlsoInherits = inheritedTableInheritedDependency != null;
-
-                foreach (var inheritedColumn in inheritedTable.Columns)
-                {
-                    if (inheritedTableInheritedDependency != null &&
-                        inheritedColumn.DbColumnName == inheritedTableInheritedDependency.DbColumnName) continue;
-
-                    sb.AppendLine(Tab3, $"DirtyColumns.Add(\"{inheritedColumn.DbColumnName}\");");
-                }
-
-                if (inheritedTableAlsoInherits)
-                {
-                    BuildConstructorInheritedColumns(otherTables, inheritedTableInheritedDependency, sb);
-                }
-            }
-        }
-
         private static void BuildConstructorInheritedColumns(List<Table> otherTables, Column inheritedDependency, StringBuilder sb)
         {
             var inheritedTable =
@@ -477,7 +438,7 @@ namespace RepoLite.GeneratorEngine.Generators
             if (inheritedTable != null)
             {
                 var inheritedTableInheritedDependency =
-                    inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                    inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && x.ForeignKeyTargetTable != inheritedTable.DbTableName));
                 var inheritedTableAlsoInherits = inheritedTableInheritedDependency != null;
 
                 foreach (var inheritedColumn in inheritedTable.Columns)
@@ -1690,7 +1651,9 @@ namespace RepoLite.GeneratorEngine.Generators
             }
             else if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.PrimaryKey)
             {
-                sb.AppendLine(inherits ? Tab4 : Tab3, $"foreach (var item in items.GroupBy(x => x.{table.PrimaryKeys[0].PropertyName}).Select(x => x.Last()))");
+                sb.AppendLine(inherits ? Tab4 : Tab3,
+                    $"var updates = items.Where(x => x.{table.PrimaryKeys[0].PropertyName} != default).GroupBy(x => x.{table.PrimaryKeys[0].PropertyName}).Select(x => x.Last());");
+                sb.AppendLine(inherits ? Tab4 : Tab3, $"foreach (var item in items.Where(x => x.{table.PrimaryKeys[0].PropertyName} == default).Union(updates))");
             }
 
             sb.AppendLine(inherits ? Tab4 : Tab3, "{");
