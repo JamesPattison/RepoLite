@@ -641,8 +641,11 @@ namespace RepoLite.GeneratorEngine.Generators
             else if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.PrimaryKey)
             {
                 sb.AppendLine(Tab2, $"{table.ClassName} Get({pk.DataTypeString} {pk.FieldName});");
+                sb.AppendLine(Tab2, $"{table.ClassName} Get({pk.DataTypeString} {pk.FieldName}, bool skipCache);");
                 sb.AppendLine(Tab2,
                     $"IEnumerable<{table.ClassName}> Get(List<{pk.DataTypeString}> {pk.FieldName}s);");
+                sb.AppendLine(Tab2,
+                    $"IEnumerable<{table.ClassName}> Get(List<{pk.DataTypeString}> {pk.FieldName}s, bool skipCache);");
                 sb.AppendLine(Tab2,
                     $"IEnumerable<{table.ClassName}> Get(params {pk.DataTypeString}[] {pk.FieldName}s);");
 
@@ -733,8 +736,18 @@ namespace RepoLite.GeneratorEngine.Generators
 
                 sb.AppendLine(Tab2,
                     nonPrimaryKey.DataType != typeof(XmlDocument)
+                        ? $"IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}({nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName}, bool skipCache);"
+                        : $"IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(String {nonPrimaryKey.FieldName}, bool skipCache);");
+
+                sb.AppendLine(Tab2,
+                    nonPrimaryKey.DataType != typeof(XmlDocument)
                         ? $"IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, {nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName});"
                         : $"IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, String {nonPrimaryKey.FieldName});");
+
+                sb.AppendLine(Tab2,
+                    nonPrimaryKey.DataType != typeof(XmlDocument)
+                        ? $"IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, {nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName}, bool skipCache);"
+                        : $"IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, String {nonPrimaryKey.FieldName}, bool skipCache);");
             }
 
             if (inherits)
@@ -823,8 +836,18 @@ namespace RepoLite.GeneratorEngine.Generators
 
                     sb.AppendLine(Tab2,
                         inheritedColumn.DataType != typeof(XmlDocument)
+                            ? $"IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName}, bool skipCache);"
+                            : $"IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(String {inheritedColumn.FieldName}, bool skipCache);");
+
+                    sb.AppendLine(Tab2,
+                        inheritedColumn.DataType != typeof(XmlDocument)
                             ? $"IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, {inheritedColumn.DataTypeString} {inheritedColumn.FieldName});"
                             : $"IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, String {inheritedColumn.FieldName});");
+
+                    sb.AppendLine(Tab2,
+                        inheritedColumn.DataType != typeof(XmlDocument)
+                            ? $"IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, {inheritedColumn.DataTypeString} {inheritedColumn.FieldName}, bool skipCache);"
+                            : $"IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, String {inheritedColumn.FieldName}, bool skipCache);");
                 }
 
                 if (inheritedTableAlsoInherits)
@@ -934,9 +957,15 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine("");
                     sb.AppendLine(Tab2, $"public {table.ClassName} Get({pk.DataTypeString} {pk.FieldName})");
                     sb.AppendLine(Tab2, "{");
+                    sb.AppendLine(Tab3, $"return Get({pk.FieldName}, false);");
+                    sb.AppendLine(Tab2, "}");
+
+                    sb.AppendLine("");
+                    sb.AppendLine(Tab2, $"public {table.ClassName} Get({pk.DataTypeString} {pk.FieldName}, bool skipCache)");
+                    sb.AppendLine(Tab2, "{");
 
                     {
-                        sb.AppendLine(Tab3, $"if (CacheEnabled)");
+                        sb.AppendLine(Tab3, $"if (CacheEnabled && !skipCache)");
                         sb.AppendLine(Tab3, "{");
                         sb.AppendLine(Tab4, $"var fromCache = GetFromCache({pk.FieldName});");
                         sb.AppendLine(Tab4, $"if (fromCache != null)");
@@ -967,7 +996,7 @@ namespace RepoLite.GeneratorEngine.Generators
                         sb.AppendLine(Tab3, "var item = ExecuteSql(query).FirstOrDefault(); ");
 
 
-                        sb.AppendLine(Tab3, "if (CacheEnabled)");
+                        sb.AppendLine(Tab3, "if (CacheEnabled & !skipCache)");
                         sb.AppendLine(Tab3, "{");
                         sb.AppendLine(Tab4, "SaveToCache(item);");
                         sb.AppendLine(Tab3, "}");
@@ -980,10 +1009,16 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab2,
                         $"public IEnumerable<{table.ClassName}> Get(List<{pk.DataTypeString}> {pk.FieldName}s)");
                     sb.AppendLine(Tab2, "{");
+                    sb.AppendLine(Tab3, $"return Get({pk.FieldName}s, false);");
+                    sb.AppendLine(Tab2, "}");
+                    sb.AppendLine("");
+                    sb.AppendLine(Tab2,
+                        $"public IEnumerable<{table.ClassName}> Get(List<{pk.DataTypeString}> {pk.FieldName}s, bool skipCache)");
+                    sb.AppendLine(Tab2, "{");
                     {
                         sb.AppendLine(Tab3, $"var toReturn = new List<{table.ClassName}>();");
                         sb.AppendLine(Tab3, $"if (!{pk.FieldName}s.Any()) return toReturn;");
-                        sb.AppendLine(Tab3, "if (CacheEnabled)");
+                        sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
                         sb.AppendLine(Tab3, "{");
                         sb.AppendLine(Tab4, $"var cachedIds = new List<{pk.DataTypeString}>();");
                         sb.AppendLine(Tab4, $"foreach (var {pk.FieldName} in {pk.FieldName}s.Where(IsInCache))");
@@ -1019,7 +1054,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
 
                         sb.AppendLine(Tab3, "var items = ExecuteSql(query).ToArray();");
-                        sb.AppendLine(Tab3, "if (CacheEnabled)");
+                        sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
                         sb.AppendLine(Tab3, "{");
                         sb.AppendLine(Tab4, "foreach (var item in items)");
                         sb.AppendLine(Tab4, "{");
@@ -1045,6 +1080,17 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine("");
                     sb.AppendLine(Tab2, $"public {table.ClassName} Get({pk.DataTypeString} {pk.FieldName})");
                     sb.AppendLine(Tab2, "{");
+                    sb.AppendLine(Tab3, $"return Get({pk.FieldName}, false);");
+                    sb.AppendLine(Tab2, "}");
+                    sb.AppendLine("");
+                    sb.AppendLine(Tab2, $"public {table.ClassName} Get({pk.DataTypeString} {pk.FieldName}, bool skipCache)");
+                    sb.AppendLine(Tab2, "{");
+                    sb.AppendLine(Tab3, $"if (CacheEnabled && !skipCache)");
+                    sb.AppendLine(Tab3, "{");
+                    sb.AppendLine(Tab4, $"var fromCache = GetFromCache({pk.FieldName});");
+                    sb.AppendLine(Tab4, $"if (fromCache != null)");
+                    sb.AppendLine(Tab5, $"return fromCache;");
+                    sb.AppendLine(Tab3, "}");
                     sb.AppendLine(Tab3,
                         $"return Where({(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({table.ClassName}.{pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.Equals, {pk.FieldName}).Results().FirstOrDefault();");
                     sb.AppendLine(Tab2, "}");
@@ -1058,10 +1104,36 @@ namespace RepoLite.GeneratorEngine.Generators
 
                     sb.AppendLine("");
                     sb.AppendLine(Tab2,
+                        $"public IEnumerable<{table.ClassName}> Get(List<{pk.DataTypeString}> {pk.FieldName}s, bool skipCache)");
+                    sb.AppendLine(Tab2, "{");
+
+                    sb.AppendLine(Tab3, $"var toReturn = new List<{table.ClassName}>();");
+                    sb.AppendLine(Tab3, $"if (!{pk.FieldName}s.Any()) return toReturn;");
+                    sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
+                    sb.AppendLine(Tab3, "{");
+                    sb.AppendLine(Tab4, $"var cachedIds = new List<{pk.DataTypeString}>();");
+                    sb.AppendLine(Tab4, $"foreach (var {pk.FieldName} in {pk.FieldName}s.Where(IsInCache))");
+                    sb.AppendLine(Tab4, "{");
+                    sb.AppendLine(Tab5, $"cachedIds.Add({pk.FieldName});");
+                    sb.AppendLine(Tab5, $"toReturn.Add(GetFromCache({pk.FieldName}));");
+                    sb.AppendLine(Tab4, "}");
+                    sb.AppendLine(Tab4, $"{pk.FieldName}s = {pk.FieldName}s.Except(cachedIds).ToList();");
+                    sb.AppendLine(Tab4, $"if (!{pk.FieldName}s.Any()) return toReturn;");
+                    sb.AppendLine(Tab3, "}");
+
+
+                    sb.AppendLine(Tab3, $"toReturn.AddRange(Where({(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({ table.ClassName}.{ pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.In, { pk.FieldName}s).Results()); ");
+
+                    sb.AppendLine(Tab3, $"return toReturn;");
+
+                    sb.AppendLine(Tab2, "}");
+
+                    sb.AppendLine("");
+                    sb.AppendLine(Tab2,
                         $"public IEnumerable<{table.ClassName}> Get(params {pk.DataTypeString}[] {pk.FieldName}s)");
                     sb.AppendLine(Tab2, "{");
-                    sb.AppendLine(Tab3,
-                        $"return Where({(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({table.ClassName}.{pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.In, {pk.FieldName}s).Results();");
+
+                    sb.AppendLine(Tab3, $"return Get({pk.FieldName}s.ToList(), false);");
                     sb.AppendLine(Tab2, "}");
                     sb.AppendLine("");
                 }
@@ -1971,9 +2043,13 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab2, "{");
                     sb.AppendLine(Tab3,
                         $"var items = FindBy{primaryKey.PropertyName}(FindComparison.Equals, {primaryKey.FieldName});");
-                    sb.AppendLine(Tab3, $"foreach (var item in items)");
+
+                    sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
                     sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, $"SaveToCache(item);");
+                    sb.AppendLine(Tab4, $"foreach (var item in items)");
+                    sb.AppendLine(Tab4, "{");
+                    sb.AppendLine(Tab5, $"SaveToCache(item);");
+                    sb.AppendLine(Tab4, "}");
                     sb.AppendLine(Tab3, "}");
                     sb.AppendLine(Tab3, $"return items;");
                     sb.AppendLine(Tab2, "}");
@@ -1999,22 +2075,51 @@ namespace RepoLite.GeneratorEngine.Generators
                         : $"public IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(String {nonPrimaryKey.FieldName})");
                 sb.AppendLine(Tab2, "{");
                 sb.AppendLine(Tab3,
-                    $"return FindBy{nonPrimaryKey.PropertyName}(FindComparison.Equals, {nonPrimaryKey.FieldName});");
+                    $"return FindBy{nonPrimaryKey.PropertyName}(FindComparison.Equals, {nonPrimaryKey.FieldName}, false);");
+                sb.AppendLine(Tab2, "}");
+                sb.AppendLine("");
+                sb.AppendLine(Tab2,
+                    nonPrimaryKey.DataType != typeof(XmlDocument)
+                        ? $"public IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}({nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName}, bool skipCache)"
+                        : $"public IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(String {nonPrimaryKey.FieldName}, bool skipCache)");
+                sb.AppendLine(Tab2, "{");
+                sb.AppendLine(Tab3,
+                    $"return FindBy{nonPrimaryKey.PropertyName}(FindComparison.Equals, {nonPrimaryKey.FieldName}, skipCache);");
                 sb.AppendLine(Tab2, "}");
 
                 sb.AppendLine("");
+
+
                 sb.AppendLine(Tab2,
                     nonPrimaryKey.DataType != typeof(XmlDocument)
                         ? $"public IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, {nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName})"
                         : $"public IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, String {nonPrimaryKey.FieldName})");
                 sb.AppendLine(Tab2, "{");
+                sb.AppendLine(Tab3,
+                    $"return FindBy{nonPrimaryKey.PropertyName}(comparison, {nonPrimaryKey.FieldName}, false);");
+
+                sb.AppendLine(Tab2, "}");
+
+
+
+
+
+                sb.AppendLine(Tab2,
+                    nonPrimaryKey.DataType != typeof(XmlDocument)
+                        ? $"public IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, {nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName}, bool skipCache)"
+                        : $"public IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, String {nonPrimaryKey.FieldName}, bool skipCache)");
+                sb.AppendLine(Tab2, "{");
                 if (nonPrimaryKey.DataType != typeof(XmlDocument))
                 {
                     sb.AppendLine(Tab3,
                         $"var items = Where({(nonPrimaryKey.DbColumnName == nameof(nonPrimaryKey.DbColumnName) ? $"nameof({table.ClassName}.{nonPrimaryKey.DbColumnName})" : $"\"{nonPrimaryKey.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {nonPrimaryKey.FieldName}).Results();");
-                    sb.AppendLine(Tab3, $"foreach (var item in items)");
+
+                    sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
                     sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, $"SaveToCache(item);");
+                    sb.AppendLine(Tab4, $"foreach (var item in items)");
+                    sb.AppendLine(Tab4, "{");
+                    sb.AppendLine(Tab5, $"SaveToCache(item);");
+                    sb.AppendLine(Tab4, "}");
                     sb.AppendLine(Tab3, "}");
                     sb.AppendLine(Tab3, $"return items;");
                 }
@@ -2058,6 +2163,15 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab3,
                         $"return FindBy{inheritedColumn.PropertyName}(FindComparison.Equals, {inheritedColumn.FieldName});");
                     sb.AppendLine(Tab2, "}");
+                    sb.AppendLine("");
+                    sb.AppendLine(Tab2,
+                        inheritedColumn.DataType != typeof(XmlDocument)
+                            ? $"public IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName}, bool skipCache)"
+                            : $"public IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(String {inheritedColumn.FieldName}, bool skipCache)");
+                    sb.AppendLine(Tab2, "{");
+                    sb.AppendLine(Tab3,
+                        $"return FindBy{inheritedColumn.PropertyName}(FindComparison.Equals, {inheritedColumn.FieldName}, skipCache);");
+                    sb.AppendLine(Tab2, "}");
 
                     sb.AppendLine("");
                     sb.AppendLine(Tab2,
@@ -2065,13 +2179,28 @@ namespace RepoLite.GeneratorEngine.Generators
                             ? $"public IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, {inheritedColumn.DataTypeString} {inheritedColumn.FieldName})"
                             : $"public IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, String {inheritedColumn.FieldName})");
                     sb.AppendLine(Tab2, "{");
+                    sb.AppendLine(Tab3,
+                        $"return FindBy{inheritedColumn.PropertyName}(comparison, {inheritedColumn.FieldName}, false);");
+
+                    sb.AppendLine(Tab2, "}");
+
+                    sb.AppendLine("");
+                    sb.AppendLine(Tab2,
+                        inheritedColumn.DataType != typeof(XmlDocument)
+                            ? $"public IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, {inheritedColumn.DataTypeString} {inheritedColumn.FieldName}, bool skipCache)"
+                            : $"public IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, String {inheritedColumn.FieldName}, bool skipCache)");
+                    sb.AppendLine(Tab2, "{");
                     if (inheritedColumn.DataType != typeof(XmlDocument))
                     {
                         sb.AppendLine(Tab3,
                             $"var items = Where({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({className}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {inheritedColumn.FieldName}).Results();");
-                        sb.AppendLine(Tab3, $"foreach (var item in items)");
+
+                        sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
                         sb.AppendLine(Tab3, "{");
-                        sb.AppendLine(Tab4, $"SaveToCache(item);");
+                        sb.AppendLine(Tab4, $"foreach (var item in items)");
+                        sb.AppendLine(Tab4, "{");
+                        sb.AppendLine(Tab5, $"SaveToCache(item);");
+                        sb.AppendLine(Tab4, "}");
                         sb.AppendLine(Tab3, "}");
                         sb.AppendLine(Tab3, $"return items;");
                     }
