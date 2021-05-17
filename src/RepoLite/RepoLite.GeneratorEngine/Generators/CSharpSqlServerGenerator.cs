@@ -94,7 +94,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             //Repo
             var inheritedDependency =
-                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
             var inherits = inheritedDependency != null;
 
             sb.AppendLine(Tab1, $"public {(AppSettings.Generation.GenerateSealedObjects ? "sealed " : "")}partial class {table.RepositoryName} : BaseRepository<{table.ClassName}>, I{table.RepositoryName}");
@@ -248,7 +248,7 @@ namespace RepoLite.GeneratorEngine.Generators
             yield return table;
 
             var inheritedDependency =
-                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
             if (inheritedDependency == null) yield break;
 
             var inheritedTable =
@@ -275,7 +275,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("{");
 
             var inheritedDependency =
-                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
             var inherits = inheritedDependency != null;
             if (inheritedDependency != null)
             {
@@ -611,7 +611,7 @@ namespace RepoLite.GeneratorEngine.Generators
             var sb = new StringBuilder();
 
             var inheritedDependency =
-                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
             var inherits = inheritedDependency != null;
 
             sb.AppendLine(Tab1,
@@ -979,7 +979,7 @@ namespace RepoLite.GeneratorEngine.Generators
                         var originalAlias = table.DbTableName.ToLower()[0];
                         var previousAlias = table.DbTableName.ToLower()[0];
                         var inheritedDependency =
-                            inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                            inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
                         do
                         {
                             sb.AppendLine(Tab7, $"LEFT JOIN [{inheritedDependency.ForeignKeyTargetTable}] {inheritedDependency.ForeignKeyTargetTable.ToLower()[0]}");
@@ -988,7 +988,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
                             previousAlias = inheritedDependency.ForeignKeyTargetTable.ToLower()[0];
                             inheritedTable = otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
-                            inheritedDependency = inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                            inheritedDependency = inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
                         } while (inheritedDependency != null);
 
                         sb.AppendLine(Tab7, " WHERE");
@@ -1036,7 +1036,7 @@ namespace RepoLite.GeneratorEngine.Generators
                         var originalAlias = table.DbTableName.ToLower()[0];
                         var previousAlias = table.DbTableName.ToLower()[0];
                         var inheritedDependency =
-                            inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                            inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
                         do
                         {
                             sb.AppendLine(Tab7, $"LEFT JOIN [{inheritedDependency.ForeignKeyTargetTable}] {inheritedDependency.ForeignKeyTargetTable.ToLower()[0]}");
@@ -1045,7 +1045,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
                             previousAlias = inheritedDependency.ForeignKeyTargetTable.ToLower()[0];
                             inheritedTable = otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
-                            inheritedDependency = inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                            inheritedDependency = inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
                         } while (inheritedDependency != null);
 
                         sb.AppendLine(Tab7, " WHERE");
@@ -1171,7 +1171,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 var originalAlias = table.DbTableName.ToLower()[0];
                 var previousAlias = table.DbTableName.ToLower()[0];
                 var inheritedDependency =
-                    inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                    inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
                 do
                 {
                     sb.AppendLine(Tab7, $"LEFT JOIN [{inheritedDependency.ForeignKeyTargetTable}] {inheritedDependency.ForeignKeyTargetTable.ToLower()[0]}");
@@ -1180,7 +1180,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
                     previousAlias = inheritedDependency.ForeignKeyTargetTable.ToLower()[0];
                     inheritedTable = otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
-                    inheritedDependency = inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                    inheritedDependency = inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
                 } while (inheritedDependency != null);
 
                 sb.AppendLine(Tab7, "\";");
@@ -1194,7 +1194,7 @@ namespace RepoLite.GeneratorEngine.Generators
         private StringBuilder Repo_Create(Table table, List<Table> otherTables, bool inherits)
         {
             var inheritedDependency =
-                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
 
             var sb = new StringBuilder();
 
@@ -1306,7 +1306,7 @@ namespace RepoLite.GeneratorEngine.Generators
         private StringBuilder Repo_Update(Table table, List<Table> otherTables, bool inherits)
         {
             var inheritedDependency =
-                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
 
             var sb = new StringBuilder();
 
@@ -1361,7 +1361,7 @@ namespace RepoLite.GeneratorEngine.Generators
         private StringBuilder Repo_Delete(Table table, List<Table> otherTables, bool inherits)
         {
             var inheritedDependency =
-                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
 
             var sb = new StringBuilder();
 
@@ -1611,7 +1611,7 @@ namespace RepoLite.GeneratorEngine.Generators
         private string Repo_DeleteBy(Table table, List<Table> otherTables, bool inherits)
         {
             var inheritedDependency =
-                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
             var sb = new StringBuilder();
 
             var pk = table.PrimaryKeys.First();
@@ -2028,7 +2028,7 @@ namespace RepoLite.GeneratorEngine.Generators
         private StringBuilder Repo_Find(Table table, List<Table> otherTables, bool inherited)
         {
             var inheritedDependency =
-                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
             var sb = new StringBuilder();
 
             if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
