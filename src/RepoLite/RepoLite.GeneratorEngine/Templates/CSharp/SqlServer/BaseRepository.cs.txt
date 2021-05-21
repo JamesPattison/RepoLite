@@ -1885,7 +1885,7 @@ namespace REPOSITORYNAMESPACE.Base
 
             return Execute($"{columnPart} WHERE {filterPart}");
         }
-        private DataTable Execute(string query)
+        protected DataTable Execute(string query)
         {
             if (HasInjection(query))
                 throw new Exception("Sql Injection attempted. Aborted");
@@ -2132,10 +2132,24 @@ namespace REPOSITORYNAMESPACE.Base
             //Creation
             using (var cn = new SqlConnection(ConnectionString))
             {
+
                 var sb = new StringBuilder();
+                sb.Append(@"DECLARE @MyTableVar TABLE (");
+
+                foreach (var mergeColumn in Columns)
+                {
+                    sb.Append($"[{mergeColumn.ColumnName}] {mergeColumn.SqlDataTypeText} NULL");
+
+                    sb.AppendLine(mergeColumn != Columns[Columns.Count - 1] ? "," : ")");
+                }
+
+                sb.AppendLine(");");
+
+
                 sb.Append($"DELETE [{Schema}].[{TableName}] ");
-                sb.Append("OUTPUT DELETED.* ");
-                sb.Append($"WHERE [{ deleteColumn.ColumnName}] = @{deleteColumn.ColumnName}");
+                sb.Append("OUTPUT DELETED.* INTO @MyTableVar ");
+                sb.Append($"WHERE [{ deleteColumn.ColumnName}] = @{deleteColumn.ColumnName};");
+                sb.Append($"SELECT * FROM @MyTableVar");
 
                 var sql = sb.ToString();
                 if (HasInjection(sql))

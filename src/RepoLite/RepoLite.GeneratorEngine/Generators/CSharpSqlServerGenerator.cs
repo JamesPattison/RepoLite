@@ -4,6 +4,7 @@ using RepoLite.Common.Extensions;
 using RepoLite.Common.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Xml;
@@ -130,6 +131,8 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab3, "InitializeExtension();");
             sb.AppendLine(Tab2, "}");
 
+            sb.Append(Repo_ExecuteSql(table));
+
             sb.Append(Repo_Get(table, otherTables, inherits));
 
             //create
@@ -170,6 +173,19 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab1, "}");
             sb.AppendLine("}");
             return sb;
+        }
+
+        private string Repo_ExecuteSql(Table table)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine("");
+            sb.AppendLine(Tab2, $"public IEnumerable<{table.ClassName}> ExecuteSql(string sql)");
+            sb.AppendLine(Tab2, "{");
+            sb.AppendLine(Tab3, "return ToItems(Execute(sql), false);");
+            sb.AppendLine(Tab2, "}");
+
+            return sb.ToString();
         }
 
         private string Repo_Caching(Table table)
@@ -414,6 +430,11 @@ namespace RepoLite.GeneratorEngine.Generators
                 var colLengthVal = sqlPrecisionColumns.Contains(column.SqlDataTypeCode)
                     ? $"({Math.Max(column.MaxLength, column.MaxIntLength)})"
                     : string.Empty;
+
+                if (column.DbType == SqlDbType.NVarChar && column.MaxLength == -1)
+                {
+                    colLengthVal = "(MAX)";
+                }
                 sb.AppendLine(Tab3,
                     $"new ColumnDefinition({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}, " +
                     $"typeof({column.DataTypeString}), " +
@@ -626,6 +647,8 @@ namespace RepoLite.GeneratorEngine.Generators
             var pkParamList = table.PrimaryKeys.Aggregate("",
                     (current, column) => current + $"{column.DataTypeString} {column.FieldName}, ")
                 .TrimEnd(' ', ',');
+
+            sb.AppendLine(Tab2, $"IEnumerable<{table.ClassName}> ExecuteSql(string sql);");
 
             //get
             if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
