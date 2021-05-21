@@ -2143,9 +2143,6 @@ namespace REPOSITORYNAMESPACE.Base
                     sb.AppendLine(mergeColumn != Columns[Columns.Count - 1] ? "," : ")");
                 }
 
-                sb.AppendLine(");");
-
-
                 sb.Append($"DELETE [{Schema}].[{TableName}] ");
                 sb.Append("OUTPUT DELETED.* INTO @MyTableVar ");
                 sb.Append($"WHERE [{ deleteColumn.ColumnName}] = @{deleteColumn.ColumnName};");
