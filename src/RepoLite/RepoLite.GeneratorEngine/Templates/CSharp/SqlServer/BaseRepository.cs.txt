@@ -2076,7 +2076,11 @@ namespace REPOSITORYNAMESPACE.Base
             sb.AppendLine($"UPDATE [{Schema}].[{TableName}] SET");
 
             var nonpkCols = Columns.Where(x => !x.PrimaryKey).ToArray();
-            foreach (var col in nonpkCols.Where(x => dirtyColumns.Contains(x.ColumnName)))
+            
+            ar updateCols = nonpkCols.Where(x => dirtyColumns.Contains(x.ColumnName)).ToList();
+            //No columns tro update on this model, must be updating a derived class
+            if (!updateCols.Any()) return true;
+            foreach (var col in updateCols)
             {
                 sb.Append($"[{col.ColumnName}] = @{col.ColumnName}");
                 sb.AppendLine(col != nonpkCols.Last(x => dirtyColumns.Contains(x.ColumnName)) ? "," : "");
