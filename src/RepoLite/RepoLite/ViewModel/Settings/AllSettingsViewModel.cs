@@ -8,18 +8,18 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Microsoft.Extensions.Options;
+using RepoLite.Common.Options;
 
 namespace RepoLite.ViewModel.Settings
 {
     public class AllSettingsViewModel : ViewModelBase
     {
-        public Common.Properties.Generation GenerationSettings { get; set; }
-        public Common.Properties.System SystemSettings { get; set; }
+        private SystemOptions _systemSettings;
 
         public AllSettingsViewModel()
         {
-            GenerationSettings = AppSettings.Generation;
-            SystemSettings = AppSettings.System;
+            _systemSettings = IOC.Resolve<IOptions<SystemOptions>>().Value;
         }
 
         private bool _connectionTestEnabled = true;
@@ -49,7 +49,7 @@ namespace RepoLite.ViewModel.Settings
                     ConnectionTestResult = "Working";
                     ConnectionTestEnabled = false;
 
-                    switch (SystemSettings.DataSource)
+                    switch (_systemSettings.DataSource)
                     {
                         case DataSourceEnum.SQLServer:
                             DoWork(async () => ConnectionTestResult = await TestSQLServerConnection());
@@ -69,7 +69,7 @@ namespace RepoLite.ViewModel.Settings
                 // ReSharper disable once ObjectCreationAsStatement
                 new DbConnectionStringBuilder
                 {
-                    ConnectionString = SystemSettings.ConnectionString
+                    ConnectionString = _systemSettings.ConnectionString
                 };
             }
             catch
@@ -80,7 +80,7 @@ namespace RepoLite.ViewModel.Settings
 
             try
             {
-                new SqlConnection(SystemSettings.ConnectionString).Open();
+                new SqlConnection(_systemSettings.ConnectionString).Open();
             }
             catch
             {
@@ -106,8 +106,8 @@ namespace RepoLite.ViewModel.Settings
             {
                 return new RelayCommand(o =>
                 {
-                    GenerationSettings.Save();
-                    SystemSettings.Save();
+                    // GenerationSettings.Save();
+                    // SystemSettings.Save();
                     var wnd = o as Global;
                     NavigationCommands.BrowseBack.Execute(null, wnd);
                 });

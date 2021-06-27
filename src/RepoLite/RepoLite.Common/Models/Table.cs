@@ -3,11 +3,18 @@ using RepoLite.Common.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RepoLite.Common.Options;
 
 namespace RepoLite.Common.Models
 {
     public class Table
     {
+        private readonly GenerationOptions _generationOptions;
+
+        public Table(GenerationOptions generationOptions)
+        {
+            _generationOptions = generationOptions;
+        }
         public List<Column> Columns { get; set; } = new List<Column>();
 
         public string Schema { get; set; }
@@ -17,9 +24,9 @@ namespace RepoLite.Common.Models
 
         public string LowerClassName => ClassName.ToLower();
 
-        public string ClassName => DbTableName.ToModelName();
+        public string ClassName => DbTableName.ToModelName(_generationOptions.ModelClassNameFormat);
 
-        public string RepositoryName => DbTableName.ToRepositoryName();
+        public string RepositoryName => DbTableName.ToRepositoryName(_generationOptions.RepositoryClassNameFormat);
 
         public Column GetColumn(string columnName)
         {

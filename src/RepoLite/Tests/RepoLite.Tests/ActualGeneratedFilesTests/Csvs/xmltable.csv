@@ -1,6 +1,0 @@
-﻿name,data
-XML1,<xml>1 - From CSV!</xml>
-XML2,<xml>2 - From CSV!</xml>
-XML3,<xml>3 - From CSV!</xml>
-XML4,<xml><nest>4 - From CSV!</nest></xml>
-XML5,<xml><nest><nest>5 - From CSV!</nest></nest></xml>

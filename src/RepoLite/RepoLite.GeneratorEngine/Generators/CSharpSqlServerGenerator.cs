@@ -8,18 +8,24 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using Microsoft.Extensions.Options;
+using RepoLite.Common.Options;
 using static RepoLite.Common.Helpers;
 
 namespace RepoLite.GeneratorEngine.Generators
 {
     public class CSharpSqlServerGenerator : CodeGenerator
     {
+        private GenerationOptions _generationSettings;
         private const int VARIABLE_BLOCK_SCOPE = 5;
 
         //private Func<string, string, string, string> GetColName = (s, table, name) => $"{(s == name ? $"nameof({table}.{name})" : $"\"{name}\"")}";
 
-        public CSharpSqlServerGenerator()
+        public CSharpSqlServerGenerator(
+            IOptions<GenerationOptions> generationOptions)
         {
+
+            _generationSettings = generationOptions.Value;
         }
 
         public override StringBuilder ModelForTable(Table table, List<Table> otherTables)
@@ -30,7 +36,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine("using System.Data;");
             sb.AppendLine("using System.Xml;");
-            sb.AppendLine($"using {AppSettings.Generation.ModelGenerationNamespace}.Base;");
+            sb.AppendLine($"using {_generationSettings.ModelGenerationNamespace}.Base;");
 
             sb.Append(Environment.NewLine);
             sb.AppendLine(CreateModel(table, otherTables).ToString());
@@ -41,9 +47,9 @@ namespace RepoLite.GeneratorEngine.Generators
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"using {AppSettings.Generation.RepositoryGenerationNamespace}.Base;");
-            sb.AppendLine($"using {AppSettings.Generation.ModelGenerationNamespace};");
-            sb.AppendLine($"using {AppSettings.Generation.ModelGenerationNamespace}.Base;");
+            sb.AppendLine($"using {_generationSettings.RepositoryGenerationNamespace}.Base;");
+            sb.AppendLine($"using {_generationSettings.ModelGenerationNamespace};");
+            sb.AppendLine($"using {_generationSettings.ModelGenerationNamespace}.Base;");
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine("using System.Data;");
@@ -53,7 +59,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("using System.Xml;");
             sb.Append(Environment.NewLine);
 
-            sb.AppendLine($"namespace {AppSettings.Generation.RepositoryGenerationNamespace}");
+            sb.AppendLine($"namespace {_generationSettings.RepositoryGenerationNamespace}");
             sb.AppendLine("{");
 
             if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
@@ -98,13 +104,13 @@ namespace RepoLite.GeneratorEngine.Generators
                 table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
             var inherits = inheritedDependency != null;
 
-            sb.AppendLine(Tab1, $"public {(AppSettings.Generation.GenerateSealedObjects ? "sealed " : "")}partial class {table.RepositoryName} : BaseRepository<{table.ClassName}>, I{table.RepositoryName}");
+            sb.AppendLine(Tab1, $"public {(_generationSettings.GenerateSealedObjects ? "sealed " : "")}partial class {table.RepositoryName} : BaseRepository<{table.ClassName}>, I{table.RepositoryName}");
 
             sb.AppendLine(Tab1, "{");
 
             if (inherits)
             {
-                sb.AppendLine(Tab2, $"private I{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName()} _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()};\n");
+                sb.AppendLine(Tab2, $"private I{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat)} _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst()};\n");
             }
 
 
@@ -125,7 +131,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab2, "{");
             if (inherits)
             {
-                sb.AppendLine(Tab3, $"_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()} = new {inheritedDependency.ForeignKeyTargetTable.ToRepositoryName()}(connectionString, logMethod);");
+                sb.AppendLine(Tab3, $"_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst()} = new {inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat)}(connectionString, logMethod);");
             }
 
             sb.AppendLine(Tab3, "InitializeExtension();");
@@ -287,7 +293,7 @@ namespace RepoLite.GeneratorEngine.Generators
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"namespace {AppSettings.Generation.ModelGenerationNamespace}");
+            sb.AppendLine($"namespace {_generationSettings.ModelGenerationNamespace}");
             sb.AppendLine("{");
 
             var inheritedDependency =
@@ -296,11 +302,11 @@ namespace RepoLite.GeneratorEngine.Generators
             if (inheritedDependency != null)
             {
                 //This table inherits from another table, inherit that table instead
-                sb.AppendLine(Tab1, $"public {(AppSettings.Generation.GenerateSealedObjects ? "sealed " : "")}partial class {table.ClassName} : {inheritedDependency.ForeignKeyTargetTable.ToModelName()}");
+                sb.AppendLine(Tab1, $"public {(_generationSettings.GenerateSealedObjects ? "sealed " : "")}partial class {table.ClassName} : {inheritedDependency.ForeignKeyTargetTable.ToModelName(_generationSettings.ModelClassNameFormat)}");
             }
             else
             {
-                sb.AppendLine(Tab1, $"public {(AppSettings.Generation.GenerateSealedObjects ? "sealed " : "")}partial class {table.ClassName} : BaseModel");
+                sb.AppendLine(Tab1, $"public {(_generationSettings.GenerateSealedObjects ? "sealed " : "")}partial class {table.ClassName} : BaseModel");
             }
 
             sb.AppendLine(Tab1, "{");
@@ -342,7 +348,7 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab2, "/// Nothing is done with this, it's merely there to hold data IF you wish to populate it");
                     sb.AppendLine(Tab2, "/// </summary>");
                     sb.AppendLine(Tab2,
-                        $"public {column.ForeignKeyTargetTable.ToModelName()} {column.DbColumnName.TrimEnd('d', 'I')} {{ get; set; }}");
+                        $"public {column.ForeignKeyTargetTable.ToModelName(_generationSettings.ModelClassNameFormat)} {column.DbColumnName.TrimEnd('d', 'I')} {{ get; set; }}");
                 }
             }
 
@@ -1234,7 +1240,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             if (inherits)
             {
-                sb.AppendLine(Tab3, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Create(item))");
+                sb.AppendLine(Tab3, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst()}.Create(item))");
                 sb.AppendLine(Tab3, "{");
             }
 
@@ -1279,7 +1285,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine("");
             if (inherits)
             {
-                sb.AppendLine(Tab3, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.BulkCreate(items))");
+                sb.AppendLine(Tab3, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst()}.BulkCreate(items))");
                 sb.AppendLine(Tab3, "{");
             }
             sb.AppendLine(inherits ? Tab4 : Tab3, "var dt = new DataTable();");
@@ -1353,7 +1359,7 @@ namespace RepoLite.GeneratorEngine.Generators
             if (inherits)
             {
                 sb.AppendLine(Tab3,
-                    $"var success = _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Update(item, false);");
+                    $"var success = _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst()}.Update(item, false);");
                 sb.AppendLine(Tab3, "success &= BaseUpdate(item.DirtyColumns, ");
             }
             else
@@ -1401,7 +1407,7 @@ namespace RepoLite.GeneratorEngine.Generators
             {
                 sb.AppendLine(Tab3, "if (BaseDelete(deleteColumn, out var items))");
                 sb.AppendLine(Tab3, "{");
-                sb.AppendLine(Tab4, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Delete({table.LowerClassName}))");
+                sb.AppendLine(Tab4, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst()}.Delete({table.LowerClassName}))");
                 sb.AppendLine(Tab4, "{");
 
                 sb.AppendLine(Tab5, "if (CacheEnabled)");
@@ -1436,7 +1442,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 {
                     sb.AppendLine(Tab3, $"if (BaseDelete(\"{table.PrimaryKeys[0].DbColumnName}\", deleteValues))");
                     sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Delete(items))");
+                    sb.AppendLine(Tab4, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst()}.Delete(items))");
 
 
                     sb.AppendLine(Tab4, "{");
@@ -1567,7 +1573,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
                     sb.AppendLine(Tab3, $"if (Delete(new {table.ClassName} {{ {pk.PropertyName} = {pk.FieldName} }}))");
                     sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Delete({pk.FieldName}))");
+                    sb.AppendLine(Tab4, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst()}.Delete({pk.FieldName}))");
                     sb.AppendLine(Tab4, "{");
 
 
@@ -1603,7 +1609,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
                     sb.AppendLine(Tab3, $"if (BaseDelete(\"{table.PrimaryKeys[0].DbColumnName}\", deleteValues))");
                     sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Delete({pk.FieldName}s))");
+                    sb.AppendLine(Tab4, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst()}.Delete({pk.FieldName}s))");
 
                     sb.AppendLine(Tab4, "{");
                     sb.AppendLine(Tab5, $"if (CacheEnabled)");
@@ -1666,7 +1672,7 @@ namespace RepoLite.GeneratorEngine.Generators
             if (inherits)
             {
                 //DeleteBy for base Tables
-                AppendDeleteByImplementationForInherited(inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst(), otherTables, inheritedDependency, sb);
+                AppendDeleteByImplementationForInherited(inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst(), otherTables, inheritedDependency, sb);
             }
 
             return sb.ToString();
@@ -1730,7 +1736,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 var inheritedTable =
                     otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
                 sb.AppendLine(Tab3,
-                    $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.Merge(items.Cast<{inheritedTable.ClassName}>().ToList()))");
+                    $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst()}.Merge(items.Cast<{inheritedTable.ClassName}>().ToList()))");
 
                 sb.AppendLine(Tab3, "{");
             }
@@ -1858,7 +1864,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             if (inherits)
             {
-                sb.AppendLine(Tab3, $"var item = skipBase ? new {table.ClassName}() : _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.ToItem<{table.ClassName}>(row, false);");
+                sb.AppendLine(Tab3, $"var item = skipBase ? new {table.ClassName}() : _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst()}.ToItem<{table.ClassName}>(row, false);");
 
                 foreach (var column in table.Columns)
                 {
@@ -1892,7 +1898,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             if (inherits)
             {
-                sb.AppendLine(Tab3, $"var item = skipBase ? new {table.ClassName}() : _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst()}.ToItem<TK>(row, false);");
+                sb.AppendLine(Tab3, $"var item = skipBase ? new {table.ClassName}() : _{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst()}.ToItem<TK>(row, false);");
 
                 foreach (var column in table.Columns)
                 {
@@ -2157,7 +2163,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             if (inherited)
             {
-                AppendFindByImplementationForInherited(inheritedDependency.ForeignKeyTargetTable.ToRepositoryName().LowerFirst(), table.ClassName, otherTables, inheritedDependency, sb);
+                AppendFindByImplementationForInherited(inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst(), table.ClassName, otherTables, inheritedDependency, sb);
             }
 
             return sb;

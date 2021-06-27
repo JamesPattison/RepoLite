@@ -17,12 +17,19 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
+using Microsoft.Extensions.Options;
+using RepoLite.Common.Options;
 
 namespace RepoLite.ViewModel.Main
 {
     public class CreateRepositoriesViewModel : ViewModelBase
     {
         private bool _loaded;
+        private GenerationOptions _generationSettings;
+        private SystemOptions _systemSettings;
+        private IParser _parser;
+        private IDataSource _dataSource;
+        private IGenerator _generator;
         public ObservableCollection<string> Messages { get; set; } = new ObservableCollection<string>();
 
         public ObservableCollection<TableToGenerate> Tables { get; set; } = new ObservableCollection<TableToGenerate>();
@@ -40,8 +47,7 @@ namespace RepoLite.ViewModel.Main
                 return new RelayCommand(o =>
                 {
                     Tables.Clear();
-                    var dataSource = DataSource.GetDataSource();
-                    var tableDefinitions = dataSource.GetTables();
+                    var tableDefinitions = _dataSource.GetTables();
                     foreach (var table in tableDefinitions.OrderBy(x => x.Schema).ThenBy(x => x.Table).ToList())
                     {
                         Tables.Add(new TableToGenerate { Schema = table.Schema, Table = table.Table });
@@ -75,39 +81,36 @@ namespace RepoLite.ViewModel.Main
                 {
                     var tables = Tables.Where(x => x.Selected);
 
-                    var dataSource = DataSource.GetDataSource();
-                    var tableDefinitions = dataSource.LoadTables(tables.Select(x => new TableAndSchema(x.Schema, x.Table)).ToList());
-
-                    var generator = CodeGenerator.GetGenerator();
-                    //var outputDirectory = AppSettings.Generation.OutputDirectory.TrimEnd('/').TrimEnd('\\');
-
-                    //if (!Directory.Exists(outputDirectory))
-                    //    Directory.CreateDirectory(outputDirectory);
+                    var tableDefinitions = _dataSource.LoadTables(tables.Select(x => new TableAndSchema(x.Schema, x.Table)).ToList());
 
                     DoWork(() =>
                     {
                         var createModelViewModel = new CreateModelsViewModel();
-                        CreateBaseRepository(generator);
+                        CreateBaseRepository(_generator);
                         if (true)
                         {
-                            createModelViewModel.CreateBaseModel(generator);
+                            createModelViewModel.CreateBaseModel(_generator);
                         }
 
                         tableDefinitions.ForEach(x =>
                         {
                             if (true)
                             {
-                                var model = generator.ModelForTable(x, tableDefinitions).ToString();
+                                var model = _generator.ModelForTable(x, tableDefinitions).ToString();
 
-                                createModelViewModel.CreateModel(x, generator, model);
+                                createModelViewModel.CreateModel(x, _generator, model);
                             }
 
                             LogMessage($"Processing Table {x.Schema}.{x.ClassName}");
-                            var repository = generator.RepositoryForTable(x, tableDefinitions).ToString();
+                            var repository = _generator.RepositoryForTable(x, tableDefinitions).ToString();
 
-                            CreateRepo(x, generator, repository);
+                            CreateRepo(x, _generator, repository);
                         });
-                    }, () => Process.Start(AppSettings.Generation.OutputDirectory));
+                    }, () =>
+                    {
+                        
+                        Process.Start("explorer.exe", _generationSettings.OutputDirectory);
+                    });
                 });
             }
         }
@@ -177,9 +180,18 @@ namespace RepoLite.ViewModel.Main
             }
         }
 
+        public CreateRepositoriesViewModel()
+        {
+            _generationSettings = IOC.Resolve<IOptions<GenerationOptions>>().Value;
+            _systemSettings = IOC.Resolve<IOptions<SystemOptions>>().Value;
+            _parser = IOC.Resolve<ParserResolver>().Invoke(_systemSettings.DataSource, _systemSettings.GenerationLanguage);
+            _dataSource = IOC.Resolve<DataSourceResolver>().Invoke(_systemSettings.DataSource);
+            _generator = IOC.Resolve<GeneratorResolver>().Invoke(_systemSettings.DataSource, _systemSettings.GenerationLanguage);
+        }
+        
         internal void CreateRepo(Table table, IGenerator generator, string repositoryName)
         {
-            var outputDirectory = $"{AppSettings.Generation.OutputDirectory}/Repositories";
+            var outputDirectory = $"{_generationSettings.OutputDirectory}/Repositories";
 
             if (!Directory.Exists(outputDirectory))
                 Directory.CreateDirectory(outputDirectory);
@@ -188,7 +200,7 @@ namespace RepoLite.ViewModel.Main
 
             string fileName;
 
-            switch (AppSettings.System.GenerationLanguage)
+            switch (_systemSettings.GenerationLanguage)
             {
                 case GenerationLanguage.CSharp:
                     fileName = $"{outputDirectory}/{result}.{generator.FileExtension()}";
@@ -204,25 +216,13 @@ namespace RepoLite.ViewModel.Main
 
         internal void CreateBaseRepository(IGenerator generator)
         {
-            var outputDirectory = $"{AppSettings.Generation.OutputDirectory}/Repositories";
+            var outputDirectory = $"{_generationSettings.OutputDirectory}/Repositories";
 
             if (!Directory.Exists($"{outputDirectory}/Base"))
                 Directory.CreateDirectory($"{outputDirectory}/Base");
 
-            IParser parser;
-
-            switch (AppSettings.System.GenerationLanguage)
-            {
-                case GenerationLanguage.CSharp:
-                    parser = new CSharpSqlServerBaseClassParser();
-                    break;
-                default:
-                    //"If you've added a new language to the enum, the generator needs creating and hooking up here"
-                    throw new ArgumentOutOfRangeException();
-            }
-
             //Write base repository
-            var baseRepo = parser.BuildBaseRepository();
+            var baseRepo = _parser.BuildBaseRepository();
             LogMessage($"Creating Base Repository file in {outputDirectory}/Base/");
             File.WriteAllText($"{outputDirectory}/Base/BaseRepository.{generator.FileExtension()}", baseRepo);
             LogMessage("Created Base Repository file.");

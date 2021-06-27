@@ -1,4 +1,6 @@
-﻿namespace RepoLite.Views
+﻿using RepoLite.ViewModel;
+
+namespace RepoLite.Views
 {
     /// <summary>
     /// Interaction logic for Landing.xaml
@@ -7,6 +9,7 @@
     {
         public LandingView()
         {
+            DataContext = IOC.Resolve<LandingViewModel>();
             InitializeComponent();
         }
     }

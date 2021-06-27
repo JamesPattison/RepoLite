@@ -12,7 +12,7 @@
     <mui:ModernWindow.MenuLinkGroups>
         <mui:LinkGroup DisplayName="Main" GroupKey="Authenticated">
             <mui:LinkGroup.Links>
-                <mui:Link DisplayName="Landing" Source="/Views/LandingView.xaml" />
+                <mui:Link DisplayName="Landing"  Source="/Views/LandingView.xaml"  />
             </mui:LinkGroup.Links>
         </mui:LinkGroup>
 

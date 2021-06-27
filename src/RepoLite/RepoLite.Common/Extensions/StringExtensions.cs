@@ -66,10 +66,10 @@ namespace RepoLite.Common.Extensions
             return str;
         }
 
-        public static string ToModelName(this string input)
+        public static string ToModelName(this string input, string format)
         {
             var name = Regex.Replace(
-                AppSettings.Generation.ModelClassNameFormat,
+                format,
                 Regex.Escape("{Name}"),
                 input,
                 RegexOptions.IgnoreCase
@@ -81,10 +81,10 @@ namespace RepoLite.Common.Extensions
             return name;
         }
 
-        public static string ToRepositoryName(this string input)
+        public static string ToRepositoryName(this string input, string format)
         {
             var name = Regex.Replace(
-                AppSettings.Generation.RepositoryClassNameFormat,
+                format,
                 Regex.Escape("{Name}"),
                 input,
                 RegexOptions.IgnoreCase

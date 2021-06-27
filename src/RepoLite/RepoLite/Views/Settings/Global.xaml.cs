@@ -1,4 +1,6 @@
-﻿namespace RepoLite.Views.Settings
+﻿using RepoLite.ViewModel.Settings;
+
+namespace RepoLite.Views.Settings
 {
     /// <summary>
     /// Interaction logic for Global.xaml
@@ -7,6 +9,7 @@
     {
         public Global()
         {
+            DataContext = IOC.Resolve<AllSettingsViewModel>();
             InitializeComponent();
         }
     }

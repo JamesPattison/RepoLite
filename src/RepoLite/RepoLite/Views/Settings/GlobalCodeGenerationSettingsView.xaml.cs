@@ -1,4 +1,6 @@
-﻿namespace RepoLite.Views.Settings
+﻿using RepoLite.ViewModel.Settings;
+
+namespace RepoLite.Views.Settings
 {
     /// <summary>
     /// Interaction logic for CodeGeneration.xaml
@@ -7,6 +9,7 @@
     {
         public GlobalCodeGenerationSettingsView()
         {
+            DataContext = IOC.Resolve<AllSettingsViewModel>();
             InitializeComponent();
         }
     }

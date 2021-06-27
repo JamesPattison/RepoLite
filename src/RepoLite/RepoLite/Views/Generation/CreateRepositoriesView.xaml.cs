@@ -1,6 +1,7 @@
 ﻿using RepoLite.GeneratorEngine.Models;
 using System.Windows.Controls;
 using System.Windows.Input;
+using RepoLite.ViewModel.Main;
 
 namespace RepoLite.Views.Main
 {
@@ -11,6 +12,7 @@ namespace RepoLite.Views.Main
     {
         public CreateRepositoriesView()
         {
+            DataContext = IOC.Resolve<CreateRepositoriesViewModel>();
             InitializeComponent();
         }
 

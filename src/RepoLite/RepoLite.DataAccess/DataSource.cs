@@ -5,26 +5,19 @@ using RepoLite.DataAccess.Accessors;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using Microsoft.Extensions.Options;
+using RepoLite.Common.Options;
 
 namespace RepoLite.DataAccess
 {
     public abstract class DataSource : IDataSource
     {
-        public static IDataSource GetDataSource()
+        private GenerationOptions _generationSettings;
+        public DataSource(
+            IOptions<GenerationOptions> generationOptions)
         {
-            IDataSource dataAccess;
-            switch (AppSettings.System.DataSource)
-            {
-                case DataSourceEnum.SQLServer:
-                    dataAccess = new SQLServerAccess();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            return dataAccess;
+            _generationSettings = generationOptions.Value;
         }
-
         public abstract List<TableAndSchema> GetTables();
         public abstract List<TableAndSchema> GetTables(string schema);
         public List<Table> LoadTables(List<TableAndSchema> tables)
@@ -32,7 +25,7 @@ namespace RepoLite.DataAccess
             var createdTables = new List<Table>();
             foreach (var table in tables)
             {
-                var item = new Table
+                var item = new Table(_generationSettings)
                 {
                     DbTableName = table.Table,
                     Schema = table.Schema
@@ -49,10 +42,5 @@ namespace RepoLite.DataAccess
         public abstract List<Procedure> LoadProcedures(List<string> procedures);
         //protected abstract List<TableDefault> GetTableDefaults(List<TableAndSchema> tables);
         public abstract List<Column> LoadTableColumns(Table table);
-    }
-
-    public abstract class DataSource<T> : DataSource where T : DbConnection, new() //dbconnection may not be appropriate going forward, but will do for now
-    {
-        protected DbConnection Connection => new T { ConnectionString = AppSettings.System.ConnectionString };
     }
 }

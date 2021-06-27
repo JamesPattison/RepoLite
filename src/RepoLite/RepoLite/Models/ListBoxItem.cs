@@ -1,6 +1,6 @@
-﻿using RepoLite.Annotations;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 
 namespace RepoLite.Models
 {
