@@ -24,16 +24,16 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="Generators\CSharp\SQLServer\Repository.tt">
+        <None Update="Generators\CSharp\SQLServer\PkRepository.tt">
             <Generator>TextTemplatingFilePreprocessor</Generator>
-            <LastGenOutput>Repository.cs</LastGenOutput>
+            <LastGenOutput>PkRepository.cs</LastGenOutput>
         </None>
     </ItemGroup>
     <ItemGroup>
-        <Compile Update="Generators\CSharp\SQLServer\Repository.cs">
+        <Compile Update="Generators\CSharp\SQLServer\PkRepository.cs">
         <AutoGen>True</AutoGen>
         <DesignTime>True</DesignTime>
-        <DependentUpon>Repository.tt</DependentUpon>
+        <DependentUpon>PkRepository.tt</DependentUpon>
         </Compile>
     </ItemGroup>
 
