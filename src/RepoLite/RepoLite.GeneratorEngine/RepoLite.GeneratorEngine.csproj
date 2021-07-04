@@ -2,20 +2,16 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
-        <RootNamespace>ClassLibrary1</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="FuzzyString" Version="1.0.0" />
       <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0-preview.5.21301.5" />
+      <PackageReference Include="System.CodeDom" Version="6.0.0-preview.5.21301.5" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\RepoLite.Common\RepoLite.Common.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Generators\CSharp\SQLServer" />
     </ItemGroup>
 
     <ItemGroup>
@@ -25,6 +21,20 @@
       <None Update="Templates\CSharp\SqlServer\BaseRepository.cs.txt">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Generators\CSharp\SQLServer\Repository.tt">
+            <Generator>TextTemplatingFilePreprocessor</Generator>
+            <LastGenOutput>Repository.cs</LastGenOutput>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Update="Generators\CSharp\SQLServer\Repository.cs">
+        <AutoGen>True</AutoGen>
+        <DesignTime>True</DesignTime>
+        <DependentUpon>Repository.tt</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>

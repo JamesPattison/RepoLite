@@ -76,7 +76,7 @@
 
                                                         <Button Content="{Binding DisplayName}"
                                                                 Command="mui:LinkCommands.NavigateLink"
-                                                                CommandParameter="{Binding Source}"
+                                                                CommandParameter="{Binding Source={RelativeSource Self}}"
                                                                 CommandTarget="{Binding ElementName=ContentFrame}"
                                                                 Style="{StaticResource SystemButtonLink}" />
                                                     </StackPanel>

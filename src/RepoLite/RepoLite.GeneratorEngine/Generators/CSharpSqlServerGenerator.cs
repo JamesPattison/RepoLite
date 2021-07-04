@@ -702,7 +702,9 @@ namespace RepoLite.GeneratorEngine.Generators
             if (inherits)
             {
                 //DeleteBy for base Tables
-                AppendDeleteByForInherited(otherTables, inheritedDependency, sb);
+                AppendInheritanceLogic(otherTables, inheritedDependency, sb,
+                    (inheritedColumn, inheritedTable) =>
+                        $"bool DeleteBy{inheritedColumn.DbColumnName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName});\n");
             }
 
             //update & delete
@@ -737,7 +739,17 @@ namespace RepoLite.GeneratorEngine.Generators
 
             if (inherits)
             {
-                AppendSearchByForInherited(otherTables, inheritedDependency, sb);
+                sb.AppendLine(",");
+                AppendInheritanceLogic(otherTables, inheritedDependency, sb, (inheritedColumn, inheritedTable) =>
+                {
+                    var isb = new StringBuilder();
+                    isb.Append(Tab3,
+                        inheritedColumn.DataType != typeof(XmlDocument)
+                            ? $"{inheritedColumn.DataTypeString}{(IsCSharpNullable(inheritedColumn.DataTypeString) ? "?" : string.Empty)} {inheritedColumn.FieldName} = null,\n"
+                            : $"String {inheritedColumn.FieldName} = null,\n");
+                    return isb.ToString();
+                });
+                sb = new StringBuilder(sb.ToString().TrimEnd('\n').TrimEnd(','));
             }
 
             sb.AppendLine(");");
@@ -782,108 +794,34 @@ namespace RepoLite.GeneratorEngine.Generators
             if (inherits)
             {
                 //DeleteBy for base Tables
-                AppendFindByForInherited(table.ClassName, otherTables, inheritedDependency, sb);
+                AppendInheritanceLogic(otherTables, inheritedDependency, sb, (inheritedColumn, inheritedTable) =>
+                {
+                    var isb = new StringBuilder();
+                    isb.AppendLine(Tab2,
+                        inheritedColumn.DataType != typeof(XmlDocument)
+                            ? $"IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName});"
+                            : $"IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}(String {inheritedColumn.FieldName});");
+
+                    isb.AppendLine(Tab2,
+                        inheritedColumn.DataType != typeof(XmlDocument)
+                            ? $"IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName}, bool skipCache);"
+                            : $"IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}(String {inheritedColumn.FieldName}, bool skipCache);");
+
+                    isb.AppendLine(Tab2,
+                        inheritedColumn.DataType != typeof(XmlDocument)
+                            ? $"IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, {inheritedColumn.DataTypeString} {inheritedColumn.FieldName});"
+                            : $"IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, String {inheritedColumn.FieldName});");
+
+                    isb.AppendLine(Tab2,
+                        inheritedColumn.DataType != typeof(XmlDocument)
+                            ? $"IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, {inheritedColumn.DataTypeString} {inheritedColumn.FieldName}, bool skipCache);"
+                            : $"IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, String {inheritedColumn.FieldName}, bool skipCache);");
+                    return isb.ToString();
+                });
             }
 
             sb.AppendLine(Tab1, "}");
             return sb;
-        }
-
-        private void AppendDeleteByForInherited(List<Table> otherTables, Column inheritedDependency, StringBuilder sb)
-        {
-            var inheritedTable =
-                otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
-            if (inheritedTable != null)
-            {
-                var inheritedTableInheritedDependency =
-                    inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
-                var inheritedTableAlsoInherits = inheritedTableInheritedDependency != null;
-
-                foreach (var inheritedColumn in inheritedTable.Columns)
-                {
-                    if (inheritedColumn.PrimaryKey || inheritedDependency != null && inheritedColumn.DbColumnName == inheritedDependency.DbColumnName) continue;
-
-                    sb.AppendLine(Tab2,
-                        $"bool DeleteBy{inheritedColumn.DbColumnName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName});");
-                }
-
-                if (inheritedTableAlsoInherits)
-                {
-                    AppendDeleteByForInherited(otherTables, inheritedTableInheritedDependency, sb);
-                }
-            }
-        }
-
-        private void AppendSearchByForInherited(List<Table> otherTables, Column inheritedDependency, StringBuilder sb)
-        {
-            sb.AppendLine(",");
-            var inheritedTable =
-                otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
-            if (inheritedTable != null)
-            {
-                var inheritedTableInheritedDependency =
-                    inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
-                var inheritedTableAlsoInherits = inheritedTableInheritedDependency != null;
-
-                foreach (var inheritedColumn in inheritedTable.Columns)
-                {
-                    if (inheritedColumn.PrimaryKey || (inheritedDependency != null && inheritedColumn.DbColumnName == inheritedDependency.DbColumnName)) continue;
-
-                    sb.Append(Tab3,
-                        inheritedColumn.DataType != typeof(XmlDocument)
-                            ? $"{inheritedColumn.DataTypeString}{(IsCSharpNullable(inheritedColumn.DataTypeString) ? "?" : string.Empty)} {inheritedColumn.FieldName} = null"
-                            : $"String {inheritedColumn.FieldName} = null");
-                    if (inheritedColumn != inheritedTable.Columns.Last())
-                        sb.AppendLine(",");
-                }
-
-                if (inheritedTableAlsoInherits)
-                {
-                    AppendSearchByForInherited(otherTables, inheritedTableInheritedDependency, sb);
-                }
-            }
-        }
-
-        private void AppendFindByForInherited(string className, List<Table> otherTables, Column inheritedDependency, StringBuilder sb)
-        {
-            var inheritedTable =
-                otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
-            if (inheritedTable != null)
-            {
-                var inheritedTableInheritedDependency =
-                    inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
-                var inheritedTableAlsoInherits = inheritedTableInheritedDependency != null;
-
-                foreach (var inheritedColumn in inheritedTable.Columns)
-                {
-                    if (inheritedColumn.PrimaryKey || (inheritedDependency != null && inheritedColumn.DbColumnName == inheritedDependency.DbColumnName)) continue;
-
-                    sb.AppendLine(Tab2,
-                        inheritedColumn.DataType != typeof(XmlDocument)
-                            ? $"IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName});"
-                            : $"IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(String {inheritedColumn.FieldName});");
-
-                    sb.AppendLine(Tab2,
-                        inheritedColumn.DataType != typeof(XmlDocument)
-                            ? $"IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName}, bool skipCache);"
-                            : $"IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(String {inheritedColumn.FieldName}, bool skipCache);");
-
-                    sb.AppendLine(Tab2,
-                        inheritedColumn.DataType != typeof(XmlDocument)
-                            ? $"IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, {inheritedColumn.DataTypeString} {inheritedColumn.FieldName});"
-                            : $"IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, String {inheritedColumn.FieldName});");
-
-                    sb.AppendLine(Tab2,
-                        inheritedColumn.DataType != typeof(XmlDocument)
-                            ? $"IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, {inheritedColumn.DataTypeString} {inheritedColumn.FieldName}, bool skipCache);"
-                            : $"IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, String {inheritedColumn.FieldName}, bool skipCache);");
-                }
-
-                if (inheritedTableAlsoInherits)
-                {
-                    AppendFindByForInherited(className, otherTables, inheritedTableInheritedDependency, sb);
-                }
-            }
         }
 
         private StringBuilder Repo_Get(Table table, List<Table> otherTables, bool inherits)
@@ -1672,54 +1610,33 @@ namespace RepoLite.GeneratorEngine.Generators
             if (inherits)
             {
                 //DeleteBy for base Tables
-                AppendDeleteByImplementationForInherited(inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst(), otherTables, inheritedDependency, sb);
+                AppendInheritanceLogic(otherTables, inheritedDependency, sb, (inheritedColumn, inheritedTable) =>
+                {
+                    var isb = new StringBuilder();
+                    isb.AppendLine(Tab2,
+                        $"public bool DeleteBy{inheritedColumn.DbColumnName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName})");
+                    isb.AppendLine(Tab2, "{");
+
+                    isb.AppendLine(Tab3, $"if (BaseDelete(new DeleteColumn(\"{inheritedColumn.DbColumnName}\", {inheritedColumn.FieldName}, SqlDbType.{inheritedColumn.DbType}), out var items))");
+                    isb.AppendLine(Tab3, "{");
+                    isb.AppendLine(Tab4, "if (CacheEnabled)");
+                    isb.AppendLine(Tab4, "{");
+                    isb.AppendLine(Tab5, "foreach (var item in items)");
+                    isb.AppendLine(Tab5, "{");
+                    isb.AppendLine(Tab6, $"RemoveFromCache(item.{pk.DbColumnName});");
+                    isb.AppendLine(Tab5, "}");
+                    isb.AppendLine(Tab4, "}");
+                    isb.AppendLine(Tab4, $"return true;");
+                    isb.AppendLine(Tab3, "}");
+
+                    isb.AppendLine(Tab3, $"return false;");
+
+                    isb.AppendLine(Tab2, "}");
+                    return isb.ToString();
+                });
             }
 
             return sb.ToString();
-        }
-
-        private void AppendDeleteByImplementationForInherited(string repository, List<Table> otherTables, Column inheritedDependency, StringBuilder sb)
-        {
-            var inheritedTable =
-                otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
-            if (inheritedTable != null)
-            {
-                var inheritedTableInheritedDependency =
-                    inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
-                var inheritedTableAlsoInherits = inheritedTableInheritedDependency != null;
-
-                var pk = inheritedTable.PrimaryKeys.First();
-                foreach (var inheritedColumn in inheritedTable.Columns)
-                {
-
-                    if (inheritedColumn.PrimaryKey || (inheritedDependency != null && inheritedColumn.DbColumnName == inheritedDependency.DbColumnName)) continue;
-
-                    sb.AppendLine(Tab2,
-                        $"public bool DeleteBy{inheritedColumn.DbColumnName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName})");
-                    sb.AppendLine(Tab2, "{");
-
-                    sb.AppendLine(Tab3, $"if (BaseDelete(new DeleteColumn(\"{inheritedColumn.DbColumnName}\", {inheritedColumn.FieldName}, SqlDbType.{inheritedColumn.DbType}), out var items))");
-                    sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, "if (CacheEnabled)");
-                    sb.AppendLine(Tab4, "{");
-                    sb.AppendLine(Tab5, "foreach (var item in items)");
-                    sb.AppendLine(Tab5, "{");
-                    sb.AppendLine(Tab6, $"RemoveFromCache(item.{pk.DbColumnName});");
-                    sb.AppendLine(Tab5, "}");
-                    sb.AppendLine(Tab4, "}");
-                    sb.AppendLine(Tab4, $"return true;");
-                    sb.AppendLine(Tab3, "}");
-
-                    sb.AppendLine(Tab3, $"return false;");
-
-                    sb.AppendLine(Tab2, "}");
-                }
-
-                if (inheritedTableAlsoInherits)
-                {
-                    AppendDeleteByImplementationForInherited(repository, otherTables, inheritedTableInheritedDependency, sb);
-                }
-            }
         }
 
         private StringBuilder Repo_Merge(Table table, List<Table> otherTables, Column inheritedDependency)
@@ -1783,22 +1700,6 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab3, "}");
                 sb.AppendLine(Tab3, "return false;");
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
             sb.AppendLine(Tab2, "}");
@@ -1950,7 +1851,18 @@ namespace RepoLite.GeneratorEngine.Generators
             }
             if (inherits)
             {
-                AppendSearchByForInherited(otherTables, inheritedDependency, sb);
+                sb.AppendLine(",");
+                AppendInheritanceLogic(otherTables, inheritedDependency, sb, (inheritedColumn, inheritedTable) =>
+                {
+                    var isb = new StringBuilder();
+                    isb.Append(Tab3,
+                        inheritedColumn.DataType != typeof(XmlDocument)
+                            ? $"{inheritedColumn.DataTypeString}{(IsCSharpNullable(inheritedColumn.DataTypeString) ? "?" : string.Empty)} {inheritedColumn.FieldName} = null,\n"
+                            : $"String {inheritedColumn.FieldName} = null,\n");
+                    return isb.ToString();
+                });
+                
+                sb = new StringBuilder(sb.ToString().TrimEnd('\n').TrimEnd(','));
             }
 
             sb.AppendLine(")");
@@ -1993,7 +1905,40 @@ namespace RepoLite.GeneratorEngine.Generators
 
             if (inherits)
             {
-                AppendSearchByImplementationForInherited(table, otherTables, inheritedDependency, sb);
+                AppendInheritanceLogic(otherTables, inheritedDependency, sb, (inheritedColumn, inheritedTable) =>
+                {
+                    var isb = new StringBuilder();
+                    if (IsCSharpNullable(inheritedColumn.DataTypeString))
+                    {
+                        isb.AppendLine(Tab3, $"if ({inheritedColumn.FieldName}.HasValue)");
+                    }
+                    else
+                        switch (inheritedColumn.DataTypeString)
+                        {
+                            case "String":
+                                isb.AppendLine(Tab3, $"if (!string.IsNullOrEmpty({inheritedColumn.FieldName}))");
+                                break;
+                            case "Byte[]":
+                                isb.AppendLine(Tab3, $"if ({inheritedColumn.FieldName}.Any())");
+                                break;
+                            default:
+                                isb.AppendLine(Tab3, $"if ({inheritedColumn.FieldName} != null)");
+                                break;
+                        }
+
+                    if (inheritedColumn.DataType != typeof(XmlDocument))
+                    {
+                        isb.AppendLine(Tab4,
+                            $"queries.Add(new QueryItem({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({table.ClassName}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, {inheritedColumn.FieldName}));");
+                    }
+                    else
+                    {
+                        isb.AppendLine(Tab4,
+                            $"queries.Add(new QueryItem({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({table.ClassName}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, {inheritedColumn.FieldName}, typeof(XmlDocument)));");
+                    }
+
+                    return isb.ToString();
+                });
             }
 
             sb.AppendLine("");
@@ -2001,57 +1946,6 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab2, "}");
 
             return sb;
-        }
-
-        private void AppendSearchByImplementationForInherited(Table table, List<Table> otherTables, Column inheritedDependency, StringBuilder sb)
-        {
-            var inheritedTable =
-                otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
-            if (inheritedTable != null)
-            {
-                var inheritedTableInheritedDependency =
-                    inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
-                var inheritedTableAlsoInherits = inheritedTableInheritedDependency != null;
-
-                foreach (var inheritedColumn in inheritedTable.Columns)
-                {
-                    if (inheritedColumn.PrimaryKey || (inheritedDependency != null && inheritedColumn.DbColumnName == inheritedDependency.DbColumnName)) continue;
-
-                    if (IsCSharpNullable(inheritedColumn.DataTypeString))
-                    {
-                        sb.AppendLine(Tab3, $"if ({inheritedColumn.FieldName}.HasValue)");
-                    }
-                    else
-                        switch (inheritedColumn.DataTypeString)
-                        {
-                            case "String":
-                                sb.AppendLine(Tab3, $"if (!string.IsNullOrEmpty({inheritedColumn.FieldName}))");
-                                break;
-                            case "Byte[]":
-                                sb.AppendLine(Tab3, $"if ({inheritedColumn.FieldName}.Any())");
-                                break;
-                            default:
-                                sb.AppendLine(Tab3, $"if ({inheritedColumn.FieldName} != null)");
-                                break;
-                        }
-
-                    if (inheritedColumn.DataType != typeof(XmlDocument))
-                    {
-                        sb.AppendLine(Tab4,
-                            $"queries.Add(new QueryItem({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({table.ClassName}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, {inheritedColumn.FieldName}));");
-                    }
-                    else
-                    {
-                        sb.AppendLine(Tab4,
-                            $"queries.Add(new QueryItem({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({table.ClassName}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, {inheritedColumn.FieldName}, typeof(XmlDocument)));");
-                    }
-                }
-
-                if (inheritedTableAlsoInherits)
-                {
-                    AppendSearchByImplementationForInherited(table, otherTables, inheritedTableInheritedDependency, sb);
-                }
-            }
         }
 
         private StringBuilder Repo_Find(Table table, List<Table> otherTables, bool inherited)
@@ -2129,10 +2023,6 @@ namespace RepoLite.GeneratorEngine.Generators
 
                 sb.AppendLine(Tab2, "}");
 
-
-
-
-
                 sb.AppendLine(Tab2,
                     nonPrimaryKey.DataType != typeof(XmlDocument)
                         ? $"public IEnumerable<{table.ClassName}> FindBy{nonPrimaryKey.PropertyName}(FindComparison comparison, {nonPrimaryKey.DataTypeString} {nonPrimaryKey.FieldName}, bool skipCache)"
@@ -2163,90 +2053,96 @@ namespace RepoLite.GeneratorEngine.Generators
 
             if (inherited)
             {
-                AppendFindByImplementationForInherited(inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst(), table.ClassName, otherTables, inheritedDependency, sb);
+                AppendInheritanceLogic(otherTables, inheritedDependency, sb, (inheritedColumn, inheritedTable) =>
+                {
+                    var isb = new StringBuilder();
+
+                    isb.AppendLine("");
+                    isb.AppendLine(Tab2,
+                        inheritedColumn.DataType != typeof(XmlDocument)
+                            ? $"public IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName})"
+                            : $"public IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}(String {inheritedColumn.FieldName})");
+                    isb.AppendLine(Tab2, "{");
+                    isb.AppendLine(Tab3,
+                        $"return FindBy{inheritedColumn.PropertyName}(FindComparison.Equals, {inheritedColumn.FieldName});");
+                    isb.AppendLine(Tab2, "}");
+                    isb.AppendLine("");
+                    isb.AppendLine(Tab2,
+                        inheritedColumn.DataType != typeof(XmlDocument)
+                            ? $"public IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName}, bool skipCache)"
+                            : $"public IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}(String {inheritedColumn.FieldName}, bool skipCache)");
+                    isb.AppendLine(Tab2, "{");
+                    isb.AppendLine(Tab3,
+                        $"return FindBy{inheritedColumn.PropertyName}(FindComparison.Equals, {inheritedColumn.FieldName}, skipCache);");
+                    isb.AppendLine(Tab2, "}");
+
+                    isb.AppendLine("");
+                    isb.AppendLine(Tab2,
+                        inheritedColumn.DataType != typeof(XmlDocument)
+                            ? $"public IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, {inheritedColumn.DataTypeString} {inheritedColumn.FieldName})"
+                            : $"public IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, String {inheritedColumn.FieldName})");
+                    isb.AppendLine(Tab2, "{");
+                    isb.AppendLine(Tab3,
+                        $"return FindBy{inheritedColumn.PropertyName}(comparison, {inheritedColumn.FieldName}, false);");
+
+                    isb.AppendLine(Tab2, "}");
+
+                    isb.AppendLine("");
+                    isb.AppendLine(Tab2,
+                        inheritedColumn.DataType != typeof(XmlDocument)
+                            ? $"public IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, {inheritedColumn.DataTypeString} {inheritedColumn.FieldName}, bool skipCache)"
+                            : $"public IEnumerable<{table.ClassName}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, String {inheritedColumn.FieldName}, bool skipCache)");
+                    isb.AppendLine(Tab2, "{");
+                    if (inheritedColumn.DataType != typeof(XmlDocument))
+                    {
+                        isb.AppendLine(Tab3,
+                            $"var items = Where({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({table.ClassName}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {inheritedColumn.FieldName}).Results();");
+
+                        isb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
+                        isb.AppendLine(Tab3, "{");
+                        isb.AppendLine(Tab4, $"foreach (var item in items)");
+                        isb.AppendLine(Tab4, "{");
+                        isb.AppendLine(Tab5, $"SaveToCache(item);");
+                        isb.AppendLine(Tab4, "}");
+                        isb.AppendLine(Tab3, "}");
+                        isb.AppendLine(Tab3, $"return items;");
+                    }
+                    else
+                    {
+                        isb.AppendLine(Tab3,
+                            $"return Where({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({table.ClassName}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {inheritedColumn.FieldName}, typeof(XmlDocument)).Results();");
+                    }
+
+                    isb.AppendLine(Tab2, "}");
+                    
+                    return isb.ToString();
+                });
             }
 
             return sb;
         }
 
-        private void AppendFindByImplementationForInherited(string repository, string className, List<Table> otherTables, Column inheritedDependency, StringBuilder sb)
+        private void AppendInheritanceLogic(List<Table> otherTables, Column inheritedDependency, StringBuilder sb, Func<Column, Table, string> getInheritancelogic)
         {
             var inheritedTable =
                 otherTables.FirstOrDefault(x => x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
-            if (inheritedTable != null)
+            if (inheritedTable == null) 
+                return;
+            
+            var inheritedTableInheritedDependency =
+                inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
+            var inheritedTableAlsoInherits = inheritedTableInheritedDependency != null;
+
+            foreach (var inheritedColumn in inheritedTable.Columns.Where(inheritedColumn => !inheritedColumn.PrimaryKey && (inheritedDependency == null || inheritedColumn.DbColumnName != inheritedDependency.DbColumnName)))
             {
-                var pk = inheritedTable.PrimaryKeys.First();
-                var inheritedTableInheritedDependency =
-                    inheritedTable.ForeignKeys.FirstOrDefault(x => inheritedTable.PrimaryKeys.Any(y => y.DbColumnName == x.DbColumnName));
-                var inheritedTableAlsoInherits = inheritedTableInheritedDependency != null;
-
-                foreach (var inheritedColumn in inheritedTable.Columns)
-                {
-                    if (inheritedColumn.PrimaryKey || (inheritedDependency != null && inheritedColumn.DbColumnName == inheritedDependency.DbColumnName)) continue;
-                    sb.AppendLine("");
-                    sb.AppendLine(Tab2,
-                        inheritedColumn.DataType != typeof(XmlDocument)
-                            ? $"public IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName})"
-                            : $"public IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(String {inheritedColumn.FieldName})");
-                    sb.AppendLine(Tab2, "{");
-                    sb.AppendLine(Tab3,
-                        $"return FindBy{inheritedColumn.PropertyName}(FindComparison.Equals, {inheritedColumn.FieldName});");
-                    sb.AppendLine(Tab2, "}");
-                    sb.AppendLine("");
-                    sb.AppendLine(Tab2,
-                        inheritedColumn.DataType != typeof(XmlDocument)
-                            ? $"public IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}({inheritedColumn.DataTypeString} {inheritedColumn.FieldName}, bool skipCache)"
-                            : $"public IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(String {inheritedColumn.FieldName}, bool skipCache)");
-                    sb.AppendLine(Tab2, "{");
-                    sb.AppendLine(Tab3,
-                        $"return FindBy{inheritedColumn.PropertyName}(FindComparison.Equals, {inheritedColumn.FieldName}, skipCache);");
-                    sb.AppendLine(Tab2, "}");
-
-                    sb.AppendLine("");
-                    sb.AppendLine(Tab2,
-                        inheritedColumn.DataType != typeof(XmlDocument)
-                            ? $"public IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, {inheritedColumn.DataTypeString} {inheritedColumn.FieldName})"
-                            : $"public IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, String {inheritedColumn.FieldName})");
-                    sb.AppendLine(Tab2, "{");
-                    sb.AppendLine(Tab3,
-                        $"return FindBy{inheritedColumn.PropertyName}(comparison, {inheritedColumn.FieldName}, false);");
-
-                    sb.AppendLine(Tab2, "}");
-
-                    sb.AppendLine("");
-                    sb.AppendLine(Tab2,
-                        inheritedColumn.DataType != typeof(XmlDocument)
-                            ? $"public IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, {inheritedColumn.DataTypeString} {inheritedColumn.FieldName}, bool skipCache)"
-                            : $"public IEnumerable<{className}> FindBy{inheritedColumn.PropertyName}(FindComparison comparison, String {inheritedColumn.FieldName}, bool skipCache)");
-                    sb.AppendLine(Tab2, "{");
-                    if (inheritedColumn.DataType != typeof(XmlDocument))
-                    {
-                        sb.AppendLine(Tab3,
-                            $"var items = Where({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({className}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {inheritedColumn.FieldName}).Results();");
-
-                        sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
-                        sb.AppendLine(Tab3, "{");
-                        sb.AppendLine(Tab4, $"foreach (var item in items)");
-                        sb.AppendLine(Tab4, "{");
-                        sb.AppendLine(Tab5, $"SaveToCache(item);");
-                        sb.AppendLine(Tab4, "}");
-                        sb.AppendLine(Tab3, "}");
-                        sb.AppendLine(Tab3, $"return items;");
-                    }
-                    else
-                    {
-                        sb.AppendLine(Tab3,
-                            $"return Where({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({className}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {inheritedColumn.FieldName}, typeof(XmlDocument)).Results();");
-                    }
-
-                    sb.AppendLine(Tab2, "}");
-                }
-
-                if (inheritedTableAlsoInherits)
-                {
-                    AppendFindByImplementationForInherited(repository, className, otherTables, inheritedTableInheritedDependency, sb);
-                }
+                sb.Append(getInheritancelogic(inheritedColumn, inheritedTable));
             }
+
+            if (inheritedTableAlsoInherits)
+            {
+                AppendInheritanceLogic(otherTables, inheritedTableInheritedDependency, sb, getInheritancelogic);
+            }
+            
         }
 
         #endregion

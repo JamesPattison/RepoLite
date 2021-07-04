@@ -1,12 +1,19 @@
 ﻿using RepoLite.Commands;
 using RepoLite.ViewModel.Base;
 using System.Windows.Input;
+using RepoLite.GeneratorEngine.Generators;
+using RepoLite.GeneratorEngine.Generators.CSharp.SQLServer;
 using RepoLite.Views;
 
 namespace RepoLite.ViewModel
 {
     public class LandingViewModel : ViewModelBase
     {
+
+        public LandingViewModel()
+        {
+            var text = new Repository(new RepositoryGenerationObject {Test = "Dicks"}).TransformText();
+        }
         public ICommand NavigateToCreateModels
         {
             get

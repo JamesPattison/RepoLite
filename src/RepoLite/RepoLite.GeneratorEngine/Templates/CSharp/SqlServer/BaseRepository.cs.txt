@@ -2077,7 +2077,7 @@ namespace REPOSITORYNAMESPACE.Base
 
             var nonpkCols = Columns.Where(x => !x.PrimaryKey).ToArray();
             
-            ar updateCols = nonpkCols.Where(x => dirtyColumns.Contains(x.ColumnName)).ToList();
+            var updateCols = nonpkCols.Where(x => dirtyColumns.Contains(x.ColumnName)).ToList();
             //No columns tro update on this model, must be updating a derived class
             if (!updateCols.Any()) return true;
             foreach (var col in updateCols)
