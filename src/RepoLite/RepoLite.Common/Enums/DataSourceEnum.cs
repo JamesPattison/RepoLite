@@ -6,6 +6,7 @@ namespace RepoLite.Common.Enums
     [Flags]
     public enum DataSourceEnum
     {
-        SQLServer = 1
+        SQLServer = 1,
+        MySql = 2
     }
 }

@@ -10,5 +10,6 @@
         public string ModelClassNameFormat { get; set; }
         public string RepositoryClassNameFormat { get; set; }
         public bool GenerateSealedObjects { get; set; }
+        public bool IncludeCaching { get; set; }
     }
 }

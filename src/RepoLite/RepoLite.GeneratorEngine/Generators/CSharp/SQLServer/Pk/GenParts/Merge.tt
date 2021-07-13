@@ -1,0 +1,92 @@
+<#@ import namespace="RepoLite.Common.Extensions" #>
+<#@ import namespace="RepoLite.Common.Models" #>
+<#@ import namespace="Common" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ parameter type="RepoLite.Common.Options.GenerationOptions" name="generationSettings" #>
+<#@ parameter type="RepoLite.Common.Models.RepositoryGenerationObject" name="generationObject" #>
+<# var pk = generationObject.Table.PrimaryKeys.FirstOrDefault();#>
+        public bool Merge(List<<#= generationObject.Table.ClassName #>> items)
+        {
+<# if (generationObject.InheritedDependency != null) { #>
+            if (_<#=
+                generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(
+                    generationSettings.RepositoryClassNameFormat).LowerFirst() #>.Merge(items.Cast<<#= generationObject.InheritedTable.Table.ClassName #>>().ToList()))
+            {
+                var mergeTable = new List<object[]>();
+                var updates = items.Where(x => x.<#= pk.DbColumnName #> != default).GroupBy(x => x.<#= pk.DbColumnName #>).Select(x => x.Last());
+                foreach (var item in items.Where(x => x.<#= pk.DbColumnName #> == default).Union(updates))
+                {
+                    mergeTable.Add(new object[]
+                    {
+<#= MergeColumns(generationObject) #>
+                    });
+                }
+                return BaseMerge(mergeTable);
+            }
+            return false;
+<# } #>
+<# if (generationObject.InheritedDependency == null) { #>
+
+            var mergeTable = new List<object[]>();
+            var updates = items.Where(x => x.<#= pk.DbColumnName #> != default).GroupBy(x => x.<#= pk.DbColumnName #>).Select(x => x.Last());
+            foreach (var item in items.Where(x => x.<#= pk.DbColumnName #> == default).Union(updates))
+            {
+                mergeTable.Add(new object[]
+                {
+<#= MergeColumns(generationObject) #>
+                });
+            }
+            return BaseMerge(mergeTable);
+<# } #>
+        }
+        public bool Merge(string csvPath)
+        {
+            var mergeTable = new List<object[]>();
+            using (var sr = new StreamReader(csvPath))
+            {
+                var line = sr.ReadLine();
+                if (line == null) return false;
+
+                var firstItem = line.Split(',')[0];
+                if (firstItem == "<#= pk.DbColumnName #>")
+                {
+                    //CSV has headers
+                    //Run to the next line
+                    line = sr.ReadLine();
+                    if (line == null) return true;
+                }
+
+                do
+                {
+                    var blocks = line.Split(',');
+                    mergeTable.Add(new object[]
+                    {
+                        Cast<long>(blocks[0]),
+                        Cast<long>(blocks[1]), true,
+                    });
+                } while ((line = sr.ReadLine()) != null);
+
+
+                return BaseMerge(mergeTable);
+            }
+        }
+<#
+   string MergeColumns(RepositoryGenerationObject generationObject)
+   {
+       var sb = new StringBuilder();
+       var inherits = generationObject.InheritedDependency != null;
+       
+       foreach (var column in generationObject.Table.Columns)
+       {
+           sb.Append(inherits ? Helpers.Tab6 : Helpers.Tab5,
+               column.PrimaryKey
+                   ? $"item.{column.PropertyName}"
+                   : $"item.{column.PropertyName}, item.DirtyColumns.Contains({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({generationObject.Table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")})");
+
+           sb.AppendLine(column != generationObject.Table.Columns.Last() ? "," : "");
+       }
+
+       return sb.ToString();
+   }
+    #>

@@ -1,0 +1,156 @@
+<#@ import namespace="System.Xml" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="RepoLite.Common.Models" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="Common" #>
+<#@ import namespace="Helpers" #>
+<#@ parameter type="RepoLite.Common.Options.GenerationOptions" name="generationSettings" #>
+<#@ parameter type="RepoLite.Common.Models.RepositoryGenerationObject" name="generationObject" #>
+        public IEnumerable<<#= generationObject.Table.ClassName #>> Search(
+            <#= SearchBySignature(generationObject) #>)
+        {
+            var queries = new List<QueryItem>();
+
+            <#= SearchBy(generationObject) #>
+
+            return BaseSearch(queries);
+        }
+
+        <#= FindBy(generationObject) #>
+<#
+string SearchBySignature(RepositoryGenerationObject generationObject)
+{
+    return TtHelpers.AppendInheritanceLogic(generationObject, (column, rgo) =>
+    {
+        var isb = new StringBuilder();
+        isb.Append(column.DataType != typeof(XmlDocument)
+            ? $"{Helpers.Tab3}{column.DataTypeString}{(Helpers.IsCSharpNullable(column.DataTypeString) ? "?" : string.Empty)} {column.FieldName} = null"
+            : $"{Helpers.Tab3}String {column.FieldName} = null");
+
+        if (rgo.InheritedDependency != null || column != rgo.Table.Columns.Last())
+            isb.AppendLine(",");
+
+        return isb.ToString();
+    });
+}
+string SearchBy(RepositoryGenerationObject generationObject)
+{
+    return TtHelpers.AppendInheritanceLogic(generationObject, (column, rgo) =>
+    {
+        var isb = new StringBuilder();
+        if (Helpers.IsCSharpNullable(column.DataTypeString))
+        {
+            isb.AppendLine($"{Helpers.Tab3}if ({column.FieldName}.HasValue)");
+        }
+        else
+            switch (column.DataTypeString)
+            {
+                case "String":
+                    isb.AppendLine($"{Helpers.Tab3}if (!string.IsNullOrEmpty({column.FieldName}))");
+                    break;
+                case "Byte[]":
+                    isb.AppendLine($"{Helpers.Tab3}if ({column.FieldName}.Any())");
+                    break;
+                default:
+                    isb.AppendLine($"{Helpers.Tab3}if ({column.FieldName} != null)");
+                    break;
+            }
+
+        if (column.DataType != typeof(XmlDocument))
+        {
+            isb.AppendLine(
+                $"{Helpers.Tab4}queries.Add(new QueryItem({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({rgo.Table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}, {column.FieldName}));");
+        }
+        else
+        {
+            isb.AppendLine(
+                $"{Helpers.Tab4}queries.Add(new QueryItem({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({rgo.Table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}, {column.FieldName}, typeof(XmlDocument)));");
+        }
+
+        return isb.ToString();
+    });
+}
+string FindBy(RepositoryGenerationObject generationObject)
+{
+    return TtHelpers.AppendInheritanceLogic(generationObject, (column, rgo) =>
+    {
+        if (column.PrimaryKey || rgo.InheritedDependency != null && column.DbColumnName == rgo.InheritedDependency.DbColumnName) return "";
+        
+        var isb = new StringBuilder();
+
+        isb.AppendLine("");
+        isb.AppendLine(column.DataType != typeof(XmlDocument)
+                ? $"{Helpers.Tab2}public IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}({column.DataTypeString} {column.FieldName})"
+                : $"{Helpers.Tab2}public IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(String {column.FieldName})");
+        if (generationSettings.IncludeCaching)
+        {
+            isb.AppendLine($"{Helpers.Tab2}{{");
+            isb.AppendLine(
+                $"{Helpers.Tab3}return FindBy{column.PropertyName}(FindComparison.Equals, {column.FieldName});");
+            isb.AppendLine($"{Helpers.Tab2}}}");
+            isb.AppendLine("");
+
+
+            isb.AppendLine(column.DataType != typeof(XmlDocument)
+                ? $"{Helpers.Tab2}public IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}({column.DataTypeString} {column.FieldName}, bool skipCache)"
+                : $"{Helpers.Tab2}public IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(String {column.FieldName}, bool skipCache)");
+        }
+        isb.AppendLine($"{Helpers.Tab2}{{");
+        isb.AppendLine(
+            generationSettings.IncludeCaching
+                ? $"{Helpers.Tab3}return FindBy{column.PropertyName}(FindComparison.Equals, {column.FieldName}, skipCache);"
+                : $"{Helpers.Tab3}return FindBy{column.PropertyName}(FindComparison.Equals, {column.FieldName});");
+
+        isb.AppendLine($"{Helpers.Tab2}}}");
+        isb.AppendLine("");
+        
+        
+        isb.AppendLine(column.DataType != typeof(XmlDocument)
+                ? $"{Helpers.Tab2}public IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(FindComparison comparison, {column.DataTypeString} {column.FieldName})"
+                : $"{Helpers.Tab2}public IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(FindComparison comparison, String {column.FieldName})");
+        if (generationSettings.IncludeCaching)
+        {
+            isb.AppendLine($"{Helpers.Tab2}{{");
+            isb.AppendLine($"{Helpers.Tab3}return FindBy{column.PropertyName}(comparison, {column.FieldName}, false);");
+
+            isb.AppendLine($"{Helpers.Tab2}}}");
+            isb.AppendLine("");
+
+
+            isb.AppendLine(column.DataType != typeof(XmlDocument)
+                ? $"{Helpers.Tab2}public IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(FindComparison comparison, {column.DataTypeString} {column.FieldName}, bool skipCache)"
+                : $"{Helpers.Tab2}public IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(FindComparison comparison, String {column.FieldName}, bool skipCache)");
+        }
+        isb.AppendLine($"{Helpers.Tab2}{{");
+        if (column.DataType != typeof(XmlDocument))
+        {
+            isb.AppendLine(
+                $"{Helpers.Tab3}var items = Where({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({rgo.Table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {column.FieldName}).Results();");
+            if (generationSettings.IncludeCaching)
+            {
+                isb.AppendLine($"{Helpers.Tab3}if (CacheEnabled && !skipCache)");
+                isb.AppendLine($"{Helpers.Tab3}{{");
+                isb.AppendLine($"{Helpers.Tab4}foreach (var item in items)");
+                isb.AppendLine($"{Helpers.Tab4}{{");
+                isb.AppendLine($"{Helpers.Tab5}SaveToCache(item);");
+                isb.AppendLine($"{Helpers.Tab4}}}");
+                isb.AppendLine($"{Helpers.Tab3}}}");
+                isb.AppendLine($"{Helpers.Tab3}return items;");
+            }
+            else
+            {
+                isb.AppendLine($"{Helpers.Tab3}return items;");
+            }
+        }
+        else
+        {
+            isb.AppendLine(
+                $"{Helpers.Tab3}return Where({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({rgo.Table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {column.FieldName}, typeof(XmlDocument)).Results();");
+        }
+
+        isb.AppendLine($"{Helpers.Tab2}}}");
+        
+        return isb.ToString();
+    });
+}
+#>

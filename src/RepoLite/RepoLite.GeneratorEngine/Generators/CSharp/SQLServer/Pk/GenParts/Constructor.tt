@@ -1,0 +1,26 @@
+<#@ import namespace="RepoLite.Common.Extensions" #>
+<#@ parameter type="RepoLite.Common.Options.GenerationOptions" name="generationSettings" #>
+<#@ parameter type="RepoLite.Common.Models.RepositoryGenerationObject" name="generationObject" #>
+		public <#= generationObject.Table.RepositoryName #>(string connectionString) : this(connectionString, exception => { }) { }
+<# if (!generationSettings.IncludeCaching) {#>
+		public <#= generationObject.Table.RepositoryName #>(string connectionString, Action<Exception> logMethod) 
+			: base(connectionString, logMethod, <#= generationObject.Table.ClassName #>.Schema, <#= generationObject.Table.ClassName #>.TableName, <#= generationObject.Table.ClassName #>.Columns)
+		{
+<# if (generationObject.InheritedTable != null) { #>
+            _<#=generationObject.InheritedTable.Table.RepositoryName.LowerFirst()#> = new <#=generationObject.InheritedTable.Table.RepositoryName#>(connectionString, logMethod);
+<# }#>
+			InitializeExtension();
+		}
+<# } #>
+<# if (generationSettings.IncludeCaching) {#>
+		public <#= generationObject.Table.RepositoryName #>(string connectionString, bool useCache, int cacheDurationInSeconds) : this(connectionString, exception => { }, useCache, cacheDurationInSeconds) { }
+
+		public <#= generationObject.Table.RepositoryName #>(string connectionString, Action<Exception> logMethod, bool useCache = false, int cacheDurationInSeconds = 0) 
+			: base(connectionString, logMethod, <#= generationObject.Table.ClassName #>.Schema, <#= generationObject.Table.ClassName #>.TableName, <#= generationObject.Table.ClassName #>.Columns, useCache, cacheDurationInSeconds)
+		{
+<# if (generationObject.InheritedTable != null) { #>
+            _<#=generationObject.InheritedTable.Table.RepositoryName.LowerFirst()#> = new <#=generationObject.InheritedTable.Table.RepositoryName#>(connectionString, logMethod);
+<# }#>
+			InitializeExtension();
+		}
+<# } #>

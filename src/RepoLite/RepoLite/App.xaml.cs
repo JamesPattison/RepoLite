@@ -12,8 +12,8 @@ using RepoLite.DataAccess;
 using RepoLite.DataAccess.Accessors;
 using RepoLite.GeneratorEngine;
 using RepoLite.GeneratorEngine.Generators;
-using RepoLite.GeneratorEngine.Generators.BaseParsers;
-using RepoLite.GeneratorEngine.Generators.BaseParsers.Base;
+using RepoLite.GeneratorEngine.Generators.CSharp.MySql;
+using RepoLite.GeneratorEngine.Generators.CSharp.SQLServer;
 using RepoLite.Models;
 using RepoLite.ViewModel;
 using RepoLite.ViewModel.Main;
@@ -65,31 +65,16 @@ namespace RepoLite
             services.AddSingleton<CreateRepositoriesViewModel>();
             services.AddSingleton<AllSettingsViewModel>();
 
-            services.AddTransient<CSharpSqlServerBaseClassParser>();
-            services.AddTransient<ParserResolver>(services => (datasource, language) =>
-            {
-                switch (datasource)
-                {
-                    case DataSourceEnum.SQLServer:
-                        switch (language)
-                        {
-                            case GenerationLanguage.CSharp:
-                                return services.GetRequiredService<CSharpSqlServerBaseClassParser>();
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(language), language, null);
-                        }
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(datasource), datasource, null);
-                }
-            });
-
             services.AddTransient<SQLServerAccess>();
+            services.AddTransient<MySqlAccess>();
             services.AddTransient<DataSourceResolver>(services => source =>
             {
                 switch (source)
                 {
                     case DataSourceEnum.SQLServer:
                         return services.GetRequiredService<SQLServerAccess>();
+                    case DataSourceEnum.MySql:
+                        return services.GetRequiredService<MySqlAccess>();
                     default:
                         throw new ArgumentOutOfRangeException(nameof(source), source, null);
                 }
@@ -97,6 +82,7 @@ namespace RepoLite
             
             
             services.AddTransient<CSharpSqlServerGenerator>();
+            services.AddTransient<CSharpMySqlGenerator>();
             services.AddTransient<GeneratorResolver>(services => (datasource, language) =>
             {
                 switch (datasource)
@@ -109,10 +95,21 @@ namespace RepoLite
                             default:
                                 throw new ArgumentOutOfRangeException(nameof(language), language, null);
                         }
+                    case DataSourceEnum.MySql:
+                        switch (language)
+                        {
+                            case GenerationLanguage.CSharp:
+                                return services.GetRequiredService<CSharpMySqlGenerator>();
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(language), language, null);
+                        }
+
                     default:
                         throw new ArgumentOutOfRangeException(nameof(datasource), datasource, null);
                 }
             });
+            
+            
 
             IOC.CurrentProvider = services.BuildServiceProvider();
         }

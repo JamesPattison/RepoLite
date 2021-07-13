@@ -11,21 +11,23 @@ namespace RepoLite.GeneratorEngine
         /// <summary>
         /// Generates a model class
         /// </summary>
-        /// <param name="table">The table object to use</param>
         /// <returns></returns>
-        StringBuilder ModelForTable(Table table, List<Table> otherTables);
+        string ModelForTable(RepositoryGenerationObject generationObject);
 
         /// <summary>
         /// Generates a repository class
         /// </summary>
-        /// <param name="table">The table object to use</param>
         /// <returns></returns>
-        StringBuilder RepositoryForTable(Table table, List<Table> otherTables);
+        string RepositoryForTable(RepositoryGenerationObject generationObject);
 
         /// <summary>
         /// Gets the file extension for the model
         /// </summary>
         /// <returns></returns>
         string FileExtension();
+        
+        string BuildBaseRepository();
+        
+        string BuildBaseModel();
     }
 }

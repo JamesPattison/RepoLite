@@ -5,7 +5,6 @@ using RepoLite.Common.Enums;
 using RepoLite.Common.Models;
 using RepoLite.DataAccess;
 using RepoLite.GeneratorEngine;
-using RepoLite.GeneratorEngine.Generators.BaseParsers.Base;
 using RepoLite.GeneratorEngine.Models;
 using RepoLite.ViewModel.Base;
 using RepoLite.Views;
@@ -26,7 +25,6 @@ namespace RepoLite.ViewModel.Main
         private bool _loaded;
         private GenerationOptions _generationSettings;
         private SystemOptions _systemSettings;
-        private IParser _parser;
         private IDataSource _dataSource;
         private IGenerator _generator;
         public ObservableCollection<string> Messages { get; set; } = new ObservableCollection<string>();
@@ -89,11 +87,11 @@ namespace RepoLite.ViewModel.Main
                         tableDefinitions.ForEach(x =>
                         {
                             LogMessage($"Processing Table {x.Schema}.{x.ClassName}");
-                            var model = _generator.ModelForTable(x, tableDefinitions).ToString();
+                            var model = _generator.ModelForTable(new RepositoryGenerationObject(x, tableDefinitions)).ToString();
 
                             CreateModel(x, _generator, model);
                         });
-                    }, () => Process.Start(_generationSettings.OutputDirectory));
+                    }, () => Process.Start("explorer.exe", _generationSettings.OutputDirectory));
                 });
             }
         }
@@ -167,7 +165,6 @@ namespace RepoLite.ViewModel.Main
         {
             _generationSettings = IOC.Resolve<IOptions<GenerationOptions>>().Value;
             _systemSettings = IOC.Resolve<IOptions<SystemOptions>>().Value;
-            _parser = IOC.Resolve<ParserResolver>().Invoke(_systemSettings.DataSource, _systemSettings.GenerationLanguage);
             _dataSource = IOC.Resolve<DataSourceResolver>().Invoke(_systemSettings.DataSource);
             _generator = IOC.Resolve<GeneratorResolver>().Invoke(_systemSettings.DataSource, _systemSettings.GenerationLanguage);
         }
@@ -205,7 +202,7 @@ namespace RepoLite.ViewModel.Main
                 Directory.CreateDirectory($"{outputDirectory}/Base");
 
             //Write base model
-            var baseModel = _parser.BuildBaseModel();
+            var baseModel = _generator.BuildBaseModel();
             LogMessage($"Creating Base Model file in {outputDirectory}/Base/");
             File.WriteAllText($"{outputDirectory}/Base/BaseModel.{generator.FileExtension()}", baseModel);
             LogMessage("Created Base Model file.");

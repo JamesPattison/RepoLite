@@ -5,8 +5,6 @@ using RepoLite.Common.Enums;
 using RepoLite.Common.Models;
 using RepoLite.DataAccess;
 using RepoLite.GeneratorEngine;
-using RepoLite.GeneratorEngine.Generators.BaseParsers;
-using RepoLite.GeneratorEngine.Generators.BaseParsers.Base;
 using RepoLite.GeneratorEngine.Models;
 using RepoLite.ViewModel.Base;
 using RepoLite.Views;
@@ -27,7 +25,6 @@ namespace RepoLite.ViewModel.Main
         private bool _loaded;
         private GenerationOptions _generationSettings;
         private SystemOptions _systemSettings;
-        private IParser _parser;
         private IDataSource _dataSource;
         private IGenerator _generator;
         public ObservableCollection<string> Messages { get; set; } = new ObservableCollection<string>();
@@ -96,13 +93,13 @@ namespace RepoLite.ViewModel.Main
                         {
                             if (true)
                             {
-                                var model = _generator.ModelForTable(x, tableDefinitions).ToString();
+                                var model = _generator.ModelForTable(new RepositoryGenerationObject(x, tableDefinitions));
 
                                 createModelViewModel.CreateModel(x, _generator, model);
                             }
 
                             LogMessage($"Processing Table {x.Schema}.{x.ClassName}");
-                            var repository = _generator.RepositoryForTable(x, tableDefinitions).ToString();
+                            var repository = _generator.RepositoryForTable(new RepositoryGenerationObject(x, tableDefinitions));
 
                             CreateRepo(x, _generator, repository);
                         });
@@ -184,7 +181,6 @@ namespace RepoLite.ViewModel.Main
         {
             _generationSettings = IOC.Resolve<IOptions<GenerationOptions>>().Value;
             _systemSettings = IOC.Resolve<IOptions<SystemOptions>>().Value;
-            _parser = IOC.Resolve<ParserResolver>().Invoke(_systemSettings.DataSource, _systemSettings.GenerationLanguage);
             _dataSource = IOC.Resolve<DataSourceResolver>().Invoke(_systemSettings.DataSource);
             _generator = IOC.Resolve<GeneratorResolver>().Invoke(_systemSettings.DataSource, _systemSettings.GenerationLanguage);
         }
@@ -222,7 +218,7 @@ namespace RepoLite.ViewModel.Main
                 Directory.CreateDirectory($"{outputDirectory}/Base");
 
             //Write base repository
-            var baseRepo = _parser.BuildBaseRepository();
+            var baseRepo = _generator.BuildBaseRepository();
             LogMessage($"Creating Base Repository file in {outputDirectory}/Base/");
             File.WriteAllText($"{outputDirectory}/Base/BaseRepository.{generator.FileExtension()}", baseRepo);
             LogMessage("Created Base Repository file.");

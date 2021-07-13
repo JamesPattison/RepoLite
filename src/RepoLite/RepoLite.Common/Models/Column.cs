@@ -80,11 +80,6 @@ namespace RepoLite.Common.Models
         /// <summary>
         /// Mapped using SqlDataTypeCode
         /// </summary>
-        public SqlDbType DbType { get; set; }
-
-        /// <summary>
-        /// Mapped using SqlDataTypeCode
-        /// </summary>
         public string DataTypeString { get; set; }
 
         /// <summary>

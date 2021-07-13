@@ -18,7 +18,8 @@ namespace RepoLite.Common.Models
             var inheritedTable =
                 otherTables.FirstOrDefault(x =>
                     x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
-
+            if (inheritedTable == null) return;
+            
             InheritedDependency = inheritedDependency;
             InheritedTable = new RepositoryGenerationObject(inheritedTable, otherTables);
 
