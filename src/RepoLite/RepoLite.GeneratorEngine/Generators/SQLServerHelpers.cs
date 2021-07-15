@@ -5,9 +5,6 @@ namespace RepoLite.GeneratorEngine.Generators
 {
     public class SQLServerHelpers
     {
-        
-
-
         public static SqlDbType GetDbType(int sqlType)
         {
             switch (sqlType)
