@@ -12,10 +12,39 @@ namespace RepoLite.Common.Models
             foreach (var inheritedTableColumn in Table.Columns)
             {
                 inheritedTableColumn.DbTableName = Table.DbTableName;
+
+                if (!inheritedTableColumn.ForeignKey || inheritedTableColumn.DbTableName != Table.DbTableName) 
+                    continue;
+                
+                if (InheritedTable2 == null && Table.PrimaryKeys.Any(y =>
+                    y.DbColumnName == inheritedTableColumn.DbColumnName &&
+                    y.ForeignKeyTargetTable != Table.DbTableName))
+                {
+                    InheritedTable2 =
+                        otherTables.FirstOrDefault(x =>
+                            x.DbTableName == inheritedTableColumn.ForeignKeyTargetTable);
+                }
             }
             
             BuildInheritedColumns(ref table, table, otherTables);
+            
+            //todo remove below
+            var inheritedDependency =
+                table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y =>
+                    y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
+
+            if (inheritedDependency == null) return;
+            
+            var inheritedTable =
+                otherTables.FirstOrDefault(x =>
+                    x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
+            if (inheritedTable == null) return;
+            
+            InheritedDependency = inheritedDependency;
+            InheritedTable = new RepositoryGenerationObject(inheritedTable, otherTables);
         }
+        
+        public Table InheritedTable2 { get; set; }
 
         private void BuildInheritedColumns(ref Table topLevelTable, Table table, IEnumerable<Table> otherTables)
         {
@@ -47,7 +76,6 @@ namespace RepoLite.Common.Models
         /// <summary>
         /// If this table inherits another in the database, this is the object used
         /// </summary>
-        [Obsolete]
         public RepositoryGenerationObject InheritedTable { get; set; }
         
         /// <summary>

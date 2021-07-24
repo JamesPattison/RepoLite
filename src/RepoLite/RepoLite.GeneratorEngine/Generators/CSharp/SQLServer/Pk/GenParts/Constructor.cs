@@ -71,21 +71,21 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write(".Columns)\r\n\t\t{\r\n");
             
             #line 9 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Constructor.tt"
- if (generationObject.InheritedTable != null) { 
+ if (generationObject.InheritedTable2 != null) { 
             
             #line default
             #line hidden
             this.Write("            _");
             
             #line 10 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Constructor.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.Table.RepositoryName.LowerFirst()));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable2.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
             this.Write(" = new ");
             
             #line 10 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Constructor.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.Table.RepositoryName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable2.RepositoryName));
             
             #line default
             #line hidden
@@ -147,21 +147,21 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write(".Columns, useCache, cacheDurationInSeconds)\r\n\t\t{\r\n");
             
             #line 21 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Constructor.tt"
- if (generationObject.InheritedTable != null) { 
+ if (generationObject.InheritedTable2 != null) { 
             
             #line default
             #line hidden
             this.Write("            _");
             
             #line 22 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Constructor.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.Table.RepositoryName.LowerFirst()));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable2.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
             this.Write(" = new ");
             
             #line 22 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Constructor.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.Table.RepositoryName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable2.RepositoryName));
             
             #line default
             #line hidden

@@ -55,17 +55,12 @@ namespace RepoLite.Common.Models
 
         public List<Column> PrimaryKeys
         {
-            get { return Columns.Where(x => x.PrimaryKey).ToList(); }
+            get { return Columns.Where(x => x.PrimaryKey && x.DbTableName == DbTableName).ToList(); }
         }
 
         public List<Column> ForeignKeys
         {
-            get { return Columns.Where(x => x.ForeignKey).ToList(); }
-        }
-
-        public List<Column> NonPrimaryKeys
-        {
-            get { return Columns.Where(x => !x.PrimaryKey).ToList(); }
+            get { return Columns.Where(x => x.ForeignKey && x.DbTableName == DbTableName).ToList(); }
         }
 
         //Returns a list of table that inherit this table

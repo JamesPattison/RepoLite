@@ -17,7 +17,17 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
         }
         public override string ModelForTable(RepositoryGenerationObject generationObject)
         {
-            return TemplateProcessor.ProcessTemplate<Model>(_generationOptions, generationObject);
+            if (generationObject.Table.PrimaryKeys.Any())
+            {
+                if (generationObject.Table.PrimaryKeys.Count == 1)
+                {
+                    return TemplateProcessor.ProcessTemplate<Model>(_generationOptions, generationObject);
+                }
+                else
+                {
+                }
+            }
+            return string.Empty;
         }
 
         public override string RepositoryForTable(RepositoryGenerationObject generationObject)
