@@ -70,14 +70,14 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write(");\r\n\r\n            if (BaseDelete(deleteColumn, out var items))\r\n            {\r\n");
             
             #line 18 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
- if (generationObject.InheritedDependency != null) { 
+ if (generationObject.InheritedTable != null) { 
             
             #line default
             #line hidden
             this.Write("                if (_");
             
             #line 19 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst()));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
@@ -111,7 +111,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             #line hidden
             
             #line 30 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
- if (generationObject.InheritedDependency == null) { 
+ if (generationObject.InheritedTable == null) { 
             
             #line default
             #line hidden
@@ -166,14 +166,14 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write("\", deleteValues))\r\n            {\r\n");
             
             #line 53 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
- if (generationObject.InheritedDependency != null) { 
+ if (generationObject.InheritedTable != null) { 
             
             #line default
             #line hidden
             this.Write("                if (_");
             
             #line 54 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst()));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
@@ -207,7 +207,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             #line hidden
             
             #line 68 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
- if (generationObject.InheritedDependency == null) { 
+ if (generationObject.InheritedTable == null) { 
             
             #line default
             #line hidden
@@ -276,14 +276,14 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write(" }))\r\n            {\r\n");
             
             #line 88 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
- if (generationObject.InheritedDependency != null) { 
+ if (generationObject.InheritedTable != null) { 
             
             #line default
             #line hidden
             this.Write("                if (_");
             
             #line 89 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst()));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
@@ -324,7 +324,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             #line hidden
             
             #line 100 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
- if (generationObject.InheritedDependency == null) { 
+ if (generationObject.InheritedTable == null) { 
             
             #line default
             #line hidden
@@ -393,14 +393,14 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write("\", deleteValues))\r\n            {\r\n");
             
             #line 121 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
- if (generationObject.InheritedDependency != null) { 
+ if (generationObject.InheritedTable != null) { 
             
             #line default
             #line hidden
             this.Write("                if (_");
             
             #line 122 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst()));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
@@ -455,7 +455,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             #line hidden
             
             #line 136 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
- if (generationObject.InheritedDependency == null) { 
+ if (generationObject.InheritedTable == null) { 
             
             #line default
             #line hidden

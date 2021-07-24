@@ -21,13 +21,13 @@
             if (validationErrors.Any())
                 throw new ValidationException(validationErrors);
 
-<# if (generationObject.InheritedDependency != null) { #>
-            var success = _<#= generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst() #>.Update(item, false);
+<# if (generationObject.InheritedTable != null) { #>
+            var success = _<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Update(item, false);
             success &= BaseUpdate(item.DirtyColumns,
                 <#= PrintBlockScopedVariables(generationObject.Table.Columns) #>);
 
 <# } #>
-<# if (generationObject.InheritedDependency == null) { #>
+<# if (generationObject.InheritedTable == null) { #>
             var success = BaseUpdate(item.DirtyColumns, 
                 <#= PrintBlockScopedVariables(generationObject.Table.Columns) #>);
 

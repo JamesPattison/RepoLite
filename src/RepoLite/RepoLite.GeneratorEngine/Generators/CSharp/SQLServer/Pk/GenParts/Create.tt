@@ -16,8 +16,8 @@
             if (validationErrors.Any())
                 throw new ValidationException(validationErrors);
 
-<# if (generationObject.InheritedDependency != null) {#>
-            if (_<#= generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst() #>.Create(item))
+<# if (generationObject.InheritedTable != null) {#>
+            if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Create(item))
             {
                 var createdKeys = BaseCreate(<#= PrintBlockScopedVariables(generationObject.Table.Columns) #>);
                 if (createdKeys.Count != <#= generationObject.Table.ClassName #>.Columns.Count(x => x.PrimaryKey))
@@ -36,7 +36,7 @@
             }
             return false;
 <# } #>
-<# if (generationObject.InheritedDependency == null) {#>
+<# if (generationObject.InheritedTable == null) {#>
             var createdKeys = BaseCreate(<#= PrintBlockScopedVariables(generationObject.Table.Columns) #>);
             if (createdKeys.Count != <#= generationObject.Table.ClassName #>.Columns.Count(x => x.PrimaryKey))
                 return false;
@@ -63,8 +63,8 @@
             if (validationErrors.Any())
                 throw new ValidationException(validationErrors);
 
-<# if (generationObject.InheritedDependency != null) {#>
-            if (_<#= generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst() #>.BulkCreate(items))
+<# if (generationObject.InheritedTable != null) {#>
+            if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.BulkCreate(items))
             {
                 var dt = new DataTable();
                 foreach (var mergeColumn in <#= generationObject.Table.ClassName #>.Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
@@ -92,7 +92,7 @@
             }
             return false;
 <# } #>
-<# if (generationObject.InheritedDependency == null) {#>
+<# if (generationObject.InheritedTable == null) {#>
 			var dt = new DataTable();
 			foreach (var mergeColumn in <#= generationObject.Table.ClassName #>.Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
 				dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);

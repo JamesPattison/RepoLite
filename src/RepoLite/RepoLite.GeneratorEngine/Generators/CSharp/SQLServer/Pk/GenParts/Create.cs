@@ -46,14 +46,14 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write(" item)\r\n        {\r\n            //Validation\r\n            if (item == null)\r\n                return false;\r\n\r\n            var validationErrors = item.Validate();\r\n            if (validationErrors.Any())\r\n                throw new ValidationException(validationErrors);\r\n\r\n");
             
             #line 19 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
- if (generationObject.InheritedDependency != null) {
+ if (generationObject.InheritedTable != null) {
             
             #line default
             #line hidden
             this.Write("            if (_");
             
             #line 20 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst()));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
@@ -115,7 +115,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             #line hidden
             
             #line 39 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
- if (generationObject.InheritedDependency == null) {
+ if (generationObject.InheritedTable == null) {
             
             #line default
             #line hidden
@@ -185,14 +185,14 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write("[] items)\r\n        {\r\n            if (!items.Any())\r\n                return false;\r\n\r\n            var validationErrors = items.SelectMany(x => x.Validate()).ToList();\r\n            if (validationErrors.Any())\r\n                throw new ValidationException(validationErrors);\r\n\r\n");
             
             #line 66 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
- if (generationObject.InheritedDependency != null) {
+ if (generationObject.InheritedTable != null) {
             
             #line default
             #line hidden
             this.Write("            if (_");
             
             #line 67 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst()));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
@@ -233,7 +233,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             #line hidden
             
             #line 95 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
- if (generationObject.InheritedDependency == null) {
+ if (generationObject.InheritedTable == null) {
             
             #line default
             #line hidden

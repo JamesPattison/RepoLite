@@ -6,45 +6,55 @@ namespace RepoLite.Common.Models
 {
     public class RepositoryGenerationObject
     {
+        /// <summary>
+        /// The table this object refers to
+        /// </summary>
+        public Table Table { get; set; }
+        
+        /// <summary>
+        /// If this table inherits another in the database, this is the object used
+        /// </summary>
+        public Table InheritedTable { get; set; }
+        
         public RepositoryGenerationObject(Table table, IEnumerable<Table> otherTables)
         {
-            Table = table;
-            foreach (var inheritedTableColumn in Table.Columns)
+            table.Columns = table.Columns.Where(x => string.IsNullOrEmpty(x.DbTableName) || x.DbTableName == table.DbTableName).ToList();
+            foreach (var inheritedTableColumn in table.Columns)
             {
-                inheritedTableColumn.DbTableName = Table.DbTableName;
-
-                if (!inheritedTableColumn.ForeignKey || inheritedTableColumn.DbTableName != Table.DbTableName) 
-                    continue;
-                
-                if (InheritedTable2 == null && Table.PrimaryKeys.Any(y =>
-                    y.DbColumnName == inheritedTableColumn.DbColumnName &&
-                    y.ForeignKeyTargetTable != Table.DbTableName))
-                {
-                    InheritedTable2 =
-                        otherTables.FirstOrDefault(x =>
-                            x.DbTableName == inheritedTableColumn.ForeignKeyTargetTable);
-                }
+                inheritedTableColumn.DbTableName = table.DbTableName;
             }
             
             BuildInheritedColumns(ref table, table, otherTables);
             
-            //todo remove below
+            //todo clean up below
             var inheritedDependency =
                 table.ForeignKeys.FirstOrDefault(x => table.PrimaryKeys.Any(y =>
                     y.DbColumnName == x.DbColumnName && y.ForeignKeyTargetTable != table.DbTableName));
 
-            if (inheritedDependency == null) return;
+            if (inheritedDependency == null)
+            {
+                Table = table;
+                return;
+            }
             
             var inheritedTable =
                 otherTables.FirstOrDefault(x =>
                     x.DbTableName == inheritedDependency.ForeignKeyTargetTable);
             if (inheritedTable == null) return;
             
-            InheritedDependency = inheritedDependency;
-            InheritedTable = new RepositoryGenerationObject(inheritedTable, otherTables);
+            InheritedTable = inheritedTable;
+
+            Table = RemoveInheritedPrimaryKeys(table);
         }
-        
-        public Table InheritedTable2 { get; set; }
+
+        private Table RemoveInheritedPrimaryKeys(Table table)
+        {
+            table.Columns = table.Columns.Where(x => x.DbTableName == table.DbTableName || !x.PrimaryKey).ToList();
+            return table;
+        }
+
+        // public TableToGenerate InheritedTable2 { get; set; }
+        // public IEnumerable<TableColumn> Columns { get; set; }
 
         private void BuildInheritedColumns(ref Table topLevelTable, Table table, IEnumerable<Table> otherTables)
         {
@@ -67,21 +77,5 @@ namespace RepoLite.Common.Models
 
             BuildInheritedColumns(ref topLevelTable, inheritedTable, otherTables);
         }
-
-        /// <summary>
-        /// The table this object refers to
-        /// </summary>
-        public Table Table { get; set; }
-        
-        /// <summary>
-        /// If this table inherits another in the database, this is the object used
-        /// </summary>
-        public RepositoryGenerationObject InheritedTable { get; set; }
-        
-        /// <summary>
-        /// The Column which is the dependency between this and the InheritedTable
-        /// </summary>
-        [Obsolete]
-        public Column InheritedDependency { get; set; }
     }
 }

@@ -46,116 +46,115 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write("> items)\r\n        {\r\n");
             
             #line 11 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
- if (generationObject.InheritedDependency != null) { 
+ if (generationObject.InheritedTable != null) { 
             
             #line default
             #line hidden
             this.Write("            if (_");
             
             #line 12 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(
-                    generationSettings.RepositoryClassNameFormat).LowerFirst()));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
             this.Write(".Merge(items.Cast<");
             
-            #line 14 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.Table.ClassName));
+            #line 13 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.ClassName));
             
             #line default
             #line hidden
             this.Write(">().ToList()))\r\n            {\r\n                var mergeTable = new List<object[]>();\r\n                var updates = items.Where(x => x.");
             
-            #line 17 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
+            #line 16 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write(" != default).GroupBy(x => x.");
             
-            #line 17 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
+            #line 16 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write(").Select(x => x.Last());\r\n                foreach (var item in items.Where(x => x.");
             
-            #line 18 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
+            #line 17 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write(" == default).Union(updates))\r\n                {\r\n                    mergeTable.Add(new object[]\r\n                    {\r\n");
             
-            #line 22 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
+            #line 21 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(MergeColumns(generationObject)));
             
             #line default
             #line hidden
             this.Write("\r\n                    });\r\n                }\r\n                return BaseMerge(mergeTable);\r\n            }\r\n            return false;\r\n");
             
-            #line 28 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
+            #line 27 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
- if (generationObject.InheritedDependency == null) { 
+            #line 28 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
+ if (generationObject.InheritedTable == null) { 
             
             #line default
             #line hidden
             this.Write("\r\n            var mergeTable = new List<object[]>();\r\n            var updates = items.Where(x => x.");
             
-            #line 32 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
+            #line 31 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write(" != default).GroupBy(x => x.");
             
-            #line 32 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
+            #line 31 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write(").Select(x => x.Last());\r\n            foreach (var item in items.Where(x => x.");
             
-            #line 33 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
+            #line 32 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write(" == default).Union(updates))\r\n            {\r\n                mergeTable.Add(new object[]\r\n                {\r\n");
             
-            #line 37 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
+            #line 36 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(MergeColumns(generationObject)));
             
             #line default
             #line hidden
             this.Write("\r\n                });\r\n            }\r\n            return BaseMerge(mergeTable);\r\n");
             
-            #line 41 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
+            #line 40 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
  } 
             
             #line default
             #line hidden
             this.Write("        }\r\n        public bool Merge(string csvPath)\r\n        {\r\n            var mergeTable = new List<object[]>();\r\n            using (var sr = new StreamReader(csvPath))\r\n            {\r\n                var line = sr.ReadLine();\r\n                if (line == null) return false;\r\n\r\n                var firstItem = line.Split(',')[0];\r\n                if (firstItem == \"");
             
-            #line 52 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
+            #line 51 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write("\")\r\n                {\r\n                    //CSV has headers\r\n                    //Run to the next line\r\n                    line = sr.ReadLine();\r\n                    if (line == null) return true;\r\n                }\r\n\r\n                do\r\n                {\r\n                    var blocks = line.Split(',');\r\n                    mergeTable.Add(new object[]\r\n                    {\r\n                        Cast<long>(blocks[0]),\r\n                        Cast<long>(blocks[1]), true,\r\n                    });\r\n                } while ((line = sr.ReadLine()) != null);\r\n\r\n\r\n                return BaseMerge(mergeTable);\r\n            }\r\n        }\r\n");
             
-            #line 74 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
+            #line 73 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Merge.tt"
 
    string MergeColumns(RepositoryGenerationObject generationObject)
    {
        var sb = new StringBuilder();
-       var inherits = generationObject.InheritedDependency != null;
+       var inherits = generationObject.InheritedTable != null;
        
        foreach (var column in generationObject.Table.Columns)
        {

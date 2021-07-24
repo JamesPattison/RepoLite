@@ -46,7 +46,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write(" ToItem(DataRow row, bool skipBase)\r\n        {\r\n");
             
             #line 11 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Misc.tt"
- if (generationObject.InheritedDependency != null) { 
+ if (generationObject.InheritedTable != null) { 
             
             #line default
             #line hidden
@@ -60,7 +60,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write("() : _");
             
             #line 12 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Misc.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst()));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
@@ -80,7 +80,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             #line hidden
             
             #line 14 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Misc.tt"
- if (generationObject.InheritedDependency == null) { 
+ if (generationObject.InheritedTable == null) { 
             
             #line default
             #line hidden
@@ -141,7 +141,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write("\r\n            item.ResetDirty();\r\n            return item;\r\n        }\r\n\r\n\t\tpublic override TK ToItem<TK>(DataRow row, bool skipBase)\r\n\t\t{\r\n");
             
             #line 27 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Misc.tt"
- if (generationObject.InheritedDependency != null) { 
+ if (generationObject.InheritedTable != null) { 
             
             #line default
             #line hidden
@@ -155,7 +155,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write("() : _");
             
             #line 28 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Misc.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst()));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
@@ -168,7 +168,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             #line hidden
             
             #line 30 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Misc.tt"
- if (generationObject.InheritedDependency == null) { 
+ if (generationObject.InheritedTable == null) { 
             
             #line default
             #line hidden
@@ -222,7 +222,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write("\r\n\t\t\titem.ResetDirty();\r\n\t\t\treturn item as TK;\r\n\t\t}\r\n");
             
             #line 40 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Misc.tt"
- if (generationObject.InheritedDependency != null) { 
+ if (generationObject.InheritedTable != null) { 
             
             #line default
             #line hidden
@@ -538,13 +538,14 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
 
 IEnumerable<Table> GetTableDefinitions(RepositoryGenerationObject generationObject)
 {
-   while (true)
-   {
-       yield return generationObject.Table;
-
-       if (generationObject.InheritedTable == null) yield break;
-       generationObject = generationObject.InheritedTable;
-   }
+   // while (true)
+   // {
+   //     yield return generationObject.Table;
+   //
+   //     if (generationObject.InheritedTable == null) yield break;
+   //     generationObject = generationObject.InheritedTable;
+   // }
+    yield return generationObject.Table;
 }
 
             

@@ -27,7 +27,7 @@ string SearchBySignature(RepositoryGenerationObject generationObject)
             ? $"{Helpers.Tab3}{column.DataTypeString}{(Helpers.IsCSharpNullable(column.DataTypeString) ? "?" : string.Empty)} {column.FieldName} = null"
             : $"{Helpers.Tab3}String {column.FieldName} = null");
 
-        if (rgo.InheritedDependency != null || column != rgo.Table.Columns.Last())
+        if (rgo.InheritedTable != null || column != rgo.Table.Columns.Last())
             isb.AppendLine(",");
 
         return isb.ToString();
@@ -74,7 +74,7 @@ string FindBy(RepositoryGenerationObject generationObject)
 {
     return TtHelpers.AppendInheritanceLogic(generationObject, (column, rgo) =>
     {
-        if (column.PrimaryKey || rgo.InheritedDependency != null && column.DbColumnName == rgo.InheritedDependency.DbColumnName) return "";
+        if (column.PrimaryKey || rgo.InheritedTable != null && column.PrimaryKey) return "";
         
         var isb = new StringBuilder();
 

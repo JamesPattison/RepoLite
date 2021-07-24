@@ -22,7 +22,7 @@
                     return fromCache;
             }
 <# }#>
-<# if (generationObject.InheritedDependency != null) {#>
+<# if (generationObject.InheritedTable != null) {#>
             <#= GetTableSql(generationObject) #>           
             	WHERE
             		<#= generationObject.Table.DbTableName.ToLower()[0] #>.<#= pk.DbColumnName #> = {<#= pk.FieldName #>}";
@@ -36,7 +36,7 @@
 <# }#>
             return item;
 <# }#>
-<# if (generationObject.InheritedDependency == null) {#>
+<# if (generationObject.InheritedTable == null) {#>
             return Where("<#= pk.DbColumnName #>", Comparison.Equals, <#= pk.FieldName #>).Results().FirstOrDefault();
 <# }#>
         }
@@ -120,24 +120,24 @@
        
        var previousAlias = generationObject.Table.DbTableName.ToLower()[0];
        var inheritedTable = generationObject.InheritedTable;
-       var inheritedDependency = generationObject.InheritedDependency;
+      // var inheritedDependency = generationObject.InheritedDependency;
        
-       while (inheritedTable != null)
-       {
-           sb.AppendLine();
-           sb.AppendLine(
-               $"{Helpers.Tab6}LEFT JOIN [{inheritedDependency.ForeignKeyTargetTable}] {inheritedDependency.ForeignKeyTargetTable.ToLower()[0]}");
-           sb.Append(
-               $"{Helpers.Tab7}ON {previousAlias}.{pk.DbColumnName} = {inheritedDependency.ForeignKeyTargetTable.ToLower()[0]}.{pk.DbColumnName}");
-
-           previousAlias = inheritedDependency.ForeignKeyTargetTable.ToLower()[0];
-           inheritedDependency = inheritedTable.InheritedDependency;
-           inheritedTable = inheritedTable.InheritedTable;
-           if (inheritedTable != null)
-           {
-               sb.AppendLine();
-           }
-       }
+       // while (inheritedTable != null)
+       // {
+       //     sb.AppendLine();
+       //     sb.AppendLine(
+       //         $"{Helpers.Tab6}LEFT JOIN [{inheritedDependency.ForeignKeyTargetTable}] {inheritedDependency.ForeignKeyTargetTable.ToLower()[0]}");
+       //     sb.Append(
+       //         $"{Helpers.Tab7}ON {previousAlias}.{pk.DbColumnName} = {inheritedDependency.ForeignKeyTargetTable.ToLower()[0]}.{pk.DbColumnName}");
+       //
+       //     previousAlias = inheritedDependency.ForeignKeyTargetTable.ToLower()[0];
+       //     inheritedDependency = inheritedTable.InheritedDependency;
+       //     inheritedTable = inheritedTable.InheritedTable;
+       //     if (inheritedTable != null)
+       //     {
+       //         sb.AppendLine();
+       //     }
+       // }
 
        return sb.ToString();
    }

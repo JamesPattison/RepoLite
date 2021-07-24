@@ -16,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using Microsoft.Extensions.Options;
+using RepoLite.Common.Extensions;
 using RepoLite.Common.Options;
 
 namespace RepoLite.ViewModel.Main

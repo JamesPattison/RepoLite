@@ -28,8 +28,8 @@ namespace <#= generationSettings.RepositoryGenerationNamespace #>
 
 	public partial class <#= generationObject.Table.RepositoryName #> : BaseRepository<<#=generationObject.Table.ClassName #>>, I<#= generationObject.Table.RepositoryName #>
     {
-<# if (generationObject.InheritedDependency != null) { #>
-        private I<#=generationObject.InheritedTable.Table.RepositoryName#> _<#=generationObject.InheritedTable.Table.RepositoryName.LowerFirst()#>;
+<# if (generationObject.InheritedTable != null) { #>
+        private I<#=generationObject.InheritedTable.RepositoryName#> _<#=generationObject.InheritedTable.RepositoryName.LowerFirst()#>;
 <#} #>
 
         partial void InitializeExtension();

@@ -22,52 +22,25 @@
 		bool Delete(<#= pk.DataTypeString #> <#= pk.FieldName #>);
 		bool Delete(IEnumerable<<#= pk.DataTypeString #>> <#= pk.FieldName #>s);
 
-<#= TtHelpers.AppendInheritanceLogic(generationObject,(column, rgo) =>
-                $"{Helpers.Tab2}bool DeleteBy{column.DbColumnName}({column.DataTypeString} {column.FieldName});\n")#>
+<# // Delete By #>
+<# foreach (var column in generationObject.Table.Columns.Where(x => !x.PrimaryKey)) { #>
+        bool DeleteBy<#= column.DbColumnName #>(<#= column.DataTypeString #> <#= column.FieldName #>);
+<# } #>
 
         IEnumerable<<#=generationObject.Table.ClassName #>> Search(
-<#= TtHelpers.AppendInheritanceLogic(generationObject,(column, rgo) =>
-    {
-        var isb = new StringBuilder();
-        isb.Append(column.DataType != typeof(XmlDocument)
-                ? $"{Helpers.Tab3}{column.DataTypeString}{(Helpers.IsCSharpNullable(column.DataTypeString) ? "?" : string.Empty)} {column.FieldName} = null"
-                : $"{Helpers.Tab3}String {column.FieldName} = null");
-        
-        if (rgo.InheritedDependency != null || column != rgo.Table.Columns.Last())
-                isb.AppendLine(",");
-        
-        return isb.ToString();
-    })#>);
+<# // Search parameters #>
+<# foreach (var column in generationObject.Table.Columns.Where(x => !x.PrimaryKey)) { #>
+            <#= column.DataTypeString #><#= Helpers.IsCSharpNullable(column.DataTypeString) ? "?" : string.Empty #> <#= column.FieldName #> = null<#= column == generationObject.Table.Columns.Last(x => !x.PrimaryKey)? ");": ","#>
+<# } #>
 
-<#= TtHelpers.AppendInheritanceLogic(generationObject, (column, rgo) =>
-    {
-        var isb = new StringBuilder();
-        isb.AppendLine(
-            column.DataType != typeof(XmlDocument)
-                ? $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}({column.DataTypeString} {column.FieldName});"
-                : $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(String {column.FieldName});");
-
-        if (generationSettings.IncludeCaching)
-        {
-            isb.AppendLine(
-                column.DataType != typeof(XmlDocument)
-                    ? $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}({column.DataTypeString} {column.FieldName}, bool skipCache);"
-                    : $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(String {column.FieldName}, bool skipCache);");
-        }
-        
-        isb.AppendLine(
-            column.DataType != typeof(XmlDocument)
-                ? $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(FindComparison comparison, {column.DataTypeString} {column.FieldName});"
-                : $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(FindComparison comparison, String {column.FieldName});");
-
-
-        if (generationSettings.IncludeCaching)
-        {
-            isb.AppendLine(
-                column.DataType != typeof(XmlDocument)
-                    ? $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(FindComparison comparison, {column.DataTypeString} {column.FieldName}, bool skipCache);"
-                    : $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(FindComparison comparison, String {column.FieldName}, bool skipCache);");
-        }
-        return isb.ToString();
-    })#>
-    }
+<# // Find By #>
+<# foreach (var column in generationObject.Table.Columns.Where(x => !x.PrimaryKey)) { #>
+        IEnumerable<<#= generationObject.Table.ClassName #>> FindBy<#= column.PropertyName #>(<#= column.DataTypeString #> <#= column.FieldName #>);
+<# if (generationSettings.IncludeCaching) { #>
+        IEnumerable<<#= generationObject.Table.ClassName #>> FindBy<#= column.PropertyName #>(<#= column.DataTypeString #> <#= column.FieldName #>, bool skipCache);
+<# } #>
+        IEnumerable<<#= generationObject.Table.ClassName #>> FindBy<#= column.PropertyName #>(FindComparison comparison, <#= column.DataTypeString #> <#= column.FieldName #>);
+<# if (generationSettings.IncludeCaching) { #>
+        IEnumerable<<#= generationObject.Table.ClassName #>> FindBy<#= column.PropertyName #>(FindComparison comparison, <#= column.DataTypeString #> <#= column.FieldName #>, bool skipCache);
+<# } #>
+<# } #>

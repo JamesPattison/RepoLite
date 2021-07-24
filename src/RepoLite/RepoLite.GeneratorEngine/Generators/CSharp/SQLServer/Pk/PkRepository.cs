@@ -66,21 +66,21 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk
             this.Write("\r\n    {\r\n");
             
             #line 31 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
- if (generationObject.InheritedDependency != null) { 
+ if (generationObject.InheritedTable != null) { 
             
             #line default
             #line hidden
             this.Write("        private I");
             
             #line 32 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.Table.RepositoryName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName));
             
             #line default
             #line hidden
             this.Write(" _");
             
             #line 32 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.Table.RepositoryName.LowerFirst()));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden

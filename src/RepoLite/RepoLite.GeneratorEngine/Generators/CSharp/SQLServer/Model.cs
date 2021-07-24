@@ -56,7 +56,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             this.Write("\r\n{\r\n");
             
             #line 28 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
- if (generationObject.InheritedDependency != null) { 
+ if (generationObject.InheritedTable != null) { 
             
             #line default
             #line hidden
@@ -77,7 +77,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             this.Write(" : ");
             
             #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedDependency.ForeignKeyTargetTable.ToModelName(generationSettings.ModelClassNameFormat)));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName));
             
             #line default
             #line hidden
@@ -90,7 +90,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             #line hidden
             
             #line 31 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
- if (generationObject.InheritedDependency == null) { 
+ if (generationObject.InheritedTable == null) { 
             
             #line default
             #line hidden
@@ -125,7 +125,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             this.Write("\";\r\n\r\n\t\tpublic ");
             
             #line 37 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedDependency != null? "new ": ""));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable != null? "new ": ""));
             
             #line default
             #line hidden
@@ -152,7 +152,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             #line hidden
             
             #line 39 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
- if (generationObject.InheritedDependency != null && column.DbColumnName == generationObject.InheritedDependency.DbColumnName) continue; 
+ if (generationObject.InheritedTable != null && column.PrimaryKey) continue; 
             
             #line default
             #line hidden
@@ -192,7 +192,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             #line hidden
             
             #line 44 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
- if (generationObject.InheritedDependency != null && column.DbColumnName == generationObject.InheritedDependency.DbColumnName) continue; 
+ if (generationObject.InheritedTable != null && column.PrimaryKey) continue; 
             
             #line default
             #line hidden
@@ -342,7 +342,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             #line hidden
             
             #line 73 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
- if (generationObject.InheritedDependency != null && column.DbColumnName == generationObject.InheritedDependency.DbColumnName) continue; 
+ if (generationObject.InheritedTable != null && column.PrimaryKey) continue; 
             
             #line default
             #line hidden
@@ -614,7 +614,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             this.Write("\t\t\treturn validationErrors;\r\n\t\t}\r\n\r\n\t\tpublic ");
             
             #line 116 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedDependency != null? "new ": ""));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable != null? "new ": ""));
             
             #line default
             #line hidden
@@ -628,7 +628,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             this.Write("\";\r\n\t\tpublic ");
             
             #line 117 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedDependency != null? "new ": ""));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable != null? "new ": ""));
             
             #line default
             #line hidden
@@ -642,7 +642,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             this.Write("\";\r\n\t\tpublic ");
             
             #line 118 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedDependency != null? "new ": ""));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable != null? "new ": ""));
             
             #line default
             #line hidden
@@ -663,7 +663,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
        {
            var isb = new StringBuilder();
            isb.Append($"{Helpers.Tab3}{column.DataTypeString}{(Helpers.IsCSharpNullable(column.DataTypeString) && column.IsNullable ? "?" : "")} {column.FieldName}");
-           isb.AppendLine(column == rgo.Table.Columns.Last() && rgo.InheritedDependency == null ? ")" : ",");
+           isb.AppendLine(column == rgo.Table.Columns.Last() && rgo.InheritedTable == null ? ")" : ",");
            return isb.ToString();
        });
    }

@@ -15,8 +15,8 @@
 
             if (BaseDelete(deleteColumn, out var items))
             {
-<# if (generationObject.InheritedDependency != null) { #>
-                if (_<#= generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst() #>.Delete(item))
+<# if (generationObject.InheritedTable != null) { #>
+                if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Delete(item))
                 {
 <# if (generationSettings.IncludeCaching) {#>
                     if (CacheEnabled)
@@ -27,7 +27,7 @@
                     return true;
                 }
 <# } #>
-<# if (generationObject.InheritedDependency == null) { #>
+<# if (generationObject.InheritedTable == null) { #>
 <# if (generationSettings.IncludeCaching) {#>
                 if (CacheEnabled)
                 {
@@ -50,8 +50,8 @@
 
             if (BaseDelete("<#= pk.DbColumnName #>", deleteValues))
             {
-<# if (generationObject.InheritedDependency != null) { #>
-                if (_<#= generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst() #>.Delete(items))
+<# if (generationObject.InheritedTable != null) { #>
+                if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Delete(items))
                 {
 <# if (generationSettings.IncludeCaching) {#>
                     if (CacheEnabled)
@@ -65,7 +65,7 @@
                     return true;
                 }
 <# } #>
-<# if (generationObject.InheritedDependency == null) { #>
+<# if (generationObject.InheritedTable == null) { #>
 <# if (generationSettings.IncludeCaching) {#>
                 if (CacheEnabled)
                 {
@@ -85,8 +85,8 @@
         {
             if (Delete(new <#= generationObject.Table.ClassName #> { <#= pk.DbColumnName #> = <#= pk.FieldName #> }))
             {
-<# if (generationObject.InheritedDependency != null) { #>
-                if (_<#= generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst() #>.Delete(<#= pk.FieldName #>))
+<# if (generationObject.InheritedTable != null) { #>
+                if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Delete(<#= pk.FieldName #>))
                 {
 <# if (generationSettings.IncludeCaching) {#>
                     if (CacheEnabled)
@@ -97,7 +97,7 @@
                     return true;
                 }
 <# } #>
-<# if (generationObject.InheritedDependency == null) { #>
+<# if (generationObject.InheritedTable == null) { #>
 <# if (generationSettings.IncludeCaching) {#>
                 if (CacheEnabled)
                 {
@@ -118,8 +118,8 @@
             deleteValues.AddRange(<#= pk.FieldName #>s.Cast<object>());
             if (BaseDelete("<#= pk.DbColumnName #>", deleteValues))
             {
-<# if (generationObject.InheritedDependency != null) { #>
-                if (_<#= generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst() #>.Delete(<#= pk.FieldName #>s))
+<# if (generationObject.InheritedTable != null) { #>
+                if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Delete(<#= pk.FieldName #>s))
                 {
 <# if (generationSettings.IncludeCaching) {#>
                     if (CacheEnabled)
@@ -133,7 +133,7 @@
                     return true;
                 }
 <# } #>
-<# if (generationObject.InheritedDependency == null) { #>
+<# if (generationObject.InheritedTable == null) { #>
 <# if (generationSettings.IncludeCaching) {#>
                 if (CacheEnabled)
                 {

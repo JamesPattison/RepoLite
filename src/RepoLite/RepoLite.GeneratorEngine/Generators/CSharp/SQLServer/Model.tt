@@ -25,23 +25,23 @@ using <#= generationSettings.ModelGenerationNamespace #>.Base;
 
 namespace <#= generationSettings.ModelGenerationNamespace #>
 {
-<# if (generationObject.InheritedDependency != null) { #>
-	public <#= generationSettings.GenerateSealedObjects ? "sealed " : ""#>partial class <#= generationObject.Table.ClassName #> : <#= generationObject.InheritedDependency.ForeignKeyTargetTable.ToModelName(generationSettings.ModelClassNameFormat) #>
+<# if (generationObject.InheritedTable != null) { #>
+	public <#= generationSettings.GenerateSealedObjects ? "sealed " : ""#>partial class <#= generationObject.Table.ClassName #> : <#= generationObject.InheritedTable.RepositoryName #>
 <# } #>
-<# if (generationObject.InheritedDependency == null) { #>
+<# if (generationObject.InheritedTable == null) { #>
 	public <#= generationSettings.GenerateSealedObjects ? "sealed " : ""#>partial class <#= generationObject.Table.ClassName #> : BaseModel
 <# } #>
 	{
 		public override string EntityName => "<#= generationObject.Table.DbTableName #>";
 
-		public <#= generationObject.InheritedDependency != null? "new ": "" #>static string CacheKey(<#= pk.DataTypeString #> id) => $"<#= generationObject.Table.DbTableName #>_{id}";
+		public <#= generationObject.InheritedTable != null? "new ": "" #>static string CacheKey(<#= pk.DataTypeString #> id) => $"<#= generationObject.Table.DbTableName #>_{id}";
 <# foreach (var column in generationObject.Table.Columns) { #>
-<# if (generationObject.InheritedDependency != null && column.DbColumnName == generationObject.InheritedDependency.DbColumnName) continue; #>
+<# if (generationObject.InheritedTable != null && column.PrimaryKey) continue; #>
         protected <#= column.DataTypeString #><#= Common.Helpers.IsCSharpNullable(column.DataTypeString) && column.IsNullable ? "?" : "" #> _<#= column.FieldName #>;
 <# } #>
 
 <# foreach (var column in generationObject.Table.Columns) { #>
-<# if (generationObject.InheritedDependency != null && column.DbColumnName == generationObject.InheritedDependency.DbColumnName) continue; #>
+<# if (generationObject.InheritedTable != null && column.PrimaryKey) continue; #>
 		public <#= column.DataTypeString #><#= Common.Helpers.IsCSharpNullable(column.DataTypeString) && column.IsNullable ? "?" : "" #> <#= column.DbColumnName #>
 		{
 			get => _<#= column.FieldName #>;
@@ -70,7 +70,7 @@ namespace <#= generationSettings.ModelGenerationNamespace #>
             base.SetValues(row, propertyPrefix);
 <# } #>
 <# foreach (var column in generationObject.Table.Columns) { #>
-<# if (generationObject.InheritedDependency != null && column.DbColumnName == generationObject.InheritedDependency.DbColumnName) continue; #>
+<# if (generationObject.InheritedTable != null && column.PrimaryKey) continue; #>
 <# if (column.DataType == typeof(string)) { #>
             _<#= column.FieldName #> = row.GetText($"{propertyPrefix}<#= column.PropertyName #>");
 <# } #>
@@ -113,9 +113,9 @@ namespace <#= generationSettings.ModelGenerationNamespace #>
 			return validationErrors;
 		}
 
-		public <#= generationObject.InheritedDependency != null? "new ": "" #>static string Schema = "<#= generationObject.Table.Schema #>";
-		public <#= generationObject.InheritedDependency != null? "new ": "" #>static string TableName = "<#= generationObject.Table.DbTableName #>";
-		public <#= generationObject.InheritedDependency != null? "new ": "" #>static List<ColumnDefinition> Columns => new List<ColumnDefinition>
+		public <#= generationObject.InheritedTable != null? "new ": "" #>static string Schema = "<#= generationObject.Table.Schema #>";
+		public <#= generationObject.InheritedTable != null? "new ": "" #>static string TableName = "<#= generationObject.Table.DbTableName #>";
+		public <#= generationObject.InheritedTable != null? "new ": "" #>static List<ColumnDefinition> Columns => new List<ColumnDefinition>
 		{
 <#= Columns(generationObject.Table) #>
 		};
@@ -129,7 +129,7 @@ namespace <#= generationSettings.ModelGenerationNamespace #>
        {
            var isb = new StringBuilder();
            isb.Append($"{Helpers.Tab3}{column.DataTypeString}{(Helpers.IsCSharpNullable(column.DataTypeString) && column.IsNullable ? "?" : "")} {column.FieldName}");
-           isb.AppendLine(column == rgo.Table.Columns.Last() && rgo.InheritedDependency == null ? ")" : ",");
+           isb.AppendLine(column == rgo.Table.Columns.Last() && rgo.InheritedTable == null ? ")" : ",");
            return isb.ToString();
        });
    }

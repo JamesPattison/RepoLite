@@ -10,22 +10,15 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.Helpers
         public static string AppendInheritanceLogic(RepositoryGenerationObject generationObject, Func<Column, RepositoryGenerationObject, string> getInheritancelogic)
         {
             var sb = new StringBuilder();
-    
+       
             foreach (
                 var column in
                 generationObject.Table.Columns.Where(
-                    inheritedColumn =>
-                        !inheritedColumn.PrimaryKey &&
-                        (generationObject.InheritedDependency == null ||
-                         inheritedColumn.DbColumnName != generationObject.InheritedDependency.DbColumnName)))
+                    inheritedColumn => !inheritedColumn.PrimaryKey))
             {
                 sb.Append(getInheritancelogic(column, generationObject));
             }
-    
-            if (generationObject.InheritedDependency != null)
-            {
-                sb.Append(AppendInheritanceLogic(generationObject.InheritedTable, getInheritancelogic));
-            }
+       
             return sb.ToString();
         }
     }

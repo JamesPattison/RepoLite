@@ -8,10 +8,10 @@
 <# var pk = generationObject.Table.PrimaryKeys.FirstOrDefault();#>
         public override <#= generationObject.Table.ClassName #> ToItem(DataRow row, bool skipBase)
         {
-<# if (generationObject.InheritedDependency != null) { #>
-            var item = skipBase ? new <#= generationObject.Table.ClassName #>() : _<#= generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst() #>.ToItem<<#= generationObject.Table.ClassName #>>(row, false);
+<# if (generationObject.InheritedTable != null) { #>
+            var item = skipBase ? new <#= generationObject.Table.ClassName #>() : _<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.ToItem<<#= generationObject.Table.ClassName #>>(row, false);
 <# } #>
-<# if (generationObject.InheritedDependency == null) { #>
+<# if (generationObject.InheritedTable == null) { #>
             var item = new <#= generationObject.Table.ClassName #>();
 <# } #>
 <# foreach (var column in generationObject.Table.Columns) { #>
@@ -24,10 +24,10 @@
 
 		public override TK ToItem<TK>(DataRow row, bool skipBase)
 		{
-<# if (generationObject.InheritedDependency != null) { #>
-            var item = skipBase ? new <#= generationObject.Table.ClassName #>() : _<#= generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(generationSettings.RepositoryClassNameFormat).LowerFirst() #>.ToItem<TK>(row, false);
+<# if (generationObject.InheritedTable != null) { #>
+            var item = skipBase ? new <#= generationObject.Table.ClassName #>() : _<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.ToItem<TK>(row, false);
 <# } #>
-<# if (generationObject.InheritedDependency == null) { #>
+<# if (generationObject.InheritedTable == null) { #>
             var item = new TK();
 <# } #>
 <# foreach (var column in generationObject.Table.Columns) { #>
@@ -37,7 +37,7 @@
 			item.ResetDirty();
 			return item as TK;
 		}
-<# if (generationObject.InheritedDependency != null) { #>
+<# if (generationObject.InheritedTable != null) { #>
         public override Where<<#= generationObject.Table.ClassName #>> Where(string col, Comparison comparison, object val, Type valueType)
         {
             var tables = new List<TableDefinition>
@@ -90,12 +90,13 @@
 <#
 IEnumerable<Table> GetTableDefinitions(RepositoryGenerationObject generationObject)
 {
-   while (true)
-   {
-       yield return generationObject.Table;
-
-       if (generationObject.InheritedTable == null) yield break;
-       generationObject = generationObject.InheritedTable;
-   }
+   // while (true)
+   // {
+   //     yield return generationObject.Table;
+   //
+   //     if (generationObject.InheritedTable == null) yield break;
+   //     generationObject = generationObject.InheritedTable;
+   // }
+    yield return generationObject.Table;
 }
 #>

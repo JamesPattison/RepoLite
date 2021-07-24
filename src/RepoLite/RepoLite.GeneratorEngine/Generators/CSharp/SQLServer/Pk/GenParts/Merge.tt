@@ -8,10 +8,9 @@
 <# var pk = generationObject.Table.PrimaryKeys.FirstOrDefault();#>
         public bool Merge(List<<#= generationObject.Table.ClassName #>> items)
         {
-<# if (generationObject.InheritedDependency != null) { #>
+<# if (generationObject.InheritedTable != null) { #>
             if (_<#=
-                generationObject.InheritedDependency.ForeignKeyTargetTable.ToRepositoryName(
-                    generationSettings.RepositoryClassNameFormat).LowerFirst() #>.Merge(items.Cast<<#= generationObject.InheritedTable.Table.ClassName #>>().ToList()))
+                generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Merge(items.Cast<<#= generationObject.InheritedTable.ClassName #>>().ToList()))
             {
                 var mergeTable = new List<object[]>();
                 var updates = items.Where(x => x.<#= pk.DbColumnName #> != default).GroupBy(x => x.<#= pk.DbColumnName #>).Select(x => x.Last());
@@ -26,7 +25,7 @@
             }
             return false;
 <# } #>
-<# if (generationObject.InheritedDependency == null) { #>
+<# if (generationObject.InheritedTable == null) { #>
 
             var mergeTable = new List<object[]>();
             var updates = items.Where(x => x.<#= pk.DbColumnName #> != default).GroupBy(x => x.<#= pk.DbColumnName #>).Select(x => x.Last());
@@ -75,7 +74,7 @@
    string MergeColumns(RepositoryGenerationObject generationObject)
    {
        var sb = new StringBuilder();
-       var inherits = generationObject.InheritedDependency != null;
+       var inherits = generationObject.InheritedTable != null;
        
        foreach (var column in generationObject.Table.Columns)
        {

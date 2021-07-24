@@ -221,74 +221,257 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write("s);\r\n\r\n");
             
             #line 25 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(TtHelpers.AppendInheritanceLogic(generationObject,(column, rgo) =>
-                $"{Helpers.Tab2}bool DeleteBy{column.DbColumnName}({column.DataTypeString} {column.FieldName});\n")));
+ // Delete By 
             
             #line default
             #line hidden
-            this.Write("\r\n\r\n        IEnumerable<");
+            
+            #line 26 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+ foreach (var column in generationObject.Table.Columns.Where(x => !x.PrimaryKey)) { 
+            
+            #line default
+            #line hidden
+            this.Write("        bool DeleteBy");
+            
+            #line 27 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.DbColumnName));
+            
+            #line default
+            #line hidden
+            this.Write("(");
+            
+            #line 27 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.DataTypeString));
+            
+            #line default
+            #line hidden
+            this.Write(" ");
+            
+            #line 27 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
+            
+            #line default
+            #line hidden
+            this.Write(");\r\n");
             
             #line 28 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write("\r\n        IEnumerable<");
+            
+            #line 30 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
             this.Write("> Search(\r\n");
             
-            #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(TtHelpers.AppendInheritanceLogic(generationObject,(column, rgo) =>
-    {
-        var isb = new StringBuilder();
-        isb.Append(column.DataType != typeof(XmlDocument)
-                ? $"{Helpers.Tab3}{column.DataTypeString}{(Helpers.IsCSharpNullable(column.DataTypeString) ? "?" : string.Empty)} {column.FieldName} = null"
-                : $"{Helpers.Tab3}String {column.FieldName} = null");
-        
-        if (rgo.InheritedDependency != null || column != rgo.Table.Columns.Last())
-                isb.AppendLine(",");
-        
-        return isb.ToString();
-    })));
+            #line 31 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+ // Search parameters 
             
             #line default
             #line hidden
-            this.Write(");\r\n\r\n");
             
-            #line 42 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(TtHelpers.AppendInheritanceLogic(generationObject, (column, rgo) =>
-    {
-        var isb = new StringBuilder();
-        isb.AppendLine(
-            column.DataType != typeof(XmlDocument)
-                ? $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}({column.DataTypeString} {column.FieldName});"
-                : $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(String {column.FieldName});");
-
-        if (generationSettings.IncludeCaching)
-        {
-            isb.AppendLine(
-                column.DataType != typeof(XmlDocument)
-                    ? $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}({column.DataTypeString} {column.FieldName}, bool skipCache);"
-                    : $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(String {column.FieldName}, bool skipCache);");
-        }
-        
-        isb.AppendLine(
-            column.DataType != typeof(XmlDocument)
-                ? $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(FindComparison comparison, {column.DataTypeString} {column.FieldName});"
-                : $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(FindComparison comparison, String {column.FieldName});");
-
-
-        if (generationSettings.IncludeCaching)
-        {
-            isb.AppendLine(
-                column.DataType != typeof(XmlDocument)
-                    ? $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(FindComparison comparison, {column.DataTypeString} {column.FieldName}, bool skipCache);"
-                    : $"{Helpers.Tab2}IEnumerable<{generationObject.Table.ClassName}> FindBy{column.PropertyName}(FindComparison comparison, String {column.FieldName}, bool skipCache);");
-        }
-        return isb.ToString();
-    })));
+            #line 32 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+ foreach (var column in generationObject.Table.Columns.Where(x => !x.PrimaryKey)) { 
             
             #line default
             #line hidden
-            this.Write("\r\n    }");
+            this.Write("            ");
+            
+            #line 33 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.DataTypeString));
+            
+            #line default
+            #line hidden
+            
+            #line 33 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(Helpers.IsCSharpNullable(column.DataTypeString) ? "?" : string.Empty));
+            
+            #line default
+            #line hidden
+            this.Write(" ");
+            
+            #line 33 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
+            
+            #line default
+            #line hidden
+            this.Write(" = null");
+            
+            #line 33 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column == generationObject.Table.Columns.Last(x => !x.PrimaryKey)? ");": ","));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n");
+            
+            #line 34 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write("\r\n");
+            
+            #line 36 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+ // Find By 
+            
+            #line default
+            #line hidden
+            
+            #line 37 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+ foreach (var column in generationObject.Table.Columns.Where(x => !x.PrimaryKey)) { 
+            
+            #line default
+            #line hidden
+            this.Write("        IEnumerable<");
+            
+            #line 38 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
+            
+            #line default
+            #line hidden
+            this.Write("> FindBy");
+            
+            #line 38 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.PropertyName));
+            
+            #line default
+            #line hidden
+            this.Write("(");
+            
+            #line 38 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.DataTypeString));
+            
+            #line default
+            #line hidden
+            this.Write(" ");
+            
+            #line 38 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
+            
+            #line default
+            #line hidden
+            this.Write(");\r\n");
+            
+            #line 39 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+ if (generationSettings.IncludeCaching) { 
+            
+            #line default
+            #line hidden
+            this.Write("        IEnumerable<");
+            
+            #line 40 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
+            
+            #line default
+            #line hidden
+            this.Write("> FindBy");
+            
+            #line 40 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.PropertyName));
+            
+            #line default
+            #line hidden
+            this.Write("(");
+            
+            #line 40 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.DataTypeString));
+            
+            #line default
+            #line hidden
+            this.Write(" ");
+            
+            #line 40 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
+            
+            #line default
+            #line hidden
+            this.Write(", bool skipCache);\r\n");
+            
+            #line 41 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write("\r\n        IEnumerable<");
+            
+            #line 43 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
+            
+            #line default
+            #line hidden
+            this.Write("> FindBy");
+            
+            #line 43 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.PropertyName));
+            
+            #line default
+            #line hidden
+            this.Write("(FindComparison comparison, ");
+            
+            #line 43 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.DataTypeString));
+            
+            #line default
+            #line hidden
+            this.Write(" ");
+            
+            #line 43 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
+            
+            #line default
+            #line hidden
+            this.Write(");\r\n");
+            
+            #line 44 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+ if (generationSettings.IncludeCaching) { 
+            
+            #line default
+            #line hidden
+            this.Write("        IEnumerable<");
+            
+            #line 45 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
+            
+            #line default
+            #line hidden
+            this.Write("> FindBy");
+            
+            #line 45 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.PropertyName));
+            
+            #line default
+            #line hidden
+            this.Write("(FindComparison comparison, ");
+            
+            #line 45 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.DataTypeString));
+            
+            #line default
+            #line hidden
+            this.Write(" ");
+            
+            #line 45 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
+            
+            #line default
+            #line hidden
+            this.Write(", bool skipCache);\r\n");
+            
+            #line 46 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+ } 
+            
+            #line default
+            #line hidden
+            
+            #line 47 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Interface.tt"
+ } 
+            
+            #line default
+            #line hidden
             return this.GenerationEnvironment.ToString();
         }
         
