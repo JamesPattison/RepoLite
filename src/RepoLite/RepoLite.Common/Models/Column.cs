@@ -8,6 +8,11 @@ namespace RepoLite.Common.Models
     public class Column
     {
         /// <summary>
+        /// Populated in RepositoryGenerationObject
+        /// </summary>
+        public string DbTableName { get; set; }
+        
+        /// <summary>
         /// INFORMATION_SCHEMA.COLUMNS.COLUMN_NAME
         /// </summary>
         public string DbColumnName { get; set; }
