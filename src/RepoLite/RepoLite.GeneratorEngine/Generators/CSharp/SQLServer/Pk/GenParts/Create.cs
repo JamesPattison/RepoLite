@@ -57,257 +57,309 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             
             #line default
             #line hidden
-            this.Write(".Create(item))\r\n            {\r\n                var createdKeys = BaseCreate(");
+            this.Write(".Create(item))\r\n            {\r\n                var createdKeys = BaseCreate(\r\n");
             
-            #line 22 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(PrintBlockScopedVariables(generationObject.Table.Columns)));
+            #line 23 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+ foreach (var column in generationObject.Table.Columns) { 
             
             #line default
             #line hidden
-            this.Write(");\r\n                if (createdKeys.Count != ");
+            this.Write("                    item.");
             
-            #line 23 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 24 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.PropertyName));
+            
+            #line default
+            #line hidden
+            
+            #line 24 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column == generationObject.Table.Columns.Last()? ");": ","));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n");
+            
+            #line 25 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write("                if (createdKeys.Count != ");
+            
+            #line 26 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
             this.Write(".Columns.Count(x => x.PrimaryKey))\r\n                    return false;\r\n\r\n                item.");
             
-            #line 26 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.PropertyName));
             
             #line default
             #line hidden
             this.Write(" = (long)createdKeys[nameof(");
             
-            #line 26 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
             this.Write(".");
             
-            #line 26 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.PropertyName));
             
             #line default
             #line hidden
             this.Write(")];\r\n                item.ResetDirty();\r\n\r\n");
             
-            #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 32 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  if (generationSettings.IncludeCaching) {
             
             #line default
             #line hidden
             this.Write("                if (CacheEnabled)\r\n                {\r\n                    SaveToCache(item);\r\n                }\r\n");
             
-            #line 34 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 37 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  } 
             
             #line default
             #line hidden
             this.Write("                return true;\r\n            }\r\n            return false;\r\n");
             
-            #line 38 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 41 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 39 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 42 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  if (generationObject.InheritedTable == null) {
             
             #line default
             #line hidden
-            this.Write("            var createdKeys = BaseCreate(");
+            this.Write("            var createdKeys = BaseCreate(\r\n");
             
-            #line 40 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(PrintBlockScopedVariables(generationObject.Table.Columns)));
+            #line 44 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+ foreach (var column in generationObject.Table.Columns) { 
             
             #line default
             #line hidden
-            this.Write(");\r\n            if (createdKeys.Count != ");
+            this.Write("                    item.");
             
-            #line 41 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 45 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.PropertyName));
+            
+            #line default
+            #line hidden
+            
+            #line 45 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column == generationObject.Table.Columns.Last()? ");": ","));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n");
+            
+            #line 46 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write("            if (createdKeys.Count != ");
+            
+            #line 47 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
             this.Write(".Columns.Count(x => x.PrimaryKey))\r\n                return false;\r\n\r\n            item.");
             
-            #line 44 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 50 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.PropertyName));
             
             #line default
             #line hidden
             this.Write(" = (long)createdKeys[nameof(");
             
-            #line 44 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 50 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
             this.Write(".");
             
-            #line 44 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 50 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.PropertyName));
             
             #line default
             #line hidden
             this.Write(")];\r\n            item.ResetDirty();\r\n\r\n");
             
-            #line 47 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 53 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  if (generationSettings.IncludeCaching) {
             
             #line default
             #line hidden
             this.Write("            if (CacheEnabled)\r\n            {\r\n                SaveToCache(item);\r\n            }\r\n");
             
-            #line 52 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 58 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  } 
             
             #line default
             #line hidden
             this.Write("            return true;\r\n");
             
-            #line 54 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 60 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  } 
             
             #line default
             #line hidden
             this.Write("        }\r\n\r\n        public override bool BulkCreate(params ");
             
-            #line 57 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 63 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
             this.Write("[] items)\r\n        {\r\n            if (!items.Any())\r\n                return false;\r\n\r\n            var validationErrors = items.SelectMany(x => x.Validate()).ToList();\r\n            if (validationErrors.Any())\r\n                throw new ValidationException(validationErrors);\r\n\r\n");
             
-            #line 66 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 72 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  if (generationObject.InheritedTable != null) {
             
             #line default
             #line hidden
             this.Write("            if (_");
             
-            #line 67 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 73 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
             this.Write(".BulkCreate(items))\r\n            {\r\n                var dt = new DataTable();\r\n                foreach (var mergeColumn in ");
             
-            #line 70 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 76 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
-            this.Write(".Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))\r\n                    dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);\r\n\r\n                foreach (var item in items)\r\n                {\r\n                    dt.Rows.Add(");
+            this.Write(".Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))\r\n                    dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);\r\n\r\n                foreach (var item in items)\r\n                {\r\n                    dt.Rows.Add(\r\n");
             
-            #line 75 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(PrintBlockScopedVariables(generationObject.Table.Columns)));
+            #line 82 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+ foreach (var column in generationObject.Table.Columns) { 
             
             #line default
             #line hidden
-            this.Write(");\r\n                }\r\n\r\n                if (BulkInsert(dt))\r\n                {\r\n");
+            this.Write("                        item.");
             
-            #line 80 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 83 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.PropertyName));
+            
+            #line default
+            #line hidden
+            
+            #line 83 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column == generationObject.Table.Columns.Last()? ");": ","));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n");
+            
+            #line 84 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write("                }\r\n\r\n                if (BulkInsert(dt))\r\n                {\r\n");
+            
+            #line 89 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  if (generationSettings.IncludeCaching) {
             
             #line default
             #line hidden
             this.Write("                    if (CacheEnabled)\r\n                    {\r\n                        foreach (var item in items)\r\n                        {\r\n                            SaveToCache(item);\r\n                        }\r\n                    }\r\n");
             
-            #line 88 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 97 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  } 
             
             #line default
             #line hidden
             this.Write("                    return true;\r\n                }\r\n                return false;\r\n            }\r\n            return false;\r\n");
             
-            #line 94 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 103 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 95 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 104 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  if (generationObject.InheritedTable == null) {
             
             #line default
             #line hidden
             this.Write("\t\t\tvar dt = new DataTable();\r\n\t\t\tforeach (var mergeColumn in ");
             
-            #line 97 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 106 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
-            this.Write(".Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))\r\n\t\t\t\tdt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);\r\n\r\n\t\t\tforeach (var item in items)\r\n\t\t\t{\r\n\t\t\t\tdt.Rows.Add(");
+            this.Write(".Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))\r\n\t\t\t\tdt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);\r\n\r\n\t\t\tforeach (var item in items)\r\n\t\t\t{\r\n\t\t\t\tdt.Rows.Add(\r\n");
             
-            #line 102 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(PrintBlockScopedVariables(generationObject.Table.Columns)));
+            #line 112 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+ foreach (var column in generationObject.Table.Columns) { 
             
             #line default
             #line hidden
-            this.Write("); \r\n\t\t\t}\r\n\r\n\t\t\tif (BulkInsert(dt))\r\n\t\t\t{\r\n");
+            this.Write("                    item.");
             
-            #line 107 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 113 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.PropertyName));
+            
+            #line default
+            #line hidden
+            
+            #line 113 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column == generationObject.Table.Columns.Last()? ");": ","));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n");
+            
+            #line 114 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write("\t\t\t}\r\n\r\n\t\t\tif (BulkInsert(dt))\r\n\t\t\t{\r\n");
+            
+            #line 119 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  if (generationSettings.IncludeCaching) {
             
             #line default
             #line hidden
             this.Write("\t\t\t\tif (CacheEnabled)\r\n\t\t\t\t{\r\n\t\t\t\t\tforeach (var item in items)\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tSaveToCache(item);\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n");
             
-            #line 115 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 127 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  } 
             
             #line default
             #line hidden
             this.Write("\t\t\t\treturn true;\r\n\t\t\t}\r\n\t\t\treturn false;\r\n");
             
-            #line 119 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 131 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
  } 
             
             #line default
             #line hidden
             this.Write("        }\r\n        public override bool BulkCreate(List<");
             
-            #line 121 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
+            #line 133 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
-            this.Write("> items)\r\n        {\r\n            return BulkCreate(items.ToArray());\r\n        }\r\n\r\n");
-            
-            #line 126 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Create.tt"
-
-string PrintBlockScopedVariables(IEnumerable<Column> columns)
-{
-   var sb = new StringBuilder();
-   var distinctColumns = columns.ToList();
-
-   for (var i = 0; i < distinctColumns.Count; i += 5)
-   {
-       for (var j = 0; j < Math.Min(5, distinctColumns.Count - i); j++)
-       {
-           sb.Append($"item.{distinctColumns[i + j].PropertyName}");
-           if (distinctColumns[i + j] != distinctColumns.Last()) sb.Append(", ");
-       }
-
-       if (i + 5 >= distinctColumns.Count)
-           continue;
-       sb.AppendLine("");
-       sb.Append(Common.Helpers.Tab4);
-   }
-
-   return sb.ToString();
-}
-
-            
-            #line default
-            #line hidden
+            this.Write("> items)\r\n        {\r\n            return BulkCreate(items.ToArray());\r\n        }");
             return this.GenerationEnvironment.ToString();
         }
         

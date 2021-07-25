@@ -77,7 +77,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             this.Write(" : ");
             
             #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.ClassName));
             
             #line default
             #line hidden
@@ -146,7 +146,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             this.Write("_{id}\";\r\n");
             
             #line 38 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
- foreach (var column in generationObject.Table.Columns) { 
+ foreach (var column in generationObject.Table.Columns.Where(x => x.DbTableName == generationObject.Table.DbTableName)) { 
             
             #line default
             #line hidden
@@ -186,7 +186,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             this.Write("\r\n");
             
             #line 43 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
- foreach (var column in generationObject.Table.Columns) { 
+ foreach (var column in generationObject.Table.Columns.Where(x => x.DbTableName == generationObject.Table.DbTableName)) { 
             
             #line default
             #line hidden
@@ -278,317 +278,331 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             
             #line default
             #line hidden
-            this.Write("(\r\n            ");
+            this.Write("(\r\n");
             
             #line 60 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(pk.DataTypeString));
+ foreach (var column in generationObject.Table.Columns) { 
+            
+            #line default
+            #line hidden
+            this.Write("            ");
+            
+            #line 61 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.DataType != typeof(XmlDocument) ? column.DataTypeString: "string"));
+            
+            #line default
+            #line hidden
+            
+            #line 61 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(Helpers.IsCSharpNullable(column.DataTypeString) && column.IsNullable ? "?" : ""));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 60 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(pk.FieldName));
+            #line 61 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
             
             #line default
             #line hidden
-            this.Write(",\r\n");
             
             #line 61 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(BuildConstructorColumns(generationObject)));
+            this.Write(this.ToStringHelper.ToStringWithCulture(column == generationObject.Table.Columns.Last()? ")": ","));
             
             #line default
             #line hidden
-            this.Write("\r\n\t\t{\r\n            _");
+            this.Write("\r\n");
             
-            #line 63 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(pk.FieldName));
+            #line 62 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write("\t\t{\r\n");
+            
+            #line 64 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+ foreach (var column in generationObject.Table.Columns) { 
+            
+            #line default
+            #line hidden
+            this.Write("            _");
+            
+            #line 65 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
             
             #line default
             #line hidden
             this.Write(" = ");
             
-            #line 63 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(pk.FieldName));
+            #line 65 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
             
             #line default
             #line hidden
             this.Write(";\r\n");
             
-            #line 64 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(BuildConstructorColumnAssignments(generationObject)));
+            #line 66 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+ } 
             
             #line default
             #line hidden
-            this.Write("\r\n\t\t}\r\n\r\n\t\tpublic override IBaseModel SetValues(DataRow row, string propertyPrefix)\r\n\t\t{\r\n");
+            this.Write("\t\t}\r\n\r\n\t\tpublic override IBaseModel SetValues(DataRow row, string propertyPrefix)\r\n\t\t{\r\n");
             
-            #line 69 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 71 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  if (generationObject.InheritedTable != null) {
             
             #line default
             #line hidden
             this.Write("            base.SetValues(row, propertyPrefix);\r\n");
             
-            #line 71 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 73 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 72 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 74 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  foreach (var column in generationObject.Table.Columns) { 
             
             #line default
             #line hidden
             
-            #line 73 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 75 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  if (generationObject.InheritedTable != null && column.PrimaryKey) continue; 
             
             #line default
             #line hidden
             
-            #line 74 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 76 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  if (column.DataType == typeof(string)) { 
             
             #line default
             #line hidden
             this.Write("            _");
             
-            #line 75 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 77 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
             
             #line default
             #line hidden
             this.Write(" = row.GetText($\"{propertyPrefix}");
             
-            #line 75 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 77 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(column.PropertyName));
             
             #line default
             #line hidden
             this.Write("\");\r\n");
             
-            #line 76 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 78 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 77 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 79 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  else if (column.DataType == typeof(byte)) { 
             
             #line default
             #line hidden
             this.Write("            _");
             
-            #line 78 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 80 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
             
             #line default
             #line hidden
             this.Write(" = (byte)row[$\"{propertyPrefix}");
             
-            #line 78 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 80 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(column.PropertyName));
             
             #line default
             #line hidden
             this.Write("\"];\r\n");
             
-            #line 79 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 81 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 80 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 82 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  else if (column.DataType == typeof(byte?)) { 
             
             #line default
             #line hidden
             this.Write("            _");
             
-            #line 81 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 83 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
             
             #line default
             #line hidden
             this.Write(" = (byte?)row[$\"{propertyPrefix}");
             
-            #line 81 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 83 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(column.PropertyName));
             
             #line default
             #line hidden
             this.Write("\"];\r\n");
             
-            #line 82 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 84 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 83 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 85 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  else if (column.DataType == typeof(byte[])) { 
             
             #line default
             #line hidden
             this.Write("            _");
             
-            #line 84 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 86 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
             
             #line default
             #line hidden
             this.Write(" = (byte[])row[$\"{propertyPrefix}");
             
-            #line 84 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 86 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(column.PropertyName));
             
             #line default
             #line hidden
             this.Write("\"];\r\n");
             
-            #line 85 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 87 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 86 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 88 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  else if (column.DataType == typeof(XmlDocument)) { 
             
             #line default
             #line hidden
             this.Write("            _");
             
-            #line 87 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 89 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
             
             #line default
             #line hidden
             this.Write(" = new XmlDocument{InnerXml = row.GetText($\"{propertyPrefix}");
             
-            #line 87 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 89 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(column.PropertyName));
             
             #line default
             #line hidden
             this.Write("\")};\r\n");
             
-            #line 88 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 90 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 89 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 91 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  else { 
             
             #line default
             #line hidden
             this.Write("            _");
             
-            #line 90 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 92 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
             
             #line default
             #line hidden
             this.Write(" = row.GetValue<");
             
-            #line 90 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 92 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(column.DataTypeString));
             
             #line default
             #line hidden
             this.Write(">($\"{propertyPrefix}");
             
-            #line 90 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 92 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(column.PropertyName));
             
             #line default
             #line hidden
             this.Write("\")");
             
-            #line 90 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 92 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Helpers.IsCSharpNullable(column.DataTypeString) && column.IsNullable ? ";" : $" ?? default({column.DataTypeString});"));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 91 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 93 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 92 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 94 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  } 
             
             #line default
             #line hidden
             this.Write("\t\t\treturn this;\r\n\t\t}\r\n\r\n\t\tpublic override List<ValidationError> Validate()\r\n\t\t{\r\n\t\t\tvar validationErrors = new List<ValidationError>();\r\n");
             
-            #line 99 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 101 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  if (generationObject.InheritedTable != null) {
             
             #line default
             #line hidden
             this.Write("            validationErrors.AddRange(base.Validate());\r\n");
             
-            #line 101 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 103 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 102 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 104 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  foreach (var column in generationObject.Table.Columns) { 
             
             #line default
             #line hidden
             
-            #line 103 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 105 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  if (column.DataType == typeof(string)) { 
             
             #line default
             #line hidden
             
-            #line 104 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 106 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StringValidation(column)));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 105 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
- } 
-            
-            #line default
-            #line hidden
-            
-            #line 106 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
- else if (column.DataType == typeof(byte[])) { 
-            
-            #line default
-            #line hidden
-            
             #line 107 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+ } else if (column.DataType == typeof(byte[])) { 
+            
+            #line default
+            #line hidden
+            
+            #line 108 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ByteArrayValidation(column)));
             
             #line default
             #line hidden
-            this.Write("      \r\n");
-            
-            #line 108 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
- } 
-            
-            #line default
-            #line hidden
+            this.Write("\r\n");
             
             #line 109 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
- else { 
+ } else { 
             
             #line default
             #line hidden
@@ -598,85 +612,63 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             
             #line default
             #line hidden
-            this.Write("   \r\n");
+            
+            #line 110 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+ } 
+            
+            #line default
+            #line hidden
             
             #line 111 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
  } 
             
             #line default
             #line hidden
-            
-            #line 112 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
- } 
-            
-            #line default
-            #line hidden
             this.Write("\t\t\treturn validationErrors;\r\n\t\t}\r\n\r\n\t\tpublic ");
             
-            #line 116 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 115 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable != null? "new ": ""));
             
             #line default
             #line hidden
             this.Write("static string Schema = \"");
             
-            #line 116 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 115 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.Schema));
             
             #line default
             #line hidden
             this.Write("\";\r\n\t\tpublic ");
             
-            #line 117 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 116 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable != null? "new ": ""));
             
             #line default
             #line hidden
             this.Write("static string TableName = \"");
             
-            #line 117 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 116 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.DbTableName));
             
             #line default
             #line hidden
             this.Write("\";\r\n\t\tpublic ");
             
-            #line 118 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 117 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable != null? "new ": ""));
             
             #line default
             #line hidden
             this.Write("static List<ColumnDefinition> Columns => new List<ColumnDefinition>\r\n\t\t{\r\n");
             
-            #line 120 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
+            #line 119 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Columns(generationObject.Table)));
             
             #line default
             #line hidden
             this.Write("\r\n\t\t};\r\n\t}\r\n}\r\n\r\n");
             
-            #line 125 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
-
-   string BuildConstructorColumns(RepositoryGenerationObject generationObject)
-   {
-       return TtHelpers.AppendInheritanceLogic(generationObject, (column, rgo) =>
-       {
-           var isb = new StringBuilder();
-           isb.Append($"{Helpers.Tab3}{column.DataTypeString}{(Helpers.IsCSharpNullable(column.DataTypeString) && column.IsNullable ? "?" : "")} {column.FieldName}");
-           isb.AppendLine(column == rgo.Table.Columns.Last() && rgo.InheritedTable == null ? ")" : ",");
-           return isb.ToString();
-       });
-   }
-
-   string BuildConstructorColumnAssignments(RepositoryGenerationObject generationObject)
-   {
-       return TtHelpers.AppendInheritanceLogic(generationObject, (column, rgo) =>
-       {
-           var isb = new StringBuilder();
-           isb.AppendLine($"{Helpers.Tab3}_{column.FieldName} = {column.FieldName};");
-           return isb.ToString();
-       });
-   }
+            #line 124 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Model.tt"
 
    string StringValidation(Column column)
    {

@@ -19,7 +19,10 @@
 <# if (generationObject.InheritedTable != null) {#>
             if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Create(item))
             {
-                var createdKeys = BaseCreate(<#= PrintBlockScopedVariables(generationObject.Table.Columns) #>);
+                var createdKeys = BaseCreate(
+<# foreach (var column in generationObject.Table.Columns) { #>
+                    item.<#= column.PropertyName #><#= column == generationObject.Table.Columns.Last()? ");": ","#>
+<# } #>
                 if (createdKeys.Count != <#= generationObject.Table.ClassName #>.Columns.Count(x => x.PrimaryKey))
                     return false;
 
@@ -37,7 +40,10 @@
             return false;
 <# } #>
 <# if (generationObject.InheritedTable == null) {#>
-            var createdKeys = BaseCreate(<#= PrintBlockScopedVariables(generationObject.Table.Columns) #>);
+            var createdKeys = BaseCreate(
+<# foreach (var column in generationObject.Table.Columns) { #>
+                    item.<#= column.PropertyName #><#= column == generationObject.Table.Columns.Last()? ");": ","#>
+<# } #>
             if (createdKeys.Count != <#= generationObject.Table.ClassName #>.Columns.Count(x => x.PrimaryKey))
                 return false;
 
@@ -72,7 +78,10 @@
 
                 foreach (var item in items)
                 {
-                    dt.Rows.Add(<#= PrintBlockScopedVariables(generationObject.Table.Columns) #>);
+                    dt.Rows.Add(
+<# foreach (var column in generationObject.Table.Columns) { #>
+                        item.<#= column.PropertyName #><#= column == generationObject.Table.Columns.Last()? ");": ","#>
+<# } #>
                 }
 
                 if (BulkInsert(dt))
@@ -99,7 +108,10 @@
 
 			foreach (var item in items)
 			{
-				dt.Rows.Add(<#= PrintBlockScopedVariables(generationObject.Table.Columns) #>); 
+				dt.Rows.Add(
+<# foreach (var column in generationObject.Table.Columns) { #>
+                    item.<#= column.PropertyName #><#= column == generationObject.Table.Columns.Last()? ");": ","#>
+<# } #>
 			}
 
 			if (BulkInsert(dt))
@@ -122,27 +134,3 @@
         {
             return BulkCreate(items.ToArray());
         }
-
-<#
-string PrintBlockScopedVariables(IEnumerable<Column> columns)
-{
-   var sb = new StringBuilder();
-   var distinctColumns = columns.ToList();
-
-   for (var i = 0; i < distinctColumns.Count; i += 5)
-   {
-       for (var j = 0; j < Math.Min(5, distinctColumns.Count - i); j++)
-       {
-           sb.Append($"item.{distinctColumns[i + j].PropertyName}");
-           if (distinctColumns[i + j] != distinctColumns.Last()) sb.Append(", ");
-       }
-
-       if (i + 5 >= distinctColumns.Count)
-           continue;
-       sb.AppendLine("");
-       sb.Append(Common.Helpers.Tab4);
-   }
-
-   return sb.ToString();
-}
-#>

@@ -26,7 +26,7 @@ using <#= generationSettings.ModelGenerationNamespace #>.Base;
 namespace <#= generationSettings.ModelGenerationNamespace #>
 {
 <# if (generationObject.InheritedTable != null) { #>
-	public <#= generationSettings.GenerateSealedObjects ? "sealed " : ""#>partial class <#= generationObject.Table.ClassName #> : <#= generationObject.InheritedTable.RepositoryName #>
+	public <#= generationSettings.GenerateSealedObjects ? "sealed " : ""#>partial class <#= generationObject.Table.ClassName #> : <#= generationObject.InheritedTable.ClassName #>
 <# } #>
 <# if (generationObject.InheritedTable == null) { #>
 	public <#= generationSettings.GenerateSealedObjects ? "sealed " : ""#>partial class <#= generationObject.Table.ClassName #> : BaseModel
@@ -35,12 +35,12 @@ namespace <#= generationSettings.ModelGenerationNamespace #>
 		public override string EntityName => "<#= generationObject.Table.DbTableName #>";
 
 		public <#= generationObject.InheritedTable != null? "new ": "" #>static string CacheKey(<#= pk.DataTypeString #> id) => $"<#= generationObject.Table.DbTableName #>_{id}";
-<# foreach (var column in generationObject.Table.Columns) { #>
+<# foreach (var column in generationObject.Table.Columns.Where(x => x.DbTableName == generationObject.Table.DbTableName)) { #>
 <# if (generationObject.InheritedTable != null && column.PrimaryKey) continue; #>
         protected <#= column.DataTypeString #><#= Common.Helpers.IsCSharpNullable(column.DataTypeString) && column.IsNullable ? "?" : "" #> _<#= column.FieldName #>;
 <# } #>
 
-<# foreach (var column in generationObject.Table.Columns) { #>
+<# foreach (var column in generationObject.Table.Columns.Where(x => x.DbTableName == generationObject.Table.DbTableName)) { #>
 <# if (generationObject.InheritedTable != null && column.PrimaryKey) continue; #>
 		public <#= column.DataTypeString #><#= Common.Helpers.IsCSharpNullable(column.DataTypeString) && column.IsNullable ? "?" : "" #> <#= column.DbColumnName #>
 		{
@@ -57,11 +57,13 @@ namespace <#= generationSettings.ModelGenerationNamespace #>
 		
 		public <#= generationObject.Table.ClassName #>() { }
 		public <#= generationObject.Table.ClassName #>(
-            <#= pk.DataTypeString #> <#= pk.FieldName #>,
-<#= BuildConstructorColumns(generationObject) #>
+<# foreach (var column in generationObject.Table.Columns) { #>
+            <#= column.DataType != typeof(XmlDocument) ? column.DataTypeString: "string" #><#= Helpers.IsCSharpNullable(column.DataTypeString) && column.IsNullable ? "?" : "" #> <#= column.FieldName #><#= column == generationObject.Table.Columns.Last()? ")": ","#>
+<# } #>
 		{
-            _<#= pk.FieldName #> = <#= pk.FieldName #>;
-<#= BuildConstructorColumnAssignments(generationObject) #>
+<# foreach (var column in generationObject.Table.Columns) { #>
+            _<#= column.FieldName #> = <#= column.FieldName #>;
+<# } #>
 		}
 
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
@@ -99,16 +101,14 @@ namespace <#= generationSettings.ModelGenerationNamespace #>
 <# if (generationObject.InheritedTable != null) {#>
             validationErrors.AddRange(base.Validate());
 <# } #>
+
 <# foreach (var column in generationObject.Table.Columns) { #>
 <# if (column.DataType == typeof(string)) { #>
 <#= StringValidation(column)#>
-<# } #>
-<# else if (column.DataType == typeof(byte[])) { #>
-<#= ByteArrayValidation(column)#>      
-<# } #>
-<# else { #>
-<#= ElseValidation(column) #>   
-<# } #>
+<# } else if (column.DataType == typeof(byte[])) { #>
+<#= ByteArrayValidation(column)#>
+<# } else { #>
+<#= ElseValidation(column) #><# } #>
 <# } #>
 			return validationErrors;
 		}
@@ -123,27 +123,6 @@ namespace <#= generationSettings.ModelGenerationNamespace #>
 }
 
 <#
-   string BuildConstructorColumns(RepositoryGenerationObject generationObject)
-   {
-       return TtHelpers.AppendInheritanceLogic(generationObject, (column, rgo) =>
-       {
-           var isb = new StringBuilder();
-           isb.Append($"{Helpers.Tab3}{column.DataTypeString}{(Helpers.IsCSharpNullable(column.DataTypeString) && column.IsNullable ? "?" : "")} {column.FieldName}");
-           isb.AppendLine(column == rgo.Table.Columns.Last() && rgo.InheritedTable == null ? ")" : ",");
-           return isb.ToString();
-       });
-   }
-
-   string BuildConstructorColumnAssignments(RepositoryGenerationObject generationObject)
-   {
-       return TtHelpers.AppendInheritanceLogic(generationObject, (column, rgo) =>
-       {
-           var isb = new StringBuilder();
-           isb.AppendLine($"{Helpers.Tab3}_{column.FieldName} = {column.FieldName};");
-           return isb.ToString();
-       });
-   }
-
    string StringValidation(Column column)
    {
        var sb = new StringBuilder();

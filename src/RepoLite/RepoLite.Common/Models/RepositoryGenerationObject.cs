@@ -72,6 +72,7 @@ namespace RepoLite.Common.Models
             foreach (var inheritedTableColumn in inheritedTable.Columns)
             {
                 inheritedTableColumn.DbTableName = inheritedTable.DbTableName;
+                if (!topLevelTable.Columns.Contains(inheritedTableColumn))
                 topLevelTable.Columns.Add(inheritedTableColumn);
             }
 
