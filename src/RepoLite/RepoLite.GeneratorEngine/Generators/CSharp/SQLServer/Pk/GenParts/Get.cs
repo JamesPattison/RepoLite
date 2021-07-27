@@ -128,7 +128,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write("           \r\n            \tWHERE\r\n            \t\t");
             
             #line 28 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Get.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.DbTableName.ToLower()[0]));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.DbTableName));
             
             #line default
             #line hidden
@@ -357,7 +357,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write("\r\n           \t\tWHERE\r\n           \t\t\t");
             
             #line 71 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Get.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.DbTableName.ToLower()[0]));
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.DbTableName));
             
             #line default
             #line hidden
@@ -502,29 +502,19 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
        var sb = new StringBuilder();
  
        sb.AppendLine("var query = $@\"" + "SELECT * FROM ");
-       sb.Append($"{Helpers.Tab7}[{generationObject.Table.DbTableName}] {generationObject.Table.DbTableName.ToLower()[0]}");
-       
-       var previousAlias = generationObject.Table.DbTableName.ToLower()[0];
-       var inheritedTable = generationObject.InheritedTable;
-      // var inheritedDependency = generationObject.InheritedDependency;
-       
-       // while (inheritedTable != null)
-       // {
-       //     sb.AppendLine();
-       //     sb.AppendLine(
-       //         $"{Helpers.Tab6}LEFT JOIN [{inheritedDependency.ForeignKeyTargetTable}] {inheritedDependency.ForeignKeyTargetTable.ToLower()[0]}");
-       //     sb.Append(
-       //         $"{Helpers.Tab7}ON {previousAlias}.{pk.DbColumnName} = {inheritedDependency.ForeignKeyTargetTable.ToLower()[0]}.{pk.DbColumnName}");
-       //
-       //     previousAlias = inheritedDependency.ForeignKeyTargetTable.ToLower()[0];
-       //     inheritedDependency = inheritedTable.InheritedDependency;
-       //     inheritedTable = inheritedTable.InheritedTable;
-       //     if (inheritedTable != null)
-       //     {
-       //         sb.AppendLine();
-       //     }
-       // }
+       sb.Append($"{Helpers.Tab7}[{generationObject.Table.DbTableName}]");
 
+       var tables = generationObject.Table.Columns.Select(x => x.DbTableName).Where(x => x != generationObject.Table.DbTableName).Distinct();
+
+       foreach (var table in tables)
+       {
+           sb.AppendLine();
+            sb.AppendLine(
+                $"{Helpers.Tab6}LEFT JOIN [{table}]");
+            sb.Append(
+                $"{Helpers.Tab7}ON {generationObject.Table.DbTableName}.{pk.DbColumnName} = {table}.{pk.DbColumnName}");
+       }
+       
        return sb.ToString();
    }
 

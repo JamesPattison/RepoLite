@@ -15,6 +15,8 @@ namespace RepoLite.Common.Models
         /// If this table inherits another in the database, this is the object used
         /// </summary>
         public Table InheritedTable { get; set; }
+
+        public bool Inherits => InheritedTable != null;
         
         public RepositoryGenerationObject(Table table, IEnumerable<Table> otherTables)
         {

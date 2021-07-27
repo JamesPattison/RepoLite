@@ -42,107 +42,107 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk
             
             #line default
             #line hidden
-            this.Write("\r\n\r\n\tpublic partial class ");
+            this.Write("\r\n    public partial class ");
             
-            #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 28 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.RepositoryName));
             
             #line default
             #line hidden
             this.Write(" : BaseRepository<");
             
-            #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 28 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
             this.Write(">, I");
             
-            #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 28 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.RepositoryName));
             
             #line default
             #line hidden
             this.Write("\r\n    {\r\n");
             
-            #line 31 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 30 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
  if (generationObject.InheritedTable != null) { 
             
             #line default
             #line hidden
             this.Write("        private I");
             
-            #line 32 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 31 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName));
             
             #line default
             #line hidden
             this.Write(" _");
             
-            #line 32 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 31 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
             this.Write(";\r\n");
             
-            #line 33 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 32 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
 } 
             
             #line default
             #line hidden
             this.Write("\r\n        partial void InitializeExtension();\r\n        \r\n");
             
-            #line 37 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 36 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TemplateProcessor.ProcessTemplate<Constructor>(generationSettings, generationObject)));
             
             #line default
             #line hidden
             this.Write("\r\n\r\n");
             
-            #line 39 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 38 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TemplateProcessor.ProcessTemplate<Get>(generationSettings, generationObject)));
             
             #line default
             #line hidden
             this.Write("\r\n\r\n");
             
-            #line 41 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 40 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TemplateProcessor.ProcessTemplate<Create>(generationSettings, generationObject)));
             
             #line default
             #line hidden
             this.Write("\r\n\r\n");
             
-            #line 43 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 42 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TemplateProcessor.ProcessTemplate<Update>(generationSettings, generationObject)));
             
             #line default
             #line hidden
             this.Write("\r\n\r\n");
             
-            #line 45 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 44 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TemplateProcessor.ProcessTemplate<Delete>(generationSettings, generationObject)));
             
             #line default
             #line hidden
             this.Write("\r\n\r\n");
             
-            #line 47 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 46 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TemplateProcessor.ProcessTemplate<Merge>(generationSettings, generationObject)));
             
             #line default
             #line hidden
             this.Write("\r\n\r\n");
             
-            #line 49 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 48 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TemplateProcessor.ProcessTemplate<Search>(generationSettings, generationObject)));
             
             #line default
             #line hidden
             this.Write("\r\n\r\n");
             
-            #line 51 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
+            #line 50 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\PkRepository.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TemplateProcessor.ProcessTemplate<Misc>(generationSettings, generationObject)));
             
             #line default

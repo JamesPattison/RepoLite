@@ -5,6 +5,7 @@
 <#@ import namespace="Common" #><#@ import namespace="RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.Helpers" #> 
 <#@ parameter type="RepoLite.Common.Options.GenerationOptions" name="generationSettings" #>
 <#@ parameter type="RepoLite.Common.Models.RepositoryGenerationObject" name="generationObject" #>
+<#@ import namespace="System.Xml" #>
 <# var pk = generationObject.Table.PrimaryKeys.FirstOrDefault();#>
        public bool Delete(<#= generationObject.Table.ClassName #> item)
         {
@@ -110,7 +111,6 @@
             return false;
         }
 
-
         public bool Delete(IEnumerable<<#= pk.DataTypeString #>> <#= pk.FieldName #>s)
         {
             if (!<#= pk.FieldName #>s.Any()) return true;
@@ -148,37 +148,42 @@
             }
             return false;
         }
-
-        <#= DeleteBy(generationObject) #>
-<#
-   string DeleteBy(RepositoryGenerationObject generationObject)
-   {
-       return TtHelpers.AppendInheritanceLogic(generationObject, (column, rgo) =>
-       {
-           var isb = new StringBuilder();
-           isb.AppendLine(
-               $"{Helpers.Tab2}public bool DeleteBy{column.DbColumnName}({column.DataTypeString} {column.FieldName})");
-           isb.AppendLine($"{Helpers.Tab2}{{");
-
-           isb.AppendLine($"{Helpers.Tab3}if (BaseDelete(new DeleteColumn(\"{column.DbColumnName}\", {column.FieldName}, SqlDbType.{SQLServerHelpers.GetDbType(column.SqlDataTypeCode)}), out var items))");
-           isb.AppendLine($"{Helpers.Tab3}{{");
-           if (generationSettings.IncludeCaching)
-           {
-               isb.AppendLine($"{Helpers.Tab4}if (CacheEnabled)");
-               isb.AppendLine($"{Helpers.Tab4}{{");
-               isb.AppendLine($"{Helpers.Tab5}foreach (var item in items)");
-               isb.AppendLine($"{Helpers.Tab5}{{");
-               isb.AppendLine($"{Helpers.Tab6}RemoveFromCache(item.{pk.DbColumnName});");
-               isb.AppendLine($"{Helpers.Tab5}}}");
-               isb.AppendLine($"{Helpers.Tab4}}}");
-           }
-           isb.AppendLine($"{Helpers.Tab4}return true;");
-           isb.AppendLine($"{Helpers.Tab3}}}");
-
-           isb.AppendLine($"{Helpers.Tab3}return false;");
-
-           isb.AppendLine($"{Helpers.Tab2}}}");
-           return isb.ToString();
-       });
-   }
-#>
+<# // Delete By #>
+<# foreach (var column in generationObject.Table.Columns.Where(x => !x.PrimaryKey)) { #> 
+        public bool DeleteBy<#= column.DbColumnName #>(<#= column.DataType != typeof(XmlDocument) ? column.DataTypeString: "string" #> <#= column.FieldName #>)
+        {
+            if (BaseDelete(new DeleteColumn(nameof(<#= generationObject.Table.ClassName #>.<#= column.DbColumnName #>), <#= column.FieldName #>, SqlDbType.<#= SQLServerHelpers.GetDbType(column.SqlDataTypeCode) #>), out var items))
+            {
+<# if (generationSettings.IncludeCaching) { #>
+<# if (generationObject.Inherits) { #>
+				if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Delete(items))
+				{
+					if (CacheEnabled)
+					{
+						foreach (var item in items)
+						{
+							RemoveFromCache(item.<#= pk.DbColumnName #>);
+						}
+					}
+				}
+<# } else { #>
+				if (CacheEnabled)
+				{
+					foreach (var item in items)
+					{
+						RemoveFromCache(item.<#= pk.DbColumnName #>);
+					}
+				}
+<# } #>
+				return true;
+<# } else { #>
+<# if (generationObject.Inherits) { #>
+                return _<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Delete(items);
+<# } else { #>
+                return true;
+<# } #>
+<# }#>
+			}
+			return false;
+		}
+<# } #>

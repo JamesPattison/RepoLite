@@ -25,23 +25,22 @@ using <#= generationSettings.ModelGenerationNamespace #>.Base;
 
 namespace <#= generationSettings.ModelGenerationNamespace #>
 {
-<# if (generationObject.InheritedTable != null) { #>
+<# if (generationObject.Inherits) { #>
 	public <#= generationSettings.GenerateSealedObjects ? "sealed " : ""#>partial class <#= generationObject.Table.ClassName #> : <#= generationObject.InheritedTable.ClassName #>
-<# } #>
-<# if (generationObject.InheritedTable == null) { #>
+<# } else { #>
 	public <#= generationSettings.GenerateSealedObjects ? "sealed " : ""#>partial class <#= generationObject.Table.ClassName #> : BaseModel
 <# } #>
 	{
 		public override string EntityName => "<#= generationObject.Table.DbTableName #>";
 
-		public <#= generationObject.InheritedTable != null? "new ": "" #>static string CacheKey(<#= pk.DataTypeString #> id) => $"<#= generationObject.Table.DbTableName #>_{id}";
+		public <#= generationObject.Inherits ? "new ": "" #>static string CacheKey(<#= pk.DataTypeString #> id) => $"<#= generationObject.Table.DbTableName #>_{id}";
 <# foreach (var column in generationObject.Table.Columns.Where(x => x.DbTableName == generationObject.Table.DbTableName)) { #>
-<# if (generationObject.InheritedTable != null && column.PrimaryKey) continue; #>
+<# if (generationObject.Inherits && column.PrimaryKey) continue; #>
         protected <#= column.DataTypeString #><#= Common.Helpers.IsCSharpNullable(column.DataTypeString) && column.IsNullable ? "?" : "" #> _<#= column.FieldName #>;
 <# } #>
 
 <# foreach (var column in generationObject.Table.Columns.Where(x => x.DbTableName == generationObject.Table.DbTableName)) { #>
-<# if (generationObject.InheritedTable != null && column.PrimaryKey) continue; #>
+<# if (generationObject.Inherits && column.PrimaryKey) continue; #>
 		public <#= column.DataTypeString #><#= Common.Helpers.IsCSharpNullable(column.DataTypeString) && column.IsNullable ? "?" : "" #> <#= column.DbColumnName #>
 		{
 			get => _<#= column.FieldName #>;
@@ -68,11 +67,11 @@ namespace <#= generationSettings.ModelGenerationNamespace #>
 
 		public override IBaseModel SetValues(DataRow row, string propertyPrefix)
 		{
-<# if (generationObject.InheritedTable != null) {#>
+<# if (generationObject.Inherits) {#>
             base.SetValues(row, propertyPrefix);
 <# } #>
 <# foreach (var column in generationObject.Table.Columns) { #>
-<# if (generationObject.InheritedTable != null && column.PrimaryKey) continue; #>
+<# if (generationObject.Inherits && column.PrimaryKey) continue; #>
 <# if (column.DataType == typeof(string)) { #>
             _<#= column.FieldName #> = row.GetText($"{propertyPrefix}<#= column.PropertyName #>");
 <# } #>
@@ -98,7 +97,7 @@ namespace <#= generationSettings.ModelGenerationNamespace #>
 		public override List<ValidationError> Validate()
 		{
 			var validationErrors = new List<ValidationError>();
-<# if (generationObject.InheritedTable != null) {#>
+<# if (generationObject.Inherits) {#>
             validationErrors.AddRange(base.Validate());
 <# } #>
 
@@ -113,9 +112,9 @@ namespace <#= generationSettings.ModelGenerationNamespace #>
 			return validationErrors;
 		}
 
-		public <#= generationObject.InheritedTable != null? "new ": "" #>static string Schema = "<#= generationObject.Table.Schema #>";
-		public <#= generationObject.InheritedTable != null? "new ": "" #>static string TableName = "<#= generationObject.Table.DbTableName #>";
-		public <#= generationObject.InheritedTable != null? "new ": "" #>static List<ColumnDefinition> Columns => new List<ColumnDefinition>
+		public <#= generationObject.Inherits ? "new ": "" #>static string Schema = "<#= generationObject.Table.Schema #>";
+		public <#= generationObject.Inherits ? "new ": "" #>static string TableName = "<#= generationObject.Table.DbTableName #>";
+		public <#= generationObject.Inherits ? "new ": "" #>static List<ColumnDefinition> Columns => new List<ColumnDefinition>
 		{
 <#= Columns(generationObject.Table) #>
 		};

@@ -25,8 +25,7 @@ using System.Xml;
 namespace <#= generationSettings.RepositoryGenerationNamespace #>
 {
 <#= TemplateProcessor.ProcessTemplate<Interface>(generationSettings, generationObject) #>
-
-	public partial class <#= generationObject.Table.RepositoryName #> : BaseRepository<<#=generationObject.Table.ClassName #>>, I<#= generationObject.Table.RepositoryName #>
+    public partial class <#= generationObject.Table.RepositoryName #> : BaseRepository<<#=generationObject.Table.ClassName #>>, I<#= generationObject.Table.RepositoryName #>
     {
 <# if (generationObject.InheritedTable != null) { #>
         private I<#=generationObject.InheritedTable.RepositoryName#> _<#=generationObject.InheritedTable.RepositoryName.LowerFirst()#>;

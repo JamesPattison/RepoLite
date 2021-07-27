@@ -15,6 +15,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
     using Common.Extensions;
     using Common;
     using RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.Helpers;
+    using System.Xml;
     using System;
     
     /// <summary>
@@ -34,328 +35,328 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write(" \r\n");
             this.Write(" \r\n");
             
-            #line 8 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 9 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  var pk = generationObject.Table.PrimaryKeys.FirstOrDefault();
             
             #line default
             #line hidden
             this.Write("       public bool Delete(");
             
-            #line 9 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 10 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
             this.Write(" item)\r\n        {\r\n            if (item == null)\r\n                return false;\r\n\r\n            var deleteColumn = new DeleteColumn(\"");
             
-            #line 14 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 15 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write("\", item.");
             
-            #line 14 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 15 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write(", SqlDbType.");
             
-            #line 14 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 15 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SQLServerHelpers.GetDbType(pk.SqlDataTypeCode)));
             
             #line default
             #line hidden
             this.Write(");\r\n\r\n            if (BaseDelete(deleteColumn, out var items))\r\n            {\r\n");
             
-            #line 18 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 19 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  if (generationObject.InheritedTable != null) { 
             
             #line default
             #line hidden
             this.Write("                if (_");
             
-            #line 19 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 20 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
             this.Write(".Delete(item))\r\n                {\r\n");
             
-            #line 21 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 22 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  if (generationSettings.IncludeCaching) {
             
             #line default
             #line hidden
             this.Write("                    if (CacheEnabled)\r\n                    {\r\n                        RemoveFromCache(item.");
             
-            #line 24 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 25 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write(");\r\n                    }\r\n");
             
-            #line 26 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 27 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  } 
             
             #line default
             #line hidden
             this.Write("                    return true;\r\n                }\r\n");
             
-            #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 30 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 30 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 31 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  if (generationObject.InheritedTable == null) { 
             
             #line default
             #line hidden
             
-            #line 31 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 32 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  if (generationSettings.IncludeCaching) {
             
             #line default
             #line hidden
             this.Write("                if (CacheEnabled)\r\n                {\r\n                    RemoveFromCache(item.");
             
-            #line 34 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 35 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write(");\r\n                }\r\n");
             
-            #line 36 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 37 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  } 
             
             #line default
             #line hidden
             this.Write("                return true;\r\n");
             
-            #line 38 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 39 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  } 
             
             #line default
             #line hidden
             this.Write("            }\r\n            return false;\r\n        }\r\n        public bool Delete(IEnumerable<");
             
-            #line 42 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 43 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
             this.Write("> items)\r\n        {\r\n            if (!items.Any()) return true;\r\n            var deleteValues = new List<object>();\r\n            foreach (var item in items)\r\n            {\r\n                deleteValues.Add(item.");
             
-            #line 48 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 49 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write(");\r\n            }\r\n\r\n            if (BaseDelete(\"");
             
-            #line 51 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 52 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write("\", deleteValues))\r\n            {\r\n");
             
-            #line 53 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 54 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  if (generationObject.InheritedTable != null) { 
             
             #line default
             #line hidden
             this.Write("                if (_");
             
-            #line 54 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 55 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
             this.Write(".Delete(items))\r\n                {\r\n");
             
-            #line 56 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 57 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  if (generationSettings.IncludeCaching) {
             
             #line default
             #line hidden
             this.Write("                    if (CacheEnabled)\r\n                    {\r\n                        foreach (var item in items)\r\n                        {\r\n                            RemoveFromCache(item.");
             
-            #line 61 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 62 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write(");\r\n                        }\r\n                    }\r\n");
             
-            #line 64 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 65 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  } 
             
             #line default
             #line hidden
             this.Write("                    return true;\r\n                }\r\n");
             
-            #line 67 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 68 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 68 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 69 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  if (generationObject.InheritedTable == null) { 
             
             #line default
             #line hidden
             
-            #line 69 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 70 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  if (generationSettings.IncludeCaching) {
             
             #line default
             #line hidden
             this.Write("                if (CacheEnabled)\r\n                {\r\n                    foreach (var item in items)\r\n                    {\r\n                        RemoveFromCache(item.");
             
-            #line 74 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 75 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write(");\r\n                    }\r\n                }\r\n");
             
-            #line 77 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 78 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  } 
             
             #line default
             #line hidden
             this.Write("                return true;\r\n");
             
-            #line 79 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 80 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  } 
             
             #line default
             #line hidden
             this.Write("            }\r\n            return false;\r\n        }\r\n\r\n        public bool Delete(");
             
-            #line 84 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 85 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DataTypeString));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 84 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 85 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.FieldName));
             
             #line default
             #line hidden
             this.Write(")\r\n        {\r\n            if (Delete(new ");
             
-            #line 86 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 87 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
             this.Write(" { ");
             
-            #line 86 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 87 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
             
             #line default
             #line hidden
             this.Write(" = ");
             
-            #line 86 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 87 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.FieldName));
             
             #line default
             #line hidden
             this.Write(" }))\r\n            {\r\n");
             
-            #line 88 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 89 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  if (generationObject.InheritedTable != null) { 
             
             #line default
             #line hidden
             this.Write("                if (_");
             
-            #line 89 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 90 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
             this.Write(".Delete(");
             
-            #line 89 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 90 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.FieldName));
             
             #line default
             #line hidden
             this.Write("))\r\n                {\r\n");
             
-            #line 91 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 92 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  if (generationSettings.IncludeCaching) {
             
             #line default
             #line hidden
             this.Write("                    if (CacheEnabled)\r\n                    {\r\n                        RemoveFromCache(");
             
-            #line 94 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 95 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.FieldName));
             
             #line default
             #line hidden
             this.Write(");\r\n                    }\r\n");
             
-            #line 96 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 97 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  } 
             
             #line default
             #line hidden
             this.Write("                    return true;\r\n                }\r\n");
             
-            #line 99 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 100 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 100 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 101 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  if (generationObject.InheritedTable == null) { 
             
             #line default
             #line hidden
             
-            #line 101 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 102 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  if (generationSettings.IncludeCaching) {
             
             #line default
             #line hidden
             this.Write("                if (CacheEnabled)\r\n                {\r\n                    RemoveFromCache(");
             
-            #line 104 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 105 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.FieldName));
             
             #line default
             #line hidden
             this.Write(");\r\n                }\r\n");
             
-            #line 106 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 107 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  } 
             
             #line default
             #line hidden
             this.Write("                return true;\r\n");
             
-            #line 108 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            #line 109 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
  } 
             
             #line default
             #line hidden
-            this.Write("            }\r\n            return false;\r\n        }\r\n\r\n\r\n        public bool Delete(IEnumerable<");
+            this.Write("            }\r\n            return false;\r\n        }\r\n\r\n        public bool Delete(IEnumerable<");
             
             #line 114 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(pk.DataTypeString));
@@ -500,48 +501,160 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             
             #line default
             #line hidden
-            this.Write("            }\r\n            return false;\r\n        }\r\n\r\n        ");
+            this.Write("            }\r\n            return false;\r\n        }\r\n");
             
-            #line 152 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(DeleteBy(generationObject)));
+            #line 151 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+ // Delete By 
             
             #line default
             #line hidden
-            this.Write("\r\n");
+            
+            #line 152 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+ foreach (var column in generationObject.Table.Columns.Where(x => !x.PrimaryKey)) { 
+            
+            #line default
+            #line hidden
+            this.Write(" \r\n        public bool DeleteBy");
             
             #line 153 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
-
-   string DeleteBy(RepositoryGenerationObject generationObject)
-   {
-       return TtHelpers.AppendInheritanceLogic(generationObject, (column, rgo) =>
-       {
-           var isb = new StringBuilder();
-           isb.AppendLine(
-               $"{Helpers.Tab2}public bool DeleteBy{column.DbColumnName}({column.DataTypeString} {column.FieldName})");
-           isb.AppendLine($"{Helpers.Tab2}{{");
-
-           isb.AppendLine($"{Helpers.Tab3}if (BaseDelete(new DeleteColumn(\"{column.DbColumnName}\", {column.FieldName}, SqlDbType.{SQLServerHelpers.GetDbType(column.SqlDataTypeCode)}), out var items))");
-           isb.AppendLine($"{Helpers.Tab3}{{");
-           if (generationSettings.IncludeCaching)
-           {
-               isb.AppendLine($"{Helpers.Tab4}if (CacheEnabled)");
-               isb.AppendLine($"{Helpers.Tab4}{{");
-               isb.AppendLine($"{Helpers.Tab5}foreach (var item in items)");
-               isb.AppendLine($"{Helpers.Tab5}{{");
-               isb.AppendLine($"{Helpers.Tab6}RemoveFromCache(item.{pk.DbColumnName});");
-               isb.AppendLine($"{Helpers.Tab5}}}");
-               isb.AppendLine($"{Helpers.Tab4}}}");
-           }
-           isb.AppendLine($"{Helpers.Tab4}return true;");
-           isb.AppendLine($"{Helpers.Tab3}}}");
-
-           isb.AppendLine($"{Helpers.Tab3}return false;");
-
-           isb.AppendLine($"{Helpers.Tab2}}}");
-           return isb.ToString();
-       });
-   }
-
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.DbColumnName));
+            
+            #line default
+            #line hidden
+            this.Write("(");
+            
+            #line 153 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.DataType != typeof(XmlDocument) ? column.DataTypeString: "string"));
+            
+            #line default
+            #line hidden
+            this.Write(" ");
+            
+            #line 153 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
+            
+            #line default
+            #line hidden
+            this.Write(")\r\n        {\r\n            if (BaseDelete(new DeleteColumn(nameof(");
+            
+            #line 155 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
+            
+            #line default
+            #line hidden
+            this.Write(".");
+            
+            #line 155 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.DbColumnName));
+            
+            #line default
+            #line hidden
+            this.Write("), ");
+            
+            #line 155 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(column.FieldName));
+            
+            #line default
+            #line hidden
+            this.Write(", SqlDbType.");
+            
+            #line 155 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(SQLServerHelpers.GetDbType(column.SqlDataTypeCode)));
+            
+            #line default
+            #line hidden
+            this.Write("), out var items))\r\n            {\r\n");
+            
+            #line 157 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+ if (generationSettings.IncludeCaching) { 
+            
+            #line default
+            #line hidden
+            
+            #line 158 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+ if (generationObject.Inherits) { 
+            
+            #line default
+            #line hidden
+            this.Write("\t\t\t\tif (_");
+            
+            #line 159 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
+            
+            #line default
+            #line hidden
+            this.Write(".Delete(items))\r\n\t\t\t\t{\r\n\t\t\t\t\tif (CacheEnabled)\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tforeach (var item in items)\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tRemoveFromCache(item.");
+            
+            #line 165 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
+            
+            #line default
+            #line hidden
+            this.Write(");\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n");
+            
+            #line 169 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+ } else { 
+            
+            #line default
+            #line hidden
+            this.Write("\t\t\t\tif (CacheEnabled)\r\n\t\t\t\t{\r\n\t\t\t\t\tforeach (var item in items)\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tRemoveFromCache(item.");
+            
+            #line 174 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
+            
+            #line default
+            #line hidden
+            this.Write(");\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n");
+            
+            #line 177 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write("\t\t\t\treturn true;\r\n");
+            
+            #line 179 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+ } else { 
+            
+            #line default
+            #line hidden
+            
+            #line 180 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+ if (generationObject.Inherits) { 
+            
+            #line default
+            #line hidden
+            this.Write("                return _");
+            
+            #line 181 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
+            
+            #line default
+            #line hidden
+            this.Write(".Delete(items);\r\n");
+            
+            #line 182 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+ } else { 
+            
+            #line default
+            #line hidden
+            this.Write("                return true;\r\n");
+            
+            #line 184 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+ } 
+            
+            #line default
+            #line hidden
+            
+            #line 185 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+ }
+            
+            #line default
+            #line hidden
+            this.Write("\t\t\t}\r\n\t\t\treturn false;\r\n\t\t}\r\n");
+            
+            #line 189 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Delete.tt"
+ } 
             
             #line default
             #line hidden

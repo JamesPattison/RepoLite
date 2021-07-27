@@ -16,7 +16,7 @@
             if (validationErrors.Any())
                 throw new ValidationException(validationErrors);
 
-<# if (generationObject.InheritedTable != null) {#>
+<# if (generationObject.Inherits) { #>
             if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Create(item))
             {
                 var createdKeys = BaseCreate(
@@ -38,8 +38,7 @@
                 return true;
             }
             return false;
-<# } #>
-<# if (generationObject.InheritedTable == null) {#>
+<# } else { #>
             var createdKeys = BaseCreate(
 <# foreach (var column in generationObject.Table.Columns) { #>
                     item.<#= column.PropertyName #><#= column == generationObject.Table.Columns.Last()? ");": ","#>
@@ -69,7 +68,7 @@
             if (validationErrors.Any())
                 throw new ValidationException(validationErrors);
 
-<# if (generationObject.InheritedTable != null) {#>
+<# if (generationObject.Inherits) { #>
             if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.BulkCreate(items))
             {
                 var dt = new DataTable();
@@ -100,8 +99,7 @@
                 return false;
             }
             return false;
-<# } #>
-<# if (generationObject.InheritedTable == null) {#>
+<# } else { #>
 			var dt = new DataTable();
 			foreach (var mergeColumn in <#= generationObject.Table.ClassName #>.Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
 				dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);

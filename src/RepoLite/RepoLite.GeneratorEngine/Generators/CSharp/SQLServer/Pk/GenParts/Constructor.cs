@@ -71,7 +71,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write(".Columns)\r\n\t\t{\r\n");
             
             #line 9 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Constructor.tt"
- if (generationObject.InheritedTable != null) { 
+ if (generationObject.Inherits) { 
             
             #line default
             #line hidden
@@ -147,7 +147,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
             this.Write(".Columns, useCache, cacheDurationInSeconds)\r\n\t\t{\r\n");
             
             #line 21 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Constructor.tt"
- if (generationObject.InheritedTable != null) { 
+ if (generationObject.Inherits) { 
             
             #line default
             #line hidden
