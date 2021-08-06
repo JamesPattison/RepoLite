@@ -9,6 +9,9 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Xml;
 using Microsoft.Extensions.Options;
+using RepoLite.Common.Interfaces;
+using RepoLite.Common.Models.ProcedureParameters;
+using RepoLite.Common.Models.Querying;
 using RepoLite.Common.Options;
 
 namespace RepoLite.DataAccess.Accessors
@@ -20,17 +23,17 @@ namespace RepoLite.DataAccess.Accessors
         public SQLServerAccess(
             IOptions<GenerationOptions> generationOptions,
             IOptions<SystemOptions> systemOptions)
-        : base(generationOptions)
+            : base(generationOptions)
         {
             _systemSettings = systemOptions.Value;
         }
-        
-        public override List<TableAndSchema> GetTables()
+
+        public override IEnumerable<NameAndSchema> GetTables()
         {
             return GetTables(null);
         }
 
-        public override List<TableAndSchema> GetTables(string schema)
+        public override IEnumerable<NameAndSchema> GetTables(string schema)
         {
             using (var conn = new SqlConnection(_systemSettings.ConnectionString))
             {
@@ -43,24 +46,189 @@ namespace RepoLite.DataAccess.Accessors
                             TABLE_TYPE = 'BASE TABLE'
                         AND
                             (@schema IS NULL OR TABLE_SCHEMA = @schema)",
-                    new { schema });
+                    new {schema});
 
-                var toReturn = tables.Select(table => table.GetTableAndSchema()).ToList();
+                var toReturn = tables.Select(table => table.GetTableAndSchema());
                 return toReturn;
             }
         }
 
-        public override List<string> GetProcedures()
+        public override IEnumerable<NameAndSchema> GetProcedures()
         {
-            throw new NotImplementedException();
+            using var cn = new SqlConnection(_systemSettings.ConnectionString);
+
+            var procedures = cn.Query<NameAndSchema>(@"
+                            SELECT
+                                ROUTINE_SCHEMA  AS [Schema],
+                                ROUTINE_NAME    AS Name  
+                            FROM INFORMATION_SCHEMA.ROUTINES");
+
+            return procedures;
         }
 
-        public override List<Procedure> LoadProcedures(List<string> procedures)
+        public override IEnumerable<Procedure> LoadProcedures(IEnumerable<NameAndSchema> procedures)
         {
-            throw new NotImplementedException();
+            using (var cn = new SqlConnection(_systemSettings.ConnectionString))
+            {
+                foreach (var procedure in procedures)
+                {
+                    var proc = new Procedure
+                    {
+                        Name = procedure.Name,
+                        Schema = procedure.Schema,
+                        Parameters = LoadProcedureParameters(procedure).ToList()
+                    };
+
+                    proc.ResultSets = LoadProcedureResults(proc).ToList();
+                    yield return proc;
+                }
+            }
         }
 
-        public override List<Column> LoadTableColumns(Table table)
+        private IEnumerable<IProcedureParameter> LoadProcedureParameters(NameAndSchema procedure)
+        {
+            using var cn = new SqlConnection(_systemSettings.ConnectionString);
+            
+            var parameterInfo = cn.Query<ProcedureParameterInfo>(@"
+                                SELECT 
+	                                pa.name				AS Name,
+	                                pa.parameter_id		AS Pos,
+	                                pa.system_type_id	AS SqlDataType,
+	                                pa.is_output		AS IsOutput,
+                                    pa.Is_Nullable		AS IsNullable,
+	                                pa.max_length       AS Length,
+                                    pa.[precision]      AS Precision,
+                                    pa.scale            AS Scale,
+	                                t.is_user_defined	AS IsUserDefined,
+	                                t.is_table_type		AS IsTableType,
+	                                CASE t.is_user_defined WHEN 1 THEN SCHEMA_NAME(t.schema_id) ELSE NULL END AS UserDefinedSchema,
+	                                CASE t.is_user_defined WHEN 1 THEN t.name ELSE NULL END	AS UserDefinedName
+                                FROM
+	                                SYS.PROCEDURES p
+	                                JOIN 
+		                                SYS.parameters pa
+			                                ON p.object_id = pa.object_id
+	                                INNER JOIN 
+		                                sys.types AS t 
+			                                on pa.system_type_id = t.system_type_id AND pa.user_type_id = t.user_type_id
+                                WHERE
+		                                SCHEMA_NAME(p.schema_id) = @schema
+	                                AND
+		                                p.name = @name",
+                new
+                {
+                    schema = procedure.Schema,
+                    name = procedure.Name
+                });
+
+            foreach (var parameter in parameterInfo)
+            {
+                IProcedureParameter param;
+                if (parameter.IsUserDefined)
+                {
+                    param = LoadCustomType(parameter);
+                }
+                else
+                {
+                    parameter.Type = GetDataType(parameter.SqlDataType).Item2;
+                    param = parameter;
+                }
+                
+                yield return param;
+            }
+        }
+
+        private IEnumerable<ResultsSet> LoadProcedureResults(Procedure procedure)
+        {
+            using var cn = new SqlConnection(_systemSettings.ConnectionString);
+
+            var paramString = "";
+            var declares = "";
+            foreach (var parameter in procedure.Parameters)
+            {
+                switch (parameter)
+                {
+                    case BasicParameter basic:
+                        paramString = $"{basic.Name}={basic.Type.GetDefault()}";
+                        break;
+                    case TableTypeParameter table:
+                        declares += $"DECLARE @tbl{table.Name} {table.SqlName};";
+                        paramString += $"{table.Name}=@tbl{table.Name}";
+                        break;
+                }
+            }
+            
+            var adapter = new SqlDataAdapter($@"
+                SET FMTONLY ON;
+                {declares}
+                exec {procedure.Name} {paramString}
+                SET FMTONLY OFF;
+                ", cn);
+            
+            var customers = new DataSet();
+            adapter.Fill(customers);
+            
+            foreach (DataTable table in customers.Tables)
+            {
+                var resultsSet = new ResultsSet{Values = new List<ResultsSetValue>()};
+                foreach (DataColumn column in table.Columns)
+                {
+                    resultsSet.Values.Add(new ResultsSetValue
+                    {
+                        Name = column.ColumnName,
+                        Type = column.DataType
+                    });
+                }
+
+                yield return resultsSet;
+            }
+        }
+
+        private TableTypeParameter LoadCustomType(ProcedureParameterInfo parameterInfo)
+        {
+            using var cn = new SqlConnection(_systemSettings.ConnectionString);
+            var param = new TableTypeParameter
+            {
+                Schema = parameterInfo.UserDefinedSchema,
+                Name = parameterInfo.Name,
+                SqlName = parameterInfo.UserDefinedName,
+                Columns = new List<BasicParameter>()
+            };
+            
+            var parameters = cn.Query<BasicParameter>(@"
+                            SELECT 
+                                c.name            AS Name,
+                                c.column_id       AS Pos,
+                                c.system_type_id  AS SqlDataType,
+                                c.Is_Nullable     AS IsNullable,
+                                c.max_length      AS Length,
+                                c.[precision]     AS Precision,
+                                c.scale           AS Scale
+                                -- c.collation_name  AS Collation
+                            FROM sys.table_types tt
+                                JOIN sys.columns c
+                                    ON tt.type_table_object_id = c.object_id
+                            WHERE
+		                            SCHEMA_NAME(tt.schema_id) = @schema
+	                            AND
+		                            tt.name = @name",
+                new
+                {
+                    schema= parameterInfo.UserDefinedSchema,
+                    name = parameterInfo.UserDefinedName
+                }).ToList();
+
+            foreach (var parameter in parameters)
+            {
+                parameter.Type = GetDataType(parameter.SqlDataType).Item2;
+            }
+
+            param.Columns.AddRange(parameters);
+            
+            return param;
+        }
+
+        public override IEnumerable<Column> LoadTableColumns(Table table)
         {
             using (var cn = new SqlConnection(_systemSettings.ConnectionString))
             {

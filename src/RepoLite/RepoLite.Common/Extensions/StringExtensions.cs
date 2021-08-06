@@ -42,17 +42,17 @@ namespace RepoLite.Common.Extensions
             return sb.ToString();
         }
 
-        public static TableAndSchema GetTableAndSchema(this string tableName)
+        public static NameAndSchema GetTableAndSchema(this string tableName)
         {
             if (!tableName.Contains("."))
-                return new TableAndSchema("dbo", tableName);
+                return new NameAndSchema("dbo", tableName);
 
             var split = tableName.Split('.');
             var schema = split[0];
             if (string.IsNullOrEmpty(schema))
                 schema = "dbo";
             var table = split[1];
-            return new TableAndSchema(schema, table);
+            return new NameAndSchema(schema, table);
         }
 
         public static string LowerFirst(this string input)

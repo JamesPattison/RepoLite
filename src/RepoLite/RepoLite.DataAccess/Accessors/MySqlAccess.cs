@@ -24,12 +24,12 @@ namespace RepoLite.DataAccess.Accessors
             _systemSettings = systemOptions.Value;
         }
         
-        public override List<TableAndSchema> GetTables()
+        public override IEnumerable<NameAndSchema> GetTables()
         {
             return GetTables(null);
         }
 
-        public override List<TableAndSchema> GetTables(string schema)
+        public override IEnumerable<NameAndSchema> GetTables(string schema)
         {
             using (var conn = new MySqlConnection(_systemSettings.ConnectionString))
             {
@@ -49,17 +49,17 @@ namespace RepoLite.DataAccess.Accessors
             }
         }
 
-        public override List<string> GetProcedures()
+        public override IEnumerable<NameAndSchema> GetProcedures()
         {
             throw new NotImplementedException();
         }
 
-        public override List<Procedure> LoadProcedures(List<string> procedures)
+        public override IEnumerable<Procedure> LoadProcedures(IEnumerable<NameAndSchema> procedures)
         {
             throw new NotImplementedException();
         }
 
-        public override List<Column> LoadTableColumns(Table table)
+        public override IEnumerable<Column> LoadTableColumns(Table table)
         {
             using (var cn = new MySqlConnection(_systemSettings.ConnectionString))
             {

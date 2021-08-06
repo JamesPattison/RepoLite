@@ -5,6 +5,7 @@ using RepoLite.DataAccess.Accessors;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using Microsoft.Extensions.Options;
 using RepoLite.Common.Options;
 
@@ -18,29 +19,29 @@ namespace RepoLite.DataAccess
         {
             _generationSettings = generationOptions.Value;
         }
-        public abstract List<TableAndSchema> GetTables();
-        public abstract List<TableAndSchema> GetTables(string schema);
-        public List<Table> LoadTables(List<TableAndSchema> tables)
+        public abstract IEnumerable<NameAndSchema> GetTables();
+        public abstract IEnumerable<NameAndSchema> GetTables(string schema);
+        public abstract IEnumerable<NameAndSchema> GetProcedures();
+        public IEnumerable<Table> LoadTables(IEnumerable<NameAndSchema> tables)
         {
             var createdTables = new List<Table>();
             foreach (var table in tables)
             {
                 var item = new Table(_generationSettings)
                 {
-                    DbTableName = table.Table,
+                    DbTableName = table.Name,
                     Schema = table.Schema
                 };
 
-                item.Columns = LoadTableColumns(item);
+                item.Columns = LoadTableColumns(item).ToList();
 
                 createdTables.Add(item);
             }
 
             return createdTables;
         }
-        public abstract List<string> GetProcedures();
-        public abstract List<Procedure> LoadProcedures(List<string> procedures);
+        public abstract IEnumerable<Procedure> LoadProcedures(IEnumerable<NameAndSchema> procedures);
         //protected abstract List<TableDefault> GetTableDefaults(List<TableAndSchema> tables);
-        public abstract List<Column> LoadTableColumns(Table table);
+        public abstract IEnumerable<Column> LoadTableColumns(Table table);
     }
 }

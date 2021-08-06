@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using RepoLite.Common.Interfaces;
 
 namespace RepoLite.GeneratorEngine.Generators
 {

@@ -1,5 +1,6 @@
 using System;
 using MySql.Data.MySqlClient;
+using RepoLite.Common.Interfaces;
 
 namespace RepoLite.GeneratorEngine
 {

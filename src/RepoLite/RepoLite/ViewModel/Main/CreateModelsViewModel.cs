@@ -45,9 +45,9 @@ namespace RepoLite.ViewModel.Main
                 {
                     Tables.Clear();
                     var tableDefinitions = _dataSource.GetTables();
-                    foreach (var table in tableDefinitions.OrderBy(x => x.Schema).ThenBy(x => x.Table).ToList())
+                    foreach (var table in tableDefinitions.OrderBy(x => x.Schema).ThenBy(x => x.Name).ToList())
                     {
-                        Tables.Add(new TableToGenerate { Schema = table.Schema, Table = table.Table });
+                        Tables.Add(new TableToGenerate { Schema = table.Schema, Table = table.Name });
                     }
                     OnPropertyChanged(nameof(Tables));
                     Loaded = true;
@@ -78,7 +78,8 @@ namespace RepoLite.ViewModel.Main
                 {
                     var tables = Tables.Where(x => x.Selected);
 
-                    var tableDefinitions = _dataSource.LoadTables(tables.Select(x => new TableAndSchema(x.Schema, x.Table)).ToList());
+                    var tableDefinitions = _dataSource
+                        .LoadTables(tables.Select(x => new NameAndSchema(x.Schema, x.Table)).ToList()).ToList();
 
                     DoWork(() =>
                     {
