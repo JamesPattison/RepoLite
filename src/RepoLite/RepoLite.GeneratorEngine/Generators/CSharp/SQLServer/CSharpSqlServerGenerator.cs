@@ -15,7 +15,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
         {
             _generationOptions = generationOptions.Value;
         }
-        public override string ModelForTable(RepositoryGenerationObject generationObject)
+        public override string BuildModel(RepositoryGenerationObject generationObject)
         {
             if (generationObject.Table.PrimaryKeys.Any())
             {
@@ -30,7 +30,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             return string.Empty;
         }
 
-        public override string RepositoryForTable(RepositoryGenerationObject generationObject)
+        public override string BuildRepository(RepositoryGenerationObject generationObject)
         {
             if (generationObject.Table.PrimaryKeys.Any())
             {
@@ -44,6 +44,11 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
             }
 
             return string.Empty;
+        }
+
+        public override string BuildProcedure(Procedure procedure)
+        {
+            throw new NotImplementedException();
         }
 
         public override string BuildBaseRepository()

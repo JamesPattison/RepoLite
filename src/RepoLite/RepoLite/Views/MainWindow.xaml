@@ -20,6 +20,7 @@
             <mui:LinkGroup.Links>
                 <mui:Link DisplayName="Models" Source="/Views/Generation/CreateModelsView.xaml" />
                 <mui:Link DisplayName="Repositories" Source="/Views/Generation/CreateRepositoriesView.xaml" />
+                <mui:Link DisplayName="Procedures" Source="/Views/Generation/CreateProdecuresView.xaml" />
             </mui:LinkGroup.Links>
         </mui:LinkGroup>
 

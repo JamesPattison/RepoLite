@@ -12,13 +12,15 @@ namespace RepoLite.GeneratorEngine
         /// Generates a model class
         /// </summary>
         /// <returns></returns>
-        string ModelForTable(RepositoryGenerationObject generationObject);
+        string BuildModel(RepositoryGenerationObject generationObject);
 
         /// <summary>
         /// Generates a repository class
         /// </summary>
         /// <returns></returns>
-        string RepositoryForTable(RepositoryGenerationObject generationObject);
+        string BuildRepository(RepositoryGenerationObject generationObject);
+        
+        string BuildProcedure(Procedure procedure);
 
         /// <summary>
         /// Gets the file extension for the model

@@ -2,7 +2,7 @@
 
 namespace RepoLite.GeneratorEngine.Models
 {
-    public class TableToGenerate : NotifyChangingObject
+    public class EntityToGenerate : NotifyChangingObject
     {
         private bool _selected;
         private string _schema;

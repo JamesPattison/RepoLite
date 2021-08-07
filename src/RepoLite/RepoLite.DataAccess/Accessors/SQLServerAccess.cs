@@ -35,9 +35,8 @@ namespace RepoLite.DataAccess.Accessors
 
         public override IEnumerable<NameAndSchema> GetTables(string schema)
         {
-            using (var conn = new SqlConnection(_systemSettings.ConnectionString))
-            {
-                var tables = conn.Query<string>(@"
+            using var conn = new SqlConnection(_systemSettings.ConnectionString);
+            var tables = conn.Query<string>(@"
                     SELECT 
                         TABLE_SCHEMA + '.' + TABLE_NAME
                     FROM
@@ -46,11 +45,10 @@ namespace RepoLite.DataAccess.Accessors
                             TABLE_TYPE = 'BASE TABLE'
                         AND
                             (@schema IS NULL OR TABLE_SCHEMA = @schema)",
-                    new {schema});
+                new {schema});
 
-                var toReturn = tables.Select(table => table.GetTableAndSchema());
-                return toReturn;
-            }
+            var toReturn = tables.Select(table => table.GetTableAndSchema());
+            return toReturn;
         }
 
         public override IEnumerable<NameAndSchema> GetProcedures()
@@ -68,20 +66,17 @@ namespace RepoLite.DataAccess.Accessors
 
         public override IEnumerable<Procedure> LoadProcedures(IEnumerable<NameAndSchema> procedures)
         {
-            using (var cn = new SqlConnection(_systemSettings.ConnectionString))
+            foreach (var procedure in procedures)
             {
-                foreach (var procedure in procedures)
+                var proc = new Procedure
                 {
-                    var proc = new Procedure
-                    {
-                        Name = procedure.Name,
-                        Schema = procedure.Schema,
-                        Parameters = LoadProcedureParameters(procedure).ToList()
-                    };
+                    Name = procedure.Name,
+                    Schema = procedure.Schema,
+                    Parameters = LoadProcedureParameters(procedure).ToList()
+                };
 
-                    proc.ResultSets = LoadProcedureResults(proc).ToList();
-                    yield return proc;
-                }
+                proc.ResultSets = LoadProcedureResults(proc).ToList();
+                yield return proc;
             }
         }
 
@@ -230,9 +225,8 @@ namespace RepoLite.DataAccess.Accessors
 
         public override IEnumerable<Column> LoadTableColumns(Table table)
         {
-            using (var cn = new SqlConnection(_systemSettings.ConnectionString))
-            {
-                var columns = cn.Query<Column>(@"
+            using var cn = new SqlConnection(_systemSettings.ConnectionString);
+            var columns = cn.Query<Column>(@"
                             SELECT
 	                            c.COLUMN_NAME AS DbColumnName,	
 	                            COLUMNPROPERTY(object_id('[' + c.TABLE_SCHEMA + '].[' + c.TABLE_NAME + ']'), c.COLUMN_NAME, 'IsComputed') as IsComputed,	
@@ -294,33 +288,32 @@ namespace RepoLite.DataAccess.Accessors
 								AND t.system_type_id <> 189 -- TIMESTAMP columns
                             ORDER BY 
 	                            c.ORDINAL_POSITION ASC",
-                    new
+                new
 
-                    {
-                        table = $"{table.Schema}.{table.DbTableName}".ToLower()
-                    }).ToList();
-
-                var toReturn = new List<Column>();
-
-                foreach (var column in columns)
                 {
-                    var preExisting = toReturn.FirstOrDefault(x => x.DbColumnName == column.DbColumnName);
-                    if (preExisting != null)
-                    {
-                        preExisting.ForeignKey |= column.ForeignKey;
-                        preExisting.PrimaryKey |= column.PrimaryKey;
-                    }
-                    else
-                    {
-                        var dt = GetDataType(column.SqlDataTypeCode);
-                        column.DataTypeString = dt.Item1;
-                        column.DataType = dt.Item2;
-                        toReturn.Add(column);
-                    }
-                }
+                    table = $"{table.Schema}.{table.DbTableName}".ToLower()
+                }).ToList();
 
-                return toReturn;
+            var toReturn = new List<Column>();
+
+            foreach (var column in columns)
+            {
+                var preExisting = toReturn.FirstOrDefault(x => x.DbColumnName == column.DbColumnName);
+                if (preExisting != null)
+                {
+                    preExisting.ForeignKey |= column.ForeignKey;
+                    preExisting.PrimaryKey |= column.PrimaryKey;
+                }
+                else
+                {
+                    var dt = GetDataType(column.SqlDataTypeCode);
+                    column.DataTypeString = dt.Item1;
+                    column.DataType = dt.Item2;
+                    toReturn.Add(column);
+                }
             }
+
+            return toReturn;
         }
 
         private Tuple<string, Type> GetDataType(int sqlType)

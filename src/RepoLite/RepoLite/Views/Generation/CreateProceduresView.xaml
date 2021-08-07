@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="RepoLite.Views.Generation.CreateRepositoriesView"
+<UserControl x:Class="RepoLite.Views.Generation.CreateProceduresView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,7 +6,7 @@
              xmlns:generation="clr-namespace:RepoLite.ViewModel.Generation"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
-             d:DataContext="{d:DesignInstance generation:CreateRepositoriesViewModel}" >
+             d:DataContext="{d:DesignInstance generation:CreateProceduresViewModel}" >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -17,10 +17,10 @@
             <ColumnDefinition Width="6"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        
+        <Label Grid.Row="0" Grid.ColumnSpan="3" HorizontalAlignment="Left" FontSize="24px" Foreground="Black">Create Models</Label>
 
-        <Label Grid.Row="0" Grid.ColumnSpan="3" HorizontalAlignment="Left" FontSize="24px" Foreground="Black">Create Repositories</Label>
-
-        <ScrollViewer Grid.Row="1" Grid.Column="0">
+        <ScrollViewer Grid.Row="1"  Grid.Column="0">
             <DockPanel LastChildFill="True">
                 <Grid DockPanel.Dock="Top">
                     <Grid.ColumnDefinitions>
@@ -30,10 +30,9 @@
                     <Button Grid.Column="0" Content="Save Selection" Margin="3" Command="{Binding Path=SaveSelection}" IsEnabled="{Binding Path=Loaded}"></Button>
                     <Button Grid.Column="1" Content="Load Selection" Margin="3" Command="{Binding Path=LoadSelection}" IsEnabled="{Binding Path=Loaded}"></Button>
                 </Grid>
-
-                <Button DockPanel.Dock="Top" Content="Load Tables" Margin="3" Command="{Binding Path=LoadTables}" />
+                <Button DockPanel.Dock="Top" Content="Load Procedures" Margin="3" Command="{Binding Path=LoadProcedures}" />
                 <Button DockPanel.Dock="Top" Content="Toggle Select All" Margin="3" Command="{Binding Path=ToggleSelectAll}" />
-                <ListView DockPanel.Dock="Bottom" Margin="3 0 3 3" ItemsSource="{Binding Path=Tables}">
+                <ListView DockPanel.Dock="Bottom" Margin="3 0 3 3" ItemsSource="{Binding Path=Procedures}">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <Setter Property="Focusable" Value="false"/>
@@ -59,8 +58,8 @@
                 </ListView>
             </DockPanel>
         </ScrollViewer>
-        <GridSplitter Grid.Row="1" Grid.Column="1" />
-        <ScrollViewer Grid.Row="1" Grid.Column="2">
+        <GridSplitter Grid.Row="1"  Grid.Column="1" />
+        <ScrollViewer Grid.Row="1"  Grid.Column="2">
             <DockPanel LastChildFill="True">
                 <Button DockPanel.Dock="Top" Margin="3" Command="{Binding Path=Generate}">Generate</Button>
                 <ListBox DockPanel.Dock="Bottom" Margin="3 0 3 3"

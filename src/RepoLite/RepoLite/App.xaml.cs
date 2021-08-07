@@ -16,7 +16,7 @@ using RepoLite.GeneratorEngine.Generators.CSharp.MySql;
 using RepoLite.GeneratorEngine.Generators.CSharp.SQLServer;
 using RepoLite.Models;
 using RepoLite.ViewModel;
-using RepoLite.ViewModel.Main;
+using RepoLite.ViewModel.Generation;
 using RepoLite.ViewModel.Settings;
 using RepoLite.Views;
 

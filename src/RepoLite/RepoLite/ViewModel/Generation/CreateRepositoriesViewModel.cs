@@ -1,25 +1,23 @@
-﻿using Newtonsoft.Json;
-using RepoLite.Commands;
-using RepoLite.Common;
-using RepoLite.Common.Enums;
-using RepoLite.Common.Models;
-using RepoLite.DataAccess;
-using RepoLite.GeneratorEngine;
-using RepoLite.GeneratorEngine.Models;
-using RepoLite.ViewModel.Base;
-using RepoLite.Views;
-using RepoLite.Views.Generation;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using Microsoft.Extensions.Options;
-using RepoLite.Common.Extensions;
+using Newtonsoft.Json;
+using RepoLite.Commands;
+using RepoLite.Common.Enums;
+using RepoLite.Common.Models;
 using RepoLite.Common.Options;
+using RepoLite.DataAccess;
+using RepoLite.GeneratorEngine;
+using RepoLite.GeneratorEngine.Models;
+using RepoLite.ViewModel.Base;
+using RepoLite.Views;
+using RepoLite.Views.Generation;
 
-namespace RepoLite.ViewModel.Main
+namespace RepoLite.ViewModel.Generation
 {
     public class CreateRepositoriesViewModel : ViewModelBase
     {
@@ -30,7 +28,7 @@ namespace RepoLite.ViewModel.Main
         private IGenerator _generator;
         public ObservableCollection<string> Messages { get; set; } = new ObservableCollection<string>();
 
-        public ObservableCollection<TableToGenerate> Tables { get; set; } = new ObservableCollection<TableToGenerate>();
+        public ObservableCollection<EntityToGenerate> Tables { get; set; } = new ObservableCollection<EntityToGenerate>();
 
         public bool Loaded
         {
@@ -48,7 +46,7 @@ namespace RepoLite.ViewModel.Main
                     var tableDefinitions = _dataSource.GetTables();
                     foreach (var table in tableDefinitions.OrderBy(x => x.Schema).ThenBy(x => x.Name).ToList())
                     {
-                        Tables.Add(new TableToGenerate { Schema = table.Schema, Table = table.Name });
+                        Tables.Add(new EntityToGenerate { Schema = table.Schema, Table = table.Name });
                     }
                     OnPropertyChanged(nameof(Tables));
                     Loaded = true;
@@ -93,15 +91,12 @@ namespace RepoLite.ViewModel.Main
 
                         tableDefinitions.ForEach(x =>
                         {
-                            if (true)
-                            {
-                                var model = _generator.ModelForTable(new RepositoryGenerationObject(x, tableDefinitions));
+                            var model = _generator.BuildModel(new RepositoryGenerationObject(x, tableDefinitions));
 
-                                createModelViewModel.CreateModel(x, _generator, model);
-                            }
-
+                            createModelViewModel.CreateModel(x, _generator, model);
+                                
                             LogMessage($"Processing Table {x.Schema}.{x.ClassName}");
-                            var repository = _generator.RepositoryForTable(new RepositoryGenerationObject(x, tableDefinitions));
+                            var repository = _generator.BuildRepository(new RepositoryGenerationObject(x, tableDefinitions));
 
                             CreateRepo(x, _generator, repository);
                         });

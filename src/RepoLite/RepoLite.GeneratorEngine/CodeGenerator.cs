@@ -7,8 +7,10 @@ namespace RepoLite.GeneratorEngine
 {
     public abstract class CodeGenerator : IGenerator
     {
-        public abstract string ModelForTable(RepositoryGenerationObject generationObject);
-        public abstract string RepositoryForTable(RepositoryGenerationObject generationObject);
+        public abstract string BuildModel(RepositoryGenerationObject generationObject);
+        public abstract string BuildRepository(RepositoryGenerationObject generationObject);
+        public abstract string BuildProcedure(Procedure procedure);
+
         public abstract string FileExtension();
         public abstract string BuildBaseRepository();
         public abstract string BuildBaseModel();
