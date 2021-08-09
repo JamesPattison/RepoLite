@@ -50,5 +50,20 @@ namespace RepoLite.ViewModel
                 });
             }
         }
+
+        public ICommand NavigateToCreateProcedures
+        {
+            get
+            {
+                return new RelayCommand(o =>
+                {
+                    DoWork(() =>
+                    {
+                        var wnd = o as LandingView;
+                        Execute("/Views/Generation/CreateProceduresView.xaml", wnd);
+                    });
+                });
+            }
+        }
     }
 }

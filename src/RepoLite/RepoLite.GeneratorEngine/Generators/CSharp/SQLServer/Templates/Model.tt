@@ -5,7 +5,6 @@
 <#@ import namespace="RepoLite.Common.Models" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="RepoLite.Common" #>
-<#@ import namespace="RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.Helpers" #>
 <#@ import namespace="System.Xml" #>
 <#@ import namespace="System.Data" #>
 <# var pk = generationObject.Table.PrimaryKeys.FirstOrDefault();#>

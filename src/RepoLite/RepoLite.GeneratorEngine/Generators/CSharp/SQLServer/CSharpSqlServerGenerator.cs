@@ -3,7 +3,8 @@ using RepoLite.Common.Models;
 using RepoLite.Common.Options;
 using System;
 using System.Linq;
-using RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk;
+using RepoLite.GeneratorEngine.Generators.CSharp.MySql;
+using RepoLite.GeneratorEngine.Generators.CSharp.MySql.Pk;
 
 namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
 {
@@ -48,7 +49,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
 
         public override string BuildProcedure(Procedure procedure)
         {
-            throw new NotImplementedException();
+            return TemplateProcessor.ProcessTemplate<RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates.Procedure>(_generationOptions, procedure);
         }
 
         public override string BuildBaseRepository()

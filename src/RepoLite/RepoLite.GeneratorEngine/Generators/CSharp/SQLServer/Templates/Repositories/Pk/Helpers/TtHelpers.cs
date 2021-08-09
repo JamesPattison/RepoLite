@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using RepoLite.Common.Models;
 
-namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.Helpers
+namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates.Repositories.Pk.Helpers
 {
     public class TtHelpers
     {

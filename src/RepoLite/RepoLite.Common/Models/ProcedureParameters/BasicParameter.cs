@@ -13,6 +13,7 @@ namespace RepoLite.Common.Models.ProcedureParameters
         public int Length { get; set; }
         public int Precision { get; set; }
         public int Scale { get; set; }
+        public string TypeString { get; set; }
         public Type Type { get; set; }
     }
 }

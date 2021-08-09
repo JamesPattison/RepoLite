@@ -82,16 +82,16 @@ namespace RepoLite.ViewModel.Generation
 
                     DoWork(() =>
                     {
-                        CreateBaseModel(_generator);
+                        //CreateBaseModel(_generator);
 
                         procedureDefinitions.ForEach(x =>
                         {
                             LogMessage($"Processing Table {x.Schema}.{x.Name}");
 
-                            _generator.BuildProcedure(x);
+                            var procedure = _generator.BuildProcedure(x);
                             // var model = _generator.ModelForTable(new RepositoryGenerationObject(x, tableDefinitions)).ToString();
                             //
-                            // CreateProcedure(x, _generator, model);
+                             CreateProcedure(x, _generator, procedure);
                         });
                     }, () => Process.Start("explorer.exe", _generationSettings.OutputDirectory));
                 });
@@ -171,11 +171,11 @@ namespace RepoLite.ViewModel.Generation
             _generator = IOC.Resolve<GeneratorResolver>().Invoke(_systemSettings.DataSource, _systemSettings.GenerationLanguage);
         }
 
-        internal void CreateModel(Table table, IGenerator generator, string modelName)
+        internal void CreateProcedure(Procedure procedure, IGenerator generator, string content)
         {
-            var outputDirectory = $"{_generationSettings.OutputDirectory}/Models";
+            var outputDirectory = $"{_generationSettings.OutputDirectory}/Procedures";
 
-            var result = table.ClassName;
+            var result = procedure.Name;
 
             string fileName;
 
@@ -191,9 +191,12 @@ namespace RepoLite.ViewModel.Generation
 
             if (!Directory.Exists(_generationSettings.OutputDirectory))
                 Directory.CreateDirectory(_generationSettings.OutputDirectory);
-            LogMessage($"Creating Model File for {table.Schema}.{table.ClassName} in {outputDirectory}/");
-            File.WriteAllText(fileName, modelName);
-            LogMessage($"Done {table.Schema}.{table.ClassName}!");
+            if (!Directory.Exists(outputDirectory))
+                Directory.CreateDirectory(outputDirectory);
+            
+            LogMessage($"Creating Procedure File for {procedure.Schema}.{procedure.Name} in {outputDirectory}/");
+            File.WriteAllText(fileName, content);
+            LogMessage($"Done {procedure.Schema}.{procedure.Name}!");
         }
 
         internal void CreateBaseModel(IGenerator generator)

@@ -7,6 +7,7 @@
     <ItemGroup>
       <PackageReference Include="FuzzyString" Version="1.0.0" />
       <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0-preview.5.21301.5" />
+      <PackageReference Include="morelinq" Version="3.3.2" />
       <PackageReference Include="MySql.Data" Version="8.0.25" />
       <PackageReference Include="System.CodeDom" Version="6.0.0-preview.5.21301.5" />
     </ItemGroup>
@@ -56,18 +57,6 @@
         <Generator>TextTemplatingFilePreprocessor</Generator>
         <LastGenOutput>PkRepository.cs</LastGenOutput>
       </None>
-      <None Update="Generators\CSharp\SQLServer\BaseRepository.tt">
-        <Generator>TextTemplatingFilePreprocessor</Generator>
-        <LastGenOutput>BaseRepository.cs</LastGenOutput>
-      </None>
-      <None Update="Generators\CSharp\SQLServer\BaseModel.tt">
-        <Generator>TextTemplatingFilePreprocessor</Generator>
-        <LastGenOutput>BaseModel.cs</LastGenOutput>
-      </None>
-      <None Update="Generators\CSharp\SQLServer\Model.tt">
-        <Generator>TextTemplatingFilePreprocessor</Generator>
-        <LastGenOutput>Model.cs</LastGenOutput>
-      </None>
       <None Update="Generators\CSharp\MySql\BaseModel.tt">
         <Generator>TextTemplatingFilePreprocessor</Generator>
         <LastGenOutput>BaseModel.cs</LastGenOutput>
@@ -81,6 +70,62 @@
         <LastGenOutput>Model.cs</LastGenOutput>
       </None>
       <None Update="Generators\CSharp\MySql\Pk\PkRepository.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>PkRepository.cs</LastGenOutput>
+      </None>
+      <None Update="Generators\CSharp\SQLServer\Templates\BaseModel.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>BaseModel.cs</LastGenOutput>
+      </None>
+      <None Update="Generators\CSharp\SQLServer\Templates\BaseRepository.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>BaseRepository.cs</LastGenOutput>
+      </None>
+      <None Update="Generators\CSharp\SQLServer\Templates\Model.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>Model.cs</LastGenOutput>
+      </None>
+      <None Update="Generators\CSharp\SQLServer\Templates\Procedure.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>Procedure.cs</LastGenOutput>
+      </None>
+      <None Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>Constructor.cs</LastGenOutput>
+      </None>
+      <None Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Create.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>Create.cs</LastGenOutput>
+      </None>
+      <None Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Delete.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>Delete.cs</LastGenOutput>
+      </None>
+      <None Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Get.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>Get.cs</LastGenOutput>
+      </None>
+      <None Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Interface.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>Interface.cs</LastGenOutput>
+      </None>
+      <None Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Merge.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>Merge.cs</LastGenOutput>
+      </None>
+      <None Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Misc.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>Misc.cs</LastGenOutput>
+      </None>
+      <None Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Search.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>Search.cs</LastGenOutput>
+      </None>
+      <None Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Update.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>Update.cs</LastGenOutput>
+      </None>
+      <None Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\PkRepository.tt">
         <Generator>TextTemplatingFilePreprocessor</Generator>
         <LastGenOutput>PkRepository.cs</LastGenOutput>
       </None>
@@ -137,21 +182,6 @@
         <DesignTime>True</DesignTime>
         <DependentUpon>Constructor.tt</DependentUpon>
       </Compile>
-      <Compile Update="Generators\CSharp\SQLServer\BaseRepository.cs">
-        <AutoGen>True</AutoGen>
-        <DesignTime>True</DesignTime>
-        <DependentUpon>BaseRepository.tt</DependentUpon>
-      </Compile>
-      <Compile Update="Generators\CSharp\SQLServer\BaseModel.cs">
-        <AutoGen>True</AutoGen>
-        <DesignTime>True</DesignTime>
-        <DependentUpon>BaseModel.tt</DependentUpon>
-      </Compile>
-      <Compile Update="Generators\CSharp\SQLServer\Model.cs">
-        <AutoGen>True</AutoGen>
-        <DesignTime>True</DesignTime>
-        <DependentUpon>Model.tt</DependentUpon>
-      </Compile>
       <Compile Update="Generators\CSharp\MySql\BaseModel.cs">
         <AutoGen>True</AutoGen>
         <DesignTime>True</DesignTime>
@@ -172,6 +202,56 @@
         <DesignTime>True</DesignTime>
         <DependentUpon>PkRepository.tt</DependentUpon>
       </Compile>
+      <Compile Update="Generators\CSharp\SQLServer\Templates\BaseModel.cs">
+        <AutoGen>True</AutoGen>
+        <DesignTime>True</DesignTime>
+        <DependentUpon>BaseModel.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\CSharp\SQLServer\Templates\BaseRepository.cs">
+        <AutoGen>True</AutoGen>
+        <DesignTime>True</DesignTime>
+        <DependentUpon>BaseRepository.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\CSharp\SQLServer\Templates\Model.cs">
+        <AutoGen>True</AutoGen>
+        <DesignTime>True</DesignTime>
+        <DependentUpon>Model.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\CSharp\SQLServer\Templates\Procedure.cs">
+        <AutoGen>True</AutoGen>
+        <DesignTime>True</DesignTime>
+        <DependentUpon>Procedure.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Delete.cs">
+        <DependentUpon>Delete.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\PkRepository.cs">
+        <DependentUpon>PkRepository.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Update.cs">
+        <DependentUpon>Update.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Search.cs">
+        <DependentUpon>Search.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.cs">
+        <DependentUpon>Constructor.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Create.cs">
+        <DependentUpon>Create.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Get.cs">
+        <DependentUpon>Get.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Interface.cs">
+        <DependentUpon>Interface.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Merge.cs">
+        <DependentUpon>Merge.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Misc.cs">
+        <DependentUpon>Misc.tt</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>
@@ -180,7 +260,7 @@
 
     <ItemGroup>
       <Folder Include="Generators\CSharp\MySql\Compound" />
-      <Folder Include="Generators\CSharp\SQLServer\Compound" />
+      <Folder Include="Generators\CSharp\SQLServer\Templates\Repositories\Compound" />
     </ItemGroup>
 
 </Project>

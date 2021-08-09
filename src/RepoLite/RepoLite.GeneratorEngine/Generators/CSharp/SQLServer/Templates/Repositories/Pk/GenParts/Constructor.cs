@@ -7,12 +7,8 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
+namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates.Repositories.Pk.GenParts
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using RepoLite.Common.Models;
     using RepoLite.Common.Extensions;
     using System;
     
@@ -20,9 +16,9 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
+    #line 1 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
-    public partial class Update : UpdateBase
+    public partial class Constructor : ConstructorBase
     {
 #line hidden
         /// <summary>
@@ -30,135 +26,163 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Pk.GenParts
         /// </summary>
         public virtual string TransformText()
         {
+            this.Write("\t\tpublic ");
             
-            #line 8 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
- var pk = generationObject.Table.PrimaryKeys.FirstOrDefault();
+            #line 4 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.RepositoryName));
             
             #line default
             #line hidden
-            this.Write("        public bool Update(");
+            this.Write("(string connectionString) : this(connectionString, exception => { }) { }\r\n");
             
-            #line 9 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
+            #line 5 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+ if (!generationSettings.IncludeCaching) {
+            
+            #line default
+            #line hidden
+            this.Write("\t\tpublic ");
+            
+            #line 6 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.RepositoryName));
+            
+            #line default
+            #line hidden
+            this.Write("(string connectionString, Action<Exception> logMethod) \r\n\t\t\t: base(connectionString, logMethod, ");
+            
+            #line 7 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
-            this.Write(" item, bool clearDirty = true)\r\n        {\r\n            if (item == null)\r\n                return false;\r\n");
+            this.Write(".Schema, ");
             
-            #line 13 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
- if (generationSettings.IncludeCaching) {
-            
-            #line default
-            #line hidden
-            this.Write("            if (CacheEnabled)\r\n            {\r\n                RemoveFromCache(item.");
-            
-            #line 16 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(pk.DbColumnName));
+            #line 7 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
-            this.Write(");\r\n            }\r\n");
+            this.Write(".TableName, ");
             
-            #line 18 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
- } 
-            
-            #line default
-            #line hidden
-            this.Write("\r\n            var validationErrors = item.Validate();\r\n            if (validationErrors.Any())\r\n                throw new ValidationException(validationErrors);\r\n\r\n");
-            
-            #line 24 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
- if (generationObject.InheritedTable != null) { 
+            #line 7 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
             
             #line default
             #line hidden
-            this.Write("            var success = _");
+            this.Write(".Columns)\r\n\t\t{\r\n");
             
-            #line 25 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
+            #line 9 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+ if (generationObject.Inherits) { 
+            
+            #line default
+            #line hidden
+            this.Write("            _");
+            
+            #line 10 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
             
             #line default
             #line hidden
-            this.Write(".Update(item, false);\r\n            success &= BaseUpdate(item.DirtyColumns,\r\n                ");
+            this.Write(" = new ");
             
-            #line 27 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(PrintBlockScopedVariables(generationObject.Table.Columns)));
+            #line 10 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName));
             
             #line default
             #line hidden
-            this.Write(");\r\n\r\n");
+            this.Write("(connectionString, logMethod);\r\n");
             
-            #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
+            #line 11 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+ }
+            
+            #line default
+            #line hidden
+            this.Write("\t\t\tInitializeExtension();\r\n\t\t}\r\n");
+            
+            #line 14 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 30 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
- if (generationObject.InheritedTable == null) { 
-            
-            #line default
-            #line hidden
-            this.Write("            var success = BaseUpdate(item.DirtyColumns, \r\n                ");
-            
-            #line 32 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(PrintBlockScopedVariables(generationObject.Table.Columns)));
-            
-            #line default
-            #line hidden
-            this.Write(");\r\n\r\n");
-            
-            #line 34 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
- } 
-            
-            #line default
-            #line hidden
-            this.Write("            if (success && clearDirty)\r\n                item.ResetDirty();\r\n");
-            
-            #line 37 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
+            #line 15 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
  if (generationSettings.IncludeCaching) {
             
             #line default
             #line hidden
-            this.Write("            if (success && CacheEnabled)\r\n            {\r\n                SaveToCache(item);\r\n            }\r\n");
+            this.Write("\t\tpublic ");
             
-            #line 42 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
- } 
+            #line 16 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.RepositoryName));
             
             #line default
             #line hidden
-            this.Write("\r\n            return success;\r\n        }\r\n");
+            this.Write("(string connectionString, bool useCache, int cacheDurationInSeconds) : this(connectionString, exception => { }, useCache, cacheDurationInSeconds) { }\r\n\r\n\t\tpublic ");
             
-            #line 46 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
-
-string PrintBlockScopedVariables(IEnumerable<Column> columns)
-{
-   var sb = new StringBuilder();
-   var distinctColumns = columns.ToList();
-
-   for (var i = 0; i < distinctColumns.Count; i += 5)
-   {
-       for (var j = 0; j < Math.Min(5, distinctColumns.Count - i); j++)
-       {
-           sb.Append($"item.{distinctColumns[i + j].PropertyName}");
-           if (distinctColumns[i + j] != distinctColumns.Last()) sb.Append(", ");
-       }
-
-       if (i + 5 >= distinctColumns.Count)
-           continue;
-       sb.AppendLine("");
-       sb.Append(Common.Helpers.Tab4);
-   }
-
-   return sb.ToString();
-}
-
+            #line 18 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.RepositoryName));
+            
+            #line default
+            #line hidden
+            this.Write("(string connectionString, Action<Exception> logMethod, bool useCache = false, int cacheDurationInSeconds = 0) \r\n\t\t\t: base(connectionString, logMethod, ");
+            
+            #line 19 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
+            
+            #line default
+            #line hidden
+            this.Write(".Schema, ");
+            
+            #line 19 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
+            
+            #line default
+            #line hidden
+            this.Write(".TableName, ");
+            
+            #line 19 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
+            
+            #line default
+            #line hidden
+            this.Write(".Columns, useCache, cacheDurationInSeconds)\r\n\t\t{\r\n");
+            
+            #line 21 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+ if (generationObject.Inherits) { 
+            
+            #line default
+            #line hidden
+            this.Write("            _");
+            
+            #line 22 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName.LowerFirst()));
+            
+            #line default
+            #line hidden
+            this.Write(" = new ");
+            
+            #line 22 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.InheritedTable.RepositoryName));
+            
+            #line default
+            #line hidden
+            this.Write("(connectionString, logMethod);\r\n");
+            
+            #line 23 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+ }
+            
+            #line default
+            #line hidden
+            this.Write("\t\t\tInitializeExtension();\r\n\t\t}\r\n");
+            
+            #line 26 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
+ } 
             
             #line default
             #line hidden
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 1 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Pk\GenParts\Update.tt"
+        #line 1 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Constructor.tt"
 
 private global::RepoLite.Common.Options.GenerationOptions _generationSettingsField;
 
@@ -240,7 +264,7 @@ if ((generationObjectValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
-    public class UpdateBase
+    public class ConstructorBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

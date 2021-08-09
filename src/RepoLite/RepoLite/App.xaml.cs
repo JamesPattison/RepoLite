@@ -63,6 +63,7 @@ namespace RepoLite
             services.AddSingleton<LandingViewModel>();
             services.AddSingleton<CreateModelsViewModel>();
             services.AddSingleton<CreateRepositoriesViewModel>();
+            services.AddSingleton<CreateProceduresViewModel>();
             services.AddSingleton<AllSettingsViewModel>();
 
             services.AddTransient<SQLServerAccess>();

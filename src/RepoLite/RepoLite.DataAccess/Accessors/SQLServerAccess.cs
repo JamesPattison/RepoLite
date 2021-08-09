@@ -125,6 +125,7 @@ namespace RepoLite.DataAccess.Accessors
                 }
                 else
                 {
+                    parameter.TypeString = GetDataType(parameter.SqlDataType).Item1;
                     parameter.Type = GetDataType(parameter.SqlDataType).Item2;
                     param = parameter;
                 }
@@ -215,6 +216,7 @@ namespace RepoLite.DataAccess.Accessors
 
             foreach (var parameter in parameters)
             {
+                parameter.TypeString = GetDataType(parameter.SqlDataType).Item1;
                 parameter.Type = GetDataType(parameter.SqlDataType).Item2;
             }
 

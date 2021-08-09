@@ -21,6 +21,7 @@
 
         <Button Grid.Column="0" Grid.Row="0" Margin="12" Content="Create Model Classes" Command="{Binding Path=NavigateToCreateModels}" CommandParameter="{Binding ElementName=ThisWindow}"></Button>
         <Button Grid.Column="1" Grid.Row="0" Margin="12" Content="Create Repositories" Command="{Binding Path=NavigateToCreateRepositories}" CommandParameter="{Binding ElementName=ThisWindow}"></Button>
+        <Button Grid.Column="0" Grid.Row="1" Margin="12" Content="Create Procedures" Command="{Binding Path=NavigateToCreateProcedures}" CommandParameter="{Binding ElementName=ThisWindow}"></Button>
 
     </Grid>
 </UserControl>
