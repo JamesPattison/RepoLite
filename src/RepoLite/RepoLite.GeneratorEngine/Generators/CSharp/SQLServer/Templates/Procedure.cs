@@ -45,18 +45,11 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
             this.Write("        public class ");
             
             #line 24 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(procedure.Name));
+            this.Write(this.ToStringHelper.ToStringWithCulture(ParameterName(tableTypeParameter)));
             
             #line default
             #line hidden
-            this.Write("_");
-            
-            #line 24 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(tableTypeParameter.SqlName));
-            
-            #line default
-            #line hidden
-            this.Write("_Param\r\n        {\r\n");
+            this.Write("\r\n        {\r\n");
             
             #line 26 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
  foreach (var column in tableTypeParameter.Columns) { 
@@ -91,7 +84,18 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
             
             #line default
             #line hidden
-            this.Write("    }\r\n}");
+            this.Write("    }\r\n}\r\n\r\n");
+            
+            #line 34 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
+
+   string ParameterName(TableTypeParameter parameter)
+   {
+       return $"{procedure.Name}_{parameter.SqlName}_Param";
+   }
+
+            
+            #line default
+            #line hidden
             return this.GenerationEnvironment.ToString();
         }
         

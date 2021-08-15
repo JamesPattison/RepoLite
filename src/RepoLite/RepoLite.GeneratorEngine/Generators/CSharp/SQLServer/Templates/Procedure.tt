@@ -21,7 +21,7 @@ namespace <#= generationSettings.ProcedureGenerationNamespace #>
     public partial class Procedures
     {
 <# foreach (var tableTypeParameter in procedure.Parameters.Where(x => x is TableTypeParameter).Cast<TableTypeParameter>().DistinctBy(x => x.SqlName)) { #>
-        public class <#= procedure.Name #>_<#= tableTypeParameter.SqlName #>_Param
+        public class <#= ParameterName(tableTypeParameter) #>
         {
 <# foreach (var column in tableTypeParameter.Columns) { #>
             public <#= column.TypeString #> <#= column.Name #> { get; set; }
@@ -30,3 +30,10 @@ namespace <#= generationSettings.ProcedureGenerationNamespace #>
 <# } #>
     }
 }
+
+<#
+   string ParameterName(TableTypeParameter parameter)
+   {
+       return $"{procedure.Name}_{parameter.SqlName}_Param";
+   }
+#>
