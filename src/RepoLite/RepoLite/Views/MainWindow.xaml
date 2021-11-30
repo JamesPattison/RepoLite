@@ -2,31 +2,26 @@
                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                   xmlns:mui="http://firstfloorsoftware.com/ModernUI"
-                  Title="Code Generation Tool" 
+                  Title="Repolite - Code Generation Tool" 
                   Style="{StaticResource MyModernWindow}">
-    <!-- Top bar links, must have an associated LinkGroup below -->
-    <mui:ModernWindow.TitleLinks>
-        <mui:Link DisplayName="Settings" Source="/Views/Settings/Global.xaml" />
-    </mui:ModernWindow.TitleLinks>
-
     <mui:ModernWindow.MenuLinkGroups>
         <mui:LinkGroup DisplayName="Main" GroupKey="Authenticated">
             <mui:LinkGroup.Links>
                 <mui:Link DisplayName="Landing"  Source="/Views/LandingView.xaml"  />
             </mui:LinkGroup.Links>
         </mui:LinkGroup>
-
+        
         <mui:LinkGroup DisplayName="Code Generation" GroupKey="Authenticated">
             <mui:LinkGroup.Links>
                 <mui:Link DisplayName="Models" Source="/Views/Generation/CreateModelsView.xaml" />
                 <mui:Link DisplayName="Repositories" Source="/Views/Generation/CreateRepositoriesView.xaml" />
-                <mui:Link DisplayName="Procedures" Source="/Views/Generation/CreateProdecuresView.xaml" />
+                <mui:Link DisplayName="Procedures" Source="/Views/Generation/CreateProceduresView.xaml" />
             </mui:LinkGroup.Links>
         </mui:LinkGroup>
 
-        <mui:LinkGroup DisplayName="Settings" GroupKey="Settings">
+        <mui:LinkGroup DisplayName="Settings" GroupKey="Authenticated">
             <mui:LinkGroup.Links>
-                <mui:Link DisplayName="Global" Source="/Views/Settings/Global.xaml" />
+                <mui:Link DisplayName="Settings" Source="/Views/Settings/Global.xaml" />
             </mui:LinkGroup.Links>
         </mui:LinkGroup>
     </mui:ModernWindow.MenuLinkGroups>

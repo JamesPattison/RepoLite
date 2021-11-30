@@ -15,11 +15,13 @@ namespace RepoLite.ViewModel.Settings
 {
     public class AllSettingsViewModel : ViewModelBase
     {
-        private SystemOptions _systemSettings;
+        public SystemOptions SystemSettings { get; set; }
+        public GenerationOptions GenerationSettings { get; set; }
 
         public AllSettingsViewModel()
         {
-            _systemSettings = IOC.Resolve<IOptions<SystemOptions>>().Value;
+            SystemSettings = IOC.Resolve<IOptionsSnapshot<SystemOptions>>().Value;
+            GenerationSettings = IOC.Resolve<IOptionsSnapshot<GenerationOptions>>().Value;
         }
 
         private bool _connectionTestEnabled = true;
@@ -49,7 +51,7 @@ namespace RepoLite.ViewModel.Settings
                     ConnectionTestResult = "Working";
                     ConnectionTestEnabled = false;
 
-                    switch (_systemSettings.DataSource)
+                    switch (SystemSettings.DataSource)
                     {
                         case DataSourceEnum.SQLServer:
                             DoWork(async () => ConnectionTestResult = await TestSQLServerConnection());
@@ -69,7 +71,7 @@ namespace RepoLite.ViewModel.Settings
                 // ReSharper disable once ObjectCreationAsStatement
                 new DbConnectionStringBuilder
                 {
-                    ConnectionString = _systemSettings.ConnectionString
+                    ConnectionString = SystemSettings.ConnectionString
                 };
             }
             catch
@@ -80,7 +82,7 @@ namespace RepoLite.ViewModel.Settings
 
             try
             {
-                new SqlConnection(_systemSettings.ConnectionString).Open();
+                new SqlConnection(SystemSettings.ConnectionString).Open();
             }
             catch
             {
@@ -106,8 +108,8 @@ namespace RepoLite.ViewModel.Settings
             {
                 return new RelayCommand(o =>
                 {
-                    // GenerationSettings.Save();
-                    // SystemSettings.Save();
+                     GenerationSettings.Save();
+                     SystemSettings.Save();
                     var wnd = o as Global;
                     NavigationCommands.BrowseBack.Execute(null, wnd);
                 });

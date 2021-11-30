@@ -39,7 +39,7 @@
                     <StackPanel>
                         <Label Style="{StaticResource LeftLabel}" Content="Connection String" Target="{Binding ElementName=ConnectionString}" 
                                ToolTip="If you need help generating this, go to www.connectionstrings.com/sql-server/"/>
-                        <TextBox x:Name="ConnectionString" HorizontalAlignment="Stretch" Text="{Binding Path=SystemSettings.ConnectionString}" TextWrapping="Wrap" Height="Auto" MaxWidth="350" />
+                        <TextBox x:Name="ConnectionString" HorizontalAlignment="Stretch" Text="{Binding SystemSettings.ConnectionString}" TextWrapping="Wrap" Height="Auto" MaxWidth="350" />
                     </StackPanel>
                     <DockPanel Margin="150,16,0,0">
                         <Button Content="Test Connection" HorizontalAlignment="Left" IsEnabled="{Binding Path=ConnectionTestEnabled}" Command="{Binding Path=TestDatabaseConnection}" />

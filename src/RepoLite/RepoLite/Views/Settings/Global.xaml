@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:settings="clr-namespace:RepoLite.ViewModel.Settings"
              xmlns:mui="http://firstfloorsoftware.com/ModernUI"
              x:Name="ThisWindow"
              mc:Ignorable="d" 
@@ -18,6 +17,7 @@
             <mui:ModernTab.Links>
                 <mui:Link DisplayName="Code Generation" Source="/Views/Settings/GlobalCodeGenerationSettingsView.xaml" />
                 <mui:Link DisplayName="Connection" Source="/Views/Settings/GlobalConnectionSettingsView.xaml" />
+                
                 <!--<mui:Link DisplayName="DataGrid" Source="/Content/ControlsStylesDataGrid.xaml" />
                 <mui:Link DisplayName="Date" Source="/Content/ControlsStylesDate.xaml" />
                 <mui:Link DisplayName="ItemsControl" Source="/Content/ControlsStylesItemsControl.xaml"/>
@@ -28,5 +28,6 @@
             </mui:ModernTab.Links>
         </mui:ModernTab>
         <Button Grid.Row="1" Command="{Binding Path=SaveAndClose}" CommandTarget="{Binding ElementName=ThisWindow}" >Save and Close</Button>
+        <!--<TextBlock>Change in appsettings.json for now</TextBlock>-->
     </Grid>
 </UserControl>

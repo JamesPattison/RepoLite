@@ -1,4 +1,6 @@
-﻿namespace RepoLite.Common.Options
+﻿using System;
+
+namespace RepoLite.Common.Options
 {
     public class GenerationOptions
     {
@@ -12,5 +14,19 @@
         public string RepositoryClassNameFormat { get; set; }
         public bool GenerateSealedObjects { get; set; }
         public bool IncludeCaching { get; set; }
+
+        public void Save()
+        {
+            Helpers.AddOrUpdateAppSetting("Generation:ModelGenerationNamespace", ModelGenerationNamespace);
+            Helpers.AddOrUpdateAppSetting("Generation:RepositoryGenerationNamespace", RepositoryGenerationNamespace);
+            Helpers.AddOrUpdateAppSetting("Generation:ProcedureGenerationNamespace", ProcedureGenerationNamespace);
+            Helpers.AddOrUpdateAppSetting("Generation:OutputDirectory", OutputDirectory);
+            Helpers.AddOrUpdateAppSetting("Generation:ModelFileNameFormat", ModelFileNameFormat);
+            Helpers.AddOrUpdateAppSetting("Generation:RepositoryFileNameFormat", RepositoryFileNameFormat);
+            Helpers.AddOrUpdateAppSetting("Generation:ModelClassNameFormat", ModelClassNameFormat);
+            Helpers.AddOrUpdateAppSetting("Generation:RepositoryClassNameFormat", RepositoryClassNameFormat);
+            Helpers.AddOrUpdateAppSetting("Generation:GenerateSealedObjects", GenerateSealedObjects);
+            Helpers.AddOrUpdateAppSetting("Generation:IncludeCaching", IncludeCaching);
+        }
     }
 }

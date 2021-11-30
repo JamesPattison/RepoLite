@@ -8,7 +8,7 @@
              xmlns:System="clr-namespace:System;assembly=mscorlib"
              xmlns:StyleAlias="clr-namespace:RepoLite.Common.Enums;assembly=RepoLite.Common"
              mc:Ignorable="d" d:DesignWidth="360"
-             d:DataContext="{d:DesignInstance settings:AllSettingsViewModel}" Height="271">
+             d:DataContext="{d:DesignInstance settings:AllSettingsViewModel}">
     <Grid>
         <ScrollViewer>
             <StackPanel MinWidth="200">
@@ -54,6 +54,11 @@
                         <TextBox x:Name="RepositoryNamespace" Text="{Binding Path=GenerationSettings.RepositoryGenerationNamespace}"/>
                     </StackPanel>
                     <StackPanel>
+                        <Label Style="{StaticResource LeftLabel}" Content="Procedure Namespace" Target="{Binding ElementName=ProcedureNamespace}"
+                               ToolTip="The namespace used in the procedure classes"/>
+                        <TextBox x:Name="ProcedureNamespace" Text="{Binding Path=GenerationSettings.ProcedureGenerationNamespace}"/>
+                    </StackPanel>
+                    <StackPanel>
                         <Label Style="{StaticResource LeftLabel}" Content="Output Directory" Target="{Binding ElementName=OutputDirectory}"
                                ToolTip="The directory where files will be generated in"/>
                         <TextBox x:Name="OutputDirectory" Text="{Binding Path=GenerationSettings.OutputDirectory}"/>
@@ -82,6 +87,11 @@
                         <Label Style="{StaticResource LeftLabel}" Content="Generate Sealed Objects" Target="{Binding ElementName=GenerateSealedObjects}"
                                ToolTip="Determines whether or not to add the sealed modifier to the classes"/>
                         <CheckBox x:Name="GenerateSealedObjects" IsChecked="{Binding Path=GenerationSettings.GenerateSealedObjects}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Style="{StaticResource LeftLabel}" Content="Include Caching" Target="{Binding ElementName=IncludeCaching}"
+                               ToolTip="Determines whether or not to include caching in the repositories"/>
+                        <CheckBox x:Name="IncludeCaching" IsChecked="{Binding Path=GenerationSettings.IncludeCaching}"/>
                     </StackPanel>
                 </StackPanel>
             </StackPanel>

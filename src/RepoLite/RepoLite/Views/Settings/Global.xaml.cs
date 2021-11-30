@@ -1,4 +1,5 @@
-﻿using RepoLite.ViewModel.Settings;
+﻿
+using RepoLite.ViewModel.Settings;
 
 namespace RepoLite.Views.Settings
 {
