@@ -108,8 +108,8 @@ namespace RepoLite.ViewModel.Settings
             {
                 return new RelayCommand(o =>
                 {
-                     GenerationSettings.Save();
-                     SystemSettings.Save();
+                    GenerationSettings.Save();
+                    SystemSettings.Save();
                     var wnd = o as Global;
                     NavigationCommands.BrowseBack.Execute(null, wnd);
                 });

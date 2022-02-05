@@ -145,7 +145,7 @@ namespace RepoLite.DataAccess.Accessors
                 switch (parameter)
                 {
                     case BasicParameter basic:
-                        paramString = $"{basic.Name}={basic.Type.GetDefault()}";
+                        paramString += $"{basic.Name}={basic.Type.GetDefault()},";
                         break;
                     case TableTypeParameter table:
                         declares += $"DECLARE @tbl{table.Name} {table.SqlName};";
@@ -153,7 +153,8 @@ namespace RepoLite.DataAccess.Accessors
                         break;
                 }
             }
-            
+            paramString = paramString.TrimEnd(',');
+            paramString += ";";
             var adapter = new SqlDataAdapter($@"
                 SET FMTONLY ON;
                 {declares}

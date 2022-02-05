@@ -18,5 +18,10 @@ namespace RepoLite.Views.Generation
             if ((sender as ListViewItem)?.DataContext is EntityToGenerate item)
                 item.Selected = !item.Selected;
         }
+
+        private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+
+        }
     }
 }

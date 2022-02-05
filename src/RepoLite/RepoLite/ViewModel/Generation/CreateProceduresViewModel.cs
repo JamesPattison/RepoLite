@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
+using FirstFloor.ModernUI.Windows.Navigation;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RepoLite.Commands;
@@ -14,8 +16,10 @@ using RepoLite.DataAccess;
 using RepoLite.GeneratorEngine;
 using RepoLite.GeneratorEngine.Models;
 using RepoLite.ViewModel.Base;
+using RepoLite.ViewModel.Generation.Procedures;
 using RepoLite.Views;
 using RepoLite.Views.Generation;
+using RepoLite.Views.Generation.Procedures;
 
 namespace RepoLite.ViewModel.Generation
 {
@@ -35,6 +39,8 @@ namespace RepoLite.ViewModel.Generation
             get => _loaded;
             set => SetProperty(ref _loaded, value);
         }
+
+        //public ObservableCollection<Procedure> SelectedProcedures => Procedures.Where(x => x.Selected).Select(x => x.)
 
         public ICommand LoadProcedures
         {
@@ -69,7 +75,7 @@ namespace RepoLite.ViewModel.Generation
             }
         }
 
-        public ICommand Generate
+        public ICommand Configure
         {
             get
             {
@@ -80,18 +86,69 @@ namespace RepoLite.ViewModel.Generation
                     var procedureDefinitions = _dataSource
                         .LoadProcedures(procedures.Select(x => new NameAndSchema(x.Schema, x.Table)).ToList()).ToList();
 
+                    var procedureGenerationSettings = GetGenerationSettings();
+
+                    var configureProcedures = new ConfigureProcedures
+                    {
+                        DataContext = new ConfigureProceduresViewModel(procedureDefinitions, procedureGenerationSettings)
+                    };
+                    configureProcedures.ShowDialog();
+                });
+            }
+        }
+
+        private Dictionary<string, List<string>> GetGenerationSettings()
+        {
+            var procedureResultsSetNamings = Properties.Settings.Default["PreviousProcedureResultSetNames"];
+            var procedureGenerationSettings = new Dictionary<string, List<string>>();
+
+            if (procedureResultsSetNamings != null &&
+                procedureResultsSetNamings is string s &&
+                !string.IsNullOrEmpty(s))
+                procedureGenerationSettings = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(s);
+            return procedureGenerationSettings;
+        }
+
+        public ICommand Generate
+        {
+            get
+            {
+                return new RelayCommand(o =>
+                {
+
+                    var procedures = Procedures.Where(x => x.Selected);
+
+                    var procedureDefinitions = _dataSource
+                        .LoadProcedures(procedures.Select(x => new NameAndSchema(x.Schema, x.Table)).ToList()).ToList();
+
+                    var procedureGenerationSettings = GetGenerationSettings();
+
+                    foreach (var procedure in procedureDefinitions)
+                    {
+                        if (procedureGenerationSettings.ContainsKey(procedure.Name))
+                        {
+                            var setting = procedureGenerationSettings[procedure.Name];
+                            for (int i = 0; i < procedure.ResultSets.Count; i++)
+                            {
+                                if (setting.Count > i - 1 && setting[i] != null)
+                                {
+                                    procedure.ResultSets[i].Name = setting[i];
+                                }
+
+                            }
+                        }
+                    }
+
                     DoWork(() =>
                     {
-                        //CreateBaseModel(_generator);
-
                         procedureDefinitions.ForEach(x =>
                         {
                             LogMessage($"Processing Table {x.Schema}.{x.Name}");
 
                             var procedure = _generator.BuildProcedure(x);
-                            // var model = _generator.ModelForTable(new RepositoryGenerationObject(x, tableDefinitions)).ToString();
-                            //
-                             CreateProcedure(x, _generator, procedure);
+                        // var model = _generator.ModelForTable(new RepositoryGenerationObject(x, tableDefinitions)).ToString();
+                        //
+                        CreateProcedure(x, _generator, procedure);
                         });
                     }, () => Process.Start("explorer.exe", _generationSettings.OutputDirectory));
                 });
@@ -193,7 +250,7 @@ namespace RepoLite.ViewModel.Generation
                 Directory.CreateDirectory(_generationSettings.OutputDirectory);
             if (!Directory.Exists(outputDirectory))
                 Directory.CreateDirectory(outputDirectory);
-            
+
             LogMessage($"Creating Procedure File for {procedure.Schema}.{procedure.Name} in {outputDirectory}/");
             File.WriteAllText(fileName, content);
             LogMessage($"Done {procedure.Schema}.{procedure.Name}!");

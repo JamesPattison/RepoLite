@@ -5,12 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:generation="clr-namespace:RepoLite.ViewModel.Generation"
              mc:Ignorable="d" 
+             x:Name="ThisWindow"
              d:DesignHeight="300" d:DesignWidth="300"
              d:DataContext="{d:DesignInstance generation:CreateProceduresViewModel}" >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -20,7 +23,7 @@
         
         <Label Grid.Row="0" Grid.ColumnSpan="3" HorizontalAlignment="Left" FontSize="24px" Foreground="Black">Create Models</Label>
 
-        <ScrollViewer Grid.Row="1"  Grid.Column="0">
+        <ScrollViewer Grid.Row="1" Grid.RowSpan="2"  Grid.Column="0">
             <DockPanel LastChildFill="True">
                 <Grid DockPanel.Dock="Top">
                     <Grid.ColumnDefinitions>
@@ -32,6 +35,7 @@
                 </Grid>
                 <Button DockPanel.Dock="Top" Content="Load Procedures" Margin="3" Command="{Binding Path=LoadProcedures}" />
                 <Button DockPanel.Dock="Top" Content="Toggle Select All" Margin="3" Command="{Binding Path=ToggleSelectAll}" />
+
                 <ListView DockPanel.Dock="Bottom" Margin="3 0 3 3" ItemsSource="{Binding Path=Procedures}">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
@@ -56,8 +60,12 @@
                     </ListView.ItemTemplate>
 
                 </ListView>
+
             </DockPanel>
         </ScrollViewer>
+
+        <Button Grid.Row="3" Margin="3" Command="{Binding Path=Configure}">Configure Result Sets</Button>
+        
         <GridSplitter Grid.Row="1"  Grid.Column="1" />
         <ScrollViewer Grid.Row="1"  Grid.Column="2">
             <DockPanel LastChildFill="True">

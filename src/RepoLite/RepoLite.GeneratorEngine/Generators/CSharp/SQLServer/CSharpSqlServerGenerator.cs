@@ -26,8 +26,14 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
                 }
                 else
                 {
+                    //todo
                 }
             }
+            else
+            {
+                //todo
+            }
+            
             return string.Empty;
         }
 
@@ -41,7 +47,12 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
                 }
                 else
                 {
+                    //todo
                 }
+            }
+            else
+            {
+                //todo
             }
 
             return string.Empty;
@@ -49,7 +60,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer
 
         public override string BuildProcedure(Procedure procedure)
         {
-            return TemplateProcessor.ProcessTemplate<RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates.Procedure>(_generationOptions, procedure);
+            return TemplateProcessor.ProcessTemplate<Templates.Procedure>(_generationOptions, procedure);
         }
 
         public override string BuildBaseRepository()

@@ -57,6 +57,7 @@ namespace RepoLite
         {
             services.Configure<GenerationOptions>(_configuration.GetSection("Generation"));
             services.Configure<SystemOptions>(_configuration.GetSection("System"));
+            services.AddSingleton<AllSettingsViewModel>();
             
             services.AddSingleton<MainWindow>();
             
@@ -64,7 +65,6 @@ namespace RepoLite
             services.AddSingleton<CreateModelsViewModel>();
             services.AddSingleton<CreateRepositoriesViewModel>();
             services.AddSingleton<CreateProceduresViewModel>();
-            services.AddSingleton<AllSettingsViewModel>();
 
             services.AddTransient<SQLServerAccess>();
             services.AddTransient<MySqlAccess>();
