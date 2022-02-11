@@ -40,7 +40,7 @@ namespace RepoLite.DataAccess
 
             return createdTables;
         }
-        public abstract IEnumerable<Procedure> LoadProcedures(IEnumerable<NameAndSchema> procedures);
+        public abstract IEnumerable<ProcedureGenerationObject> LoadProcedures(IEnumerable<NameAndSchema> procedures);
         //protected abstract List<TableDefault> GetTableDefaults(List<TableAndSchema> tables);
         public abstract IEnumerable<Column> LoadTableColumns(Table table);
     }

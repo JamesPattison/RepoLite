@@ -8,7 +8,7 @@ namespace RepoLite.Common.Models.ProcedureParameters
     {
         public string Name { get; set; }
         public int Pos { get; set; }
-        public int SqlDataType { get; set; }
+        public string SqlDataType { get; set; }
         public bool IsNullable { get; set; }
         public int Length { get; set; }
         public int Precision { get; set; }

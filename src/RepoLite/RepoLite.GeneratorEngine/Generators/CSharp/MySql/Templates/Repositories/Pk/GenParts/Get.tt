@@ -1,0 +1,134 @@
+<#@ import namespace="System.Text" #>
+<#@ import namespace="RepoLite.Common.Models" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="Common"#>
+<#@ parameter type="RepoLite.Common.Options.GenerationOptions" name="generationSettings" #>
+<#@ parameter type="RepoLite.Common.Models.RepositoryGenerationObject" name="generationObject" #>
+<# var pk = generationObject.Table.PrimaryKeys.FirstOrDefault();#>
+        public <#= generationObject.Table.ClassName #> Get(long <#= pk.FieldName #>)
+<# if (generationSettings.IncludeCaching) {#>
+        {
+            return Get(<#= pk.FieldName #>, false);
+        }
+
+        public <#= generationObject.Table.ClassName #> Get(<#= pk.DataTypeString #> <#= pk.FieldName #>, bool skipCache)
+<# }#>
+        {
+<# if (generationSettings.IncludeCaching) {#>
+            if (CacheEnabled && !skipCache)
+            {
+                var fromCache = GetFromCache(<#= pk.FieldName #>);
+                if (fromCache != null)
+                    return fromCache;
+            }
+<# }#>
+<# if (generationObject.InheritedTable != null) {#>
+            <#= GetTableSql(generationObject) #>           
+            	WHERE
+            		<#= generationObject.Table.DbTableName #>.<#= pk.DbColumnName #> = {<#= pk.FieldName #>}";
+           
+            var item = ExecuteSql(query).FirstOrDefault();
+<# if (generationSettings.IncludeCaching) {#>
+            if (CacheEnabled & !skipCache)
+            {
+                SaveToCache(item);
+            }
+<# }#>
+            return item;
+<# }#>
+<# if (generationObject.InheritedTable == null) {#>
+            return Where("<#= pk.DbColumnName #>", Comparison.Equals, <#= pk.FieldName #>).Results().FirstOrDefault();
+<# }#>
+        }
+
+        public IEnumerable<<#= generationObject.Table.ClassName #>> Get(List<<#= pk.DataTypeString #>> <#= pk.FieldName #>s)
+<# if (generationSettings.IncludeCaching) {#>
+        {
+            return Get(<#= pk.FieldName #>s, false);
+        }
+
+        public IEnumerable<<#= generationObject.Table.ClassName #>> Get(List<<#= pk.DataTypeString #>> <#= pk.FieldName #>s, bool skipCache)
+<# }#>
+        {
+            var toReturn = new List<<#= generationObject.Table.ClassName #>>();
+            if (!<#= pk.FieldName #>s.Any()) return toReturn;
+<# if (generationSettings.IncludeCaching) {#>
+            if (CacheEnabled && !skipCache)
+            {
+                var cachedIds = new List<<#= pk.DataTypeString #>>();
+                foreach (var <#= pk.FieldName #> in <#= pk.FieldName #>s.Where(IsInCache))
+                {
+                    cachedIds.Add(<#= pk.FieldName #>);
+                    toReturn.Add(GetFromCache(<#= pk.FieldName #>));
+                }
+                <#= pk.FieldName #>s = <#= pk.FieldName #>s.Except(cachedIds).ToList();
+                if (!<#= pk.FieldName #>s.Any()) return toReturn;
+            }
+<# }#>
+<# if (generationObject.InheritedTable != null) { #>
+            <#= GetTableSql(generationObject) #>
+           		WHERE
+           			<#= generationObject.Table.DbTableName #>.<#= pk.DbColumnName #> IN ({string.Join(", ", <#= pk.FieldName #>s)})";
+           
+            var items = ExecuteSql(query).ToArray();
+<# if (generationSettings.IncludeCaching) {#>
+            if (CacheEnabled && !skipCache)
+            {
+                foreach (var item in items)
+                {
+                    SaveToCache(item);
+                }
+            }
+<# }#>
+            toReturn.AddRange(items);
+<# }#>
+<# if (generationObject.InheritedTable == null) { #>
+            toReturn.AddRange(Where("<#= pk.DbColumnName #>", Comparison.In, <#= pk.FieldName #>s).Results()); 
+<# }#>
+            return toReturn;
+        }
+
+        public IEnumerable<<#= generationObject.Table.ClassName #>> Get(params <#= pk.DataTypeString #>[] <#= pk.FieldName #>s)
+        {
+            return Get(<#= pk.FieldName #>s.ToList());
+        }
+
+        public <#= pk.DataTypeString #> GetMaxId()
+        {
+            using (var cn = new MySqlConnection(ConnectionString))
+            {
+                using (var cmd = CreateCommand(cn, "SELECT ISNULL(MAX(<#= pk.DbColumnName #>), 0) FROM <#= generationObject.Table.DbTableName #>"))
+                {
+                    cn.Open();
+                    return (<#= pk.DataTypeString #>)cmd.ExecuteScalar();
+                }
+            }
+        }
+        public override IEnumerable<<#= generationObject.Table.ClassName #>> GetAll()
+        {
+            <#= GetTableSql(generationObject) #>";
+            return ExecuteSql(query);
+        }
+
+<#
+   string GetTableSql(RepositoryGenerationObject generationObject)
+   {
+       var sb = new StringBuilder();
+ 
+       sb.AppendLine("var query = $@\"" + "SELECT * FROM ");
+       sb.Append($"{Helpers.Tab7}[{generationObject.Table.DbTableName}]");
+
+       var tables = generationObject.Table.Columns.Select(x => x.DbTableName).Where(x => x != generationObject.Table.DbTableName).Distinct();
+
+       foreach (var table in tables)
+       {
+           sb.AppendLine();
+            sb.AppendLine(
+                $"{Helpers.Tab6}LEFT JOIN [{table}]");
+            sb.Append(
+                $"{Helpers.Tab7}ON {generationObject.Table.DbTableName}.{pk.DbColumnName} = {table}.{pk.DbColumnName}");
+       }
+       
+       return sb.ToString();
+   }
+#>

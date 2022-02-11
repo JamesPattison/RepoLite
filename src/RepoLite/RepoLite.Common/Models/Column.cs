@@ -18,11 +18,6 @@ namespace RepoLite.Common.Models
         public string DbColumnName { get; set; }
 
         /// <summary>
-        /// sys.types.system_type_id
-        /// </summary>
-        public int SqlDataTypeCode { get; set; }
-
-        /// <summary>
         /// INFORMATION_SCHEMA.COLUMNS.DATA_TYPE
         /// </summary>
         public string SqlDataType { get; set; }
@@ -60,7 +55,7 @@ namespace RepoLite.Common.Models
         /// <summary>
         /// INFORMATION_SCHEMA.COLUMNS.CHARACTER_MAXIMUM_LENGTH
         /// </summary>
-        public int MaxLength { get; set; }
+        public long MaxLength { get; set; }
 
         /// <summary>
         /// INFORMATION_SCHEMA.COLUMNS.NUMERIC_PRECISION
@@ -83,12 +78,12 @@ namespace RepoLite.Common.Models
         public object DefaultValue { get; set; }
 
         /// <summary>
-        /// Mapped using SqlDataTypeCode
+        /// Mapped using SqlDataType
         /// </summary>
         public string DataTypeString { get; set; }
 
         /// <summary>
-        /// Mapped using SqlDataTypeCode
+        /// Mapped using SqlDataType
         /// </summary>
         public Type DataType { get; set; }
 

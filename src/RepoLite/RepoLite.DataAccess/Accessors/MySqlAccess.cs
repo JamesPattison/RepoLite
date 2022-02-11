@@ -54,7 +54,7 @@ namespace RepoLite.DataAccess.Accessors
             throw new NotImplementedException();
         }
 
-        public override IEnumerable<Procedure> LoadProcedures(IEnumerable<NameAndSchema> procedures)
+        public override IEnumerable<ProcedureGenerationObject> LoadProcedures(IEnumerable<NameAndSchema> procedures)
         {
             throw new NotImplementedException();
         }
@@ -68,8 +68,7 @@ namespace RepoLite.DataAccess.Accessors
                                 c.COLUMN_NAME AS DbColumnName,
                                 0                                                                           as IsComputed,
                                 c.DATA_TYPE                                                                 AS SqlDataType,
-                                ''                                                                          AS SqlDataTypeCode,
-                                c.IS_NULLABLE                                                               AS IsNullable,
+                                c.IS_NULLABLE = 'YES'                                                       AS IsNullable,
                                 c.EXTRA like '%auto_increment%'                                             AS IsIdentity,
                                 CASE
                                     WHEN c.COLUMN_DEFAULT LIKE '((%' AND c.COLUMN_DEFAULT LIKE '%))'
@@ -106,12 +105,14 @@ namespace RepoLite.DataAccess.Accessors
                                         AND	x.TABLE_NAME = c.TABLE_NAME
                                         AND x.COLUMN_NAME = c.COLUMN_NAME
                             where c.TABLE_NAME = @table
+                                  and database() = @schema
                             ORDER BY 
 	                            c.ORDINAL_POSITION ASC",
                     new
 
                     {
-                        table = $"{table.Schema}.{table.DbTableName}".ToLower()
+                        table = $"{table.DbTableName}".ToLower(),
+                        schema = $"{table.Schema}".ToLower()
                     }).ToList();
 
                 var toReturn = new List<Column>();

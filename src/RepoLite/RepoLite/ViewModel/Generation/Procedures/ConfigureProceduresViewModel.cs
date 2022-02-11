@@ -15,13 +15,13 @@ namespace RepoLite.ViewModel.Generation.Procedures
 {
     internal class ConfigureProceduresViewModel : ViewModelBase
     {
-        public ObservableCollection<Procedure> Procedures { get; internal set; }
+        public ObservableCollection<ProcedureGenerationObject> Procedures { get; internal set; }
 
         public Dictionary<string, List<string>> PreviousGenerationSettings { get; internal set; }
 
-        public ConfigureProceduresViewModel(List<Procedure> procedures, Dictionary<string, List<string>> genSettings)
+        public ConfigureProceduresViewModel(List<ProcedureGenerationObject> procedures, Dictionary<string, List<string>> genSettings)
         {
-            Procedures = new ObservableCollection<Procedure>(procedures);
+            Procedures = new ObservableCollection<ProcedureGenerationObject>(procedures);
             foreach (var procedure in Procedures)
             {
                 if (genSettings.ContainsKey(procedure.Name))

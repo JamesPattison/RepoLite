@@ -2,7 +2,8 @@ using System.Linq;
 using Microsoft.Extensions.Options;
 using RepoLite.Common.Models;
 using RepoLite.Common.Options;
-using RepoLite.GeneratorEngine.Generators.CSharp.MySql.Pk;
+using RepoLite.GeneratorEngine.Generators.CSharp.MySql.Templates.Repositories;
+using RepoLite.GeneratorEngine.Generators.CSharp.MySql.Templates.Repositories.Pk;
 
 namespace RepoLite.GeneratorEngine.Generators.CSharp.MySql
 {
@@ -35,7 +36,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.MySql
             return string.Empty;
         }
 
-        public override string BuildProcedure(Procedure procedure)
+        public override string BuildProcedure(ProcedureGenerationObject procedureGenerationObject)
         {
             throw new System.NotImplementedException();
         }

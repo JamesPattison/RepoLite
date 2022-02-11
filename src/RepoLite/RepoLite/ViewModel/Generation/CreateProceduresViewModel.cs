@@ -228,11 +228,11 @@ namespace RepoLite.ViewModel.Generation
             _generator = IOC.Resolve<GeneratorResolver>().Invoke(_systemSettings.DataSource, _systemSettings.GenerationLanguage);
         }
 
-        internal void CreateProcedure(Procedure procedure, IGenerator generator, string content)
+        internal void CreateProcedure(ProcedureGenerationObject procedureGenerationObject, IGenerator generator, string content)
         {
             var outputDirectory = $"{_generationSettings.OutputDirectory}/Procedures";
 
-            var result = procedure.Name;
+            var result = procedureGenerationObject.Name;
 
             string fileName;
 
@@ -251,9 +251,9 @@ namespace RepoLite.ViewModel.Generation
             if (!Directory.Exists(outputDirectory))
                 Directory.CreateDirectory(outputDirectory);
 
-            LogMessage($"Creating Procedure File for {procedure.Schema}.{procedure.Name} in {outputDirectory}/");
+            LogMessage($"Creating Procedure File for {procedureGenerationObject.Schema}.{procedureGenerationObject.Name} in {outputDirectory}/");
             File.WriteAllText(fileName, content);
-            LogMessage($"Done {procedure.Schema}.{procedure.Name}!");
+            LogMessage($"Done {procedureGenerationObject.Schema}.{procedureGenerationObject.Name}!");
         }
 
         internal void CreateBaseModel(IGenerator generator)

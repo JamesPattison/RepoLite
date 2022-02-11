@@ -9,7 +9,7 @@ namespace RepoLite.GeneratorEngine
     {
         public abstract string BuildModel(RepositoryGenerationObject generationObject);
         public abstract string BuildRepository(RepositoryGenerationObject generationObject);
-        public abstract string BuildProcedure(Procedure procedure);
+        public abstract string BuildProcedure(ProcedureGenerationObject procedureGenerationObject);
 
         public abstract string FileExtension();
         public abstract string BuildBaseRepository();

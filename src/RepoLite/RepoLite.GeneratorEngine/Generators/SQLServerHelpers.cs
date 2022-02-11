@@ -6,39 +6,39 @@ namespace RepoLite.GeneratorEngine.Generators
 {
     public class SQLServerHelpers
     {
-        public static SqlDbType GetDbType(int sqlType)
+        public static SqlDbType GetDbType(string sqlType)
         {
             switch (sqlType)
             {
-                case 34: return SqlDbType.Image;
-                case 35: return SqlDbType.Text;
-                case 36: return SqlDbType.UniqueIdentifier;
-                case 40: return SqlDbType.Date;
-                case 41: return SqlDbType.Time;
-                case 42: return SqlDbType.DateTime2;
-                case 43: return SqlDbType.DateTimeOffset;
-                case 48: return SqlDbType.TinyInt;
-                case 52: return SqlDbType.SmallInt;
-                case 56: return SqlDbType.Int;
-                case 58: return SqlDbType.SmallDateTime;
-                case 59: return SqlDbType.Real;
-                case 60: return SqlDbType.Money;
-                case 61: return SqlDbType.DateTime;
-                case 62: return SqlDbType.Float;
-                case 98: return SqlDbType.Variant;
-                case 104: return SqlDbType.Bit;
-                case 106: return SqlDbType.Decimal;
-                case 108: return SqlDbType.Decimal;
-                case 122: return SqlDbType.SmallMoney;
-                case 127: return SqlDbType.BigInt;
-                case 165: return SqlDbType.VarBinary;
-                case 167: return SqlDbType.VarChar;
-                case 173: return SqlDbType.Binary;
-                case 175: return SqlDbType.Char;
-                case 189: return SqlDbType.Timestamp;
-                case 231: return SqlDbType.NVarChar;
-                case 239: return SqlDbType.NChar;
-                case 241: return SqlDbType.Xml;
+                case "image": return SqlDbType.Image;
+                case "text": return SqlDbType.Text;
+                case "uniqueidentifier": return SqlDbType.UniqueIdentifier;
+                case "date": return SqlDbType.Date;
+                case "time": return SqlDbType.Time;
+                case "datetime2": return SqlDbType.DateTime2;
+                case "datetimeoffset": return SqlDbType.DateTimeOffset;
+                case "tinyint": return SqlDbType.TinyInt;
+                case "smallint": return SqlDbType.SmallInt;
+                case "int": return SqlDbType.Int;
+                case "smalldatetime": return SqlDbType.SmallDateTime;
+                case "real": return SqlDbType.Real;
+                case "money": return SqlDbType.Money;
+                case "datetime": return SqlDbType.DateTime;
+                case "float": return SqlDbType.Float;
+                case "sql_variant": return SqlDbType.Variant;
+                case "bit": return SqlDbType.Bit;
+                case "decimal": return SqlDbType.Decimal;
+                case "numeric": return SqlDbType.Decimal;
+                case "smallmoney": return SqlDbType.SmallMoney;
+                case "bigint": return SqlDbType.BigInt;
+                case "varbinary": return SqlDbType.VarBinary;
+                case "varchar": return SqlDbType.VarChar;
+                case "binary": return SqlDbType.Binary;
+                case "char": return SqlDbType.Char;
+                case "timestamp": return SqlDbType.Timestamp;
+                case "nvarchar": return SqlDbType.NVarChar;
+                case "nchar": return SqlDbType.NChar;
+                case "xml": return SqlDbType.Xml;
             }
             throw new Exception("SQL Type not supported");
         }

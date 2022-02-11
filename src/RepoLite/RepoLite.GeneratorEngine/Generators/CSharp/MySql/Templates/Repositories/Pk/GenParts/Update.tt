@@ -1,0 +1,68 @@
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="RepoLite.Common.Models" #>
+<#@ import namespace="RepoLite.Common.Extensions" #>
+<#@ parameter type="RepoLite.Common.Options.GenerationOptions" name="generationSettings" #>
+<#@ parameter type="RepoLite.Common.Models.RepositoryGenerationObject" name="generationObject" #>
+<# var pk = generationObject.Table.PrimaryKeys.FirstOrDefault();#>
+        public bool Update(<#= generationObject.Table.ClassName #> item, bool clearDirty = true)
+        {
+            if (item == null)
+                return false;
+<# if (generationSettings.IncludeCaching) {#>
+            if (CacheEnabled)
+            {
+                RemoveFromCache(item.<#= pk.DbColumnName #>);
+            }
+<# } #>
+
+            var validationErrors = item.Validate();
+            if (validationErrors.Any())
+                throw new ValidationException(validationErrors);
+
+<# if (generationObject.InheritedTable != null) { #>
+            var success = _<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Update(item, false);
+            success &= BaseUpdate(item.DirtyColumns,
+                <#= PrintBlockScopedVariables(generationObject.Table.Columns) #>);
+
+<# } #>
+<# if (generationObject.InheritedTable == null) { #>
+            var success = BaseUpdate(item.DirtyColumns, 
+                <#= PrintBlockScopedVariables(generationObject.Table.Columns) #>);
+
+<# } #>
+            if (success && clearDirty)
+                item.ResetDirty();
+<# if (generationSettings.IncludeCaching) {#>
+            if (success && CacheEnabled)
+            {
+                SaveToCache(item);
+            }
+<# } #>
+
+            return success;
+        }
+<#
+string PrintBlockScopedVariables(IEnumerable<Column> columns)
+{
+   var sb = new StringBuilder();
+   var distinctColumns = columns.ToList();
+
+   for (var i = 0; i < distinctColumns.Count; i += 5)
+   {
+       for (var j = 0; j < Math.Min(5, distinctColumns.Count - i); j++)
+       {
+           sb.Append($"item.{distinctColumns[i + j].PropertyName}");
+           if (distinctColumns[i + j] != distinctColumns.Last()) sb.Append(", ");
+       }
+
+       if (i + 5 >= distinctColumns.Count)
+           continue;
+       sb.AppendLine("");
+       sb.Append(Common.Helpers.Tab4);
+   }
+
+   return sb.ToString();
+}
+#>

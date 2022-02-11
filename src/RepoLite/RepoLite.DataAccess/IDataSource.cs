@@ -13,7 +13,7 @@ namespace RepoLite.DataAccess
         
         
         IEnumerable<Table> LoadTables(IEnumerable<NameAndSchema> tables);
-        IEnumerable<Procedure> LoadProcedures(IEnumerable<NameAndSchema> procedures);
+        IEnumerable<ProcedureGenerationObject> LoadProcedures(IEnumerable<NameAndSchema> procedures);
         
         IEnumerable<Column> LoadTableColumns(Table table);
     }

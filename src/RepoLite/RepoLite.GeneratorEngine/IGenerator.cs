@@ -20,7 +20,7 @@ namespace RepoLite.GeneratorEngine
         /// <returns></returns>
         string BuildRepository(RepositoryGenerationObject generationObject);
         
-        string BuildProcedure(Procedure procedure);
+        string BuildProcedure(ProcedureGenerationObject procedureGenerationObject);
 
         /// <summary>
         /// Gets the file extension for the model

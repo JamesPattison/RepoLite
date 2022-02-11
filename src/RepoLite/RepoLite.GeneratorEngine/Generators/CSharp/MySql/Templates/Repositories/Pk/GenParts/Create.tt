@@ -1,0 +1,134 @@
+<#@ import namespace="RepoLite.Common.Extensions" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="RepoLite.Common.Models" #>
+<#@ parameter type="RepoLite.Common.Options.GenerationOptions" name="generationSettings" #>
+<#@ parameter type="RepoLite.Common.Models.RepositoryGenerationObject" name="generationObject" #>
+<# var pk = generationObject.Table.PrimaryKeys.FirstOrDefault();#>
+       public override bool Create(<#= generationObject.Table.ClassName #> item)
+        {
+            //Validation
+            if (item == null)
+                return false;
+
+            var validationErrors = item.Validate();
+            if (validationErrors.Any())
+                throw new ValidationException(validationErrors);
+
+<# if (generationObject.Inherits) { #>
+            if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Create(item))
+            {
+                var createdKeys = BaseCreate(
+<# foreach (var column in generationObject.Table.Columns) { #>
+                    item.<#= column.PropertyName #><#= column == generationObject.Table.Columns.Last()? ");": ","#>
+<# } #>
+                if (createdKeys.Count != <#= generationObject.Table.ClassName #>.Columns.Count(x => x.PrimaryKey))
+                    return false;
+
+                item.<#= pk.PropertyName #> = (long)createdKeys[nameof(<#= generationObject.Table.ClassName #>.<#= pk.PropertyName #>)];
+                item.ResetDirty();
+
+<# if (generationSettings.IncludeCaching) {#>
+                if (CacheEnabled)
+                {
+                    SaveToCache(item);
+                }
+<# } #>
+                return true;
+            }
+            return false;
+<# } else { #>
+            var createdKeys = BaseCreate(
+<# foreach (var column in generationObject.Table.Columns) { #>
+                    item.<#= column.PropertyName #><#= column == generationObject.Table.Columns.Last()? ");": ","#>
+<# } #>
+            if (createdKeys.Count != <#= generationObject.Table.ClassName #>.Columns.Count(x => x.PrimaryKey))
+                return false;
+
+            item.<#= pk.PropertyName #> = (long)createdKeys[nameof(<#= generationObject.Table.ClassName #>.<#= pk.PropertyName #>)];
+            item.ResetDirty();
+
+<# if (generationSettings.IncludeCaching) {#>
+            if (CacheEnabled)
+            {
+                SaveToCache(item);
+            }
+<# } #>
+            return true;
+<# } #>
+        }
+
+        public override bool BulkCreate(params <#= generationObject.Table.ClassName #>[] items)
+        {
+            if (!items.Any())
+                return false;
+
+            var validationErrors = items.SelectMany(x => x.Validate()).ToList();
+            if (validationErrors.Any())
+                throw new ValidationException(validationErrors);
+
+<# if (generationObject.Inherits) { #>
+            if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.BulkCreate(items))
+            {
+                var dt = new DataTable();
+                foreach (var mergeColumn in <#= generationObject.Table.ClassName #>.Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
+                    dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
+
+                foreach (var item in items)
+                {
+                    dt.Rows.Add(
+<# foreach (var column in generationObject.Table.Columns) { #>
+                        item.<#= column.PropertyName #><#= column == generationObject.Table.Columns.Last()? ");": ","#>
+<# } #>
+                }
+
+                if (BulkInsert(dt))
+                {
+<# if (generationSettings.IncludeCaching) {#>
+                    if (CacheEnabled)
+                    {
+                        foreach (var item in items)
+                        {
+                            SaveToCache(item);
+                        }
+                    }
+<# } #>
+                    return true;
+                }
+                return false;
+            }
+            return false;
+<# } else { #>
+			var dt = new DataTable();
+			foreach (var mergeColumn in <#= generationObject.Table.ClassName #>.Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity))
+				dt.Columns.Add(mergeColumn.ColumnName, mergeColumn.ValueType);
+
+			foreach (var item in items)
+			{
+				dt.Rows.Add(
+<# foreach (var column in generationObject.Table.Columns) { #>
+                    item.<#= column.PropertyName #><#= column == generationObject.Table.Columns.Last()? ");": ","#>
+<# } #>
+			}
+
+			if (BulkInsert(dt))
+			{
+<# if (generationSettings.IncludeCaching) {#>
+				if (CacheEnabled)
+				{
+					foreach (var item in items)
+					{
+						SaveToCache(item);
+					}
+				}
+<# } #>
+				return true;
+			}
+			return false;
+<# } #>
+        }
+        public override bool BulkCreate(List<<#= generationObject.Table.ClassName #>> items)
+        {
+            return BulkCreate(items.ToArray());
+        }

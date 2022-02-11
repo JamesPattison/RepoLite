@@ -40,13 +40,13 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
             this.Write("\r\n{\r\n    public partial class Procedures\r\n    {\r\n");
             
             #line 25 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
- if (procedure.HasParameters){ 
+ if (ProcedureGenerationObject.HasParameters){ 
             
             #line default
             #line hidden
             
             #line 26 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
- foreach (var tableTypeParameter in procedure.Parameters.Where(x => x is TableTypeParameter).Cast<TableTypeParameter>().DistinctBy(x => x.SqlName)) { 
+ foreach (var tableTypeParameter in ProcedureGenerationObject.Parameters.Where(x => x is TableTypeParameter).Cast<TableTypeParameter>().DistinctBy(x => x.SqlName)) { 
             
             #line default
             #line hidden
@@ -80,28 +80,28 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
             this.Write("\r\n");
             
             #line 31 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
- if (procedure.HasResults){ 
+ if (ProcedureGenerationObject.HasResults){ 
             
             #line default
             #line hidden
             this.Write("        public record ");
             
             #line 32 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture($"{procedure.Name}_Result"));
+            this.Write(this.ToStringHelper.ToStringWithCulture($"{ProcedureGenerationObject.Name}_Result"));
             
             #line default
             #line hidden
             this.Write("(\r\n");
             
             #line 33 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
- foreach (var resultSet in procedure.ResultSets) { 
+ foreach (var resultSet in ProcedureGenerationObject.ResultSets) { 
             
             #line default
             #line hidden
             this.Write("            IEnumerable<");
             
             #line 34 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture($"{procedure.Name}_Result_{ResultSetName(resultSet)}"));
+            this.Write(this.ToStringHelper.ToStringWithCulture($"{ProcedureGenerationObject.Name}_Result_{ResultSetName(resultSet)}"));
             
             #line default
             #line hidden
@@ -114,7 +114,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
             #line hidden
             
             #line 34 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(resultSet == procedure.ResultSets.Last()?");": ","));
+            this.Write(this.ToStringHelper.ToStringWithCulture(resultSet == ProcedureGenerationObject.ResultSets.Last()?");": ","));
             
             #line default
             #line hidden
@@ -128,14 +128,14 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
             this.Write("\r\n");
             
             #line 37 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
- foreach (var resultSet in procedure.ResultSets) { 
+ foreach (var resultSet in ProcedureGenerationObject.ResultSets) { 
             
             #line default
             #line hidden
             this.Write("        public record ");
             
             #line 38 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture($"{procedure.Name}_Result_{ResultSetName(resultSet)}"));
+            this.Write(this.ToStringHelper.ToStringWithCulture($"{ProcedureGenerationObject.Name}_Result_{ResultSetName(resultSet)}"));
             
             #line default
             #line hidden
@@ -169,7 +169,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
             this.Write(" ");
             
             #line 41 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(procedure.Name));
+            this.Write(this.ToStringHelper.ToStringWithCulture(ProcedureGenerationObject.Name));
             
             #line default
             #line hidden
@@ -183,14 +183,14 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
             this.Write("\r\n        ) \r\n        {\r\n            using var conn = new SqlConnection(_connectionString);\r\n            using var command = new SqlCommand(\"");
             
             #line 46 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(procedure.Name));
+            this.Write(this.ToStringHelper.ToStringWithCulture(ProcedureGenerationObject.Name));
             
             #line default
             #line hidden
             this.Write("\", conn)\r\n            {\r\n                CommandType = CommandType.StoredProcedure\r\n            };\r\n\r\n");
             
             #line 51 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
- foreach(var parameter in procedure.Parameters.Where(x => x is BasicParameter).Cast<BasicParameter>()) { 
+ foreach(var parameter in ProcedureGenerationObject.Parameters.Where(x => x is BasicParameter).Cast<BasicParameter>()) { 
             
             #line default
             #line hidden
@@ -217,7 +217,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
             #line hidden
             
             #line 54 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
- foreach(var parameter in procedure.Parameters.Where(x => x is TableTypeParameter).Cast<TableTypeParameter>()) { 
+ foreach(var parameter in ProcedureGenerationObject.Parameters.Where(x => x is TableTypeParameter).Cast<TableTypeParameter>()) { 
             
             #line default
             #line hidden
@@ -342,21 +342,21 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
             this.Write("\r\n            conn.Open();\r\n");
             
             #line 73 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
- if (procedure.HasResults) { 
+ if (ProcedureGenerationObject.HasResults) { 
             
             #line default
             #line hidden
             this.Write("            var da = new SqlDataAdapter(command);\r\n            var ds = new DataSet();\r\n            da.Fill(ds);\r\n\r\n            if (ds.Tables.Count != ");
             
             #line 78 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(procedure.ResultSets.Count));
+            this.Write(this.ToStringHelper.ToStringWithCulture(ProcedureGenerationObject.ResultSets.Count));
             
             #line default
             #line hidden
             this.Write(") throw new Exception(\"Return count differs to expected. Please regenerate\");\r\n\r\n");
             
             #line 80 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
- foreach(var resultSet in procedure.ResultSets) { 
+ foreach(var resultSet in ProcedureGenerationObject.ResultSets) { 
             
             #line default
             #line hidden
@@ -370,7 +370,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
             this.Write("_table = ds.Tables[");
             
             #line 81 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(procedure.ResultSets.IndexOf(resultSet)));
+            this.Write(this.ToStringHelper.ToStringWithCulture(ProcedureGenerationObject.ResultSets.IndexOf(resultSet)));
             
             #line default
             #line hidden
@@ -391,7 +391,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
             this.Write("_table.AsEnumerable()\r\n                select new ");
             
             #line 84 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture($"{procedure.Name}_Result_{ResultSetName(resultSet)}"));
+            this.Write(this.ToStringHelper.ToStringWithCulture($"{ProcedureGenerationObject.Name}_Result_{ResultSetName(resultSet)}"));
             
             #line default
             #line hidden
@@ -440,14 +440,14 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
             this.Write("\r\n            return new ");
             
             #line 91 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture($"{procedure.Name}_Result"));
+            this.Write(this.ToStringHelper.ToStringWithCulture($"{ProcedureGenerationObject.Name}_Result"));
             
             #line default
             #line hidden
             this.Write("(\r\n");
             
             #line 92 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
- foreach(var resultSet in procedure.ResultSets) { 
+ foreach(var resultSet in ProcedureGenerationObject.ResultSets) { 
             
             #line default
             #line hidden
@@ -461,7 +461,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
             this.Write("Result");
             
             #line 93 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Procedure.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(resultSet == procedure.ResultSets.Last()?"":","));
+            this.Write(this.ToStringHelper.ToStringWithCulture(resultSet == ProcedureGenerationObject.ResultSets.Last()?"":","));
             
             #line default
             #line hidden
@@ -492,22 +492,22 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
 
    string ParameterName(TableTypeParameter parameter)
    {
-       return $"{procedure.Name}_{parameter.SqlName}_Param";
+       return $"{ProcedureGenerationObject.Name}_{parameter.SqlName}_Param";
    }
    string ResultName()
    {
-       return procedure.HasResults ? $"{procedure.Name}_Result" : "void";
+       return ProcedureGenerationObject.HasResults ? $"{ProcedureGenerationObject.Name}_Result" : "void";
    }
    string ResultSetName(ResultsSet resultSet)
    {
-       return resultSet.Name ?? $"{procedure.ResultSets.IndexOf(resultSet) + 1}";
+       return resultSet.Name ?? $"{ProcedureGenerationObject.ResultSets.IndexOf(resultSet) + 1}";
    }
 
    string ParameterList()
    {
        var parameterString = new StringBuilder();
        var prependComma = false;
-       var basicParameters = procedure.Parameters.Where(x => x is BasicParameter).Cast<BasicParameter>().ToArray();
+       var basicParameters = ProcedureGenerationObject.Parameters.Where(x => x is BasicParameter).Cast<BasicParameter>().ToArray();
        foreach (var parameter in basicParameters)
        {
            prependComma = true;
@@ -515,7 +515,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
            if (parameter != basicParameters.Last())
                parameterString.AppendLine(",");
        }
-       var tableTypeParameters = procedure.Parameters.Where(x => x is TableTypeParameter).Cast<TableTypeParameter>().ToArray();
+       var tableTypeParameters = ProcedureGenerationObject.Parameters.Where(x => x is TableTypeParameter).Cast<TableTypeParameter>().ToArray();
        foreach (
            var tableTypeParameter in tableTypeParameters)
        {
@@ -554,16 +554,16 @@ private global::RepoLite.Common.Options.GenerationOptions generationSettings
     }
 }
 
-private global::RepoLite.Common.Models.Procedure _procedureField;
+private global::RepoLite.Common.Models.ProcedureGenerationObject _ProcedureGenerationObjectField;
 
 /// <summary>
-/// Access the procedure parameter of the template.
+/// Access the ProcedureGenerationObject parameter of the template.
 /// </summary>
-private global::RepoLite.Common.Models.Procedure procedure
+private global::RepoLite.Common.Models.ProcedureGenerationObject ProcedureGenerationObject
 {
     get
     {
-        return this._procedureField;
+        return this._ProcedureGenerationObjectField;
     }
 }
 
@@ -589,18 +589,18 @@ if ((generationSettingsValueAcquired == false))
         this._generationSettingsField = ((global::RepoLite.Common.Options.GenerationOptions)(data));
     }
 }
-bool procedureValueAcquired = false;
-if (this.Session.ContainsKey("procedure"))
+bool ProcedureGenerationObjectValueAcquired = false;
+if (this.Session.ContainsKey("ProcedureGenerationObject"))
 {
-    this._procedureField = ((global::RepoLite.Common.Models.Procedure)(this.Session["procedure"]));
-    procedureValueAcquired = true;
+    this._ProcedureGenerationObjectField = ((global::RepoLite.Common.Models.ProcedureGenerationObject)(this.Session["ProcedureGenerationObject"]));
+    ProcedureGenerationObjectValueAcquired = true;
 }
-if ((procedureValueAcquired == false))
+if ((ProcedureGenerationObjectValueAcquired == false))
 {
-    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("procedure");
+    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("ProcedureGenerationObject");
     if ((data != null))
     {
-        this._procedureField = ((global::RepoLite.Common.Models.Procedure)(data));
+        this._ProcedureGenerationObjectField = ((global::RepoLite.Common.Models.ProcedureGenerationObject)(data));
     }
 }
 

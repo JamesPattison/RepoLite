@@ -6,7 +6,7 @@ using RepoLite.Common.Models.Querying;
 
 namespace RepoLite.Common.Models
 {
-    public class Procedure
+    public class ProcedureGenerationObject
     {
         public string Schema { get; set; }
         public string Name { get; set; }

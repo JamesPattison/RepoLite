@@ -23,11 +23,11 @@ namespace RepoLite.GeneratorEngine.Generators
             t.Initialize();
             return t.TransformText();
         }
-        public static string ProcessTemplate<T>(Common.Options.GenerationOptions generationSettings, Procedure procedure) where T : new()
+        public static string ProcessTemplate<T>(Common.Options.GenerationOptions generationSettings, ProcedureGenerationObject procedureGenerationObject) where T : new()
         {
             dynamic t = new T();
             t.Session = new System.Collections.Generic.Dictionary<string, object> {
-                {"procedure", procedure},
+                {"procedure", procedureGenerationObject},
                 {"generationSettings", generationSettings},
             };
             t.Initialize();

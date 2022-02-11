@@ -1,0 +1,46 @@
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Xml" #>
+<#@ import namespace="Common" #>
+<#@ parameter type="RepoLite.Common.Options.GenerationOptions" name="generationSettings" #>
+<#@ parameter type="RepoLite.Common.Models.RepositoryGenerationObject" name="generationObject" #>
+<# var pk = generationObject.Table.PrimaryKeys.FirstOrDefault();#>
+    public partial interface I<#= generationObject.Table.RepositoryName #> : IPkRepository<<#=generationObject.Table.ClassName #>>
+    {
+		<#=generationObject.Table.ClassName #> Get(<#= pk.DataTypeString #> <#= pk.FieldName #>);
+<# if (generationSettings.IncludeCaching) {#>
+		<#=generationObject.Table.ClassName #> Get(<#= pk.DataTypeString #> <#= pk.FieldName #>, bool skipCache);
+<# } #>
+		IEnumerable<<#=generationObject.Table.ClassName #>> Get(List<<#= pk.DataTypeString #>> <#= pk.FieldName #>s);
+<# if (generationSettings.IncludeCaching) {#>
+		IEnumerable<<#=generationObject.Table.ClassName #>> Get(List<<#= pk.DataTypeString #>> <#= pk.FieldName #>s, bool skipCache);
+<# } #>
+		IEnumerable<<#=generationObject.Table.ClassName #>> Get(params <#= pk.DataTypeString #>[] <#= pk.FieldName #>s);
+		
+        <#= pk.DataTypeString #> GetMaxId();
+		bool Delete(<#= pk.DataTypeString #> <#= pk.FieldName #>);
+		bool Delete(IEnumerable<<#= pk.DataTypeString #>> <#= pk.FieldName #>s);
+
+<# // Delete By #>
+<# foreach (var column in generationObject.Table.Columns.Where(x => !x.PrimaryKey)) { #>
+        bool DeleteBy<#= column.DbColumnName #>(<#= column.DataTypeString #> <#= column.FieldName #>);
+<# } #>
+
+        IEnumerable<<#=generationObject.Table.ClassName #>> Search(
+<# // Search parameters #>
+<# foreach (var column in generationObject.Table.Columns.Where(x => !x.PrimaryKey)) { #>
+            <#= column.DataTypeString #><#= Helpers.IsCSharpNullable(column.DataTypeString) ? "?" : string.Empty #> <#= column.FieldName #> = null<#= column == generationObject.Table.Columns.Last(x => !x.PrimaryKey)? ");": ","#>
+<# } #>
+
+<# // Find By #>
+<# foreach (var column in generationObject.Table.Columns.Where(x => !x.PrimaryKey)) { #>
+        IEnumerable<<#= generationObject.Table.ClassName #>> FindBy<#= column.PropertyName #>(<#= column.DataType != typeof(XmlDocument) ? column.DataTypeString: "string" #> <#= column.FieldName #>);
+<# if (generationSettings.IncludeCaching) { #>
+        IEnumerable<<#= generationObject.Table.ClassName #>> FindBy<#= column.PropertyName #>(<#= column.DataType != typeof(XmlDocument) ? column.DataTypeString: "string" #> <#= column.FieldName #>, bool skipCache);
+<# } #>
+        IEnumerable<<#= generationObject.Table.ClassName #>> FindBy<#= column.PropertyName #>(FindComparison comparison, <#= column.DataType != typeof(XmlDocument) ? column.DataTypeString: "string" #> <#= column.FieldName #>);
+<# if (generationSettings.IncludeCaching) { #>
+        IEnumerable<<#= generationObject.Table.ClassName #>> FindBy<#= column.PropertyName #>(FindComparison comparison, <#= column.DataType != typeof(XmlDocument) ? column.DataTypeString: "string" #> <#= column.FieldName #>, bool skipCache);
+
+<# } #>
+<# } #>
+    }

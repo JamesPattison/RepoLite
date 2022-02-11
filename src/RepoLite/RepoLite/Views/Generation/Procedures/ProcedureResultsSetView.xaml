@@ -6,7 +6,7 @@
              xmlns:models="clr-namespace:RepoLite.Common.Models;assembly=RepoLite.Common"
              mc:Ignorable="d"
              d:DesignHeight="100" d:DesignWidth="300"
-             d:DataContext="{d:DesignInstance models:Procedure}">
+             d:DataContext="{d:DesignInstance models:ProcedureGenerationObject}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

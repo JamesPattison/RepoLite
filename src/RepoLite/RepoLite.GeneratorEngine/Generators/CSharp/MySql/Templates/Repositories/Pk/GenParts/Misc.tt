@@ -1,0 +1,102 @@
+<#@ import namespace="Common" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="RepoLite.Common.Models" #>
+<#@ parameter type="RepoLite.Common.Options.GenerationOptions" name="generationSettings" #>
+<#@ parameter type="RepoLite.Common.Models.RepositoryGenerationObject" name="generationObject" #>
+<#@ import namespace="RepoLite.Common.Extensions" #>
+<# var pk = generationObject.Table.PrimaryKeys.FirstOrDefault();#>
+        public override <#= generationObject.Table.ClassName #> ToItem(DataRow row, bool skipBase)
+        {
+<# if (generationObject.InheritedTable != null) { #>
+            var item = skipBase ? new <#= generationObject.Table.ClassName #>() : _<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.ToItem<<#= generationObject.Table.ClassName #>>(row, false);
+<# } #>
+<# if (generationObject.InheritedTable == null) { #>
+            var item = new <#= generationObject.Table.ClassName #>();
+<# } #>
+<# foreach (var column in generationObject.Table.Columns) { #>
+            item.<#= column.PropertyName #> = Get<#= Helpers.IsCSharpNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "" #><#= (column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name) #>(row, <#= (column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({generationObject.Table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"") #>);
+<# } #>
+
+            item.ResetDirty();
+            return item;
+        }
+
+		public override TK ToItem<TK>(DataRow row, bool skipBase)
+		{
+<# if (generationObject.InheritedTable != null) { #>
+            var item = skipBase ? new <#= generationObject.Table.ClassName #>() : _<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.ToItem<TK>(row, false);
+<# } #>
+<# if (generationObject.InheritedTable == null) { #>
+            var item = new TK();
+<# } #>
+<# foreach (var column in generationObject.Table.Columns) { #>
+            item.<#= column.PropertyName #> = Get<#= Helpers.IsCSharpNullable(column.DataType.Name) && column.IsNullable ? "Nullable" : "" #><#= (column.DataType.Name.Contains("[]") ? column.DataType.Name.Replace("[]", "Array") : column.DataType.Name) #>(row, <#= (column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({generationObject.Table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"") #>);
+<# } #>
+
+			item.ResetDirty();
+			return item as TK;
+		}
+<# if (generationObject.InheritedTable != null) { #>
+        public override Where<<#= generationObject.Table.ClassName #>> Where(string col, Comparison comparison, object val, Type valueType)
+        {
+            var tables = new List<TableDefinition>
+            {
+<# foreach (var definition in GetTableDefinitions(generationObject)){ #>
+                new TableDefinition("<#= definition.PrimaryKeys[0].DbColumnName #>", <#= definition.ClassName #>.Schema, <#= definition.ClassName #>.TableName, <#= definition.ClassName #>.Columns),
+<# } #>
+            };
+            return base.Where(tables, col, comparison, val, valueType);
+        }
+        public override Where<<#= generationObject.Table.ClassName #>> Where(string col, Comparison comparison, object val)
+        {
+            var tables = new List<TableDefinition>
+            {
+<# foreach (var definition in GetTableDefinitions(generationObject)){ #>
+                new TableDefinition("<#= definition.PrimaryKeys[0].DbColumnName #>", <#= definition.ClassName #>.Schema, <#= definition.ClassName #>.TableName, <#= definition.ClassName #>.Columns),
+<# } #>
+            };
+            return base.Where(tables, col, comparison, val, val.GetType());
+        }
+        public override IEnumerable<<#= generationObject.Table.ClassName #>> Where(string query)
+        {
+            var tables = new List<TableDefinition>
+            {
+<# foreach (var definition in GetTableDefinitions(generationObject)){ #>
+                new TableDefinition("<#= definition.PrimaryKeys[0].DbColumnName #>", <#= definition.ClassName #>.Schema, <#= definition.ClassName #>.TableName, <#= definition.ClassName #>.Columns),
+<# } #>
+            };
+            return base.Where(tables, query);
+        }
+<# } #>
+<# if (generationSettings.IncludeCaching) { #>
+        private void SaveToCache(<#= generationObject.Table.ClassName #> <#= generationObject.Table.LowerClassName #>)
+        {
+            CacheHelper.SaveToCache(<#= generationObject.Table.ClassName #>.CacheKey(<#= generationObject.Table.LowerClassName #>.<#= pk.DbColumnName #>), <#= generationObject.Table.LowerClassName #>);
+        }
+        private <#= generationObject.Table.ClassName #> GetFromCache(<#= pk.DataTypeString #> <#= pk.FieldName #>)
+        {
+            return CacheHelper.GetFromCache<<#= generationObject.Table.ClassName #>>(<#= generationObject.Table.ClassName #>.CacheKey(<#= pk.FieldName #>));
+        }
+        private void RemoveFromCache(<#= pk.DataTypeString #> <#= pk.FieldName #>)
+        {
+            CacheHelper.RemoveFromCache(<#= generationObject.Table.ClassName #>.CacheKey(<#= pk.FieldName #>));
+        }
+        private bool IsInCache(<#= pk.DataTypeString #> <#= pk.FieldName #>)
+        {
+            return CacheHelper.IsInCache(<#= generationObject.Table.ClassName #>.CacheKey(<#= pk.FieldName #>));
+        }
+<# } #>
+<#
+IEnumerable<Table> GetTableDefinitions(RepositoryGenerationObject generationObject)
+{
+   // while (true)
+   // {
+   //     yield return generationObject.Table;
+   //
+   //     if (generationObject.InheritedTable == null) yield break;
+   //     generationObject = generationObject.InheritedTable;
+   // }
+    yield return generationObject.Table;
+}
+#>

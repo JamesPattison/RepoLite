@@ -760,12 +760,16 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
        var sb = new StringBuilder();
        foreach (var column in table.Columns)
        {
-           var sqlPrecisionColumns = new[] { 35, 60, 62, 99, 106, 108, 122, 165, 167, 173, 175, 231, 239 };
-           var colLengthVal = sqlPrecisionColumns.Contains(column.SqlDataTypeCode)
+           var sqlPrecisionColumns = new[]
+           {
+               "text", "money", "float", "ntext", "decimal", "numeric", "smallmoney", "varbinary", "varchar", "binary",
+               "char", "nvarchar", "nchar", "sysname"
+           };
+           var colLengthVal = sqlPrecisionColumns.Contains(column.SqlDataType)
                ? $"({Math.Max(column.MaxLength, column.MaxIntLength)})"
                : string.Empty;
 
-           if (SQLServerHelpers.GetDbType(column.SqlDataTypeCode) == SqlDbType.NVarChar && column.MaxLength == -1)
+           if (SQLServerHelpers.GetDbType(column.SqlDataType) == SqlDbType.NVarChar && column.MaxLength == -1)
            {
                colLengthVal = "(MAX)";
            }
@@ -773,7 +777,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates
                $"{Helpers.Tab3}new ColumnDefinition({(column.DbColumnName == nameof(column.DbColumnName) ? $"nameof({table.ClassName}.{column.DbColumnName})" : $"\"{column.DbColumnName}\"")}, " +
                $"typeof({column.DataTypeString}), " +
                $"\"[{column.SqlDataType}]{colLengthVal}\", " +
-               $"SqlDbType.{SQLServerHelpers.GetDbType(column.SqlDataTypeCode)}, " +
+               $"SqlDbType.{SQLServerHelpers.GetDbType(column.SqlDataType)}, " +
                $"{column.IsNullable.ToString().ToLower()}, " +
                $"{column.PrimaryKey.ToString().ToLower()}, " +
                $"{column.IsIdentity.ToString().ToLower()}),");

@@ -12,7 +12,7 @@
             if (item == null)
                 return false;
 
-            var deleteColumn = new DeleteColumn("<#= pk.DbColumnName #>", item.<#= pk.DbColumnName #>, SqlDbType.<#= SQLServerHelpers.GetDbType(pk.SqlDataTypeCode) #>);
+            var deleteColumn = new DeleteColumn("<#= pk.DbColumnName #>", item.<#= pk.DbColumnName #>, SqlDbType.<#= SQLServerHelpers.GetDbType(pk.SqlDataType) #>);
 
             if (BaseDelete(deleteColumn, out var items))
             {
@@ -152,7 +152,7 @@
 <# foreach (var column in generationObject.Table.Columns.Where(x => !x.PrimaryKey)) { #> 
         public bool DeleteBy<#= column.DbColumnName #>(<#= column.DataType != typeof(XmlDocument) ? column.DataTypeString: "string" #> <#= column.FieldName #>)
         {
-            if (BaseDelete(new DeleteColumn(nameof(<#= generationObject.Table.ClassName #>.<#= column.DbColumnName #>), <#= column.FieldName #>, SqlDbType.<#= SQLServerHelpers.GetDbType(column.SqlDataTypeCode) #>), out var items))
+            if (BaseDelete(new DeleteColumn(nameof(<#= generationObject.Table.ClassName #>.<#= column.DbColumnName #>), <#= column.FieldName #>, SqlDbType.<#= SQLServerHelpers.GetDbType(column.SqlDataType) #>), out var items))
             {
 <# if (generationSettings.IncludeCaching) { #>
 <# if (generationObject.Inherits) { #>

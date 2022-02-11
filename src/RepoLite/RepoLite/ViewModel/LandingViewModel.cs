@@ -13,13 +13,13 @@ namespace RepoLite.ViewModel
     {
         public LandingViewModel()
         {
-            var systemSettings = IOC.Resolve<IOptions<SystemOptions>>().Value;
-            var dataSource = IOC.Resolve<DataSourceResolver>().Invoke(systemSettings.DataSource);
+            //var systemSettings = IOC.Resolve<IOptions<SystemOptions>>().Value;
+            //var dataSource = IOC.Resolve<DataSourceResolver>().Invoke(systemSettings.DataSource);
             
-            var procedures = dataSource.GetProcedures();
+           //var procedures = dataSource.GetProcedures();
 
-            var loadedProcedures = dataSource.LoadProcedures(procedures);
-            var g = 12;
+            //var loadedProcedures = dataSource.LoadProcedures(procedures);
+            //var g = 12;
         }
         public ICommand NavigateToCreateModels
         {

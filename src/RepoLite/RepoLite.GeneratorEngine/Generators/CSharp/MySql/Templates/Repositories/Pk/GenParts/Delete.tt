@@ -1,0 +1,189 @@
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="RepoLite.Common.Models" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="Common.Extensions" #> 
+<#@ import namespace="Common" #> 
+<#@ parameter type="RepoLite.Common.Options.GenerationOptions" name="generationSettings" #>
+<#@ parameter type="RepoLite.Common.Models.RepositoryGenerationObject" name="generationObject" #>
+<#@ import namespace="System.Xml" #>
+<# var pk = generationObject.Table.PrimaryKeys.FirstOrDefault();#>
+       public bool Delete(<#= generationObject.Table.ClassName #> item)
+        {
+            if (item == null)
+                return false;
+
+            var deleteColumn = new DeleteColumn("<#= pk.DbColumnName #>", item.<#= pk.DbColumnName #>, MySqlDbType.<#= MySqlHelpers.GetDbType(pk.SqlDataType) #>);
+
+            if (BaseDelete(deleteColumn, out var items))
+            {
+<# if (generationObject.InheritedTable != null) { #>
+                if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Delete(item))
+                {
+<# if (generationSettings.IncludeCaching) {#>
+                    if (CacheEnabled)
+                    {
+                        RemoveFromCache(item.<#= pk.DbColumnName #>);
+                    }
+<# } #>
+                    return true;
+                }
+<# } #>
+<# if (generationObject.InheritedTable == null) { #>
+<# if (generationSettings.IncludeCaching) {#>
+                if (CacheEnabled)
+                {
+                    RemoveFromCache(item.<#= pk.DbColumnName #>);
+                }
+<# } #>
+                return true;
+<# } #>
+            }
+            return false;
+        }
+        public bool Delete(IEnumerable<<#= generationObject.Table.ClassName #>> items)
+        {
+            if (!items.Any()) return true;
+            var deleteValues = new List<object>();
+            foreach (var item in items)
+            {
+                deleteValues.Add(item.<#= pk.DbColumnName #>);
+            }
+
+            if (BaseDelete("<#= pk.DbColumnName #>", deleteValues))
+            {
+<# if (generationObject.InheritedTable != null) { #>
+                if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Delete(items))
+                {
+<# if (generationSettings.IncludeCaching) {#>
+                    if (CacheEnabled)
+                    {
+                        foreach (var item in items)
+                        {
+                            RemoveFromCache(item.<#= pk.DbColumnName #>);
+                        }
+                    }
+<# } #>
+                    return true;
+                }
+<# } #>
+<# if (generationObject.InheritedTable == null) { #>
+<# if (generationSettings.IncludeCaching) {#>
+                if (CacheEnabled)
+                {
+                    foreach (var item in items)
+                    {
+                        RemoveFromCache(item.<#= pk.DbColumnName #>);
+                    }
+                }
+<# } #>
+                return true;
+<# } #>
+            }
+            return false;
+        }
+
+        public bool Delete(<#= pk.DataTypeString #> <#= pk.FieldName #>)
+        {
+            if (Delete(new <#= generationObject.Table.ClassName #> { <#= pk.DbColumnName #> = <#= pk.FieldName #> }))
+            {
+<# if (generationObject.InheritedTable != null) { #>
+                if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Delete(<#= pk.FieldName #>))
+                {
+<# if (generationSettings.IncludeCaching) {#>
+                    if (CacheEnabled)
+                    {
+                        RemoveFromCache(<#= pk.FieldName #>);
+                    }
+<# } #>
+                    return true;
+                }
+<# } #>
+<# if (generationObject.InheritedTable == null) { #>
+<# if (generationSettings.IncludeCaching) {#>
+                if (CacheEnabled)
+                {
+                    RemoveFromCache(<#= pk.FieldName #>);
+                }
+<# } #>
+                return true;
+<# } #>
+            }
+            return false;
+        }
+
+        public bool Delete(IEnumerable<<#= pk.DataTypeString #>> <#= pk.FieldName #>s)
+        {
+            if (!<#= pk.FieldName #>s.Any()) return true;
+            var deleteValues = new List<object>();
+            deleteValues.AddRange(<#= pk.FieldName #>s.Cast<object>());
+            if (BaseDelete("<#= pk.DbColumnName #>", deleteValues))
+            {
+<# if (generationObject.InheritedTable != null) { #>
+                if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Delete(<#= pk.FieldName #>s))
+                {
+<# if (generationSettings.IncludeCaching) {#>
+                    if (CacheEnabled)
+                    {
+                        foreach (var <#= pk.FieldName #> in <#= pk.FieldName #>s)
+                        {
+                            RemoveFromCache(<#= pk.FieldName #>);
+                        }
+                    }
+<# } #>
+                    return true;
+                }
+<# } #>
+<# if (generationObject.InheritedTable == null) { #>
+<# if (generationSettings.IncludeCaching) {#>
+                if (CacheEnabled)
+                {
+                    foreach (var <#= pk.FieldName #> in <#= pk.FieldName #>s)
+                    {
+                        RemoveFromCache(<#= pk.FieldName #>);
+                    }
+                }
+<# } #>
+                return true;
+<# } #>
+            }
+            return false;
+        }
+<# // Delete By #>
+<# foreach (var column in generationObject.Table.Columns.Where(x => !x.PrimaryKey)) { #> 
+        public bool DeleteBy<#= column.DbColumnName #>(<#= column.DataType != typeof(XmlDocument) ? column.DataTypeString: "string" #> <#= column.FieldName #>)
+        {
+            if (BaseDelete(new DeleteColumn(nameof(<#= generationObject.Table.ClassName #>.<#= column.DbColumnName #>), <#= column.FieldName #>, MySqlDbType.<#= MySqlHelpers.GetDbType(column.SqlDataType) #>), out var items))
+            {
+<# if (generationSettings.IncludeCaching) { #>
+<# if (generationObject.Inherits) { #>
+				if (_<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Delete(items))
+				{
+					if (CacheEnabled)
+					{
+						foreach (var item in items)
+						{
+							RemoveFromCache(item.<#= pk.DbColumnName #>);
+						}
+					}
+				}
+<# } else { #>
+				if (CacheEnabled)
+				{
+					foreach (var item in items)
+					{
+						RemoveFromCache(item.<#= pk.DbColumnName #>);
+					}
+				}
+<# } #>
+				return true;
+<# } else { #>
+<# if (generationObject.Inherits) { #>
+                return _<#= generationObject.InheritedTable.RepositoryName.LowerFirst() #>.Delete(items);
+<# } else { #>
+                return true;
+<# } #>
+<# }#>
+			}
+			return false;
+		}
+<# } #>
