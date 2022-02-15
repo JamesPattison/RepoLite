@@ -501,8 +501,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.MySql.Templates.Repositorie
    {
        var sb = new StringBuilder();
  
-       sb.AppendLine("var query = $@\"" + "SELECT * FROM ");
-       sb.Append($"{Helpers.Tab7}[{generationObject.Table.DbTableName}]");
+       sb.AppendLine("var query = $@\"" + $"SELECT * FROM `{generationObject.Table.Schema}`.`{generationObject.Table.DbTableName}`");
 
        var tables = generationObject.Table.Columns.Select(x => x.DbTableName).Where(x => x != generationObject.Table.DbTableName).Distinct();
 

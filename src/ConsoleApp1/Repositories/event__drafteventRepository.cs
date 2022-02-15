@@ -114,8 +114,8 @@ namespace Biomind.Data.Repositories
         }
         public override IEnumerable<event__drafteventDbModel> GetAll()
         {
-            var query = $@"SELECT * FROM 
-							[event__draftevent]";
+            var query = $@"SELECT * FROM `democlient`.`event__draftevent`
+";
             return ExecuteSql(query);
         }
 
