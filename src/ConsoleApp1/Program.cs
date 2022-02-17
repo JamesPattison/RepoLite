@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Biomind.Data.Procedures;
 using Biomind.Data.Repositories;
 
 namespace ConsoleApp1
@@ -11,19 +13,24 @@ namespace ConsoleApp1
         
         static void Main(string[] args)
         {
-            var sproctester = new SprocTester(cn);
+            // var sproctester = new SprocTester(cn);
+            //
+            // var draftEventRepository = new event__drafteventRepository(cn);
+            // var draftEvent = draftEventRepository.Get(1);
+            // var all = draftEventRepository.GetAll();
+            //
+            // //sproctester.CreateOwner(2, "Test", "Data", DateTime.Now);
+            // //var cars = sproctester.FindOwnersCarByName("Petra", "Donnelly");
+            // //var companyInfo = sproctester.GetCompanyInfo(1);
+            // //sproctester.CreateCars(new[] {new SprocTester.CreateCars_Request_Car("Test", "Todel", "Karishma")});
+            // //var createdCars = sproctester.CreateCarsAndReturn(new[] {new SprocTester.CreateCarsAndReturn_Request_Car("Test", "Todel", "Taran")});
+            // //var allCars = sproctester.GetAllCars();
+            // //var database = sproctester.GetDatabase();
 
-            var draftEventRepository = new event__drafteventRepository(cn);
-            var draftEvent = draftEventRepository.Get(1);
-            var all = draftEventRepository.GetAll();
-            
-            //sproctester.CreateOwner(2, "Test", "Data", DateTime.Now);
-            //var cars = sproctester.FindOwnersCarByName("Petra", "Donnelly");
-            //var companyInfo = sproctester.GetCompanyInfo(1);
-            //sproctester.CreateCars(new[] {new SprocTester.CreateCars_Request_Car("Test", "Todel", "Karishma")});
-            //var createdCars = sproctester.CreateCarsAndReturn(new[] {new SprocTester.CreateCarsAndReturn_Request_Car("Test", "Todel", "Taran")});
-            //var allCars = sproctester.GetAllCars();
-            //var database = sproctester.GetDatabase();
+            var events = new Procedures(cn).event__get_events_by_ids("11111111-1111-1111-1111-11111111111", new List<Procedures.event__get_events_by_ids___temp_event_ids_Param>
+            {
+                new (1)
+            });
             
             Console.WriteLine("Hello World!");
         }

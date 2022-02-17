@@ -51,11 +51,11 @@ namespace RepoLite.DataAccess.Accessors
             return toReturn;
         }
 
-        public override IEnumerable<NameAndSchema> GetProcedures()
+        public override IEnumerable<ProcedureDefinition> GetProcedures()
         {
             using var cn = new SqlConnection(_systemSettings.ConnectionString);
 
-            var procedures = cn.Query<NameAndSchema>(@"
+            var procedures = cn.Query<ProcedureDefinition>(@"
                             SELECT
                                 ROUTINE_SCHEMA  AS [Schema],
                                 ROUTINE_NAME    AS Name  
@@ -64,7 +64,7 @@ namespace RepoLite.DataAccess.Accessors
             return procedures;
         }
 
-        public override IEnumerable<ProcedureGenerationObject> LoadProcedures(IEnumerable<NameAndSchema> procedures)
+        public override IEnumerable<ProcedureGenerationObject> LoadProcedures(IEnumerable<ProcedureDefinition> procedures)
         {
             foreach (var procedure in procedures)
             {

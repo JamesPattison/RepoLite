@@ -21,7 +21,7 @@ namespace RepoLite.DataAccess
         }
         public abstract IEnumerable<NameAndSchema> GetTables();
         public abstract IEnumerable<NameAndSchema> GetTables(string schema);
-        public abstract IEnumerable<NameAndSchema> GetProcedures();
+        public abstract IEnumerable<ProcedureDefinition> GetProcedures();
         public IEnumerable<Table> LoadTables(IEnumerable<NameAndSchema> tables)
         {
             var createdTables = new List<Table>();
@@ -40,7 +40,7 @@ namespace RepoLite.DataAccess
 
             return createdTables;
         }
-        public abstract IEnumerable<ProcedureGenerationObject> LoadProcedures(IEnumerable<NameAndSchema> procedures);
+        public abstract IEnumerable<ProcedureGenerationObject> LoadProcedures(IEnumerable<ProcedureDefinition> procedures);
         //protected abstract List<TableDefault> GetTableDefaults(List<TableAndSchema> tables);
         public abstract IEnumerable<Column> LoadTableColumns(Table table);
     }

@@ -9,11 +9,11 @@ namespace RepoLite.DataAccess
     {
         IEnumerable<NameAndSchema> GetTables();
         IEnumerable<NameAndSchema> GetTables(string schema);
-        IEnumerable<NameAndSchema> GetProcedures();
+        IEnumerable<ProcedureDefinition> GetProcedures();
         
         
         IEnumerable<Table> LoadTables(IEnumerable<NameAndSchema> tables);
-        IEnumerable<ProcedureGenerationObject> LoadProcedures(IEnumerable<NameAndSchema> procedures);
+        IEnumerable<ProcedureGenerationObject> LoadProcedures(IEnumerable<ProcedureDefinition> procedures);
         
         IEnumerable<Column> LoadTableColumns(Table table);
     }

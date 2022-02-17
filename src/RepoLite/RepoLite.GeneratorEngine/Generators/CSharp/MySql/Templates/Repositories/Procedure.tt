@@ -1,5 +1,5 @@
 <#@ parameter type="RepoLite.Common.Options.GenerationOptions" name="generationSettings" #>
-<#@ parameter type="RepoLite.Common.Models.ProcedureGenerationObject" name="ProcedureGenerationObject" #>
+<#@ parameter type="RepoLite.Common.Models.ProcedureGenerationObject" name="procedure" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="RepoLite.Common.Models.ProcedureParameters" #>
 <#@ import namespace="MoreLinq.Extensions" #>
@@ -16,42 +16,67 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Text;
 using System.Xml;
+using MySqlConnector;
 
 namespace <#= generationSettings.ProcedureGenerationNamespace #>
 {
     public partial class Procedures
     {
-<# if (ProcedureGenerationObject.HasParameters){ #>
-<# foreach (var tableTypeParameter in ProcedureGenerationObject.Parameters.Where(x => x is TableTypeParameter).Cast<TableTypeParameter>().DistinctBy(x => x.SqlName)) { #>
+<# if (procedure.HasParameters){ #>
+<# foreach (var tableTypeParameter in procedure.Parameters.Where(x => x is TableTypeParameter).Cast<TableTypeParameter>().DistinctBy(x => x.SqlName)) { #>
         public record <#= ParameterName(tableTypeParameter) #>(<#= string.Join(',', tableTypeParameter.Columns.Select(x => $"{x.TypeString} {x.Name}")) #>);
 <# } #>
-<#}#>
-
-<# if (ProcedureGenerationObject.HasResults){ #>
-        public record <#= $"{ProcedureGenerationObject.Name}_Result" #>(
-<# foreach (var resultSet in ProcedureGenerationObject.ResultSets) { #>
-            IEnumerable<<#= $"{ProcedureGenerationObject.Name}_Result_{ResultSetName(resultSet)}" #>> <#= resultSet.Name #><#=resultSet == ProcedureGenerationObject.ResultSets.Last()?");": ","#>
-<# } #>
-
-<# foreach (var resultSet in ProcedureGenerationObject.ResultSets) { #>
-        public record <#= $"{ProcedureGenerationObject.Name}_Result_{ResultSetName(resultSet)}" #>(<#= string.Join(',', resultSet.Values.Select(x => $"{x.Type} {x.Name}")) #>);
+<# foreach (var tempTableParameter in procedure.Parameters.Where(x => x is TemporaryTableParameter).Cast<TemporaryTableParameter>().DistinctBy(x => x.Name)) { #>
+        public record <#= TemporaryTableParameterName(tempTableParameter) #>(<#= string.Join(',', tempTableParameter.Columns.Select(x => $"{x.TypeString} {x.Name}")) #>);
 <# } #>
 <#}#>
-        public <#= ResultName() #> <#= ProcedureGenerationObject.Name #>(
+
+<# if (procedure.HasResults){ #>
+        public record <#= $"{procedure.Name}_Result" #>(
+<# foreach (var resultSet in procedure.ResultSets) { #>
+            IEnumerable<<#= $"{procedure.Name}_Result_{ResultSetName(resultSet)}" #>> <#= ResultSetName(resultSet) #><#=resultSet == procedure.ResultSets.Last()?");": ","#>
+<# } #>
+
+<# foreach (var resultSet in procedure.ResultSets) { #>
+        public record <#= $"{procedure.Name}_Result_{ResultSetName(resultSet)}" #>(<#= string.Join(',', resultSet.Values.Select(x => $"{x.Type} {x.Name}")) #>);
+<# } #>
+<#}#>
+
+<# // Temporary tables #>
+
+
+        public <#= ResultName() #> <#= procedure.Name #>(
 <#= ParameterList() #>
         ) 
         {
-            using var conn = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("<#= ProcedureGenerationObject.Name #>", conn)
+            using var conn = new MySqlConnection(_connectionString);
+
+            conn.Open();
+<# if (procedure.HasParameters){ #>
+<# foreach (var tempTableParameter in procedure.Parameters.Where(x => x is TemporaryTableParameter).Cast<TemporaryTableParameter>().DistinctBy(x => x.Name)) { #>
+      
+            var temporaryTablesSqls = new List<string>();
+            temporaryTablesSqls.Add("drop temporary table if exists <#= tempTableParameter.Name #>; create temporary table <#= tempTableParameter.Name #> (<#= string.Join(',', tempTableParameter.Columns.Select(x => $"{x.Name} {x.SqlDataType}")) #>)");
+            if (<#= tempTableParameter.Name #>.Any())
+                temporaryTablesSqls.Add(ToMySql(<#= tempTableParameter.Name #>));
+            var temporaryTableSql = temporaryTablesSqls.Any() ? string.Join(";", temporaryTablesSqls) : null;
+
+            new MySqlCommand(temporaryTableSql, conn).ExecuteNonQuery();
+<# } #>
+<#}#>
+
+            using var command = new MySqlCommand("<#= procedure.Name #>", conn)
             {
                 CommandType = CommandType.StoredProcedure
             };
 
-<# foreach(var parameter in ProcedureGenerationObject.Parameters.Where(x => x is BasicParameter).Cast<BasicParameter>()) { #>
+<# foreach(var parameter in procedure.Parameters.Where(x => x is BasicParameter).Cast<BasicParameter>()) { #>
             command.Parameters.AddWithValue("<#= parameter.Name #>", <#= parameter.Name #>);
 <# }#>
-<# foreach(var parameter in ProcedureGenerationObject.Parameters.Where(x => x is TableTypeParameter).Cast<TableTypeParameter>()) { #>
+<# foreach(var parameter in procedure.Parameters.Where(x => x is TableTypeParameter).Cast<TableTypeParameter>()) { #>
             var dt_<#= parameter.Name.TrimStart('@') #> = new DataTable();
 <# foreach(var col in parameter.Columns) { #>
             dt_<#= parameter.Name.TrimStart('@') #>.Columns.Add("<#= col.Name #>", typeof(<#= col.Type #>));
@@ -69,28 +94,27 @@ namespace <#= generationSettings.ProcedureGenerationNamespace #>
             param.TypeName = "<#= parameter.Schema #>.<#= parameter.SqlName #>";
 <# }#>
 
-            conn.Open();
-<# if (ProcedureGenerationObject.HasResults) { #>
-            var da = new SqlDataAdapter(command);
+<# if (procedure.HasResults) { #>
+            var da = new MySqlDataAdapter(command);
             var ds = new DataSet();
             da.Fill(ds);
 
-            if (ds.Tables.Count != <#= ProcedureGenerationObject.ResultSets.Count #>) throw new Exception("Return count differs to expected. Please regenerate");
+            if (ds.Tables.Count != <#= procedure.ResultSets.Count #>) throw new Exception("Return count differs to expected. Please regenerate");
 
-<# foreach(var resultSet in ProcedureGenerationObject.ResultSets) { #>            
-            var <#= ResultSetName(resultSet) #>_table = ds.Tables[<#= ProcedureGenerationObject.ResultSets.IndexOf(resultSet) #>];
+<# foreach(var resultSet in procedure.ResultSets) { #>            
+            var <#= ResultSetName(resultSet) #>_table = ds.Tables[<#= procedure.ResultSets.IndexOf(resultSet) #>];
 
             var <#= ResultSetName(resultSet) #>Result = from row in <#= ResultSetName(resultSet) #>_table.AsEnumerable()
-                select new <#= $"{ProcedureGenerationObject.Name}_Result_{ResultSetName(resultSet)}" #>(
+                select new <#= $"{procedure.Name}_Result_{ResultSetName(resultSet)}" #>(
 <# foreach(var item in resultSet.Values) { #>
                     row.Field<<#= item.Type #>>("<#= item.Name #>")<#= item == resultSet.Values.Last() ? "": ","#>
 <# } #>
                 );
 <# } #>
 
-            return new <#= $"{ProcedureGenerationObject.Name}_Result" #>(
-<# foreach(var resultSet in ProcedureGenerationObject.ResultSets) { #>
-                <#= ResultSetName(resultSet) #>Result<#= resultSet == ProcedureGenerationObject.ResultSets.Last()?"":"," #>
+            return new <#= $"{procedure.Name}_Result" #>(
+<# foreach(var resultSet in procedure.ResultSets) { #>
+                <#= ResultSetName(resultSet) #>Result<#= resultSet == procedure.ResultSets.Last()?"":"," #>
 <# } #>
 );
 
@@ -99,38 +123,75 @@ namespace <#= generationSettings.ProcedureGenerationNamespace #>
 <# } #>
         }
     
+<# if (procedure.HasParameters){ #>
+<# foreach (var tempTableParameter in procedure.Parameters.Where(x => x is TemporaryTableParameter).Cast<TemporaryTableParameter>().DistinctBy(x => x.Name)) { #>
+        public static string ToMySql(IEnumerable<<#= TemporaryTableParameterName(tempTableParameter) #>> src)
+        {
+            var sb = new StringBuilder().Append("insert into <#= tempTableParameter.Name #> values ");
+            var prependComma = false;
+            foreach (<#= TemporaryTableParameterName(tempTableParameter) #> s in src)
+            {
+                if( prependComma)
+                    sb.Append(",");
+<# foreach (var column in tempTableParameter.Columns) { #>                
+                sb.Append("(").AppendJoin(",",SqlDataTypesHelper.PrepareDataForInlineQuery(s.<#= column.Name #>, "<#= column.SqlDataType #>")).Append(")");
+<# } #>
+                prependComma = true;
+            }
+            return sb.ToString();
+        }
+
+        public static class SqlDataTypesHelper
+        {
+            public static string PrepareDataForInlineQuery(object src, string columnType)
+            {
+                if (src == null)
+                    return "null";
+                if (columnType.ToLower().Contains("varchar") || columnType.ToLower().Contains("text") || columnType.ToLower().Contains("char("))
+                    return $"'{MySqlHelper.EscapeString(src.ToString())}'";
+                else if (columnType.ToLower().Contains("date") || columnType.ToLower().Contains("timestamp"))
+                    return $"'{((DateTime)src):yyyy-MM-dd HH:mm:ss.FFFFFFF}'";
+                return MySqlHelper.EscapeString(src.ToString());
+            }
+        }
+<# } #>
+<#}#>
+
     }
 }
 
 <#
    string ParameterName(TableTypeParameter parameter)
    {
-       return $"{ProcedureGenerationObject.Name}_{parameter.SqlName}_Param";
+       return $"{procedure.Name}_{parameter.SqlName}_Param";
+   }
+   string TemporaryTableParameterName(TemporaryTableParameter parameter)
+   {
+       return $"{procedure.Name}_{parameter.Name}_Param";
    }
    string ResultName()
    {
-       return ProcedureGenerationObject.HasResults ? $"{ProcedureGenerationObject.Name}_Result" : "void";
+       return procedure.HasResults ? $"{procedure.Name}_Result" : "void";
    }
    string ResultSetName(ResultsSet resultSet)
    {
-       return resultSet.Name ?? $"{ProcedureGenerationObject.ResultSets.IndexOf(resultSet) + 1}";
+       return resultSet.Name ?? $"Set{procedure.ResultSets.IndexOf(resultSet) + 1}";
    }
 
    string ParameterList()
    {
        var parameterString = new StringBuilder();
        var prependComma = false;
-       var basicParameters = ProcedureGenerationObject.Parameters.Where(x => x is BasicParameter).Cast<BasicParameter>().ToArray();
+       var basicParameters = procedure.Parameters.Where(x => x is BasicParameter).Cast<BasicParameter>().ToArray();
        foreach (var parameter in basicParameters)
        {
            prependComma = true;
            parameterString.Append($"\t\t\t{parameter.Type} {parameter.Name}");
            if (parameter != basicParameters.Last())
                parameterString.AppendLine(",");
-       }
-       var tableTypeParameters = ProcedureGenerationObject.Parameters.Where(x => x is TableTypeParameter).Cast<TableTypeParameter>().ToArray();
-       foreach (
-           var tableTypeParameter in tableTypeParameters)
+       }       
+       var tempTableParameters = procedure.Parameters.Where(x => x is TemporaryTableParameter).Cast<TemporaryTableParameter>().ToArray();
+       foreach (var tempTableParameter in tempTableParameters)
        {
 
            if (prependComma)
@@ -139,8 +200,8 @@ namespace <#= generationSettings.ProcedureGenerationNamespace #>
                prependComma = false;
            }
            
-           parameterString.Append($"\t\t\tIEnumerable<{ParameterName(tableTypeParameter)}> {tableTypeParameter.Name.TrimStart('@')}");
-           if (tableTypeParameter != tableTypeParameters.Last())
+           parameterString.Append($"\t\t\tIEnumerable<{TemporaryTableParameterName(tempTableParameter)}> {tempTableParameter.Name.TrimStart('@')}");
+           if (tempTableParameter != tempTableParameters.Last())
                parameterString.AppendLine(",");
        }
        return parameterString.ToString();

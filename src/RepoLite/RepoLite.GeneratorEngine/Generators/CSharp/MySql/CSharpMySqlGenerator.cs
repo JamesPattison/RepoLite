@@ -38,7 +38,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.MySql
 
         public override string BuildProcedure(ProcedureGenerationObject procedureGenerationObject)
         {
-            throw new System.NotImplementedException();
+            return TemplateProcessor.ProcessTemplate<Procedure>(_generationOptions, procedureGenerationObject);
         }
 
         public override string BuildBaseRepository()

@@ -52,7 +52,12 @@ namespace RepoLite.ViewModel.Generation
                     var procedures = _dataSource.GetProcedures();
                     foreach (var procedure in procedures.OrderBy(x => x.Schema).ThenBy(x => x.Name).ToList())
                     {
-                        Procedures.Add(new EntityToGenerate { Schema = procedure.Schema, Table = procedure.Name });
+                        Procedures.Add(new EntityToGenerate
+                        {
+                            Schema = procedure.Schema,
+                            Table = procedure.Name,
+                            Definition = procedure.Definition
+                        });
                     }
                     OnPropertyChanged(nameof(Procedures));
                     Loaded = true;
@@ -84,7 +89,7 @@ namespace RepoLite.ViewModel.Generation
                     var procedures = Procedures.Where(x => x.Selected);
 
                     var procedureDefinitions = _dataSource
-                        .LoadProcedures(procedures.Select(x => new NameAndSchema(x.Schema, x.Table)).ToList()).ToList();
+                        .LoadProcedures(procedures.Select(x => new ProcedureDefinition(x.Schema, x.Table, x.Definition)).ToList()).ToList();
 
                     var procedureGenerationSettings = GetGenerationSettings();
 
@@ -119,7 +124,7 @@ namespace RepoLite.ViewModel.Generation
                     var procedures = Procedures.Where(x => x.Selected);
 
                     var procedureDefinitions = _dataSource
-                        .LoadProcedures(procedures.Select(x => new NameAndSchema(x.Schema, x.Table)).ToList()).ToList();
+                        .LoadProcedures(procedures.Select(x => new ProcedureDefinition(x.Schema, x.Table, x.Definition)).ToList()).ToList();
 
                     var procedureGenerationSettings = GetGenerationSettings();
 
