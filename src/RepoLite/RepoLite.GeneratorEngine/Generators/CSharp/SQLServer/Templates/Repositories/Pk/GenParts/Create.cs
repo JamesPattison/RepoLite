@@ -98,7 +98,14 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates.Reposit
             
             #line default
             #line hidden
-            this.Write(" = (long)createdKeys[nameof(");
+            this.Write(" = ");
+            
+            #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Create.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(pk.DataType));
+            
+            #line default
+            #line hidden
+            this.Write(".Parse(createdKeys[nameof(");
             
             #line 29 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
@@ -112,7 +119,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates.Reposit
             
             #line default
             #line hidden
-            this.Write(")];\r\n                item.ResetDirty();\r\n\r\n");
+            this.Write(")].ToString());\r\n                item.ResetDirty();\r\n\r\n");
             
             #line 32 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Create.tt"
  if (generationSettings.IncludeCaching) {
@@ -174,7 +181,14 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates.Reposit
             
             #line default
             #line hidden
-            this.Write(" = (long)createdKeys[nameof(");
+            this.Write(" = ");
+            
+            #line 49 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Create.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(pk.DataType));
+            
+            #line default
+            #line hidden
+            this.Write(".Parse(createdKeys[nameof(");
             
             #line 49 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Create.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(generationObject.Table.ClassName));
@@ -188,7 +202,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.SQLServer.Templates.Reposit
             
             #line default
             #line hidden
-            this.Write(")];\r\n            item.ResetDirty();\r\n\r\n");
+            this.Write(")].ToString());\r\n            item.ResetDirty();\r\n\r\n");
             
             #line 52 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\SQLServer\Templates\Repositories\Pk\GenParts\Create.tt"
  if (generationSettings.IncludeCaching) {

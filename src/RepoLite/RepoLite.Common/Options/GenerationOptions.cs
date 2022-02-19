@@ -14,6 +14,7 @@ namespace RepoLite.Common.Options
         public string RepositoryClassNameFormat { get; set; }
         public bool GenerateSealedObjects { get; set; }
         public bool IncludeCaching { get; set; }
+        public bool GenerateObjectReferences { get; set; }
 
         public void Save()
         {
@@ -27,6 +28,7 @@ namespace RepoLite.Common.Options
             Helpers.AddOrUpdateAppSetting("Generation:RepositoryClassNameFormat", RepositoryClassNameFormat);
             Helpers.AddOrUpdateAppSetting("Generation:GenerateSealedObjects", GenerateSealedObjects);
             Helpers.AddOrUpdateAppSetting("Generation:IncludeCaching", IncludeCaching);
+            Helpers.AddOrUpdateAppSetting("Generation:GenerateObjectReferences", GenerateObjectReferences);
         }
     }
 }

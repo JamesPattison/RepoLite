@@ -301,6 +301,7 @@ namespace RepoLite.DataAccess.Accessors
             switch (mySqlType.ToUpper())
             {
                 case "BIT":
+                    return new Tuple<string, Type>("bool", typeof(bool));
                 case "TINYINT":
                     return new Tuple<string, Type>("byte", typeof(byte));
                 case "SMALLINT":
@@ -322,9 +323,8 @@ namespace RepoLite.DataAccess.Accessors
                 case "DATE":
                 case "TIME":
                 case "DATETIME":
-                    return new Tuple<string, Type>("DateTime", typeof(DateTime));
                 case "TIMESTAMP":
-                    return new Tuple<string, Type>("byte[]", typeof(byte[]));
+                    return new Tuple<string, Type>("DateTime", typeof(DateTime));
                 case "CHAR":
                 case "VARCHAR":
                 case "TINYTEXT":

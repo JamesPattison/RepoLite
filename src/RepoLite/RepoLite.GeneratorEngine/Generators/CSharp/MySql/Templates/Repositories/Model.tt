@@ -45,7 +45,7 @@ namespace <#= generationSettings.ModelGenerationNamespace #>
 			get => _<#= column.FieldName #>;
 			set => SetValue(ref _<#= column.FieldName #>, value);
 		}
-<# if (column.ForeignKey) {#>
+<# if (column.ForeignKey && generationSettings.GenerateObjectReferences) {#>
         /// <summary>
         /// Nothing is done with this, it's merely there to hold data IF you wish to populate it
         /// </summary>

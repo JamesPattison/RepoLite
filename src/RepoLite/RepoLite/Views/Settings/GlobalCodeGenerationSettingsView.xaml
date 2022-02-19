@@ -93,6 +93,11 @@
                                ToolTip="Determines whether or not to include caching in the repositories"/>
                         <CheckBox x:Name="IncludeCaching" IsChecked="{Binding Path=GenerationSettings.IncludeCaching}"/>
                     </StackPanel>
+                    <StackPanel>
+                        <Label Style="{StaticResource LeftLabel}" Content="Generate Object References" Target="{Binding ElementName=GenerateObjectReferences}"
+                               ToolTip="Determines whether or not to generate to referenced tables (foreign keys) in the model classes"/>
+                        <CheckBox x:Name="GenerateObjectReferences" IsChecked="{Binding Path=GenerationSettings.GenerateObjectReferences}"/>
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

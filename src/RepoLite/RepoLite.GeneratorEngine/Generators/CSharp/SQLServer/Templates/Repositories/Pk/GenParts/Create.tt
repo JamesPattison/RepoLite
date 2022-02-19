@@ -26,7 +26,7 @@
                 if (createdKeys.Count != <#= generationObject.Table.ClassName #>.Columns.Count(x => x.PrimaryKey))
                     return false;
 
-                item.<#= pk.PropertyName #> = (long)createdKeys[nameof(<#= generationObject.Table.ClassName #>.<#= pk.PropertyName #>)];
+                item.<#= pk.PropertyName #> = <#= pk.DataType #>.Parse(createdKeys[nameof(<#= generationObject.Table.ClassName #>.<#= pk.PropertyName #>)].ToString());
                 item.ResetDirty();
 
 <# if (generationSettings.IncludeCaching) {#>
@@ -46,7 +46,7 @@
             if (createdKeys.Count != <#= generationObject.Table.ClassName #>.Columns.Count(x => x.PrimaryKey))
                 return false;
 
-            item.<#= pk.PropertyName #> = (long)createdKeys[nameof(<#= generationObject.Table.ClassName #>.<#= pk.PropertyName #>)];
+            item.<#= pk.PropertyName #> = <#= pk.DataType #>.Parse(createdKeys[nameof(<#= generationObject.Table.ClassName #>.<#= pk.PropertyName #>)].ToString());
             item.ResetDirty();
 
 <# if (generationSettings.IncludeCaching) {#>

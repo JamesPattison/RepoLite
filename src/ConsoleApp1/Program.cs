@@ -27,6 +27,9 @@ namespace ConsoleApp1
             // //var allCars = sproctester.GetAllCars();
             // //var database = sproctester.GetDatabase();
 
+            var entityRepository = new organisation_data__entityRepository(cn);
+            var entities = entityRepository.Get(1);
+            
             var events = new Procedures(cn).event__get_events_by_ids("11111111-1111-1111-1111-11111111111", new List<Procedures.event__get_events_by_ids___temp_event_ids_Param>
             {
                 new (1)

@@ -225,7 +225,7 @@ namespace RepoLite.GeneratorEngine.Generators.CSharp.MySql.Templates.Repositorie
             this.Write(", value);\r\n\t\t}\r\n");
             
             #line 48 "C:\Users\Jimmy\source\repos\RepoLite\src\RepoLite\RepoLite.GeneratorEngine\Generators\CSharp\MySql\Templates\Repositories\Model.tt"
- if (column.ForeignKey) {
+ if (column.ForeignKey && generationSettings.GenerateObjectReferences) {
             
             #line default
             #line hidden

@@ -1893,17 +1893,7 @@ namespace Biomind.Data.Repositories.Base
                 var sb = new StringBuilder();
                 var pkCols = Columns.Where(x => x.PrimaryKey).ToList();
 
-                if (Columns.Any(x => x.PrimaryKey))
-                {
-                    sb.AppendLine("DECLARE @tempo TABLE (");
-                    foreach (var pk in pkCols)
-                    {
-                        sb.Append($"`{pk.ColumnName}`  {pk.SqlDataTypeText}");
-                        sb.AppendLine(pk != pkCols[pkCols.Count - 1] ? "," : string.Empty);
-                    }
-                    sb.AppendLine(")");
-                }
-                sb.AppendLine($"INSERT `{Schema}`.`{TableName}` (");
+                sb.AppendLine($"INSERT INTO `{Schema}`.`{TableName}` (");
 
                 var toCreate = Columns.Where(x => !x.PrimaryKey || x.PrimaryKey && !x.Identity).ToList();
                 foreach (var createColumn in toCreate)
@@ -1913,32 +1903,19 @@ namespace Biomind.Data.Repositories.Base
                     sb.AppendLine(createColumn != Columns.Last() ? "," : ")");
                 }
 
-                if (Columns.Any(x => x.PrimaryKey))
-                {
-                    sb.Append("OUTPUT ");
-
-                    foreach (var pk in pkCols)
-                    {
-                        sb.Append($"`Inserted`.`{pk.ColumnName}` ");
-                        sb.AppendLine(pk != pkCols[pkCols.Count - 1] ? "," : string.Empty);
-                    }
-
-                    sb.AppendLine("INTO @tempo ");
-                }
-
                 sb.AppendLine("VALUES (");
 
                 var valueCols = Columns.Where(x => !x.PrimaryKey || (x.PrimaryKey && !x.Identity)).ToList();
                 foreach (var createColumn in valueCols)
                 {
                     sb.Append("@" + createColumn.ColumnName);
-                    sb.AppendLine(createColumn != valueCols.Last() ? "," : ")");
+                    sb.AppendLine(createColumn != valueCols.Last() ? "," : ");");
 
                 }
 
                 if (Columns.Any(x => x.PrimaryKey))
                 {
-                    sb.AppendLine("SELECT * FROM @tempo");
+                    sb.AppendLine("SELECT LAST_INSERT_ID();");
                 }
 
                 var sql = sb.ToString();
@@ -2420,7 +2397,13 @@ namespace Biomind.Data.Repositories.Base
         }
 
         protected byte GetByte(DataRow row, string fieldName)
-        {
+        {            
+            var g = row[fieldName];
+            //Stupid bug in MySqlDataAdapter parsing bit as uint64
+            if (long.TryParse(g.ToString(), out var parsedLong))
+            {
+                return (byte)parsedLong;
+            }
             return (byte)row[fieldName];
         }
 
