@@ -8,7 +8,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.Caching;
+//using System.Runtime.Caching;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml;
@@ -29,7 +29,8 @@ namespace REPOSITORYNAMESPACE.Base
         IEnumerable<T> Where(string query);
         T ToItem(DataRow row, bool skipBase);
         TK ToItem<TK>(DataRow row, bool skipBase) where TK : T, new();
-        void EnableCache(int cacheDurationInSeconds);
+        RowChange ToMergeChange(DataRow row);
+//        void EnableCache(int cacheDurationInSeconds);
     }
 
     public interface IPkRepository<T> : IBaseRepository<T>
@@ -38,12 +39,19 @@ namespace REPOSITORYNAMESPACE.Base
         bool Update(T item, bool clearDirty = true);
         bool Delete(T item);
         bool Delete(IEnumerable<T> items);
-        bool Merge(List<T> items);
-        bool Merge(string csvPath);
+        MergeChanges Merge(List<T> items);
+        MergeChanges Merge(string csvPath);
     }
-
+    
     #region Enums
-
+ 
+    public enum RowChangeAction
+    {
+        INSERT,
+        UPDATE,
+        DELETE
+    }
+    
     internal enum ClauseType
     {
         Initial,
@@ -121,6 +129,31 @@ namespace REPOSITORYNAMESPACE.Base
         {
             ValidationErrors = validationErrors;
         }
+    }
+    
+    
+    
+    public class MergeChanges
+    {
+        public List<TableChange> TableChanges { get; set; }
+    }
+    
+    public class TableChange
+    {
+        public List<RowChange> RowChanges { get; set; }
+    }
+
+    public class RowChange
+    {
+        public RowChangeAction Action { get; set; }
+        public List<ColumnChange> ColumnChanges { get; set; }
+    }
+
+    public class ColumnChange
+    {
+        public string ColumnName { get; set; }
+        public object OldValue { get; set; }
+        public object NewValue { get; set; }
     }
 
     #endregion
@@ -1683,46 +1716,66 @@ namespace REPOSITORYNAMESPACE.Base
                 return null;
             }
         }
-    }
 
-    internal static class CacheHelper
-    {
-        private static int _cacheDuration;
-
-        public static void Initialize(int cacheDuration)
+        protected IEnumerable<DataTable> ToDataTables(SqlCommand cmd)
         {
-            _cacheDuration = cacheDuration;
-        }
-
-        public static void SaveToCache<TC>(string cacheKey, TC savedItem)
-            where TC : BaseModel
-        {
-            RemoveFromCache(cacheKey);
-            MemoryCache.Default.Add(cacheKey, savedItem, DateTimeOffset.Now.AddSeconds(_cacheDuration));
-
-        }
-
-        public static TC GetFromCache<TC>(string cacheKey)
-            where TC : BaseModel
-        {
-            var cacheItem = MemoryCache.Default[cacheKey] as TC;
-
-            return cacheItem;
-        }
-
-        public static void RemoveFromCache(string cacheKey)
-        {
-            if (IsInCache(cacheKey))
+            var ds = new DataSet();
+            try
             {
-                MemoryCache.Default.Remove(cacheKey);
+                var da = new SqlDataAdapter(cmd);
+                da.Fill(ds);
+            }
+            catch (Exception ex)
+            {
+                Logger(ex);
+                yield break;
+            }
+            
+            foreach (DataTable table in ds.Tables)
+            {
+                yield return table;
             }
         }
-
-        public static bool IsInCache(string cacheKey)
-        {
-            return MemoryCache.Default[cacheKey] != null;
-        }
     }
+
+//    internal static class CacheHelper
+//    {
+//        private static int _cacheDuration;
+//
+//        public static void Initialize(int cacheDuration)
+//        {
+//            _cacheDuration = cacheDuration;
+//        }
+//
+//        public static void SaveToCache<TC>(string cacheKey, TC savedItem)
+//            where TC : BaseModel
+//        {
+//            RemoveFromCache(cacheKey);
+//            MemoryCache.Default.Add(cacheKey, savedItem, DateTimeOffset.Now.AddSeconds(_cacheDuration));
+//
+//        }
+//
+//        public static TC GetFromCache<TC>(string cacheKey)
+//            where TC : BaseModel
+//        {
+//            var cacheItem = MemoryCache.Default[cacheKey] as TC;
+//
+//            return cacheItem;
+//        }
+//
+//        public static void RemoveFromCache(string cacheKey)
+//        {
+//            if (IsInCache(cacheKey))
+//            {
+//                MemoryCache.Default.Remove(cacheKey);
+//            }
+//        }
+//
+//        public static bool IsInCache(string cacheKey)
+//        {
+//            return MemoryCache.Default[cacheKey] != null;
+//        }
+//    }
 
     public abstract partial class BaseRepository<T> : RepositoryDataAccess, IBaseRepository<T>
         where T : IBaseModel, new()
@@ -1742,10 +1795,10 @@ namespace REPOSITORYNAMESPACE.Base
             Logger = logMethod ?? (exception => { });
             Columns = columns;
 
-            if (enableCache)
-            {
-                EnableCache(cacheDurationInSeconds);
-            }
+//            if (enableCache)
+//            {
+//                EnableCache(cacheDurationInSeconds);
+//            }
 
             var sql = $@"SELECT COUNT(*)
                             FROM INFORMATION_SCHEMA.COLUMNS
@@ -1785,13 +1838,16 @@ namespace REPOSITORYNAMESPACE.Base
         public abstract bool BulkCreate(params T[] items);
         public abstract T ToItem(DataRow row, bool skipBase);
         public abstract TK ToItem<TK>(DataRow row, bool skipBase) where TK : T, new();
+        public abstract RowChange ToMergeChange(DataRow row);
+        
 
-        public void EnableCache(int cacheDurationInSeconds)
-        {
-            CacheEnabled = true;
-            CacheDuration = cacheDurationInSeconds;
-            CacheHelper.Initialize(cacheDurationInSeconds);
-        }
+
+//        public void EnableCache(int cacheDurationInSeconds)
+//        {
+//            CacheEnabled = true;
+//            CacheDuration = cacheDurationInSeconds;
+//            CacheHelper.Initialize(cacheDurationInSeconds);
+//        }
 
         private string BuildSelectQuery(List<TableDefinition> tables)
         {
@@ -2077,7 +2133,7 @@ namespace REPOSITORYNAMESPACE.Base
 
             var nonpkCols = Columns.Where(x => !x.PrimaryKey).ToArray();
             
-            ar updateCols = nonpkCols.Where(x => dirtyColumns.Contains(x.ColumnName)).ToList();
+            var updateCols = nonpkCols.Where(x => dirtyColumns.Contains(x.ColumnName)).ToList();
             //No columns tro update on this model, must be updating a derived class
             if (!updateCols.Any()) return true;
             foreach (var col in updateCols)
@@ -2173,8 +2229,6 @@ namespace REPOSITORYNAMESPACE.Base
 
                 }
             }
-
-            return isSuccess;
         }
 
         protected bool BaseDelete(string columnName, List<object> dataValues)
@@ -2211,12 +2265,12 @@ namespace REPOSITORYNAMESPACE.Base
             return isSuccess;
         }
 
-        protected bool BaseMerge(List<object[]> mergeData)
+        protected MergeChanges BaseMerge(List<object[]> mergeData)
         {
             return BaseMerge(mergeData, Columns, Schema, TableName);
         }
 
-        protected bool BaseMerge(List<object[]> mergeData, List<ColumnDefinition> columns, string schema, string tableName)
+        protected MergeChanges BaseMerge(List<object[]> mergeData, List<ColumnDefinition> columns, string schema, string tableName)
         {
             var tempTableName = "staging" + DateTime.Now.Ticks;
 
@@ -2271,7 +2325,18 @@ namespace REPOSITORYNAMESPACE.Base
 
                     mergeSql.AppendLine(string.Join(",", columns.Where(x => !x.Identity).Select(x => $"[{x.ColumnName}]").ToArray()) + ")");
                     mergeSql.AppendLine("VALUES (");
-                    mergeSql.AppendLine(string.Join(",", columns.Where(x => !x.Identity).Select(x => $"[Source].[{x.ColumnName}]").ToArray()) + ");");
+
+                    mergeSql.AppendLine(string.Join(",", columns.Where(x => !x.Identity).Select(x => $"[Source].[{x.ColumnName}]").ToArray()) + ")");
+                    mergeSql.AppendLine(
+                        "OUTPUT $action as Action,");
+                    foreach (var column in columns)
+                    {
+                        mergeSql.AppendLine($"deleted.{column.ColumnName} AS Old{column.ColumnName},");
+                        mergeSql.Append($"inserted.{column.ColumnName} AS New{column.ColumnName}");
+                        
+                        mergeSql.AppendLine(column != columns.Last() ? "," : ";");
+                    }
+                    
                     mergeSql.AppendLine("IF OBJECT_ID('dbo.DropTmpTable') IS NULL EXEC ('CREATE PROCEDURE dbo.DropTmpTable @table NVARCHAR(250) AS DECLARE @sql NVARCHAR(300) = N''DROP TABLE '' + @table; EXECUTE sp_executesql @sql')");
 
                     var sql = mergeSql.ToString();
@@ -2287,7 +2352,22 @@ namespace REPOSITORYNAMESPACE.Base
                     };
 
                     cn.Open();
-                    cmd.ExecuteNonQuery();
+                    var datatables = ToDataTables(cmd);
+                    var mergeChanges = new MergeChanges();
+                    foreach (var datatable in datatables)
+                    {
+                        var tableChanges = new TableChange
+                        {
+                            RowChanges = new List<RowChange>()
+                        };
+
+                        foreach (DataRow row in datatable.Rows)
+                        {
+                            tableChanges.RowChanges.Add(ToMergeChanges(row));
+                        }
+                        
+                        mergeChanges.TableChanges.Add(tableChanges);
+                    }
                     cmd.Dispose();
 
                     var dropCmd = new SqlCommand
@@ -2302,7 +2382,7 @@ namespace REPOSITORYNAMESPACE.Base
                     dropCmd.Dispose();
                     cn.Close();
 
-                    return true;
+                    return mergeChanges;
                 }
             }
             catch (Exception ex)
@@ -2323,7 +2403,7 @@ namespace REPOSITORYNAMESPACE.Base
                     }
                     catch (Exception ex2) { Logger(ex2); }
                 }
-                return false;
+                return null;
             }
         }
 
@@ -2366,6 +2446,34 @@ namespace REPOSITORYNAMESPACE.Base
                 }
                 yield return item;
             }
+        }
+        
+        protected void ProcessMergeColumnChange(List<ColumnChange> columnChanges, string columnName, DataRow row)
+        {
+            var oldVal = row[$"Old{columnName}"];
+            var newVal = row[$"New{columnName}"];
+            if (!oldVal.Equals(newVal))
+            {
+                columnChanges.Add(new ColumnChange
+                {
+                    ColumnName = columnName,
+                    OldValue = oldVal,
+                    NewValue = newVal,
+                });
+            }
+        }
+        
+        protected virtual RowChange ToMergeChanges(DataRow row)
+        {        
+            var rowChange = new RowChange
+            {
+                Action = (RowChangeAction)Enum.Parse(typeof(RowChangeAction), row.GetText("Action")),
+                ColumnChanges = new List<ColumnChange>()
+            };
+            
+            ToMergeChange(row);
+
+            return rowChange;
         }
 
         protected bool NoneQuery(SqlConnection cn, SqlCommand cmd)

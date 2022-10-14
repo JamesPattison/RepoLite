@@ -162,6 +162,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             //toItem
             sb.Append(Repo_ToItem(table, inheritedDependency));
+            sb.Append(Repo_ToMergeChange(table));
 
             //search
             sb.Append(Repo_Search(table, otherTables, inheritedDependency));
@@ -199,25 +200,25 @@ namespace RepoLite.GeneratorEngine.Generators
             var sb = new StringBuilder();
             var pk = table.PrimaryKeys.First();
 
-            sb.AppendLine(Tab2, $"private void SaveToCache({table.ClassName} {table.LowerClassName})");
-            sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, $"CacheHelper.SaveToCache({table.ClassName}.CacheKey({table.LowerClassName}.{pk.PropertyName}), {table.LowerClassName});");
-            sb.AppendLine(Tab2, "}");
-
-            sb.AppendLine(Tab2, $"private {table.ClassName} GetFromCache({pk.DataTypeString} {pk.FieldName})");
-            sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, $"return CacheHelper.GetFromCache<{table.ClassName}>({table.ClassName}.CacheKey({pk.FieldName}));");
-            sb.AppendLine(Tab2, "}");
-
-            sb.AppendLine(Tab2, $"private void RemoveFromCache({pk.DataTypeString} {pk.FieldName})");
-            sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, $"CacheHelper.RemoveFromCache({table.ClassName}.CacheKey({pk.FieldName}));");
-            sb.AppendLine(Tab2, "}");
-
-            sb.AppendLine(Tab2, $"private bool IsInCache({pk.DataTypeString} {pk.FieldName})");
-            sb.AppendLine(Tab2, "{");
-            sb.AppendLine(Tab3, $"return CacheHelper.IsInCache({table.ClassName}.CacheKey({pk.FieldName}));");
-            sb.AppendLine(Tab2, "}");
+            // sb.AppendLine(Tab2, $"private void SaveToCache({table.ClassName} {table.LowerClassName})");
+            // sb.AppendLine(Tab2, "{");
+            // sb.AppendLine(Tab3, $"CacheHelper.SaveToCache({table.ClassName}.CacheKey({table.LowerClassName}.{pk.PropertyName}), {table.LowerClassName});");
+            // sb.AppendLine(Tab2, "}");
+            //
+            // sb.AppendLine(Tab2, $"private {table.ClassName} GetFromCache({pk.DataTypeString} {pk.FieldName})");
+            // sb.AppendLine(Tab2, "{");
+            // sb.AppendLine(Tab3, $"return CacheHelper.GetFromCache<{table.ClassName}>({table.ClassName}.CacheKey({pk.FieldName}));");
+            // sb.AppendLine(Tab2, "}");
+            //
+            // sb.AppendLine(Tab2, $"private void RemoveFromCache({pk.DataTypeString} {pk.FieldName})");
+            // sb.AppendLine(Tab2, "{");
+            // sb.AppendLine(Tab3, $"CacheHelper.RemoveFromCache({table.ClassName}.CacheKey({pk.FieldName}));");
+            // sb.AppendLine(Tab2, "}");
+            //
+            // sb.AppendLine(Tab2, $"private bool IsInCache({pk.DataTypeString} {pk.FieldName})");
+            // sb.AppendLine(Tab2, "{");
+            // sb.AppendLine(Tab3, $"return CacheHelper.IsInCache({table.ClassName}.CacheKey({pk.FieldName}));");
+            // sb.AppendLine(Tab2, "}");
 
             return sb.ToString();
         }
@@ -342,14 +343,14 @@ namespace RepoLite.GeneratorEngine.Generators
 
                 sb.AppendLine(Tab2, "}");
 
-                if (column.ForeignKey)
-                {
-                    sb.AppendLine(Tab2, "/// <summary>");
-                    sb.AppendLine(Tab2, "/// Nothing is done with this, it's merely there to hold data IF you wish to populate it");
-                    sb.AppendLine(Tab2, "/// </summary>");
-                    sb.AppendLine(Tab2,
-                        $"public {column.ForeignKeyTargetTable.ToModelName(_generationSettings.ModelClassNameFormat)} {column.DbColumnName.TrimEnd('d', 'I')} {{ get; set; }}");
-                }
+                // if (column.ForeignKey)
+                // {
+                //     sb.AppendLine(Tab2, "/// <summary>");
+                //     sb.AppendLine(Tab2, "/// Nothing is done with this, it's merely there to hold data IF you wish to populate it");
+                //     sb.AppendLine(Tab2, "/// </summary>");
+                //     sb.AppendLine(Tab2,
+                //         $"public {column.ForeignKeyTargetTable.ToModelName(_generationSettings.ModelClassNameFormat)} {column.DbColumnName.TrimEnd('d', 'I')} {{ get; set; }}");
+                // }
             }
 
             //constructors
@@ -385,6 +386,7 @@ namespace RepoLite.GeneratorEngine.Generators
 
             //methods
 
+            //SetValues
             sb.AppendLine(Tab2, "public override IBaseModel SetValues(DataRow row, string propertyPrefix)");
             sb.AppendLine(Tab2, "{");
             if (inheritedDependency != null)
@@ -423,6 +425,8 @@ namespace RepoLite.GeneratorEngine.Generators
 
             sb.AppendLine(Tab3, "return this;");
             sb.AppendLine(Tab2, "}");
+            
+            //Validation
 
             CreateModelValidation(table, sb, inherits);
 
@@ -709,7 +713,7 @@ namespace RepoLite.GeneratorEngine.Generators
             if (table.PrimaryKeyConfiguration == PrimaryKeyConfigurationEnum.CompositeKey)
             {
                 //update
-                sb.AppendLine(Tab2, $"bool Update({table.ClassName} item);");
+                sb.AppendLine(Tab2, $"bool Update({table.ClassName} item, bool clearDirty = true);");
 
                 //delete
                 sb.AppendLine(Tab2, $"bool Delete({table.ClassName} {table.LowerClassName});");
@@ -717,8 +721,8 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab2, $"bool Delete({table.ClassName}Keys compositeId);");
                 sb.AppendLine(Tab2, $"bool Delete(IEnumerable<{table.ClassName}Keys> compositeIds);");
 
-                sb.AppendLine(Tab2, $"bool Merge(List<{table.ClassName}> items);");
-                sb.AppendLine(Tab2, "bool Merge(string csvPath);");
+                sb.AppendLine(Tab2, $"MergeChanges Merge(List<{table.ClassName}> items);");
+                sb.AppendLine(Tab2, "MergeChanges Merge(string csvPath);");
             }
 
             //search
@@ -994,12 +998,12 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab2, "{");
 
                     {
-                        sb.AppendLine(Tab3, $"if (CacheEnabled && !skipCache)");
-                        sb.AppendLine(Tab3, "{");
-                        sb.AppendLine(Tab4, $"var fromCache = GetFromCache({pk.FieldName});");
-                        sb.AppendLine(Tab4, $"if (fromCache != null)");
-                        sb.AppendLine(Tab5, $"return fromCache;");
-                        sb.AppendLine(Tab3, "}");
+                        // sb.AppendLine(Tab3, $"if (CacheEnabled && !skipCache)");
+                        // sb.AppendLine(Tab3, "{");
+                        // sb.AppendLine(Tab4, $"var fromCache = GetFromCache({pk.FieldName});");
+                        // sb.AppendLine(Tab4, $"if (fromCache != null)");
+                        // sb.AppendLine(Tab5, $"return fromCache;");
+                        // sb.AppendLine(Tab3, "}");
 
 
                         sb.AppendLine(Tab3, "var query = $@\"SELECT * FROM ");
@@ -1025,10 +1029,10 @@ namespace RepoLite.GeneratorEngine.Generators
                         sb.AppendLine(Tab3, "var item = ExecuteSql(query).FirstOrDefault(); ");
 
 
-                        sb.AppendLine(Tab3, "if (CacheEnabled & !skipCache)");
-                        sb.AppendLine(Tab3, "{");
-                        sb.AppendLine(Tab4, "SaveToCache(item);");
-                        sb.AppendLine(Tab3, "}");
+                        // sb.AppendLine(Tab3, "if (CacheEnabled & !skipCache)");
+                        // sb.AppendLine(Tab3, "{");
+                        // sb.AppendLine(Tab4, "SaveToCache(item);");
+                        // sb.AppendLine(Tab3, "}");
 
                         sb.AppendLine(Tab3, "return item;");
                     }
@@ -1047,17 +1051,17 @@ namespace RepoLite.GeneratorEngine.Generators
                     {
                         sb.AppendLine(Tab3, $"var toReturn = new List<{table.ClassName}>();");
                         sb.AppendLine(Tab3, $"if (!{pk.FieldName}s.Any()) return toReturn;");
-                        sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
-                        sb.AppendLine(Tab3, "{");
-                        sb.AppendLine(Tab4, $"var cachedIds = new List<{pk.DataTypeString}>();");
-                        sb.AppendLine(Tab4, $"foreach (var {pk.FieldName} in {pk.FieldName}s.Where(IsInCache))");
-                        sb.AppendLine(Tab4, "{");
-                        sb.AppendLine(Tab5, $"cachedIds.Add({pk.FieldName});");
-                        sb.AppendLine(Tab5, $"toReturn.Add(GetFromCache({pk.FieldName}));");
-                        sb.AppendLine(Tab4, "}");
-                        sb.AppendLine(Tab4, $"{pk.FieldName}s = {pk.FieldName}s.Except(cachedIds).ToList();");
-                        sb.AppendLine(Tab4, $"if (!{pk.FieldName}s.Any()) return toReturn;");
-                        sb.AppendLine(Tab3, "}");
+                        // sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
+                        // sb.AppendLine(Tab3, "{");
+                        // sb.AppendLine(Tab4, $"var cachedIds = new List<{pk.DataTypeString}>();");
+                        // sb.AppendLine(Tab4, $"foreach (var {pk.FieldName} in {pk.FieldName}s.Where(IsInCache))");
+                        // sb.AppendLine(Tab4, "{");
+                        // sb.AppendLine(Tab5, $"cachedIds.Add({pk.FieldName});");
+                        // sb.AppendLine(Tab5, $"toReturn.Add(GetFromCache({pk.FieldName}));");
+                        // sb.AppendLine(Tab4, "}");
+                        // sb.AppendLine(Tab4, $"{pk.FieldName}s = {pk.FieldName}s.Except(cachedIds).ToList();");
+                        // sb.AppendLine(Tab4, $"if (!{pk.FieldName}s.Any()) return toReturn;");
+                        // sb.AppendLine(Tab3, "}");
 
                         sb.AppendLine(Tab3, "var query = $@\"SELECT * FROM ");
                         sb.AppendLine(Tab8, $"[{table.DbTableName}] {table.DbTableName.ToLower()[0]}");
@@ -1083,13 +1087,13 @@ namespace RepoLite.GeneratorEngine.Generators
 
 
                         sb.AppendLine(Tab3, "var items = ExecuteSql(query).ToArray();");
-                        sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
-                        sb.AppendLine(Tab3, "{");
-                        sb.AppendLine(Tab4, "foreach (var item in items)");
-                        sb.AppendLine(Tab4, "{");
-                        sb.AppendLine(Tab5, "SaveToCache(item);");
-                        sb.AppendLine(Tab4, "}");
-                        sb.AppendLine(Tab3, "}");
+                        // sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
+                        // sb.AppendLine(Tab3, "{");
+                        // sb.AppendLine(Tab4, "foreach (var item in items)");
+                        // sb.AppendLine(Tab4, "{");
+                        // sb.AppendLine(Tab5, "SaveToCache(item);");
+                        // sb.AppendLine(Tab4, "}");
+                        // sb.AppendLine(Tab3, "}");
                         sb.AppendLine(Tab3, "toReturn.AddRange(items);");
                         sb.AppendLine(Tab3, "return toReturn;");
                     }
@@ -1114,12 +1118,12 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine("");
                     sb.AppendLine(Tab2, $"public {table.ClassName} Get({pk.DataTypeString} {pk.FieldName}, bool skipCache)");
                     sb.AppendLine(Tab2, "{");
-                    sb.AppendLine(Tab3, $"if (CacheEnabled && !skipCache)");
-                    sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, $"var fromCache = GetFromCache({pk.FieldName});");
-                    sb.AppendLine(Tab4, $"if (fromCache != null)");
-                    sb.AppendLine(Tab5, $"return fromCache;");
-                    sb.AppendLine(Tab3, "}");
+                    // sb.AppendLine(Tab3, $"if (CacheEnabled && !skipCache)");
+                    // sb.AppendLine(Tab3, "{");
+                    // sb.AppendLine(Tab4, $"var fromCache = GetFromCache({pk.FieldName});");
+                    // sb.AppendLine(Tab4, $"if (fromCache != null)");
+                    // sb.AppendLine(Tab5, $"return fromCache;");
+                    // sb.AppendLine(Tab3, "}");
                     sb.AppendLine(Tab3,
                         $"return Where({(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({table.ClassName}.{pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.Equals, {pk.FieldName}).Results().FirstOrDefault();");
                     sb.AppendLine(Tab2, "}");
@@ -1138,17 +1142,17 @@ namespace RepoLite.GeneratorEngine.Generators
 
                     sb.AppendLine(Tab3, $"var toReturn = new List<{table.ClassName}>();");
                     sb.AppendLine(Tab3, $"if (!{pk.FieldName}s.Any()) return toReturn;");
-                    sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
-                    sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, $"var cachedIds = new List<{pk.DataTypeString}>();");
-                    sb.AppendLine(Tab4, $"foreach (var {pk.FieldName} in {pk.FieldName}s.Where(IsInCache))");
-                    sb.AppendLine(Tab4, "{");
-                    sb.AppendLine(Tab5, $"cachedIds.Add({pk.FieldName});");
-                    sb.AppendLine(Tab5, $"toReturn.Add(GetFromCache({pk.FieldName}));");
-                    sb.AppendLine(Tab4, "}");
-                    sb.AppendLine(Tab4, $"{pk.FieldName}s = {pk.FieldName}s.Except(cachedIds).ToList();");
-                    sb.AppendLine(Tab4, $"if (!{pk.FieldName}s.Any()) return toReturn;");
-                    sb.AppendLine(Tab3, "}");
+                    // sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
+                    // sb.AppendLine(Tab3, "{");
+                    // sb.AppendLine(Tab4, $"var cachedIds = new List<{pk.DataTypeString}>();");
+                    // sb.AppendLine(Tab4, $"foreach (var {pk.FieldName} in {pk.FieldName}s.Where(IsInCache))");
+                    // sb.AppendLine(Tab4, "{");
+                    // sb.AppendLine(Tab5, $"cachedIds.Add({pk.FieldName});");
+                    // sb.AppendLine(Tab5, $"toReturn.Add(GetFromCache({pk.FieldName}));");
+                    // sb.AppendLine(Tab4, "}");
+                    // sb.AppendLine(Tab4, $"{pk.FieldName}s = {pk.FieldName}s.Except(cachedIds).ToList();");
+                    // sb.AppendLine(Tab4, $"if (!{pk.FieldName}s.Any()) return toReturn;");
+                    // sb.AppendLine(Tab3, "}");
 
 
                     sb.AppendLine(Tab3, $"toReturn.AddRange(Where({(pk.DbColumnName == nameof(pk.DbColumnName) ? $"nameof({ table.ClassName}.{ pk.DbColumnName})" : $"\"{pk.DbColumnName}\"")}, Comparison.In, { pk.FieldName}s).Results()); ");
@@ -1178,7 +1182,7 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab3, "using (var cn = new SqlConnection(ConnectionString))");
                     sb.AppendLine(Tab3, "{");
                     sb.AppendLine(Tab4,
-                        $"using (var cmd = CreateCommand(cn, \"SELECT ISNULL(MAX({pk.DbColumnName}), 0) FROM {table.DbTableName}\"))");
+                        $"using (var cmd = CreateCommand(cn, $\"SELECT ISNULL(MAX({pk.DbColumnName}), 0) FROM {{Schema}}.{table.DbTableName}\"))");
                     sb.AppendLine(Tab4, "{");
                     sb.AppendLine(Tab5, "cn.Open();");
                     sb.AppendLine(Tab5, $"return ({pk.DataTypeString})cmd.ExecuteScalar();");
@@ -1259,10 +1263,10 @@ namespace RepoLite.GeneratorEngine.Generators
 
             sb.AppendLine(inherits ? Tab4 : Tab3, "item.ResetDirty();");
             sb.AppendLine("");
-            sb.AppendLine(Tab4, "if (CacheEnabled)");
-            sb.AppendLine(Tab4, "{");
-            sb.AppendLine(Tab5, "SaveToCache(item);");
-            sb.AppendLine(Tab4, "}");
+            // sb.AppendLine(Tab4, "if (CacheEnabled)");
+            // sb.AppendLine(Tab4, "{");
+            // sb.AppendLine(Tab5, "SaveToCache(item);");
+            // sb.AppendLine(Tab4, "}");
             sb.AppendLine(inherits ? Tab4 : Tab3, "return true;");
 
             if (inherits)
@@ -1306,13 +1310,13 @@ namespace RepoLite.GeneratorEngine.Generators
 
             sb.AppendLine(inherits ? Tab4 : Tab3, "if (BulkInsert(dt))");
             sb.AppendLine(inherits ? Tab4 : Tab3, "{");
-            sb.AppendLine(inherits ? Tab5 : Tab4, "if (CacheEnabled)");
-            sb.AppendLine(inherits ? Tab5 : Tab4, "{");
-            sb.AppendLine(inherits ? Tab6 : Tab5, "foreach (var item in items)");
-            sb.AppendLine(inherits ? Tab6 : Tab5, "{");
-            sb.AppendLine(inherits ? Tab7 : Tab6, "SaveToCache(item);");
-            sb.AppendLine(inherits ? Tab6 : Tab5, "}");
-            sb.AppendLine(inherits ? Tab5 : Tab4, "}");
+            // sb.AppendLine(inherits ? Tab5 : Tab4, "if (CacheEnabled)");
+            // sb.AppendLine(inherits ? Tab5 : Tab4, "{");
+            // sb.AppendLine(inherits ? Tab6 : Tab5, "foreach (var item in items)");
+            // sb.AppendLine(inherits ? Tab6 : Tab5, "{");
+            // sb.AppendLine(inherits ? Tab7 : Tab6, "SaveToCache(item);");
+            // sb.AppendLine(inherits ? Tab6 : Tab5, "}");
+            // sb.AppendLine(inherits ? Tab5 : Tab4, "}");
             sb.AppendLine(inherits ? Tab5 : Tab4, "return true;");
             sb.AppendLine(inherits ? Tab4 : Tab3, "}");
             sb.AppendLine(inherits ? Tab4 : Tab3, "return false;");
@@ -1345,11 +1349,11 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab3, "if (item == null)");
             sb.AppendLine(Tab4, "return false;");
 
-            sb.AppendLine(Tab3, "if (CacheEnabled)");
-            sb.AppendLine(Tab3, "{");
-            var pk = table.PrimaryKeys.First();
-            sb.AppendLine(Tab4, $"RemoveFromCache(item.{pk.DbColumnName});");
-            sb.AppendLine(Tab3, "}");
+            // sb.AppendLine(Tab3, "if (CacheEnabled)");
+            // sb.AppendLine(Tab3, "{");
+            // var pk = table.PrimaryKeys.First();
+            // sb.AppendLine(Tab4, $"RemoveFromCache(item.{pk.DbColumnName});");
+            // sb.AppendLine(Tab3, "}");
             sb.AppendLine("");
             sb.AppendLine(Tab3, "var validationErrors = item.Validate();");
             sb.AppendLine(Tab3, "if (validationErrors.Any())");
@@ -1376,10 +1380,10 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab3, "if (success && clearDirty)");
             sb.AppendLine(Tab4, "item.ResetDirty();");
 
-            sb.AppendLine(Tab3, "if (success && CacheEnabled)");
-            sb.AppendLine(Tab3, "{");
-            sb.AppendLine(Tab4, "SaveToCache(item);");
-            sb.AppendLine(Tab3, "}");
+            // sb.AppendLine(Tab3, "if (success && CacheEnabled)");
+            // sb.AppendLine(Tab3, "{");
+            // sb.AppendLine(Tab4, "SaveToCache(item);");
+            // sb.AppendLine(Tab3, "}");
             sb.AppendLine("");
             sb.AppendLine(Tab3, "return success;");
             sb.AppendLine(Tab2, "}");
@@ -1410,10 +1414,10 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(Tab4, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst()}.Delete({table.LowerClassName}))");
                 sb.AppendLine(Tab4, "{");
 
-                sb.AppendLine(Tab5, "if (CacheEnabled)");
-                sb.AppendLine(Tab5, "{");
-                sb.AppendLine(Tab6, $"RemoveFromCache({table.LowerClassName}.{tpk.DbColumnName});");
-                sb.AppendLine(Tab5, "}");
+                // sb.AppendLine(Tab5, "if (CacheEnabled)");
+                // sb.AppendLine(Tab5, "{");
+                // sb.AppendLine(Tab6, $"RemoveFromCache({table.LowerClassName}.{tpk.DbColumnName});");
+                // sb.AppendLine(Tab5, "}");
                 sb.AppendLine(Tab5, "return true;");
                 sb.AppendLine(Tab4, "}");
 
@@ -1446,15 +1450,15 @@ namespace RepoLite.GeneratorEngine.Generators
 
 
                     sb.AppendLine(Tab4, "{");
-                    sb.AppendLine(Tab5, "if (CacheEnabled)");
-                    sb.AppendLine(Tab5, "{");
-
-                    sb.AppendLine(Tab6, "foreach (var item in items)");
-                    sb.AppendLine(Tab6, "{");
-                    sb.AppendLine(Tab7, $"RemoveFromCache(item.{tpk.DbColumnName});");
-                    sb.AppendLine(Tab6, "}");
-
-                    sb.AppendLine(Tab5, "}");
+                    // sb.AppendLine(Tab5, "if (CacheEnabled)");
+                    // sb.AppendLine(Tab5, "{");
+                    //
+                    // sb.AppendLine(Tab6, "foreach (var item in items)");
+                    // sb.AppendLine(Tab6, "{");
+                    // sb.AppendLine(Tab7, $"RemoveFromCache(item.{tpk.DbColumnName});");
+                    // sb.AppendLine(Tab6, "}");
+                    //
+                    // sb.AppendLine(Tab5, "}");
                     sb.AppendLine(Tab5, "return true;");
                     sb.AppendLine(Tab4, "}");
 
@@ -1529,7 +1533,7 @@ namespace RepoLite.GeneratorEngine.Generators
                 sb.AppendLine(");");
                 sb.AppendLine(Tab3, "}");
 
-                sb.AppendLine(Tab3, "CreateStagingTable(tempTableName, true);");
+                sb.AppendLine(Tab3, $"CreateStagingTable(tempTableName, {table.ClassName}.Columns, true);");
                 sb.AppendLine(Tab3, "BulkInsert(dt, tempTableName);");
 
                 sb.AppendLine(Tab3, "using (var cn = new SqlConnection(ConnectionString))");
@@ -1577,10 +1581,10 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab4, "{");
 
 
-                    sb.AppendLine(Tab5, "if (CacheEnabled)");
-                    sb.AppendLine(Tab5, "{");
-                    sb.AppendLine(Tab6, $"RemoveFromCache({pk.FieldName});");
-                    sb.AppendLine(Tab5, "}");
+                    // sb.AppendLine(Tab5, "if (CacheEnabled)");
+                    // sb.AppendLine(Tab5, "{");
+                    // sb.AppendLine(Tab6, $"RemoveFromCache({pk.FieldName});");
+                    // sb.AppendLine(Tab5, "}");
                     sb.AppendLine(Tab5, "return true;");
                     sb.AppendLine(Tab4, "}");
 
@@ -1612,13 +1616,13 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab4, $"if (_{inheritedDependency.ForeignKeyTargetTable.ToRepositoryName(_generationSettings.RepositoryClassNameFormat).LowerFirst()}.Delete({pk.FieldName}s))");
 
                     sb.AppendLine(Tab4, "{");
-                    sb.AppendLine(Tab5, $"if (CacheEnabled)");
-                    sb.AppendLine(Tab5, "{");
-                    sb.AppendLine(Tab6, $"foreach (var {pk.FieldName} in {pk.FieldName}s)");
-                    sb.AppendLine(Tab6, "{");
-                    sb.AppendLine(Tab7, $"RemoveFromCache({pk.FieldName});");
-                    sb.AppendLine(Tab6, "}");
-                    sb.AppendLine(Tab5, "}");
+                    // sb.AppendLine(Tab5, $"if (CacheEnabled)");
+                    // sb.AppendLine(Tab5, "{");
+                    // sb.AppendLine(Tab6, $"foreach (var {pk.FieldName} in {pk.FieldName}s)");
+                    // sb.AppendLine(Tab6, "{");
+                    // sb.AppendLine(Tab7, $"RemoveFromCache({pk.FieldName});");
+                    // sb.AppendLine(Tab6, "}");
+                    // sb.AppendLine(Tab5, "}");
                     sb.AppendLine(Tab4, $"");
                     sb.AppendLine(Tab5, $"return true;");
                     sb.AppendLine(Tab4, "}");
@@ -1654,13 +1658,13 @@ namespace RepoLite.GeneratorEngine.Generators
 
                 sb.AppendLine(Tab3, $"if (BaseDelete(new DeleteColumn(\"{column.DbColumnName}\", {column.FieldName}, SqlDbType.{column.DbType}), out var items))");
                 sb.AppendLine(Tab3, "{");
-                sb.AppendLine(Tab4, "if (CacheEnabled)");
-                sb.AppendLine(Tab4, "{");
-                sb.AppendLine(Tab5, "foreach (var item in items)");
-                sb.AppendLine(Tab5, "{");
-                sb.AppendLine(Tab6, $"RemoveFromCache(item.{pk.DbColumnName});");
-                sb.AppendLine(Tab5, "}");
-                sb.AppendLine(Tab4, "}");
+                // sb.AppendLine(Tab4, "if (CacheEnabled)");
+                // sb.AppendLine(Tab4, "{");
+                // sb.AppendLine(Tab5, "foreach (var item in items)");
+                // sb.AppendLine(Tab5, "{");
+                // sb.AppendLine(Tab6, $"RemoveFromCache(item.{pk.DbColumnName});");
+                // sb.AppendLine(Tab5, "}");
+                // sb.AppendLine(Tab4, "}");
                 sb.AppendLine(Tab4, $"return true;");
                 sb.AppendLine(Tab3, "}");
 
@@ -1700,13 +1704,13 @@ namespace RepoLite.GeneratorEngine.Generators
 
                     sb.AppendLine(Tab3, $"if (BaseDelete(new DeleteColumn(\"{inheritedColumn.DbColumnName}\", {inheritedColumn.FieldName}, SqlDbType.{inheritedColumn.DbType}), out var items))");
                     sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, "if (CacheEnabled)");
-                    sb.AppendLine(Tab4, "{");
-                    sb.AppendLine(Tab5, "foreach (var item in items)");
-                    sb.AppendLine(Tab5, "{");
-                    sb.AppendLine(Tab6, $"RemoveFromCache(item.{pk.DbColumnName});");
-                    sb.AppendLine(Tab5, "}");
-                    sb.AppendLine(Tab4, "}");
+                    // sb.AppendLine(Tab4, "if (CacheEnabled)");
+                    // sb.AppendLine(Tab4, "{");
+                    // sb.AppendLine(Tab5, "foreach (var item in items)");
+                    // sb.AppendLine(Tab5, "{");
+                    // sb.AppendLine(Tab6, $"RemoveFromCache(item.{pk.DbColumnName});");
+                    // sb.AppendLine(Tab5, "}");
+                    // sb.AppendLine(Tab4, "}");
                     sb.AppendLine(Tab4, $"return true;");
                     sb.AppendLine(Tab3, "}");
 
@@ -1728,7 +1732,7 @@ namespace RepoLite.GeneratorEngine.Generators
             var sb = new StringBuilder();
 
             sb.AppendLine("");
-            sb.AppendLine(Tab2, $"public bool Merge(List<{table.ClassName}> items)");
+            sb.AppendLine(Tab2, $"public MergeChanges Merge(List<{table.ClassName}> items)");
             sb.AppendLine(Tab2, "{");
 
             if (inherits)
@@ -1803,13 +1807,13 @@ namespace RepoLite.GeneratorEngine.Generators
 
             sb.AppendLine(Tab2, "}");
 
-            sb.AppendLine(Tab2, "public bool Merge(string csvPath)");
+            sb.AppendLine(Tab2, "public MergeChanges Merge(string csvPath)");
             sb.AppendLine(Tab2, "{");
             sb.AppendLine(Tab3, "var mergeTable = new List<object[]>();");
             sb.AppendLine(Tab3, "using (var sr = new StreamReader(csvPath))");
             sb.AppendLine(Tab3, "{");
             sb.AppendLine(Tab4, "var line = sr.ReadLine();");
-            sb.AppendLine(Tab4, "if (line == null) return false;");
+            sb.AppendLine(Tab4, "if (line == null) return null;");
             sb.AppendLine();
             sb.AppendLine(Tab4, "var firstItem = line.Split(',')[0];");
             sb.AppendLine(Tab4, $"if (firstItem == \"{table.Columns.First().PropertyName}\")");
@@ -1817,7 +1821,7 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab5, "//CSV has headers");
             sb.AppendLine(Tab5, "//Run to the next line");
             sb.AppendLine(Tab5, "line = sr.ReadLine();");
-            sb.AppendLine(Tab5, "if (line == null) return true;");
+            sb.AppendLine(Tab5, "if (line == null) return null;");
             sb.AppendLine(Tab4, "}");
             sb.AppendLine();
             sb.AppendLine(Tab4, "do");
@@ -1926,6 +1930,30 @@ namespace RepoLite.GeneratorEngine.Generators
             sb.AppendLine(Tab2, "}");
 
             return sb;
+        }
+
+        private string Repo_ToMergeChange(Table table)
+        {
+            var sb = new StringBuilder();
+            
+            sb.AppendLine(Tab2, "public override RowChange ToMergeChange(DataRow row)");
+            sb.AppendLine(Tab2, "{");
+            
+            sb.AppendLine(Tab3, $"var rowChange = new RowChange");
+            sb.AppendLine(Tab3, "{");
+            sb.AppendLine(Tab4, "Action = (RowChangeAction)Enum.Parse(typeof(RowChangeAction), row.GetText(\"Action\")),");
+            sb.AppendLine(Tab4, "ColumnChanges = new List<ColumnChange>()");
+            sb.AppendLine(Tab3, "};");
+            
+            foreach (var column in table.Columns)
+            {
+                sb.AppendLine(Tab3, $"ProcessMergeColumnChange(rowChange.ColumnChanges, nameof({table.ClassName}.{column.PropertyName}), row);");
+            }
+
+            sb.AppendLine(Tab3, "return rowChange;");
+            sb.AppendLine(Tab2, "}");
+            
+            return sb.ToString();
         }
 
         private StringBuilder Repo_Search(Table table, List<Table> otherTables, Column inheritedDependency)
@@ -2073,13 +2101,13 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab3,
                         $"var items = FindBy{primaryKey.PropertyName}(FindComparison.Equals, {primaryKey.FieldName});");
 
-                    sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
-                    sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, $"foreach (var item in items)");
-                    sb.AppendLine(Tab4, "{");
-                    sb.AppendLine(Tab5, $"SaveToCache(item);");
-                    sb.AppendLine(Tab4, "}");
-                    sb.AppendLine(Tab3, "}");
+                    // sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
+                    // sb.AppendLine(Tab3, "{");
+                    // sb.AppendLine(Tab4, $"foreach (var item in items)");
+                    // sb.AppendLine(Tab4, "{");
+                    // sb.AppendLine(Tab5, $"SaveToCache(item);");
+                    // sb.AppendLine(Tab4, "}");
+                    // sb.AppendLine(Tab3, "}");
                     sb.AppendLine(Tab3, $"return items;");
                     sb.AppendLine(Tab2, "}");
 
@@ -2143,13 +2171,13 @@ namespace RepoLite.GeneratorEngine.Generators
                     sb.AppendLine(Tab3,
                         $"var items = Where({(nonPrimaryKey.DbColumnName == nameof(nonPrimaryKey.DbColumnName) ? $"nameof({table.ClassName}.{nonPrimaryKey.DbColumnName})" : $"\"{nonPrimaryKey.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {nonPrimaryKey.FieldName}).Results();");
 
-                    sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
-                    sb.AppendLine(Tab3, "{");
-                    sb.AppendLine(Tab4, $"foreach (var item in items)");
-                    sb.AppendLine(Tab4, "{");
-                    sb.AppendLine(Tab5, $"SaveToCache(item);");
-                    sb.AppendLine(Tab4, "}");
-                    sb.AppendLine(Tab3, "}");
+                    // sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
+                    // sb.AppendLine(Tab3, "{");
+                    // sb.AppendLine(Tab4, $"foreach (var item in items)");
+                    // sb.AppendLine(Tab4, "{");
+                    // sb.AppendLine(Tab5, $"SaveToCache(item);");
+                    // sb.AppendLine(Tab4, "}");
+                    // sb.AppendLine(Tab3, "}");
                     sb.AppendLine(Tab3, $"return items;");
                 }
                 else
@@ -2224,13 +2252,13 @@ namespace RepoLite.GeneratorEngine.Generators
                         sb.AppendLine(Tab3,
                             $"var items = Where({(inheritedColumn.DbColumnName == nameof(inheritedColumn.DbColumnName) ? $"nameof({className}.{inheritedColumn.DbColumnName})" : $"\"{inheritedColumn.DbColumnName}\"")}, (Comparison)Enum.Parse(typeof(Comparison), comparison.ToString()), {inheritedColumn.FieldName}).Results();");
 
-                        sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
-                        sb.AppendLine(Tab3, "{");
-                        sb.AppendLine(Tab4, $"foreach (var item in items)");
-                        sb.AppendLine(Tab4, "{");
-                        sb.AppendLine(Tab5, $"SaveToCache(item);");
-                        sb.AppendLine(Tab4, "}");
-                        sb.AppendLine(Tab3, "}");
+                        // sb.AppendLine(Tab3, "if (CacheEnabled && !skipCache)");
+                        // sb.AppendLine(Tab3, "{");
+                        // sb.AppendLine(Tab4, $"foreach (var item in items)");
+                        // sb.AppendLine(Tab4, "{");
+                        // sb.AppendLine(Tab5, $"SaveToCache(item);");
+                        // sb.AppendLine(Tab4, "}");
+                        // sb.AppendLine(Tab3, "}");
                         sb.AppendLine(Tab3, $"return items;");
                     }
                     else

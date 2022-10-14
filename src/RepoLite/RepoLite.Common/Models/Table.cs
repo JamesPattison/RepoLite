@@ -60,7 +60,7 @@ namespace RepoLite.Common.Models
 
         public List<Column> ForeignKeys
         {
-            get { return Columns.Where(x => x.ForeignKey).ToList(); }
+            get { return new List<Column>(); } // Columns.Where(x => x.ForeignKey).ToList(); }
         }
 
         public List<Column> NonPrimaryKeys
